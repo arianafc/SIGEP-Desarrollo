@@ -7,23 +7,23 @@
       "RelativeMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|solutionrelative:sigep\\controllers\\generalusercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|c:\\users\\johnn\\onedrive\\escritorio\\universidad\\9 cuarti\\dise\u00F1o y desarrollo\\proyecto\\sigep-desarrollo\\sigep\\sigep\\controllers\\egresadocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|C:\\Users\\johnn\\OneDrive\\Escritorio\\Universidad\\9 Cuarti\\Dise\u00F1o y Desarrollo\\Proyecto\\SIGEP-Desarrollo\\SIGEP\\sigep\\controllers\\egresadocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|solutionrelative:sigep\\controllers\\egresadocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|c:\\users\\johnn\\onedrive\\escritorio\\universidad\\9 cuarti\\dise\u00F1o y desarrollo\\proyecto\\sigep-desarrollo\\sigep\\sigep\\controllers\\profesorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|C:\\Users\\johnn\\OneDrive\\Escritorio\\Universidad\\9 Cuarti\\Dise\u00F1o y Desarrollo\\Proyecto\\SIGEP-Desarrollo\\SIGEP\\sigep\\controllers\\profesorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|solutionrelative:sigep\\controllers\\profesorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|c:\\users\\johnn\\onedrive\\escritorio\\universidad\\9 cuarti\\dise\u00F1o y desarrollo\\proyecto\\sigep-desarrollo\\sigep\\sigep\\controllers\\estudiantecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|C:\\Users\\johnn\\OneDrive\\Escritorio\\Universidad\\9 Cuarti\\Dise\u00F1o y Desarrollo\\Proyecto\\SIGEP-Desarrollo\\SIGEP\\sigep\\controllers\\estudiantecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|solutionrelative:sigep\\controllers\\estudiantecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|c:\\users\\johnn\\onedrive\\escritorio\\universidad\\9 cuarti\\dise\u00F1o y desarrollo\\proyecto\\sigep-desarrollo\\sigep\\sigep\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|C:\\Users\\johnn\\OneDrive\\Escritorio\\Universidad\\9 Cuarti\\Dise\u00F1o y Desarrollo\\Proyecto\\SIGEP-Desarrollo\\SIGEP\\sigep\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|solutionrelative:sigep\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|c:\\users\\johnn\\onedrive\\escritorio\\universidad\\9 cuarti\\dise\u00F1o y desarrollo\\proyecto\\sigep-desarrollo\\sigep\\sigep\\controllers\\administradorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|C:\\Users\\johnn\\OneDrive\\Escritorio\\Universidad\\9 Cuarti\\Dise\u00F1o y Desarrollo\\Proyecto\\SIGEP-Desarrollo\\SIGEP\\sigep\\controllers\\administradorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{82B20C04-AF33-431A-929C-5B4893362762}|SIGEP\\SIGEP.csproj|solutionrelative:sigep\\controllers\\administradorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -59,8 +59,7 @@
               "RelativeToolTip": "SIGEP\\Controllers\\EgresadoController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T03:25:03.772Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T03:25:03.772Z"
             },
             {
               "$type": "Document",
@@ -72,8 +71,7 @@
               "RelativeToolTip": "SIGEP\\Controllers\\ProfesorController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T03:22:46.001Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T03:22:46.001Z"
             },
             {
               "$type": "Document",
@@ -85,8 +83,7 @@
               "RelativeToolTip": "SIGEP\\Controllers\\EstudianteController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T03:22:03.636Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T03:22:03.636Z"
             },
             {
               "$type": "Document",
@@ -98,8 +95,7 @@
               "RelativeToolTip": "SIGEP\\Controllers\\AdministradorController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T03:19:25.297Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T03:19:25.297Z"
             },
             {
               "$type": "Document",
@@ -111,8 +107,7 @@
               "RelativeToolTip": "SIGEP\\Controllers\\HomeController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T03:19:06.65Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T03:19:06.65Z"
             }
           ]
         }
