@@ -1,0 +1,231 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Vacantes - Prácticas";
+}
+
+<h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
+    Vacantes @DateTime.Now.Year
+</h2>
+
+<div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
+    <button type="button" class="btn-cta btn-nuevo mb-0"
+            data-bs-toggle="modal" data-bs-target="#modalCrearVacante">
+        + Registrar
+    </button>
+
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle"
+                type="button" id="filtroDropdown"
+                data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-filter"></i>
+        </button>
+        <div class="dropdown-menu p-3" style="min-width: 300px;">
+            <div class="mb-2">
+                <label>Estado de vacante</label>
+                <select id="filtroPractica" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="Asignada">Asignada</option>
+                    <option value="No asignada">No Asignada</option>
+                </select>
+            </div>
+            <div>
+                <label>Especialidad</label>
+                <input type="text" id="filtroEspecialidad"
+                       class="form-control" placeholder="Filtrar por especialidad" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card rounded-5 p-3">
+    <table id="miTabla" class="display responsive nowrap w-100">
+        <thead>
+            <tr>
+                <th>Empresa</th>
+                <th>Especialidad</th>
+                <th>Requisitos</th>
+                <th>Cupos Disponibles</th>
+                <th>Estudiantes Postulados</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+<!-- ===========================
+     MODAL CREAR VACANTE
+=========================== -->
+<div class="modal fade" id="modalCrearVacante" tabindex="-1"
+     aria-labelledby="modalCrearVacanteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color:#2D594D; color: white;">
+                <h5 class="modal-title" id="modalCrearVacanteLabel">Nueva Vacante para Práctica</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body px-4">
+                <div class="mb-4">
+                    <h5 class="section-title">Información General</h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Nombre de la Vacante <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nombrePuesto"
+                                   placeholder="Ejemplo: Asistente bancario" required>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Empresa <span class="text-danger">*</span></label>
+                            <select class="form-select OpcionesVacantes w-100" name="empresa" style="font-size:14px" required>
+                                <option value="" disabled selected>-- Seleccione empresa --</option>
+                                @* Rellenar dinámicamente vía JS *@
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Lugar / Ubicación <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="ubicacion" required>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Especialidad <span class="text-danger">*</span></label>
+                            <select class="form-select OpcionesVacantes w-100" name="areaProfesional" style="font-size:14px" required>
+                                <option value="" disabled selected>-- Seleccione área --</option>
+                                @foreach (var e in ViewBag.Especialidades)
+                                {
+                                    <option value="@e.Value">@e.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Cantidad de Cupos <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="cupos"
+                                   placeholder="Ejemplo: 3" min="1" required>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Modalidad <span class="text-danger">*</span></label>
+                            <select class="form-select OpcionesVacantes w-100" name="modalidad" style="font-size:14px" required>
+                                <option value="" disabled selected>-- Seleccione modalidad --</option>
+                                @foreach (var m in ViewBag.Modalidades)
+                                {
+                                    <option value="@m.Value">@m.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="FechaAplicacion" name="fechaLimite" required>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Fecha de Cierre <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="FechaCierre" name="fechaPublicacion" required>
+                        </div>
+                        <div class="col-12 form-group mb-3">
+                            <label>Requisitos <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="requisitos" rows="3"
+                                      placeholder="Habilidades y conocimientos requeridos" required></textarea>
+                        </div>
+                        <div class="col-12 form-group mb-3">
+                            <label>Descripción <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="descripcion" rows="3"
+                                      placeholder="Detalles de la vacante..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer px-4">
+                <button id="btnGuardarVacante" type="button" class="btn CerrarModal">Guardar y Publicar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Inicializar DataTable
+            var tabla = $('#miTabla').DataTable({
+                responsive: true,
+                ajax: {
+                    url: '@Url.Action("GetVacantes", "Practicas")',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'EmpresaNombre' },
+                    { data: 'EspecialidadNombre' }, // ✅ corregido
+                    { data: 'Requerimientos' },
+                    { data: 'NumCupos' },
+                    { data: 'EstudiantesPostulados' },
+                    { data: 'EstadoNombre' },
+                    {
+                        data: 'IdVacante',
+                        render: function (data, type, row) {
+                            return `
+                                <button class="btn btn-sm btn-info btn-editar" data-id="${data}">Editar</button>
+                                <button class="btn btn-sm btn-danger btn-eliminar" data-id="${data}">Eliminar</button>
+                            `;
+                        }
+                    }
+                ]
+            });
+
+            // Filtrar tabla
+            $('#filtroPractica, #filtroEspecialidad').on('change keyup', function () {
+                tabla.ajax.url('@Url.Action("GetVacantes", "Practicas")' +
+                    '?estado=' + $('#filtroPractica').val() +
+                    '&idEspecialidad=' + $('#filtroEspecialidad').val() +   
+                    '&idModalidad=' + $('#filtroModalidad').val()         
+                ).load();
+            });
+
+            // Guardar nueva vacante
+            $('#btnGuardarVacante').on('click', function () {
+                var vacante = {
+                    Nombre: $('input[name="nombrePuesto"]').val(),
+                    IdEmpresa: $('select[name="empresa"]').val(),
+                    Requerimientos: $('textarea[name="requisitos"]').val(),
+                    FechaMaxAplicacion: $('#FechaAplicacion').val(),
+                    NumCupos: $('input[name="cupos"]').val(),
+                    FechaCierre: $('#FechaCierre').val(),
+                    IdModalidad: $('select[name="modalidad"]').val(),     
+                    Descripcion: $('textarea[name="descripcion"]').val(),
+                    IdEspecialidad: $('select[name="areaProfesional"]').val()
+                };
+
+                $.post('@Url.Action("Crear", "Practicas")', vacante, function (res) {
+                    if (res.ok) {
+                        Swal.fire("Éxito", res.message, "success");
+                        $('#modalCrearVacante').modal('hide');
+                        tabla.ajax.reload();
+                    } else {
+                        Swal.fire("Error", res.message, "error");
+                    }
+                });
+            });
+
+            // Eliminar vacante
+            $('#miTabla').on('click', '.btn-eliminar', function () {
+                var id = $(this).data('id');
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "No podrás revertir esta acción",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post('@Url.Action("Eliminar", "Practicas")', { id: id }, function (res) {
+                            if (res.ok) {
+                                Swal.fire("Eliminado", res.message, "success");
+                                tabla.ajax.reload();
+                            } else {
+                                Swal.fire("Error", res.message, "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
