@@ -1,0 +1,45 @@
+cambio en la BD
+USE [SIGEP];
+GO
+
+-- 1) Crear la tabla de modalidades
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ModalidadesTB')
+BEGIN
+    CREATE TABLE [dbo].[ModalidadesTB](
+        [IdModalidad] INT IDENTITY(1,1) NOT NULL,
+        [Descripcion] VARCHAR(100) NOT NULL,
+        CONSTRAINT PK_Modalidades PRIMARY KEY CLUSTERED (IdModalidad ASC)
+    );
+END
+GO
+
+-- 2) Poblar modalidades estándar
+IF NOT EXISTS (SELECT 1 FROM ModalidadesTB)
+BEGIN
+    INSERT INTO [dbo].[ModalidadesTB] (Descripcion) VALUES ('Presencial');
+    INSERT INTO [dbo].[ModalidadesTB] (Descripcion) VALUES ('Virtual');
+    INSERT INTO [dbo].[ModalidadesTB] (Descripcion) VALUES ('Híbrido');
+END
+GO
+
+-- 3) Agregar columna IdModalidad a las tablas
+IF COL_LENGTH('dbo.VacantesPracticasTB', 'IdModalidad') IS NULL
+    ALTER TABLE [dbo].[VacantesPracticasTB] ADD IdModalidad INT NULL;
+
+IF COL_LENGTH('dbo.BolsaEmpleoTB', 'IdModalidad') IS NULL
+    ALTER TABLE [dbo].[BolsaEmpleoTB] ADD IdModalidad INT NULL;
+GO
+
+-- 5) Crear llaves foráneas
+ALTER TABLE [dbo].[VacantesPracticasTB]
+ADD CONSTRAINT FK_VacantesPracticas_Modalidad FOREIGN KEY (IdModalidad)
+REFERENCES [dbo].[ModalidadesTB](IdModalidad);
+
+ALTER TABLE [dbo].[BolsaEmpleoTB]
+ADD CONSTRAINT FK_BolsaEmpleo_Modalidad FOREIGN KEY (IdModalidad)
+REFERENCES [dbo].[ModalidadesTB](IdModalidad);
+GO
+
+-- 6) Eliminar columna vieja Modalidad
+ALTER TABLE [dbo].[VacantesPracticasTB] DROP COLUMN Modalidad;
+ALTER TABLE [dbo].[BolsaEmpleoTB] DROP COLUMN Modalidad;
