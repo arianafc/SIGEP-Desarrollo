@@ -44,7 +44,7 @@ namespace SIGEP.Models
         [StringLength(1000)]
         public string Descripcion { get; set; }
 
-        [Required]
+        
         public int IdEstado { get; set; }
 
         // ---- Campos para mostrar en la vista ----
