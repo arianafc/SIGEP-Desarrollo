@@ -1,33 +1,269 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var rol = Session["rol"] != null ? Convert.ToInt32(Session["rol"]) : 0;
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
+<style>
+    a.btn:hover {
+        background-color: #8CA653 !important;
+        color: #fff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+</style>
 
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
-    </div>
+<main class="container py-4">
+
+    @if (rol == 1 || rol == 4)
+    {
+        <h2 class="fw-bold mb-4">Dashboard - Prácticas Profesionales</h2>
+
+        <!-- Cards resumen -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 text-white" style="background-color:#2D594D;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Estudiantes Activos</h6>
+                                <h3 class="fw-bold">152</h3>
+                            </div>
+                            <i class="fas fa-user-graduate fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 text-white" style="background-color: #768C46;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Prácticas Asignadas</h6>
+                                <h3 class="fw-bold">87</h3>
+                            </div>
+                            <i class="fas fa-briefcase fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 text-white" style="background-color: #2D594D;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Empresas Registradas</h6>
+                                <h3 class="fw-bold">45</h3>
+                            </div>
+                            <i class="fas fa-building fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 text-white" style="background-color: #768C46;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Prácticas Finalizadas</h6>
+                                <h3 class="fw-bold">32</h3>
+                            </div>
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de progreso + accesos rápidos -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Progreso General de Estudiantes</h5>
+                        <p>Estudiantes con práctica asignada</p>
+                        <div class="progress mb-2" style="height: 25px;">
+                            <div class="progress-bar fw-bold" role="progressbar"
+                                 style="width: 57%; background-color:#8CA653;" aria-valuenow="57"
+                                 aria-valuemin="0" aria-valuemax="100">
+                                57%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Accesos Rápidos</h5>
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("VacantesEstudiantes","Practicas")" class="btn" style="background-color:#2D594D; color:white;">
+                                <i class="fas fa-user-plus me-2"></i>Registrar nueva vacante
+                            </a>
+                            <a href="@Url.Action("ListaEmpresas","Empresa")" class="btn" style="background-color:#8CA653; color:white;">
+                                <i class="fas fa-building me-2"></i>Agregar empresa
+                            </a>
+                            <a href="@Url.Action("ListarEstudiante","Estudiante")" class="btn" style="background-color:#768C46; color:white;">
+                                <i class="fas fa-briefcase me-2"></i>Visualizar Estudiantes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla resumen -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">Últimas Prácticas Asignadas</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead style="background-color:#F2F2F2;">
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Carrera</th>
+                                <th>Empresa</th>
+                                <th>Fecha de inicio</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Ana Rodríguez</td>
+                                <td>Ing. en Sistemas</td>
+                                <td>Intel CR</td>
+                                <td>2025-07-01</td>
+                                <td><span class="badge" style="background-color:#8CA653;">Activa</span></td>
+                            </tr>
+                            <tr>
+                                <td>José Mora</td>
+                                <td>Administración</td>
+                                <td>Bac Credomatic</td>
+                                <td>2025-06-20</td>
+                                <td><span class="badge" style="background-color:#768C46;">En revisión</span></td>
+                            </tr>
+                            <tr>
+                                <td>Laura Vargas</td>
+                                <td>Contaduría</td>
+                                <td>PwC</td>
+                                <td>2025-06-15</td>
+                                <td><span class="badge bg-danger">Cancelada</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    }
+
+        @if (rol == 2)
+        {
+            <!-- Estudiante -->
+            <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">
+                <h2 class="fw-bold mb-3" style="color:#2D594D;">¡Bienvenido a SIGEP!</h2>
+                <p style="font-size:1.2rem; max-width:600px; margin:auto;">
+                    Aquí podrás gestionar todo lo relacionado con tu práctica profesional de forma sencilla y organizada.
+                </p>
+                <a href="@Url.Action("PostulacionesEstudiantes", "Practicas")" class="btn btn-lg mt-3" style="background-color:#2D594D; color:white;">Mis Postulaciones</a>
+            </section>
+
+            <section class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100" style="border:none;">
+                        <div class="card-body">
+                            <i class="fas fa-briefcase fa-3x mb-3" style="color:#8CA653;"></i>
+                            <h5 class="fw-bold">Mis Postulaciones</h5>
+                            <p>Explora oportunidades disponibles y gestiona tu postulación fácilmente.</p>
+                            <a href="@Url.Action("PostulacionesEstudiantes", "Practicas")" class="btn btn-sm" style="background-color:#8CA653; color:white;">Ver Postulaciones</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100" style="border:none;">
+                        <div class="card-body">
+                            <i class="fas fa-tasks fa-3x mb-3" style="color:#768C46;"></i>
+                            <h5 class="fw-bold">Mi Práctica</h5>
+                            <p>Consulta el estado y detalles de tu práctica profesional actual.</p>
+                            <a href="@Url.Action("VisualizacionPostulacion", "Practicas")" class="btn btn-sm" style="background-color:#768C46; color:white;">Ver Mi Práctica</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100" style="border:none;">
+                        <div class="card-body">
+                            <i class="fas fa-bullhorn fa-3x mb-3" style="color:#2D594D;"></i>
+                            <h5 class="fw-bold">Comunicados</h5>
+                            <p>Mantente informado con anuncios y noticias relevantes de coordinación.</p>
+                            <a href="@Url.Action("Comunicados", "Comunicados")" class="btn btn-sm" style="background-color:#2D594D; color:white;">Ver Comunicados</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center mt-5">
+                <p class="text-muted">Mantén tu perfil siempre actualizado para aprovechar al máximo tus oportunidades.</p>
+                <a href="@Url.Action("MiPerfil", "Perfil")"
+                   class="btn btn-lg"
+                   style="background-color: #2D594D; color: #fff; border-radius: 50px; padding: 0.75rem 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
+                    <i class="fas fa-user-circle me-2"></i>Ir a Mi Perfil
+                </a>
+            </section>
+        }
+        else if (rol == 3)
+        {
+            <!-- Egresado -->
+            <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">
+                <h2 class="fw-bold mb-3" style="color:#2D594D;">Bienvenido Egresado</h2>
+                <p style="font-size:1.2rem; max-width:600px; margin:auto;">
+                    Descubre oportunidades laborales, mantente informado y potencia tu perfil profesional.
+                </p>
+                <a href="@Url.Action("ListaVacanteCoordinador", "Vacante")" class="btn btn-lg mt-3" style="background-color:#2D594D; color:white;">Explorar Bolsa de Empleo</a>
+            </section>
+
+            <section class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100" style="border:none;">
+                        <div class="card-body">
+                            <i class="fas fa-briefcase fa-3x mb-3" style="color:#8CA653;"></i>
+                            <h5 class="fw-bold">Bolsa de Empleo</h5>
+                            <p>Encuentra ofertas laborales ajustadas a tu perfil profesional.</p>
+                            <a href="@Url.Action("ListaVacanteCoordinador", "Vacante")" class="btn btn-sm" style="background-color:#8CA653; color:white;">Ver Ofertas</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100" style="border:none;">
+                        <div class="card-body">
+                            <i class="fas fa-bullhorn fa-3x mb-3" style="color:#768C46;"></i>
+                            <h5 class="fw-bold">Comunicados</h5>
+                            <p>Revisa noticias, actualizaciones y avisos para egresados.</p>
+                            <a href="@Url.Action("Comunicados", "Comunicados")" class="btn btn-sm" style="background-color:#768C46; color:white;">Ver Comunicados</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm h-100" style="border:none;">
+                        <div class="card-body">
+                            <i class="fas fa-user fa-3x mb-3" style="color:#2D594D;"></i>
+                            <h5 class="fw-bold">Mi Perfil</h5>
+                            <p>Actualiza tu información y destaca tus logros profesionales.</p>
+                            <a href="@Url.Action("MiPerfil", "Perfil")" class="btn btn-sm" style="background-color:#2D594D; color:white;">Editar Perfil</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center mt-5">
+                <p class="text-muted">Tu futuro comienza hoy. Aprovecha cada oportunidad.</p>
+            </section>
+        }
+
 </main>

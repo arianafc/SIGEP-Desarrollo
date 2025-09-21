@@ -1,11 +1,12 @@
-﻿using System;
+﻿using SIGEP.EF;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
 namespace SIGEP.Models
 {
-    public class Usuario
+    public class Autenticacion
     {
         public int IdUsuario { get; set; }
         public string Cedula { get; set; }
@@ -20,5 +21,8 @@ namespace SIGEP.Models
         public int IdDireccion { get; set; }
         public int IdRol { get; set; }
         public int IdEstado { get; set; }
+
+        public List<SeccionesTB> ListaSecciones { get; set; }
+        public List<EspecialidadesTB> ListaEspecialidades { get; set; }
     }
 }
