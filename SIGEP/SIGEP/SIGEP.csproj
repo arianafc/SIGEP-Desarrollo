@@ -131,6 +131,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PracticasController.cs" />
+    <Compile Include="Data\SIGEPContext.cs" />
     <Compile Include="EF\AuditoriaGlobalTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -192,19 +193,19 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\Model1.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
       <DependentUpon>Model1.Context.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
     <Compile Include="EF\Model1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
       <DependentUpon>Model1.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
     <Compile Include="EF\Model1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
     <Compile Include="EF\PracticaEstudianteTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -233,8 +234,37 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AuditoriaGlobal.cs" />
     <Compile Include="Models\Autenticacion.cs" />
+    <Compile Include="Models\BolsaEmpleo.cs" />
+    <Compile Include="Models\Canton.cs" />
+    <Compile Include="Models\ComentarioPractica.cs" />
+    <Compile Include="Models\Comunicado.cs" />
+    <Compile Include="Models\Direccion.cs" />
+    <Compile Include="Models\Distrito.cs" />
+    <Compile Include="Models\Documento.cs" />
+    <Compile Include="Models\Email.cs" />
+    <Compile Include="Models\Empleo.cs" />
+    <Compile Include="Models\Empresa.cs" />
+    <Compile Include="Models\Encargado.cs" />
+    <Compile Include="Models\Especialidad.cs" />
+    <Compile Include="Models\EspecialidadVacante.cs" />
+    <Compile Include="Models\Estado.cs" />
+    <Compile Include="Models\EstudianteEncargado.cs" />
+    <Compile Include="Models\FormacionAcademica.cs" />
+    <Compile Include="Models\InformacionLaboral.cs" />
+    <Compile Include="Models\InformacionMedica.cs" />
+    <Compile Include="Models\Modalidad.cs" />
+    <Compile Include="Models\PracticaEstudiante.cs" />
+    <Compile Include="Models\Provincia.cs" />
+    <Compile Include="Models\Rol.cs" />
+    <Compile Include="Models\Seccion.cs" />
+    <Compile Include="Models\Telefono.cs" />
+    <Compile Include="Models\UsuarioEspecialidad.cs" />
     <Compile Include="Models\Vacante.cs" />
+    <Compile Include="Models\VacantePractica.cs" />
+    <Compile Include="Models\VacantePracticaDTO.cs" />
+    <Compile Include="Models\VacantePracticaVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -284,13 +314,16 @@
     <Content Include="Content\imagenes\HPcolegio.jpg.jpg" />
     <Content Include="Content\style.css" />
     <Content Include="EF\Model1.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>Model1.edmx</DependentUpon>
+      <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Model1.Context.cs</LastGenOutput>
     </Content>
-    <Content Include="EF\Model1.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
+    <Content Include="EF\Model1.edmx.diagram">
       <DependentUpon>Model1.edmx</DependentUpon>
+    </Content>
+    <Content Include="EF\Model1.tt">
+      <DependentUpon>Model1.edmx</DependentUpon>
+      <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Model1.cs</LastGenOutput>
     </Content>
     <Content Include="favicon.ico" />
@@ -303,6 +336,9 @@
     <Content Include="Images\logo-light-text.png" />
     <Content Include="Images\logo-text.png" />
     <Content Include="Images\logoSIGEP.png" />
+    <Content Include="Scripts\app-style-switcher.js" />
+    <Content Include="Scripts\app.init.js" />
+    <Content Include="Scripts\app.min.js" />
     <Content Include="Scripts\Autenticacion\Autenticacion.js" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -345,13 +381,6 @@
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.ttf" />
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff" />
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff2" />
-    <EntityDeploy Include="EF\Model1.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>Model1.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <Content Include="EF\Model1.edmx.diagram">
-      <DependentUpon>Model1.edmx</DependentUpon>
-    </Content>
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\DataTable\dataTables.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
@@ -423,6 +452,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EntityDeploy Include="EF\Model1.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>Model1.Designer.cs</LastGenOutput>
+    </EntityDeploy>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
