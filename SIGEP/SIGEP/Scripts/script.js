@@ -8,11 +8,11 @@
     }
 
     function ConsultarPersonaApi() {
-        $("#nombre").val("");
-        $("#apellido1").val("");
-        $("#apellido2").val("");
+        $("#NombreRegistro").val("");
+        $("#Apellido1").val("");
+        $("#Apellido2").val("");
 
-        let identificacion = $("#cedula").val();
+        let identificacion = $("#CedulaRegistro").val();
 
         if (identificacion.length >= 9) {
             $.ajax({
@@ -22,9 +22,9 @@
                 success: function (data) {
                     if (data.resultcount > 0) {
                         let persona = data.results[0];
-                        $("#nombre").val(capitalizeWords(persona.firstname1));
-                        $("#apellido1").val(capitalizeWords(persona.lastname1));
-                        $("#apellido2").val(capitalizeWords(persona.lastname2));
+                        $("#NombreRegistro").val(capitalizeWords(persona.firstname1));
+                        $("#Apellido1").val(capitalizeWords(persona.lastname1));
+                        $("#Apellido2").val(capitalizeWords(persona.lastname2));
                     } else {
                         alert("No se encontró información para esa cédula");
                     }
@@ -35,7 +35,7 @@
             });
         }
     }
-    $("#cedula").on("keyup", ConsultarPersonaApi);
+    $("#CedulaRegistro").on("keyup", ConsultarPersonaApi);
 
            document.querySelectorAll('.btn-desasignar').forEach(btn => {
                 btn.addEventListener('click', function (e) {

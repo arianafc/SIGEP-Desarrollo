@@ -27,16 +27,15 @@
                             <hr />
                             <p style="color:red">@ViewBag.Mensaje</p>
 
-                            @using (Html.BeginForm("Login", "Home", FormMethod.Post, new { @id = "loginForm", @class = "custom-form" }))
-                            {
+                            <form id="LoginForm" class="custom-form">
                                 <div class="input-icon-container mb-3">
                                     <i class="fas fa-envelope"></i>
-                                    @Html.TextBoxFor(m => m.Cedula, new { @id = "cedulaLogin", @class = "input-field", placeholder = "Ingresa tu cédula" })
+                                    @Html.TextBoxFor(m => m.Cedula, new { @id = "CedulaLogin", @name= "Cedula", @class = "input-field", placeholder = "Ingresa tu cédula" })
                                 </div>
 
                                 <div class="input-icon-container mb-3">
                                     <i class="fas fa-lock"></i>
-                                    @Html.PasswordFor(m => m.Contrasenna, new { @id = "contrasenna", @class = "input-field password-input", placeholder = "Ingresa tu contraseña" })
+                                    @Html.PasswordFor(m => m.Contrasenna, new { @id = "ContrasennaLogin", @name = "Contrasenna", @class = "input-field password-input", placeholder = "Ingresa tu contraseña" })
                                     <i class="fas fa-eye-slash toggle-password"></i>
                                 </div>
 
@@ -47,10 +46,9 @@
                                 <button id="IniciarSesionBTN" class="btnInicio btn btn-lg px-5" type="submit">
                                     Iniciar Sesión
                                 </button>
-                            }
-
-                        </div>
-
+                            </form>
+                        
+                            <br>
                         <div>
                             <p class="mb-0">
                                 ¿No tienes una cuenta? <a href="@Url.Action("Registro", "Home")" class="text-white-50 fw-bold">Regístrate</a>
@@ -61,14 +59,16 @@
                 </div>
             </div>
         </div>
+            </div>
+
     </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <script>
 
-    document.addEventListener('DOMContentLoaded', function () {
+    $(function () {
 
         const toggle = document.querySelector('.toggle-password');
         const input = document.querySelector('.password-input');
@@ -82,11 +82,11 @@
             });
         }
 
-        $("#loginForm").on("submit", function (e) {
+        $("#LoginForm").on("submit", function (e) {
             e.preventDefault();
 
-            let cedula = $("#cedulaLogin").val().trim();
-            let contrasenna = $("#contrasenna").val().trim();
+            let cedula = $("#CedulaLogin").val().trim();
+            let contrasenna = $("#ContrasennaLogin").val().trim();
 
             if (!cedula || !contrasenna) {
                 Swal.fire({
@@ -98,7 +98,27 @@
                 return;
             }
 
-            this.submit();
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("Login", "Home")',
+                data: {
+                    Cedula: cedula, Contrasenna: contrasenna
+                },
+            dataType: "json",
+            success: function (resp) {
+                if (resp.success) {
+                    Swal.fire("Éxito", resp.message, "success").then(() => {
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    });
+                } else {
+                    Swal.fire("Error", resp.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("Error", "Error de comunicación con el servidor", "error");
+            }
+        });
         });
     });
 </script>

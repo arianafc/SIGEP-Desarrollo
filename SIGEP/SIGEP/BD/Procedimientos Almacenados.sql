@@ -3,27 +3,16 @@ CREATE PROCEDURE [dbo].[RegistroSP]
     @Apellido1 VARCHAR(50), 
     @Apellido2 VARCHAR(50), 
     @Correo VARCHAR(255), 
-    @Especialidad VARCHAR(255),
+    @IdEspecialidad INT,
     @FechaNacimiento DATETIME,
-    @Seccion VARCHAR(20),
+    @IdSeccion INT,
     @Contrasenna VARCHAR(255), 
     @Cedula VARCHAR(20)
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @IdSeccion INT;
-    DECLARE @IdEspecialidad INT;
     DECLARE @IdUsuario INT;
-
-    -- Obtenemos los IDs
-    SELECT @IdSeccion = IdSeccion
-    FROM SeccionesTB
-    WHERE Seccion = @Seccion;
-
-    SELECT @IdEspecialidad = IdEspecialidad
-    FROM EspecialidadesTB
-    WHERE Nombre = @Especialidad;
 
     -- Validaciones
     IF @IdSeccion IS NULL
@@ -48,16 +37,18 @@ BEGIN
         BEGIN TRAN;
 
         -- Insertar usuario
-        INSERT INTO dbo.UsuariosTB (Nombre, Apellido1, Apellido2, Contrasenna, Cedula, IdEstado, IdRol, IdSeccion)
+        INSERT INTO dbo.UsuariosTB (Nombre, Apellido1, Apellido2, Contrasenna, FechaNacimiento, Cedula, IdEstado, IdRol, IdSeccion, FechaRegistro)
         VALUES (
             @Nombre, 
             @Apellido1, 
             @Apellido2, 
             CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', @Contrasenna), 2), 
+            @FechaNacimiento,
             @Cedula, 
             1,
             1, -- Estudiante
-            @IdSeccion
+            @IdSeccion,
+            GETDATE()
         );
 
         SET @IdUsuario = SCOPE_IDENTITY();
@@ -80,5 +71,44 @@ BEGIN
         ROLLBACK;
         THROW;
     END CATCH
+END;
+GO
+
+USE [SIGEP]
+GO
+
+/****** Object:  StoredProcedure [dbo].[LoginSP]    Script Date: 9/22/2025 12:51:44 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[LoginSP]
+    @CEDULA VARCHAR(100),
+    @CONTRASENNA VARCHAR(100)
+AS
+BEGIN
+
+    SELECT 
+        U.IdUsuario,
+        U.Nombre,
+        U.Apellido1, 
+        U.Apellido2,
+        U.Cedula,
+        U.IdRol,
+        U.IdEstado,
+        S.Seccion,
+        E.Nombre
+    FROM dbo.UsuariosTB U 
+    INNER JOIN dbo.SeccionesTB S 
+    on U.IdSeccion = S.IdSeccion
+    INNER JOIN dbo.UsuarioEspecialidadTB UE
+    ON UE.IdUsuario = U.IdUsuario
+    INNER JOIN dbo.EspecialidadesTB E
+    ON UE.IdEspecialidad = E.IdEspecialidad
+    WHERE U.Cedula = @CEDULA
+    AND Contrasenna = CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', @CONTRASENNA), 2);
 END;
 GO
