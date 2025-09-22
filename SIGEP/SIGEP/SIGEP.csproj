@@ -238,6 +238,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="BD\Inserts.sql" />
+    <Content Include="BD\Procedimientos Almacenados.sql" />
+    <Content Include="BD\Script de la BD.sql" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
