@@ -234,7 +234,8 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Autenticacion.cs" />
-    <Compile Include="Models\Vacante.cs" />
+    <Compile Include="Models\VacantePracticaDTO.cs" />
+    <Compile Include="Models\VacantePracticaVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -306,6 +307,9 @@
     <Content Include="Images\logo-light-text.png" />
     <Content Include="Images\logo-text.png" />
     <Content Include="Images\logoSIGEP.png" />
+    <Content Include="Scripts\app-style-switcher.js" />
+    <Content Include="Scripts\app.init.js" />
+    <Content Include="Scripts\app.min.js" />
     <Content Include="Scripts\Autenticacion\Autenticacion.js" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
