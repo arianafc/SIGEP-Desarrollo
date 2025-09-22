@@ -10,7 +10,9 @@ namespace SIGEP.Controllers
 {
     public class PracticasController : Controller
     {
-        // GET: /Practicas/VacantesEstudiantes
+        // ==============================
+        // VISTA PRINCIPAL VACANTES
+        // ==============================
         [HttpGet]
         public ActionResult VacantesEstudiantes()
         {
@@ -29,18 +31,18 @@ namespace SIGEP.Controllers
         [HttpGet]
         public JsonResult GetVacantes(string estado = "", int idEspecialidad = 0, int idModalidad = 0)
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             {
-                var query = from v in db.Vacantes
-                            join e in db.Empresas on v.IdEmpresa equals e.IdEmpresa into je
+                var query = from v in db.VacantesPracticasTB
+                            join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
                             from e in je.DefaultIfEmpty()
-                            join es in db.Estados on v.IdEstado equals es.IdEstado into jes
+                            join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
                             from es in jes.DefaultIfEmpty()
-                            join ev in db.EspecialidadesVacantes on v.IdVacante equals ev.IdVacante into jev
+                            join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
                             from ev in jev.DefaultIfEmpty()
-                            join sp in db.Especialidades on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
+                            join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
                             from sp in jsp.DefaultIfEmpty()
-                            join m in db.Modalidades on v.IdModalidad equals m.IdModalidad into jm
+                            join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
                             from m in jm.DefaultIfEmpty()
                             select new VacantePracticaDTO
                             {
@@ -59,10 +61,10 @@ namespace SIGEP.Controllers
                                 EspecialidadNombre = sp != null ? sp.Nombre : "",
                                 IdEstado = v.IdEstado,
                                 EstadoNombre = es != null ? es.Descripcion : "",
-                                EstudiantesPostulados = db.PracticasEstudiantes.Count(p => p.IdVacante == v.IdVacante)
+                                EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
                             };
 
-                // filtros
+                // filtros dinámicos
                 if (!string.IsNullOrEmpty(estado))
                     query = query.Where(x => x.EstadoNombre == estado);
 
@@ -86,15 +88,14 @@ namespace SIGEP.Controllers
             if (model == null)
                 return Json(new { ok = false, message = "Modelo inválido" });
 
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             using (var tx = db.Database.BeginTransaction())
             {
                 try
                 {
-                    // Por defecto, si no recibe IdEstado, usar 1 (No asignada) - opcional
                     var idEstado = model.IdEstado > 0 ? model.IdEstado : 1;
 
-                    var vacante = new VacantePractica
+                    var vacante = new VacantesPracticasTB
                     {
                         Nombre = model.Nombre,
                         IdEmpresa = model.IdEmpresa,
@@ -107,17 +108,17 @@ namespace SIGEP.Controllers
                         Descripcion = model.Descripcion
                     };
 
-                    db.Vacantes.Add(vacante);
+                    db.VacantesPracticasTB.Add(vacante);
                     db.SaveChanges();
 
                     if (model.IdEspecialidad > 0)
                     {
-                        var esp = new EspecialidadVacante
+                        var esp = new EspecialidadesVacantesTB
                         {
                             IdVacante = vacante.IdVacante,
                             IdEspecialidad = model.IdEspecialidad
                         };
-                        db.EspecialidadesVacantes.Add(esp);
+                        db.EspecialidadesVacantesTB.Add(esp);
                         db.SaveChanges();
                     }
 
@@ -138,18 +139,18 @@ namespace SIGEP.Controllers
         [HttpGet]
         public JsonResult Detalle(int id)
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             {
-                var data = (from v in db.Vacantes
-                            join e in db.Empresas on v.IdEmpresa equals e.IdEmpresa into je
+                var data = (from v in db.VacantesPracticasTB
+                            join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
                             from e in je.DefaultIfEmpty()
-                            join es in db.Estados on v.IdEstado equals es.IdEstado into jes
+                            join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
                             from es in jes.DefaultIfEmpty()
-                            join ev in db.EspecialidadesVacantes on v.IdVacante equals ev.IdVacante into jev
+                            join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
                             from ev in jev.DefaultIfEmpty()
-                            join sp in db.Especialidades on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
+                            join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
                             from sp in jsp.DefaultIfEmpty()
-                            join m in db.Modalidades on v.IdModalidad equals m.IdModalidad into jm
+                            join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
                             from m in jm.DefaultIfEmpty()
                             where v.IdVacante == id
                             select new VacantePracticaVM
@@ -184,12 +185,12 @@ namespace SIGEP.Controllers
             if (model == null || model.IdVacante <= 0)
                 return Json(new { ok = false, message = "Modelo inválido" });
 
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             using (var tx = db.Database.BeginTransaction())
             {
                 try
                 {
-                    var vacante = db.Vacantes.FirstOrDefault(v => v.IdVacante == model.IdVacante);
+                    var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == model.IdVacante);
                     if (vacante == null)
                         return Json(new { ok = false, message = "Vacante no encontrada" });
 
@@ -205,15 +206,14 @@ namespace SIGEP.Controllers
 
                     db.SaveChanges();
 
-                    // actualizar tabla intermedia: eliminar existentes y crear nueva si aplica
-                    var existentes = db.EspecialidadesVacantes.Where(x => x.IdVacante == vacante.IdVacante).ToList();
+                    // actualizar especialidad
+                    var existentes = db.EspecialidadesVacantesTB.Where(x => x.IdVacante == vacante.IdVacante).ToList();
                     if (existentes.Any())
-                    {
-                        db.EspecialidadesVacantes.RemoveRange(existentes);
-                    }
+                        db.EspecialidadesVacantesTB.RemoveRange(existentes);
+
                     if (model.IdEspecialidad > 0)
                     {
-                        db.EspecialidadesVacantes.Add(new EspecialidadVacante
+                        db.EspecialidadesVacantesTB.Add(new EspecialidadesVacantesTB
                         {
                             IdVacante = vacante.IdVacante,
                             IdEspecialidad = model.IdEspecialidad
@@ -239,22 +239,22 @@ namespace SIGEP.Controllers
         [HttpPost]
         public JsonResult Eliminar(int id)
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             using (var tx = db.Database.BeginTransaction())
             {
                 try
                 {
-                    var especialidades = db.EspecialidadesVacantes.Where(ev => ev.IdVacante == id).ToList();
+                    var especialidades = db.EspecialidadesVacantesTB.Where(ev => ev.IdVacante == id).ToList();
                     if (especialidades.Any())
-                        db.EspecialidadesVacantes.RemoveRange(especialidades);
+                        db.EspecialidadesVacantesTB.RemoveRange(especialidades);
 
-                    var postulaciones = db.PracticasEstudiantes.Where(p => p.IdVacante == id).ToList();
+                    var postulaciones = db.PracticaEstudianteTB.Where(p => p.IdVacante == id).ToList();
                     if (postulaciones.Any())
-                        db.PracticasEstudiantes.RemoveRange(postulaciones);
+                        db.PracticaEstudianteTB.RemoveRange(postulaciones);
 
-                    var vacante = db.Vacantes.FirstOrDefault(v => v.IdVacante == id);
+                    var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
                     if (vacante != null)
-                        db.Vacantes.Remove(vacante);
+                        db.VacantesPracticasTB.Remove(vacante);
 
                     db.SaveChanges();
                     tx.Commit();
@@ -297,9 +297,9 @@ namespace SIGEP.Controllers
         // ==============================
         private List<SelectListItem> ObtenerEspecialidades()
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             {
-                return db.Especialidades
+                return db.EspecialidadesTB
                          .OrderBy(e => e.Nombre)
                          .Select(e => new SelectListItem
                          {
@@ -311,9 +311,9 @@ namespace SIGEP.Controllers
 
         private List<SelectListItem> ObtenerModalidades()
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             {
-                return db.Modalidades
+                return db.ModalidadesTB
                          .OrderBy(m => m.Descripcion)
                          .Select(m => new SelectListItem
                          {
@@ -325,9 +325,9 @@ namespace SIGEP.Controllers
 
         private List<SelectListItem> ObtenerEmpresas()
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             {
-                return db.Empresas
+                return db.EmpresasTB
                          .OrderBy(e => e.NombreEmpresa)
                          .Select(e => new SelectListItem
                          {
@@ -339,9 +339,9 @@ namespace SIGEP.Controllers
 
         private List<SelectListItem> ObtenerEstados()
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             {
-                return db.Estados
+                return db.EstadosTB
                          .OrderBy(s => s.Descripcion)
                          .Select(s => new SelectListItem
                          {
