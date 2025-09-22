@@ -234,8 +234,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Autenticacion.cs" />
+    <Compile Include="Models\PracticaEstudianteViewModel.cs" />
     <Compile Include="Models\VacantePracticaDTO.cs" />
     <Compile Include="Models\VacantePracticaVM.cs" />
+    <Compile Include="Models\VacanteViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

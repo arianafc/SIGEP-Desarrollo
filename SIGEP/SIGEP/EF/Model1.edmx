@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AuditoriaGlobalTB">
           <Key>
             <PropertyRef Name="IdAuditoria" />
@@ -291,6 +291,7 @@
           <Property Name="Tipo" Type="varchar" MaxLength="255" />
           <Property Name="IdEstado" Type="int" Nullable="false" />
           <Property Name="IdModalidad" Type="int" />
+          <Property Name="Ubicacion" Type="nvarchar" MaxLength="200" />
         </EntityType>
         <Association Name="FK__Auditoria__IdUsu__6A30C649">
           <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
@@ -1058,8 +1059,7 @@
             <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="SIGEPModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1441,6 +1441,7 @@
           <NavigationProperty Name="EstadosTB" Relationship="Self.FK__VacantesP__IdEst__1332DBDC" FromRole="VacantesPracticasTB" ToRole="EstadosTB" />
           <NavigationProperty Name="ModalidadesTB" Relationship="Self.FK_VacantesPracticas_Modalidad" FromRole="VacantesPracticasTB" ToRole="ModalidadesTB" />
           <NavigationProperty Name="PracticaEstudianteTB" Relationship="Self.FK__PracticaE__IdVac__05D8E0BE" FromRole="VacantesPracticasTB" ToRole="PracticaEstudianteTB" />
+          <Property Name="Ubicacion" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
         </EntityType>
         <Association Name="FK__Auditoria__IdUsu__6A30C649">
           <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
@@ -2515,6 +2516,7 @@
           <EntitySetMapping Name="VacantesPracticasTB">
             <EntityTypeMapping TypeName="SIGEPModel.VacantesPracticasTB">
               <MappingFragment StoreEntitySet="VacantesPracticasTB">
+                <ScalarProperty Name="Ubicacion" ColumnName="Ubicacion" />
                 <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
                 <ScalarProperty Name="IdEmpresa" ColumnName="IdEmpresa" />

@@ -23,5 +23,6 @@ namespace SIGEP.Models
         public int IdEstado { get; set; }
         public string EstadoNombre { get; set; }
         public int EstudiantesPostulados { get; set; }
+        public string Ubicacion { get; set; }
     }
 }

@@ -61,6 +61,7 @@ namespace SIGEP.Controllers
                                 EspecialidadNombre = sp != null ? sp.Nombre : "",
                                 IdEstado = v.IdEstado,
                                 EstadoNombre = es != null ? es.Descripcion : "",
+                                Ubicacion = v.Ubicacion,
                                 EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
                             };
 
@@ -105,7 +106,8 @@ namespace SIGEP.Controllers
                         NumCupos = model.NumCupos,
                         FechaCierre = model.FechaCierre,
                         IdModalidad = model.IdModalidad,
-                        Descripcion = model.Descripcion
+                        Descripcion = model.Descripcion,
+                        Ubicacion = model.Ubicacion
                     };
 
                     db.VacantesPracticasTB.Add(vacante);
@@ -169,6 +171,7 @@ namespace SIGEP.Controllers
                                 Requerimientos = v.Requerimientos,
                                 Descripcion = v.Descripcion,
                                 IdEstado = v.IdEstado,
+                                Ubicacion = v.Ubicacion,
                                 EstadoNombre = es != null ? es.Descripcion : ""
                             }).FirstOrDefault();
 
@@ -203,6 +206,7 @@ namespace SIGEP.Controllers
                     vacante.FechaCierre = model.FechaCierre;
                     vacante.IdModalidad = model.IdModalidad;
                     vacante.Descripcion = model.Descripcion;
+                    vacante.Ubicacion = model.Ubicacion;
 
                     db.SaveChanges();
 
@@ -272,6 +276,7 @@ namespace SIGEP.Controllers
         // ==============================
         // OBTENER POSTULACIONES
         // ==============================
+        
         [HttpGet]
         public JsonResult ObtenerPostulaciones(int idVacante)
         {
@@ -279,18 +284,64 @@ namespace SIGEP.Controllers
             {
                 var lista = (from p in db.PracticaEstudianteTB
                              join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
+                             join e in db.EstadosTB on p.IdEstado equals e.IdEstado
                              where p.IdVacante == idVacante
                              orderby u.Nombre
-                             select new
+                             select new PracticaEstudianteViewModel
                              {
-                                 u.IdUsuario,
-                                 u.Cedula,
-                                 NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2
+                                 IdUsuario = u.IdUsuario,
+                                 Cedula = u.Cedula,
+                                 NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                                 IdEstado = p.IdEstado,
+                                 EstadoDescripcion = e.Descripcion
                              }).ToList();
 
                 return Json(new { ok = true, data = lista }, JsonRequestBehavior.AllowGet);
             }
         }
+
+
+
+        // ==============================
+        // ASIGNAR ESTUDIANTE A VACANTE
+        // ==============================
+        [HttpPost]
+        public JsonResult Asignar(int idVacante, int idUsuario)
+        {
+            using (var db = new SIGEPEntities())
+            {
+                var estadoAsignado = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Asignado");
+
+                if (estadoAsignado == null)
+                {
+                    return Json(new { ok = false, message = "El estado 'Asignado' no existe en la tabla EstadoTB" }, JsonRequestBehavior.AllowGet);
+                }
+
+                var existente = db.PracticaEstudianteTB
+                    .FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
+
+                if (existente != null)
+                {
+                    existente.IdEstado = estadoAsignado.IdEstado;
+                    existente.FechaAplicacion = DateTime.Now;
+                }
+                else
+                {
+                    db.PracticaEstudianteTB.Add(new PracticaEstudianteTB
+                    {
+                        IdVacante = idVacante,
+                        IdUsuario = idUsuario,
+                        IdEstado = estadoAsignado.IdEstado,
+                        FechaAplicacion = DateTime.Now
+                    });
+                }
+
+                db.SaveChanges();
+                return Json(new { ok = true, message = "Estudiante asignado correctamente." }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
 
         // ==============================
         // MÉTODOS PRIVADOS PARA DROPDOWNS
