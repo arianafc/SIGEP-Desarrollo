@@ -1,9 +1,10 @@
-﻿using SIGEP.Models;
+﻿using SIGEP.EF;
+using SIGEP.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
-using System.Data.Entity;
 
 namespace SIGEP.Controllers
 {
@@ -274,10 +275,10 @@ namespace SIGEP.Controllers
         [HttpGet]
         public JsonResult ObtenerPostulaciones(int idVacante)
         {
-            using (var db = new SIGEPContext())
+            using (var db = new SIGEPEntities())
             {
-                var lista = (from p in db.PracticasEstudiantes
-                             join u in db.Usuarios on p.IdUsuario equals u.IdUsuario
+                var lista = (from p in db.PracticaEstudianteTB
+                             join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
                              where p.IdVacante == idVacante
                              orderby u.Nombre
                              select new
