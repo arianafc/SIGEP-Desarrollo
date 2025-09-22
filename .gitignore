@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+SIGEP/SIGEP/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+SIGEP/SIGEP/obj/Debug/SIGEP.csproj.AssemblyReference.cache
+SIGEP/SIGEP/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+SIGEP/SIGEP/obj/Debug/SIGEP.csproj.AssemblyReference.cache
+*.cache
