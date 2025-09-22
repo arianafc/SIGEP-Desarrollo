@@ -55,21 +55,33 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-        public ActionResult Login(Autenticacion usuario)
+        public ActionResult Login(Autenticacion Usuario)
         {
-       
-
-            bool credencialesValidas = false;
-
-
-            if (!credencialesValidas)
+            try
             {
-                TempData["SwalError"] = "Lo sentimos, el usuario no se encuentra registrado. Por favor, crea una cuenta";
-                return View("Login", usuario);
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var resultado = dbContext.LoginSP(Usuario.Cedula, Usuario.Contrasenna).FirstOrDefault();
+                    if (resultado != null)
+                    {
+                        Session["IdRol"] = resultado.IdRol;
+                        Session["Nombre"] = resultado.Nombre;
+                        Session["Apellido1"] = resultado.Apellido1;
+                        Session["Cedula"] = resultado.Cedula;
+                        Session["IdUsuario"] = resultado.IdUsuario;
+
+                        return Json(new { success = true, message = "¡Bienvenido a SIGEP, " + resultado.Nombre + "!"});
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Credenciales incorrectas. Por favor, verifica tu cédula o contraseña." });
+                    }
+                }
             }
-
-
-            return RedirectToAction("Index");
+            catch (Exception e)
+            {
+                return Json(new { success = false, message = "Error en el servidor, intente más tarde." + e });
+            }
         }
 
         [HttpPost]

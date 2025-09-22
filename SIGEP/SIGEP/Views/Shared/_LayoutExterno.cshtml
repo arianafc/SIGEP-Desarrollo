@@ -25,11 +25,25 @@
 
     </div>
 
-    <script src="~/Scripts/jquery.min.js"></script>
-    <script src="~/Scripts/popper.min.js"></script>
-    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <!-- jQuery primero -->
+    <script src="@Url.Content("~/Scripts/jquery-3.7.0.js")"></script>
+
+    <!-- jQuery UI -->
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <!-- Popper y Bootstrap -->
+    <script src="@Url.Content("~/Scripts/popper.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/bootstrap.min.js")"></script>
+
+    <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Tus scripts -->
+    <script src="@Url.Content("~/Scripts/script.js")"></script>
+    <script src="@Url.Content("~/Scripts/Autenticacion/Autenticacion.js")"></script>
+
+
 
 
     @RenderSection("scripts", required: false)
