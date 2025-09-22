@@ -1,4 +1,5 @@
-﻿@{
+﻿
+@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Vacantes - Prácticas";
 }
@@ -17,7 +18,7 @@
             <option value="">Todos los estados</option>
             @foreach (var s in ViewBag.Estados as List<SelectListItem>)
             {
-                <option value="@s.Text">@s.Text</option>
+                <option value="@s.Value">@s.Text</option>
             }
         </select>
 
