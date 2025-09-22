@@ -22,6 +22,11 @@ namespace SIGEP.Models
         public int IdRol { get; set; }
         public int IdEstado { get; set; }
 
+        public string Correo { get; set; }  
+        
+        public int Especialidad { get; set; }    
+        public int Seccion { get; set; } 
+
         public List<SeccionesTB> ListaSecciones { get; set; }
         public List<EspecialidadesTB> ListaEspecialidades { get; set; }
     }

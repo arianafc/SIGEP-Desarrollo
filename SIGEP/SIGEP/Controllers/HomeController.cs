@@ -73,12 +73,31 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-        public ActionResult Registro(Autenticacion usuario)
+        public ActionResult Registro(Autenticacion Usuario)
         {
-
-            TempData["SwalSuccess"] = "Usuario registrado correctamente";
-            return RedirectToAction("Login");
+            try
+            {
+                using ( var dbContext = new SIGEPEntities())
+                {
+                    var resultado = dbContext.RegistroSP(Usuario.Nombre, Usuario.Apellido1, 
+                        Usuario.Apellido2, Usuario.Correo, Usuario.Especialidad, Usuario.FechaNacimiento, 
+                        Usuario.Seccion, Usuario.Contrasenna, Usuario.Cedula).FirstOrDefault();
+                    if (resultado.HasValue && resultado.Value != 0)
+                    {
+                        return Json(new { success = true, message = "¡Registro exitoso! Ahora puede iniciar sesión." });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Ocurrió un error al procesar su registro." });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { success = false, message = "Error en el servidor, intente más tarde." + e });
+            }
         }
+
 
         [HttpGet]
         public ActionResult Logout()

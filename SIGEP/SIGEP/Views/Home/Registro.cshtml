@@ -11,112 +11,106 @@
                 <div class="card cardLogin" style="border-radius: 1rem;">
                     <div class="card-body p-5 text-center">
 
-                        <div class="mb-md-5 mt-md-4 pb-5">
+                        <h2 class="fw-bold mb-2">CREA TU CUENTA</h2>
+                        <hr />
 
-                            <h2 class="fw-bold mb-2 ">CREA TU CUENTA</h2>
-                            <hr />
-                            <form id="RegistroForm" method="post" action="@Url.Action("Registro", "Home")" class="custom-form container mt-4">
-                                <div class="row g-3">
-                                    <!-- Cédula - Nombre -->
-                                    <div class="col-md-6">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa'email"></i>
-                                            <input type="text" id="CedulaRegistro" name="CedulaRegistro" placeholder="Ingresa tu cédula" class="input-field" />
-                                        </div>
+                        <form id="RegistroForm" class="custom-form container mt-4">
+                            <div class="row g-3">
+                                <!-- Cédula - Nombre -->
+                                <div class="col-md-6">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-id-card"></i>
+                                        <input type="text" id="CedulaRegistro" name="Cedula" placeholder="Cédula" class="input-field" />
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-users"></i>
-                                            <input type="text" id="NombreRegistro" name="NombreRegistro" placeholder="Nombre" class="input-field" />
-                                        </div>
-                                    </div>
-
-                                    <!-- Primer Apellido - Segundo Apellido -->
-                                    <div class="col-md-6">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-user"></i>
-                                            <input type="text" id="Apellido1" name="PrimerApellido" placeholder="Primer Apellido" class="input-field" readonly />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-user"></i>
-                                            <input type="text" id="Apellido2" name="SegundoApellido" placeholder="Segundo Apellido" class="input-field" readonly />
-                                        </div>
-                                    </div>
-                                    <!-- Especialidad -->
-                                    <div class="col-md-6">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-briefcase"></i>
-                                            <select id="Especialidad" name="Especialidad" class="input-field">
-                                                <option value="">Seleccione una Especialidad</option>
-                                                @foreach (var esp in Model.ListaEspecialidades)
-                                                {
-                                                   @:<option value="@esp.IdEspecialidad">@esp.Nombre</option>
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-briefcase"></i>
-                                            <select id="Seccion" name="Seccion" class="input-field">
-                                                <option value="">Seleccione una Sección</option>
-                                                @foreach (var sec in Model.ListaSecciones)
-                                                {
-                                                   @:<option value="@sec.IdSeccion">@sec.Seccion</option>
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-calendar-alt"></i>
-                                            <input type="text" id="CorreoRegistro" name="CorreoRegistro" placeholder="Correo Electrónico" class="input-field" autocomplete="off" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-calendar-alt"></i>
-                                            <input type="text" id="FechaNacimiento" name="FechaNacimiento" placeholder="Fecha de Nacimiento" class="input-field" autocomplete="off" />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-key"></i>
-                                            <input type="password" id="ContrasennaRegistro" name="ContrasennaRegistro" placeholder="Ingresa tu contraseña" class="input-field password-input" />
-                                            <i class="fas fa-eye-slash toggle-password"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="input-icon-container mb-3">
-                                            <i class="fas fa-key"></i>
-                                            <input type="password" id="ContrasennaConfirmar" name="ContrasennaRegistro" placeholder="Confirmar contraseña" class="input-field password-input" />
-                                            <i class="fas fa-eye-slash toggle-password"></i>
-                                        </div>
+                                <div class="col-md-6">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-user"></i>
+                                        <input type="text" id="NombreRegistro" name="Nombre" placeholder="Nombre" class="input-field" />
                                     </div>
                                 </div>
 
+                                <!-- Apellidos -->
+                                <div class="col-md-6">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-user"></i>
+                                        <input type="text" id="Apellido1" name="Apellido1" placeholder="Primer Apellido" class="input-field" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-user"></i>
+                                        <input type="text" id="Apellido2" name="Apellido2" placeholder="Segundo Apellido" class="input-field" />
+                                    </div>
+                                </div>
+
+                                <!-- Especialidad - Sección -->
+                                <div class="col-md-6">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-briefcase"></i>
+                                        <select id="Especialidad" name="Especialidad" class="input-field">
+                                            <option value="">Seleccione una Especialidad</option>
+                                            @foreach (var esp in Model.ListaEspecialidades)
+                                            {
+                                                <option value="@esp.IdEspecialidad">@esp.Nombre</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-briefcase"></i>
+                                        <select id="Seccion" name="Seccion" class="input-field">
+                                            <option value="">Seleccione una Sección</option>
+                                            @foreach (var sec in Model.ListaSecciones)
+                                            {
+                                                <option value="@sec.IdSeccion">@sec.Seccion</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Correo - Fecha de Nacimiento -->
+                                <div class="col-md-12">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-envelope"></i>
+                                        <input type="email" id="CorreoRegistro" name="Correo" placeholder="Correo Electrónico" class="input-field" autocomplete="off" />
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <input type="text" id="FechaNacimiento" name="FechaNacimiento" placeholder="Fecha de Nacimiento" class="input-field" autocomplete="off" />
+                                    </div>
+                                </div>
+
+                                <!-- Contraseña - Confirmar Contraseña -->
+                                <div class="col-md-12">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-key"></i>
+                                        <input type="password" id="ContrasennaRegistro" name="Contrasenna" placeholder="Contraseña" class="input-field password-input" />
+                                        <i class="fas fa-eye-slash toggle-password"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="input-icon-container mb-3">
+                                        <i class="fas fa-key"></i>
+                                        <input type="password" id="ContrasennaConfirmar" placeholder="Confirmar Contraseña" class="input-field password-input" />
+                                        <i class="fas fa-eye-slash toggle-password"></i>
+                                    </div>
+                                </div>
 
                                 <div class="text-center mt-4">
                                     <button id="RegistroBtn" class="BtnInicio btn btn-lg px-5" type="submit">
                                         Registrarse
                                     </button>
                                 </div>
-                            </form>
+                            </div>
+                        </form>
 
-
-                        </div>
-
-                        <div>
-                            <p class="mb-0">
-                                ¿Ya tienes una cuenta? <a href="@Url.Action("Login", "Home")" class="text-white-50 fw-bold">Iniciar Sesión</a>
-                            </p>
-                        </div>
+                        <p class="mt-3 mb-0">
+                            ¿Ya tienes una cuenta? <a href="@Url.Action("Login", "Home")" class="text-white-50 fw-bold">Iniciar Sesión</a>
+                        </p>
 
                     </div>
                 </div>
@@ -124,104 +118,88 @@
         </div>
     </div>
 </section>
+
 <script src="~/Scripts/jquery-3.7.0.js"></script>
 <script src="~/Scripts/script.js"></script>
 <script src="~/Scripts/Autenticacion/Autenticacion.js"></script>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+$(function () {
 
-        $("#RegistroForm").on("submit", function (e) {
-            e.preventDefault();
+    // Inicializar datepicker
+    $("#FechaNacimiento").datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "1950:2025",
+        defaultDate: "-18y"
+    });
 
-            const cedula = $("#CedulaRegistro").val().trim();
-            const nombre = $("#NombreRegistro").val().trim();
-            const apellido1 = $("#Apellido1").val().trim();
-            const apellido2 = $("#Apellido2").val().trim();
-            const especialidad = $("#Especialidad").val().trim();
-            const fechaNacimiento = $("#FechaNacimiento").val().trim();
-            const contrasenna = $("#ContrasennaRegistro").val().trim();
-            const confirmar = $("#ContrasennaConfirmar").val().trim();
-
-            if (!cedula || !nombre || !apellido1 || !apellido2 || !especialidad || !fechaNacimiento || !contrasenna || !confirmar) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Campos obligatorios",
-                    text: "Debes completar todos los campos antes de continuar.",
-                    confirmButtonColor: "#2D594D"
-                });
-                return;
+    // Toggle de contraseña
+    document.querySelectorAll('.toggle-password').forEach(function (toggle) {
+        toggle.addEventListener('click', function () {
+            const input = this.previousElementSibling;
+            if (input && input.classList.contains('password-input')) {
+                const type = input.type === 'password' ? 'text' : 'password';
+                input.type = type;
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
             }
-
-            if (contrasenna.length < 8) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Contraseña insegura",
-                    text: "La contraseña debe tener al menos 8 caracteres.",
-                    confirmButtonColor: "#2D594D"
-                });
-                return;
-            }
-
-            if (contrasenna !== confirmar) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Contraseñas no coinciden",
-                    text: "Asegúrate de que ambas contraseñas sean iguales.",
-                    confirmButtonColor: "#2D594D"
-                });
-                return;
-            }
-
-            this.submit();
-        });
-        $("#FechaNacimiento").datepicker({
-            dateFormat: "yy-mm-dd",
-            changeMonth: true,
-            changeYear: true,
-            yearRange: "1950:2025",
-            defaultDate: "-18y"
-        });
-
-
-        document.querySelectorAll('.toggle-password').forEach(function (toggle) {
-            toggle.addEventListener('click', function () {
-                const input = this.previousElementSibling;
-
-                if (input && input.classList.contains('password-input')) {
-                    const type = input.type === 'password' ? 'text' : 'password';
-                    input.type = type;
-
-                    this.classList.toggle('fa-eye');
-                    this.classList.toggle('fa-eye-slash');
-                }
-            });
-        });
-
-        $("#RegistroForm").on("submit", function (e) {
-            e.preventDefault();
-
-            let cedula = $("#CedulaRegistro").val().trim();
-            let contrasenna = $("#ContrasennaRegistro").val().trim();
-
-            if (!cedula || !contrasenna) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Campos vacíos",
-                    text: "Por favor, completa ambos campos para continuar.",
-                    confirmButtonColor: "#2D594D"
-                });
-                return;
-            }
-
-            this.submit();
-        });
-
-
-        $(".fa-calendar-alt").on("click", function () {
-            $("#FechaNacimiento").focus();
         });
     });
 
+    // AJAX para registro
+    $("#RegistroForm").on("submit", function (e) {
+        e.preventDefault();
 
+        const formData = {
+            Nombre: $("#NombreRegistro").val().trim(),
+            Apellido1: $("#Apellido1").val().trim(),
+            Apellido2: $("#Apellido2").val().trim(),
+            Correo: $("#CorreoRegistro").val().trim(),
+            Especialidad: $("#Especialidad").val(),
+            Seccion: $("#Seccion").val(),
+            FechaNacimiento: $("#FechaNacimiento").val().trim(),
+            Cedula: $("#CedulaRegistro").val().trim(),
+            Contrasenna: $("#ContrasennaRegistro").val().trim()
+        };
 
+        // Validación básica
+        for (const key in formData) {
+            if (!formData[key]) {
+                Swal.fire("Error", "Debes completar todos los campos.", "warning");
+                return;
+            }
+        }
+
+        if (formData.Contrasenna.length < 8) {
+            Swal.fire("Error", "La contraseña debe tener al menos 8 caracteres.", "error");
+            return;
+        }
+
+        if (formData.Contrasenna !== $("#ContrasennaConfirmar").val().trim()) {
+            Swal.fire("Error", "Las contraseñas no coinciden.", "error");
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Registro", "Home")',
+            data: formData,
+            dataType: "json",
+            success: function (resp) {
+                if (resp.success) {
+                    Swal.fire("Éxito", resp.message, "success").then(() => {
+                        window.location.href = '@Url.Action("Login", "Home")';
+                    });
+                } else {
+                    Swal.fire("Error", resp.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("Error", "Error de comunicación con el servidor", "error");
+            }
+        });
+    });
+});
 </script>
