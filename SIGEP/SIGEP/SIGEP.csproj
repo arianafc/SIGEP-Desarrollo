@@ -241,6 +241,7 @@
     <Compile Include="Models\VacantePracticaVM.cs" />
     <Compile Include="Models\VacanteViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\Utilitarios.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="BD\Inserts.sql" />
@@ -399,6 +400,7 @@
     <Content Include="Views\Shared\_LayoutMain.cshtml" />
     <Content Include="Views\Home\RecuperarAcceso.cshtml" />
     <Content Include="Views\Home\Registro.cshtml" />
+    <Content Include="Views\Practicas\VistaVacantesProfesor.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,218 @@
+﻿@model List<SIGEP.EF.VacantesPracticasTB>
+
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Vacantes - Prácticas";
+}
+
+<section class="vacantes-wrapper">
+    <h2 class="vacantes-titulo titulo-principal">Vacantes Disponibles</h2>
+
+    <!-- Botón + filtros -->
+    <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-3 align-items-center">
+        <button type="button" class="btn-cta btn-nuevo mb-0" data-bs-toggle="modal" data-bs-target="#modalCrearVacante">
+            + Registrar
+        </button>
+
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-filter"></i>
+            </button>
+            <div class="dropdown-menu p-3" style="min-width: 300px;">
+                <div class="mb-2">
+                    <label>Estado de vacante</label>
+                    <select id="filtroPractica" class="form-control">
+                        <option value="">Todos</option>
+                        @if (ViewBag.Estados != null)
+                        {
+                            foreach (var s in ViewBag.Estados as List<SelectListItem>)
+                            {
+                                <option value="@s.Value">@s.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label>Modalidad</label>
+                    <select id="filtroModalidad" class="form-control">
+                        <option value="">Todas</option>
+                        @if (ViewBag.Modalidades != null)
+                        {
+                            foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
+                            {
+                                <option value="@m.Value">@m.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label>Especialidad</label>
+                    <select id="filtroEspecialidad" class="form-control">
+                        <option value="">Todas</option>
+                        @if (ViewBag.Especialidades != null)
+                        {
+                            foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                            {
+                                <option value="@e.Value">@e.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Vacantes -->
+    <div class="vacantes-lista">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="vacante-alerta">
+                <strong>Información:</strong> No se encontraron vacantes.
+            </div>
+        }
+        else
+        {
+            foreach (var vacante in Model)
+            {
+                <article class="vacante-card">
+                    <header class="vacante-header d-flex justify-content-between align-items-start">
+                        <div>
+                            <h3 class="vacante-titulo">@vacante.Nombre</h3>
+                            <span class="vacante-empresa">@vacante.EmpresasTB?.NombreEmpresa</span>
+                        </div>
+                        @if (vacante.NumCupos <= 0)
+                        {
+                            <span class="badge text-white fw-bold" style="background-color: darkgoldenrod; font-size: 14px">
+                                Vacante llena
+                            </span>
+                        }
+                    </header>
+                    <ul class="vacante-detalles">
+                        <li><strong>Requisitos:</strong> @vacante.Requerimientos</li>
+                        <li><strong>Modalidad:</strong> @vacante.ModalidadesTB?.Descripcion</li>
+                        <li><strong>Fecha límite de aplicación:</strong> @vacante.FechaMaxAplicacion?.ToShortDateString()</li>
+                        <li><strong>Número de cupos:</strong> @vacante.NumCupos</li>
+                        <li><strong>Estado:</strong> @vacante.EstadosTB?.Descripcion</li>
+                    </ul>
+                    <div class="row justify-content-between">
+                        <button data-bs-target="#modalVisualizar_@vacante.IdVacante" data-bs-toggle="modal" class="col-md-6 btn btn-cta">Ver más</button>
+                        <button data-bs-target="#modalAsignar_@vacante.IdVacante" data-bs-toggle="modal" class="col-md-5 btn btn-cta" @(vacante.NumCupos <= 0 ? "disabled" : "")>Asignar</button>
+                    </div>
+                </article>
+
+                <!-- Modal Asignar -->
+                <div class="modal fade" id="modalAsignar_@vacante.IdVacante" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+                            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                                <h5 class="modal-title">Asignar Estudiante</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body px-4">
+                                <form method="post" action="@Url.Action("Asignar", "Practicas")">
+                                    <input type="hidden" name="idVacante" value="@vacante.IdVacante" />
+                                    <div class="form-group">
+                                        <label>Seleccione estudiante</label>
+                                        <select name="idUsuario" class="form-control" required>
+                                            <option value="">-- Seleccione --</option>
+                                            @if (ViewBag.Usuarios != null)
+                                            {
+                                                foreach (var usuario in ViewBag.Usuarios as List<SelectListItem>)
+                                                {
+                                                    <option value="@usuario.Value">@usuario.Text</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Asignar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+@section Scripts {
+    <script>
+        // ==============================
+        // FILTROS DE VACANTES
+        // ==============================
+        $("#filtroPractica, #filtroModalidad, #filtroEspecialidad").change(function () {
+            filtrarVacantes();
+        });
+
+        function filtrarVacantes() {
+            var estado = $("#filtroPractica").val();
+            var modalidad = $("#filtroModalidad").val();
+            var especialidad = $("#filtroEspecialidad").val();
+
+            $.getJSON('@Url.Action("GetVacantes", "Practicas")',
+                { estado: estado, idModalidad: modalidad, idEspecialidad: especialidad },
+                function (resp) {
+                    if (resp && resp.data) {
+                        renderVacantes(resp.data);
+                    }
+                });
+        }
+
+        // Render dinámico de vacantes
+        function renderVacantes(vacantes) {
+            var contenedor = $(".vacantes-lista");
+            contenedor.empty();
+
+            if (!vacantes || vacantes.length === 0) {
+                contenedor.append('<div class="vacante-alerta"><strong>Información:</strong> No se encontraron vacantes.</div>');
+                return;
+            }
+
+            vacantes.forEach(function (v) {
+                var badge = v.NumCupos <= 0
+                    ? '<span class="badge text-white fw-bold" style="background-color: darkgoldenrod; font-size: 14px">Vacante llena</span>'
+                    : '';
+
+                var card = `
+                    <article class="vacante-card">
+                        <header class="vacante-header d-flex justify-content-between align-items-start">
+                            <div>
+                                <h3 class="vacante-titulo">${v.Nombre}</h3>
+                                <span class="vacante-empresa">${v.EmpresaNombre}</span>
+                            </div>
+                            ${badge}
+                        </header>
+                        <ul class="vacante-detalles">
+                            <li><strong>Requisitos:</strong> ${v.Requerimientos}</li>
+                            <li><strong>Modalidad:</strong> ${v.ModalidadNombre}</li>
+                            <li><strong>Fecha límite de aplicación:</strong> ${v.FechaMaxAplicacion ? v.FechaMaxAplicacion.split('T')[0] : ''}</li>
+                            <li><strong>Número de cupos:</strong> ${v.NumCupos}</li>
+                            <li><strong>Estado:</strong> ${v.EstadoNombre}</li>
+                        </ul>
+                        <div class="row justify-content-between">
+                            <button data-id="${v.IdVacante}" class="col-md-6 btn btn-cta btn-detalle">Ver más</button>
+                            <button data-id="${v.IdVacante}" class="col-md-5 btn btn-cta btn-asignar" ${v.NumCupos <= 0 ? "disabled" : ""}>Asignar</button>
+                        </div>
+                    </article>`;
+                contenedor.append(card);
+            });
+        }
+
+        // ==============================
+        // ASIGNAR ESTUDIANTE
+        // ==============================
+        $(document).on("submit", "form[action*='Asignar']", function (e) {
+            e.preventDefault();
+            var form = $(this);
+            $.post(form.attr("action"), form.serialize(), function (resp) {
+                if (resp.ok) {
+                    alert(resp.message);
+                    $("#modalAsignar_" + form.find("input[name=idVacante]").val()).modal("hide");
+                    filtrarVacantes();
+                } else {
+                    alert("Error: " + resp.message);
+                }
+            });
+        });
+    </script>
+}
