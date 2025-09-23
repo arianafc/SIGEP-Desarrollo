@@ -32,27 +32,20 @@ namespace SIGEP.Controllers
         {
             using (var db = new SIGEPEntities())
             {
-                // join a empresas y direcciones (left joins) + joins a estados, especialidades, modalidades
+                // Consulta principal (produce VacantePracticaDTO en memoria)
                 var query = from v in db.VacantesPracticasTB
                             join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
                             from e in je.DefaultIfEmpty()
-
-                                // join con DireccionesTB a través de e.IdDireccion
                             join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
                             from d in jd.DefaultIfEmpty()
-
                             join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
                             from es in jes.DefaultIfEmpty()
-
                             join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
                             from ev in jev.DefaultIfEmpty()
-
                             join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
                             from sp in jsp.DefaultIfEmpty()
-
                             join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
                             from m in jm.DefaultIfEmpty()
-
                             select new VacantePracticaDTO
                             {
                                 IdVacante = v.IdVacante,
@@ -70,12 +63,10 @@ namespace SIGEP.Controllers
                                 EspecialidadNombre = sp != null ? sp.Nombre : "",
                                 IdEstado = v.IdEstado,
                                 EstadoNombre = es != null ? es.Descripcion : "",
-                                // <-- Ubicacion viene de DireccionesTB.DireccionExacta (vía EmpresasTB.IdDireccion)
                                 Ubicacion = d != null ? d.DireccionExacta : "",
                                 EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
                             };
 
-                // filtros dinámicos
                 if (!string.IsNullOrEmpty(estado))
                     query = query.Where(x => x.EstadoNombre == estado);
 
@@ -86,16 +77,36 @@ namespace SIGEP.Controllers
                     query = query.Where(x => x.IdModalidad == idModalidad);
 
                 var list = query.OrderByDescending(x => x.IdVacante).ToList();
-                return Json(new { data = list }, JsonRequestBehavior.AllowGet);
+
+                // Formatear fechas a ISO (string) para que el JS las pueda parsear con split('T')[0]
+                var outList = list.Select(x => new
+                {
+                    x.IdVacante,
+                    x.Nombre,
+                    x.IdEmpresa,
+                    x.EmpresaNombre,
+                    x.Requerimientos,
+                    FechaMaxAplicacion = x.FechaMaxAplicacion.HasValue ? x.FechaMaxAplicacion.Value.ToString("o") : null,
+                    x.NumCupos,
+                    FechaCierre = x.FechaCierre.HasValue ? x.FechaCierre.Value.ToString("o") : null,
+                    x.IdModalidad,
+                    x.ModalidadNombre,
+                    x.Descripcion,
+                    x.IdEspecialidad,
+                    x.EspecialidadNombre,
+                    x.IdEstado,
+                    x.EstadoNombre,
+                    x.Ubicacion,
+                    x.EstudiantesPostulados
+                }).ToList();
+
+                return Json(new { data = outList }, JsonRequestBehavior.AllowGet);
             }
         }
 
         // ==============================
         // CREAR VACANTE (POST)
         // ==============================
-        // Nota: no almacenamos "Ubicacion" en la tabla VacantesPracticasTB porque la BD almacena la dirección en DireccionesTB,
-        // vinculada desde EmpresasTB.IdDireccion. Si quieres permitir un "override" por vacante, habría que agregar una columna
-        // a VacantesPracticasTB (no lo hacemos aquí).
         [HttpPost]
         public JsonResult Crear(VacanteViewModel model)
         {
@@ -113,8 +124,7 @@ namespace SIGEP.Controllers
             {
                 try
                 {
-                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1; // 1 = No Asignada (según tu catálogo)
-
+                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1; // fallback
                     var vacante = new VacantesPracticasTB
                     {
                         Nombre = model.Nombre,
@@ -126,7 +136,6 @@ namespace SIGEP.Controllers
                         FechaCierre = model.FechaCierre,
                         IdModalidad = model.IdModalidad,
                         Descripcion = model.Descripcion
-                        // NO asignamos Ubicacion aquí (no existe esa columna en la tabla)
                     };
 
                     db.VacantesPracticasTB.Add(vacante);
@@ -156,56 +165,46 @@ namespace SIGEP.Controllers
         // ==============================
         // DETALLE VACANTE (GET)
         // ==============================
-        [HttpGet]
         public JsonResult Detalle(int id)
         {
             using (var db = new SIGEPEntities())
             {
-                var data = (from v in db.VacantesPracticasTB
-                            join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
-                            from e in je.DefaultIfEmpty()
+                var d = (from v in db.VacantesPracticasTB
+                         join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
+                         from e in je.DefaultIfEmpty()
+                         join dir in db.DireccionesTB on e.IdDireccion equals dir.IdDireccion into jd
+                         from dir in jd.DefaultIfEmpty()
+                         join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
+                         from es in jes.DefaultIfEmpty()
+                         join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
+                         from m in jm.DefaultIfEmpty()
+                         where v.IdVacante == id
+                         select new
+                         {
+                             v.IdVacante,
+                             v.Nombre,
+                             v.IdEmpresa,
+                             EmpresaNombre = e != null ? e.NombreEmpresa : "",
+                             v.Requerimientos,
+                             FechaMaxAplicacion = v.FechaMaxAplicacion.HasValue
+                                                    ? v.FechaMaxAplicacion.Value.ToString("yyyy-MM-dd")
+                                                    : null,
+                             v.NumCupos,
+                             FechaCierre = v.FechaCierre.HasValue
+                                                    ? v.FechaCierre.Value.ToString("yyyy-MM-dd")
+                                                    : null,
+                             v.Descripcion,
+                             v.IdModalidad,
+                             ModalidadNombre = m != null ? m.Descripcion : "",
+                             v.IdEstado,
+                             EstadoNombre = es != null ? es.Descripcion : "",
+                             Ubicacion = dir != null ? dir.DireccionExacta : ""
+                         }).FirstOrDefault();
 
-                                // join a direcciones para obtener DireccionExacta
-                            join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
-                            from d in jd.DefaultIfEmpty()
-
-                            join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
-                            from es in jes.DefaultIfEmpty()
-
-                            join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
-                            from ev in jev.DefaultIfEmpty()
-
-                            join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
-                            from sp in jsp.DefaultIfEmpty()
-
-                            join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
-                            from m in jm.DefaultIfEmpty()
-
-                            where v.IdVacante == id
-                            select new VacanteViewModel
-                            {
-                                IdVacante = v.IdVacante,
-                                Nombre = v.Nombre,
-                                IdEmpresa = v.IdEmpresa,
-                                EmpresaNombre = e != null ? e.NombreEmpresa : "",
-                                IdEspecialidad = ev != null ? ev.IdEspecialidad : 0,
-                                EspecialidadNombre = sp != null ? sp.Nombre : "",
-                                IdModalidad = v.IdModalidad ?? 0,
-                                ModalidadNombre = m != null ? m.Descripcion : "",
-                                NumCupos = v.NumCupos ?? 0,
-                                FechaMaxAplicacion = v.FechaMaxAplicacion,
-                                FechaCierre = v.FechaCierre,
-                                Requerimientos = v.Requerimientos,
-                                Descripcion = v.Descripcion,
-                                IdEstado = v.IdEstado,
-                                EstadoNombre = es != null ? es.Descripcion : "",
-                                // <-- tomamos la dirección exacta desde DireccionesTB
-                                Ubicacion = d != null ? d.DireccionExacta : ""
-                            }).FirstOrDefault();
-
-                return Json(new { ok = data != null, data }, JsonRequestBehavior.AllowGet);
+                return Json(d, JsonRequestBehavior.AllowGet);
             }
         }
+
 
         // ==============================
         // EDITAR VACANTE (POST)
@@ -240,7 +239,6 @@ namespace SIGEP.Controllers
                     vacante.FechaCierre = model.FechaCierre;
                     vacante.IdModalidad = model.IdModalidad;
                     vacante.Descripcion = model.Descripcion;
-                    // NO actualizamos Direcciones ni Ubicacion aquí — la dirección está en DireccionesTB vinculada por Empresa.IdDireccion
 
                     db.SaveChanges();
 
@@ -333,21 +331,55 @@ namespace SIGEP.Controllers
         }
 
         // ==============================
-        // ASIGNAR ESTUDIANTE A VACANTE
+        // OBTENER ESTUDIANTES DISPONIBLES PARA ASIGNAR (AJAX usado por modal asignar)
         // ==============================
+        [HttpGet]
+        public JsonResult ObtenerEstudiantesParaAsignar(int idVacante)
+        {
+            using (var db = new SIGEPEntities())
+            {
+                // Estado "Asignado"
+                var estadoAsignado = db.EstadosTB
+                    .FirstOrDefault(e => e.Descripcion == "Asignado" || e.Descripcion == "Asignada");
+
+                // Estudiantes candidatos: todos los usuarios activos que NO estén ya asignados a la vacante
+                var lista = (from u in db.UsuariosTB
+                             where !db.PracticaEstudianteTB.Any(p =>
+                                  p.IdUsuario == u.IdUsuario &&
+                                  p.IdVacante == idVacante &&
+                                  (estadoAsignado != null && p.IdEstado == estadoAsignado.IdEstado))
+                             orderby u.Nombre
+                             select new
+                             {
+                                 IdEstudiante = u.IdUsuario,
+                                 NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                                 Cedula = u.Cedula,
+                                 Asignada = estadoAsignado != null &&
+                                            db.PracticaEstudianteTB.Any(p =>
+                                                p.IdUsuario == u.IdUsuario &&
+                                                p.IdEstado == estadoAsignado.IdEstado)
+                             }).ToList();
+
+                return Json(new { ok = true, data = lista }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+
+        // ==============================
+        // ASIGNAR ESTUDIANTE A VACANTE (POST)
+        // ==============================
+        // Nombre antiguo: Asignar (seguimos manteniéndolo)
         [HttpPost]
         public JsonResult Asignar(int idVacante, int idUsuario)
         {
             using (var db = new SIGEPEntities())
             {
-                var estadoAsignado = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Asignado");
-
+                var estadoAsignado = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Asignado" || e.Descripcion == "Asignada");
                 if (estadoAsignado == null)
                     return Json(new { ok = false, message = "El estado 'Asignado' no existe en EstadosTB" }, JsonRequestBehavior.AllowGet);
 
-                var existente = db.PracticaEstudianteTB
-                    .FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
-
+                var existente = db.PracticaEstudianteTB.FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
                 if (existente != null)
                 {
                     existente.IdEstado = estadoAsignado.IdEstado;
@@ -367,6 +399,14 @@ namespace SIGEP.Controllers
                 db.SaveChanges();
                 return Json(new { ok = true, message = "Estudiante asignado correctamente." }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        // Alias con el nombre que tu JS podría estar usando: AsignarEstudiante
+        [HttpPost]
+        public JsonResult AsignarEstudiante(int idVacante, int idEstudiante)
+        {
+            // solo un wrapper para evitar que JS y controlador se desincronicen
+            return Asignar(idVacante, idEstudiante);
         }
 
         // ==============================
@@ -428,26 +468,23 @@ namespace SIGEP.Controllers
             }
         }
 
+        // ==============================
+        // get ubicacion de empresa por idEmpresa
+        // ==============================
+        [HttpGet]
         public JsonResult GetUbicacionEmpresa(int idEmpresa)
         {
             using (var db = new SIGEPEntities())
             {
-                var empresa = (from e in db.EmpresasTB
-                               join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion
-                               where e.IdEmpresa == idEmpresa
-                               select new
-                               {
-                                   d.DireccionExacta
-                               }).FirstOrDefault();
+                // Busca la empresa y su dirección (si existe)
+                var ubicacion = (from e in db.EmpresasTB
+                                 join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
+                                 from d in jd.DefaultIfEmpty()
+                                 where e.IdEmpresa == idEmpresa
+                                 select d.DireccionExacta).FirstOrDefault();
 
-                if (empresa != null)
-                {
-                    return Json(new { ok = true, ubicacion = empresa.DireccionExacta }, JsonRequestBehavior.AllowGet);
-                }
-
-                return Json(new { ok = false }, JsonRequestBehavior.AllowGet);
+                return Json(new { ok = ubicacion != null, ubicacion = ubicacion ?? "" }, JsonRequestBehavior.AllowGet);
             }
         }
     }
 }
-

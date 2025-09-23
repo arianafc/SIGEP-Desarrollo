@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Vacantes - Prácticas";
 }
@@ -93,11 +92,11 @@
 
                             <div class="col-md-6 form-group mb-3">
                                 <label>Empresa <span class="text-danger">*</span></label>
-                                <select id="IdEmpresa" name="IdEmpresa" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
-                                    <option value="">-- Seleccione empresa --</option>
-                                    @foreach (var em in ViewBag.Empresas as List<SelectListItem>)
+                                <select id="IdEmpresa" name="IdEmpresa" class="form-control" required>
+                                    <option value="">-- Seleccione Empresa --</option>
+                                    @foreach (var e in ViewBag.Empresas as List<SelectListItem>)
                                     {
-                                        <option value="@em.Value">@em.Text</option>
+                                        <option value="@e.Value">@e.Text</option>
                                     }
                                 </select>
                             </div>
@@ -193,18 +192,18 @@
                             </div>
 
                             <div class="col-md-6 form-group mb-3">
-                                <label>Empresa <span class="text-danger">*</span></label>
-                                <select id="edit-IdEmpresa" name="IdEmpresa" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
-                                    <option value="">-- Seleccione empresa --</option>
-                                    @foreach (var em in ViewBag.Empresas as List<SelectListItem>)
+                                <label for="edit-IdEmpresa">Empresa</label>
+                                <select id="edit-IdEmpresa" name="IdEmpresa" class="form-control" required>
+                                    <option value="">-- Seleccione una empresa --</option>
+                                    @foreach (var emp in ViewBag.Empresas as List<SelectListItem>)
                                     {
-                                        <option value="@em.Value">@em.Text</option>
+                                        <option value="@emp.Value">@emp.Text</option>
                                     }
                                 </select>
                             </div>
 
                             <div class="col-md-6 form-group mb-3">
-                                <label>Lugar / Ubicación <span class="text-danger">*</span></label>
+                                <label for="edit-Ubicacion">Ubicación</label>
                                 <input type="text" id="edit-Ubicacion" class="form-control" readonly />
                             </div>
 
@@ -486,32 +485,35 @@ $(function () {
     });
 
     // --- Cambiar empresa en CREAR ---
-    $('#IdEmpresa').on('change', function () {
-        var idEmpresa = $(this).val();
-        if (idEmpresa) {
-            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")', { idEmpresa: idEmpresa }, function (res) {
+  // Crear Vacante
+$('#IdEmpresa').on('change', function () {
+    var idEmpresa = $(this).val();
+    if (idEmpresa) {
+        $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
+            { idEmpresa: idEmpresa }, function (res) {
                 $('#ubicacionEmpresa').val(res.ok ? res.ubicacion : '');
             }).fail(function () {
                 $('#ubicacionEmpresa').val('');
             });
-        } else {
-            $('#ubicacionEmpresa').val('');
-        }
-    });
+    } else {
+        $('#ubicacionEmpresa').val('');
+    }
+});
 
     // --- Cambiar empresa en EDITAR ---
-    $('#edit-IdEmpresa').on('change', function () {
-        var idEmpresa = $(this).val();
-        if (idEmpresa) {
-            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")', { idEmpresa: idEmpresa }, function (res) {
+   $('#edit-IdEmpresa').on('change', function () {
+    var idEmpresa = $(this).val();
+    if (idEmpresa) {
+        $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
+            { idEmpresa: idEmpresa }, function (res) {
                 $('#edit-Ubicacion').val(res.ok ? res.ubicacion : '');
             }).fail(function () {
                 $('#edit-Ubicacion').val('');
             });
-        } else {
-            $('#edit-Ubicacion').val('');
-        }
-    });
+    } else {
+        $('#edit-Ubicacion').val('');
+    }
+});
 
     // --- Editar ---
     $('#miTabla').on('click', '.btn-editar', function () {
@@ -578,51 +580,58 @@ $(function () {
         });
     });
 
+  
     // --- Visualizar ---
-    $('#miTabla').on('click', '.btn-visualizar', function () {
-        var id = $(this).data('id');
-        $.get('@Url.Action("Detalle", "Practicas")', { id: id }, function (res) {
-            if (res.ok && res.data) {
-                var d = res.data;
-                $('#vis-Nombre').val(d.Nombre);
-                $('#vis-Empresa').val(d.IdEmpresa); // id, no nombre
-                $('#vis-Especialidad').val(d.IdEspecialidad); // id
-                $('#vis-Modalidad').val(d.IdModalidad); // id
-                $('#vis-NumCupos').val(d.NumCupos);
-                $('#vis-FechaAplicacion').val(d.FechaMaxAplicacion ? d.FechaMaxAplicacion.split('T')[0] : '');
-                $('#vis-FechaCierre').val(d.FechaCierre ? d.FechaCierre.split('T')[0] : '');
-                $('#vis-Requerimientos').val(d.Requerimientos);
-                $('#vis-Descripcion').val(d.Descripcion);
-                $('#vis-Ubicacion').val(d.Ubicacion);
+$('#miTabla').on('click', '.btn-visualizar', function () {
+    var id = $(this).data('id');
+    $.get('@Url.Action("Detalle", "Practicas")', { id: id }, function (res) {
+        if (res.ok && res.data) {
+            var d = res.data;
 
-                $('#listaPostulaciones').empty();
-                $('#mensajeSinAsignados').hide();
+            // Asignar valores
+            $('#vis-Nombre').val(d.Nombre);
+            $('#vis-Empresa').val(d.IdEmpresa);
+            $('#vis-Ubicacion').val(d.Ubicacion);
+            $('#vis-Especialidad').val(d.IdEspecialidad);
+            $('#vis-NumCupos').val(d.NumCupos);
+            $('#vis-Modalidad').val(d.IdModalidad);
+            $('#vis-Requerimientos').val(d.Requerimientos);
+            $('#vis-Descripcion').val(d.Descripcion);
 
-                $.get('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: id }, function (res2) {
-                    if (res2.ok) {
-                        if (res2.data.length > 0) {
-                            res2.data.forEach(function (u) {
-                                $('#listaPostulaciones').append(`
-                                    <li class="list-group-item">
-                                        <strong>${u.NombreCompleto}</strong>
-                                        <span class="text-muted">(${u.Cedula})</span>
-                                    </li>
-                                `);
-                            });
-                        } else {
-                            $('#mensajeSinAsignados').show();
-                        }
-                    } else {
-                        Swal.fire('Error', 'No se pudo cargar postulaciones', 'error');
-                    }
-                });
+            // Fechas -> cortar por la T
+            if (d.FechaMaxAplicacion)
+                $('#vis-FechaAplicacion').val(d.FechaMaxAplicacion.split('T')[0]);
+            else
+                $('#vis-FechaAplicacion').val('');
 
-                $('#modalVisualizarVacante').modal('show');
-            } else {
-                Swal.fire('Error', 'No se pudo cargar la vacante', 'error');
-            }
-        });
+            if (d.FechaCierre)
+                $('#vis-FechaCierre').val(d.FechaCierre.split('T')[0]);
+            else
+                $('#vis-FechaCierre').val('');
+
+            // Mostrar modal
+            $('#modalVisualizarVacante').modal('show');
+
+            // Cargar postulaciones
+            $.get('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: d.IdVacante }, function (res2) {
+                var $lista = $('#listaPostulaciones');
+                $lista.empty();
+
+                if (res2.ok && res2.data.length > 0) {
+                    $('#mensajeSinAsignados').hide();
+                    res2.data.forEach(function (p) {
+                        $lista.append(`<li class="list-group-item">${p.NombreCompleto} - ${p.EstadoDescripcion}</li>`);
+                    });
+                } else {
+                    $('#mensajeSinAsignados').show();
+                }
+            });
+        } else {
+            Swal.fire('Error', 'No se pudo cargar la vacante', 'error');
+        }
     });
+});
+
 
     // --- Asignar ---
     $('#miTabla').on('click', '.btn-asignar', function () {
