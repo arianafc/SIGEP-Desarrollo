@@ -21,6 +21,6 @@ namespace SIGEP.EF
         public int IdRol { get; set; }
         public int IdEstado { get; set; }
         public string Seccion { get; set; }
-        public string Nombre1 { get; set; }
+        public string Especialidad { get; set; }
     }
 }

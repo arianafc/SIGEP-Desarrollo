@@ -8,6 +8,8 @@ namespace SIGEP.Models
 {
     public class Autenticacion
     {
+
+        
         public int IdUsuario { get; set; }
         public string Cedula { get; set; }
         public string Nombre { get; set; }
@@ -29,5 +31,7 @@ namespace SIGEP.Models
 
         public List<SeccionesTB> ListaSecciones { get; set; }
         public List<EspecialidadesTB> ListaEspecialidades { get; set; }
+
+
     }
 }

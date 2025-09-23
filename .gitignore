@@ -370,3 +370,16 @@ SIGEP/SIGEP/obj/Debug/SIGEP.csproj.AssemblyReference.cache
 =======
 >>>>>>> Stashed changes
 SIGEP/SIGEP/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+
+# Ignorar carpetas de compilaci�n
+[Bb]in/
+[Oo]bj/
+
+# Ignorar config sensible
+Web.config
+
+# Ignorar archivo de proyecto
+SIGEP.csproj
+/SIGEP/SIGEP/obj
+/SIGEP/SIGEP/obj
+SIGEP/SIGEP/Web.config
