@@ -93,7 +93,7 @@
 
                             <div class="col-md-6 form-group mb-3">
                                 <label>Empresa <span class="text-danger">*</span></label>
-                                <select name="IdEmpresa" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
+                                <select id="IdEmpresa" name="IdEmpresa" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
                                     <option value="">-- Seleccione empresa --</option>
                                     @foreach (var em in ViewBag.Empresas as List<SelectListItem>)
                                     {
@@ -103,8 +103,8 @@
                             </div>
 
                             <div class="col-md-6 form-group mb-3">
-                                <label>Lugar / Ubicación <span class="text-danger">*</span></label>
-                                <input type="text" name="Ubicacion" class="form-control" placeholder="Ejemplo: Cartago, La Lima" required />
+                                <label for="ubicacionEmpresa">Ubicación</label>
+                                <input type="text" id="ubicacionEmpresa" class="form-control" readonly />
                             </div>
 
                             <div class="col-md-6 form-group mb-3">
@@ -161,7 +161,7 @@
 
             <!-- FOOTER -->
             <div class="modal-footer px-4">
-                <button id="btnGuardarVacante" class="btn CerrarModal">Guardar y Publicar</button>
+                <button id="btnGuardarVacante" type="submit" form="formCrearVacante" class="btn CerrarModal">Guardar y Publicar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
             </div>
         </div>
@@ -205,7 +205,7 @@
 
                             <div class="col-md-6 form-group mb-3">
                                 <label>Lugar / Ubicación <span class="text-danger">*</span></label>
-                                <input type="text" id="edit-Ubicacion" name="Ubicacion" class="form-control" placeholder="Ejemplo: Cartago, La Lima" required />
+                                <input type="text" id="edit-Ubicacion" class="form-control" readonly />
                             </div>
 
                             <div class="col-md-6 form-group mb-3">
@@ -407,6 +407,7 @@
 @section Scripts {
     <script>
 $(function () {
+    // --- Inicializar DataTable ---
     var tabla = $('#miTabla').DataTable({
         responsive: true,
         ajax: {
@@ -427,61 +428,92 @@ $(function () {
             {
                 data: 'EstadoNombre',
                 render: function (data) {
-                    if (data === 'Asignada') {
-                        return `<span class="badge badge-asignada">Asignada</span>`;
-                    } else {
-                        return `<span class="badge badge-no-asignada">No Asignada</span>`;
-                    }
+                    return data === 'Asignada'
+                        ? `<span class="badge badge-asignada">Asignada</span>`
+                        : `<span class="badge badge-no-asignada">No Asignada</span>`;
                 }
             },
             {
                 data: 'IdVacante',
                 orderable: false,
-                render: function (data, type, row) {
+                render: function (data) {
                     return `
-                        <button class="btn bg-transparent text-decoration-none btn-asignar" data-id="${data}" title="Asignar" style="color: #2d594d">
-                            <i class="fas fa-user-plus"></i>
-                        </button>
-                        <button class="btn bg-transparent text-decoration-none btn-visualizar" data-id="${data}" title="Visualizar" style="color: #2d594d">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn bg-transparent text-decoration-none btn-editar" data-id="${data}" title="Editar" style="color: #2d594d">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                        <button class="btn bg-transparent text-decoration-none btn-eliminar" data-id="${data}" title="Eliminar" style="color: #2d594d">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <button class="btn bg-transparent btn-asignar" data-id="${data}" title="Asignar" style="color:#2d594d"><i class="fas fa-user-plus"></i></button>
+                        <button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d"><i class="fas fa-eye"></i></button>
+                        <button class="btn bg-transparent btn-editar" data-id="${data}" title="Editar" style="color:#2d594d"><i class="fas fa-sync-alt"></i></button>
+                        <button class="btn bg-transparent btn-eliminar" data-id="${data}" title="Eliminar" style="color:#2d594d"><i class="fas fa-trash"></i></button>
                     `;
                 }
             }
         ]
     });
 
-    // filtros
+    // --- Filtros ---
     $('#filtroPractica, #filtroEspecialidad, #filtroModalidad').on('change', function () {
         tabla.ajax.reload();
     });
 
-    // Guardar nueva vacante
-    $('#btnGuardarVacante').on('click', function () {
+    // --- Crear vacante ---
+    $('#btnGuardarVacante').on('click', function (e) {
+        e.preventDefault();
         var $form = $('#formCrearVacante');
+
         if (!$form[0].checkValidity()) {
             $form[0].reportValidity();
             return;
         }
-        $.post('@Url.Action("Crear", "Practicas")', $form.serialize(), function (res) {
-            if (res.ok) {
-                Swal.fire('Éxito', res.message, 'success');
-                $('#modalCrearVacante').modal('hide');
-                $form[0].reset();
-                tabla.ajax.reload();
-            } else {
-                Swal.fire('Error', res.message, 'error');
+
+        $.ajax({
+            url: '@Url.Action("Crear", "Practicas")',
+            type: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            success: function (res) {
+                if (res.ok) {
+                    Swal.fire('Éxito', res.message, 'success');
+                    $('#modalCrearVacante').modal('hide');
+                    $form[0].reset();
+                    $('#ubicacionEmpresa').val('');
+                    tabla.ajax.reload();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message || 'Error en servidor' });
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Error en la petición al servidor.', 'error');
             }
         });
     });
 
-    // Abrir editar y cargar datos
+    // --- Cambiar empresa en CREAR ---
+    $('#IdEmpresa').on('change', function () {
+        var idEmpresa = $(this).val();
+        if (idEmpresa) {
+            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")', { idEmpresa: idEmpresa }, function (res) {
+                $('#ubicacionEmpresa').val(res.ok ? res.ubicacion : '');
+            }).fail(function () {
+                $('#ubicacionEmpresa').val('');
+            });
+        } else {
+            $('#ubicacionEmpresa').val('');
+        }
+    });
+
+    // --- Cambiar empresa en EDITAR ---
+    $('#edit-IdEmpresa').on('change', function () {
+        var idEmpresa = $(this).val();
+        if (idEmpresa) {
+            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")', { idEmpresa: idEmpresa }, function (res) {
+                $('#edit-Ubicacion').val(res.ok ? res.ubicacion : '');
+            }).fail(function () {
+                $('#edit-Ubicacion').val('');
+            });
+        } else {
+            $('#edit-Ubicacion').val('');
+        }
+    });
+
+    // --- Editar ---
     $('#miTabla').on('click', '.btn-editar', function () {
         var id = $(this).data('id');
         $.get('@Url.Action("Detalle", "Practicas")', { id: id }, function (res) {
@@ -489,7 +521,7 @@ $(function () {
                 var d = res.data;
                 $('#edit-IdVacante').val(d.IdVacante);
                 $('#edit-Nombre').val(d.Nombre);
-                $('#edit-IdEmpresa').val(d.IdEmpresa);
+                $('#edit-IdEmpresa').val(d.IdEmpresa).trigger('change');
                 $('#edit-IdEspecialidad').val(d.IdEspecialidad);
                 $('#edit-IdModalidad').val(d.IdModalidad);
                 $('#edit-IdEstado').val(d.IdEstado);
@@ -498,7 +530,7 @@ $(function () {
                 $('#edit-FechaCierre').val(d.FechaCierre ? d.FechaCierre.split('T')[0] : '');
                 $('#edit-Requerimientos').val(d.Requerimientos);
                 $('#edit-Descripcion').val(d.Descripcion);
-                $('#edit-Ubicacion').val(d.Ubicacion); // ✅ agregado
+                $('#edit-Ubicacion').val(d.Ubicacion);
                 $('#modalEditarVacante').modal('show');
             } else {
                 Swal.fire('Error', 'No se pudo cargar la vacante', 'error');
@@ -506,7 +538,6 @@ $(function () {
         });
     });
 
-    // Guardar edición
     $('#btnActualizarVacante').on('click', function () {
         var $form = $('#formEditarVacante');
         if (!$form[0].checkValidity()) {
@@ -524,7 +555,7 @@ $(function () {
         });
     });
 
-    // Eliminar
+    // --- Eliminar ---
     $('#miTabla').on('click', '.btn-eliminar', function () {
         var id = $(this).data('id');
         Swal.fire({
@@ -547,22 +578,22 @@ $(function () {
         });
     });
 
-    // Visualizar + cargar postulaciones
+    // --- Visualizar ---
     $('#miTabla').on('click', '.btn-visualizar', function () {
         var id = $(this).data('id');
         $.get('@Url.Action("Detalle", "Practicas")', { id: id }, function (res) {
             if (res.ok && res.data) {
                 var d = res.data;
                 $('#vis-Nombre').val(d.Nombre);
-                $('#vis-Empresa').val(d.EmpresaNombre);
-                $('#vis-Especialidad').val(d.EspecialidadNombre);
-                $('#vis-Modalidad').val(d.ModalidadNombre);
+                $('#vis-Empresa').val(d.IdEmpresa); // id, no nombre
+                $('#vis-Especialidad').val(d.IdEspecialidad); // id
+                $('#vis-Modalidad').val(d.IdModalidad); // id
                 $('#vis-NumCupos').val(d.NumCupos);
                 $('#vis-FechaAplicacion').val(d.FechaMaxAplicacion ? d.FechaMaxAplicacion.split('T')[0] : '');
                 $('#vis-FechaCierre').val(d.FechaCierre ? d.FechaCierre.split('T')[0] : '');
                 $('#vis-Requerimientos').val(d.Requerimientos);
                 $('#vis-Descripcion').val(d.Descripcion);
-                $('#vis-Ubicacion').val(d.Ubicacion); // ✅ agregado
+                $('#vis-Ubicacion').val(d.Ubicacion);
 
                 $('#listaPostulaciones').empty();
                 $('#mensajeSinAsignados').hide();
@@ -593,15 +624,14 @@ $(function () {
         });
     });
 
-    // Abrir modal Asignar
+    // --- Asignar ---
     $('#miTabla').on('click', '.btn-asignar', function () {
         var idVacante = $(this).data('id');
         $('#modalAsignar').data('idVacante', idVacante);
 
         $.get('@Url.Action("ObtenerEstudiantesParaAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
             if (res.ok) {
-                var tbody = $('#miTablaAsignar tbody');
-                tbody.empty();
+                var tbody = $('#miTablaAsignar tbody').empty();
                 if (res.data.length > 0) {
                     res.data.forEach(function (e) {
                         var estado = e.Asignada
@@ -614,7 +644,7 @@ $(function () {
                                 <td>${estado}</td>
                                 <td>${e.Especialidad}</td>
                                 <td class="text-center">
-                                    <button class="btn bg-transparent text-decoration-none btn-asignar-estudiante" data-id="${e.IdEstudiante}" title="Asignar" style="color: #2d594d">
+                                    <button class="btn bg-transparent btn-asignar-estudiante" data-id="${e.IdEstudiante}" title="Asignar" style="color:#2d594d">
                                         <i class="fas fa-user-plus"></i>
                                     </button>
                                 </td>
@@ -631,37 +661,36 @@ $(function () {
         });
     });
 
-    // Asignar estudiante a vacante
-    // Asignar estudiante a vacante (con confirmación)
-$('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
-    var idEstudiante = $(this).data('id');
-    var idVacante = $('#modalAsignar').data('idVacante');
+    $('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
+        var idEstudiante = $(this).data('id');
+        var idVacante = $('#modalAsignar').data('idVacante');
 
-    Swal.fire({
-        title: '¿Asignar este estudiante?',
-        text: 'El estudiante será asignado a la vacante seleccionada',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, asignar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post('@Url.Action("AsignarEstudiante", "Practicas")',
-                { idVacante: idVacante, idEstudiante: idEstudiante },
-                function (res) {
-                    if (res.ok) {
-                        Swal.fire('Éxito', res.message, 'success');
-                        $('#modalAsignar').modal('hide');
-                        $('#miTabla').DataTable().ajax.reload();
-                    } else {
-                        Swal.fire('Error', res.message, 'error');
+        Swal.fire({
+            title: '¿Asignar este estudiante?',
+            text: 'El estudiante será asignado a la vacante seleccionada',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, asignar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('@Url.Action("AsignarEstudiante", "Practicas")',
+                    { idVacante: idVacante, idEstudiante: idEstudiante },
+                    function (res) {
+                        if (res.ok) {
+                            Swal.fire('Éxito', res.message, 'success');
+                            $('#modalAsignar').modal('hide');
+                            tabla.ajax.reload();
+                        } else {
+                            Swal.fire('Error', res.message, 'error');
+                        }
                     }
-                }
-            );
-        }
+                );
+            }
+        });
     });
 });
-
     </script>
 }
+
 
 

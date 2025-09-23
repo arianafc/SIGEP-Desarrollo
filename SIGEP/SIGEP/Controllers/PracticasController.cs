@@ -427,6 +427,27 @@ namespace SIGEP.Controllers
                          }).ToList();
             }
         }
+
+        public JsonResult GetUbicacionEmpresa(int idEmpresa)
+        {
+            using (var db = new SIGEPEntities())
+            {
+                var empresa = (from e in db.EmpresasTB
+                               join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion
+                               where e.IdEmpresa == idEmpresa
+                               select new
+                               {
+                                   d.DireccionExacta
+                               }).FirstOrDefault();
+
+                if (empresa != null)
+                {
+                    return Json(new { ok = true, ubicacion = empresa.DireccionExacta }, JsonRequestBehavior.AllowGet);
+                }
+
+                return Json(new { ok = false }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }
 
