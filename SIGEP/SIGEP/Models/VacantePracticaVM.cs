@@ -25,6 +25,5 @@ namespace SIGEP.Models
         public string EspecialidadNombre { get; set; }
         public string ModalidadNombre { get; set; }
         public string EstadoNombre { get; set; }
-        public string Ubicacion { get; set; }
     }
 }

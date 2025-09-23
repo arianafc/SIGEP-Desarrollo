@@ -632,21 +632,35 @@ $(function () {
     });
 
     // Asignar estudiante a vacante
-    $('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
-        var idEstudiante = $(this).data('id');
-        var idVacante = $('#modalAsignar').data('idVacante');
-        $.post('@Url.Action("AsignarEstudiante", "Practicas")', { idVacante: idVacante, idEstudiante: idEstudiante }, function (res) {
-            if (res.ok) {
-                Swal.fire('Éxito', res.message, 'success');
-                $('#modalAsignar').modal('hide');
-                $('#miTabla').DataTable().ajax.reload();
-            } else {
-                Swal.fire('Error', res.message, 'error');
-            }
-        });
-    });
+    // Asignar estudiante a vacante (con confirmación)
+$('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
+    var idEstudiante = $(this).data('id');
+    var idVacante = $('#modalAsignar').data('idVacante');
 
+    Swal.fire({
+        title: '¿Asignar este estudiante?',
+        text: 'El estudiante será asignado a la vacante seleccionada',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, asignar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('@Url.Action("AsignarEstudiante", "Practicas")',
+                { idVacante: idVacante, idEstudiante: idEstudiante },
+                function (res) {
+                    if (res.ok) {
+                        Swal.fire('Éxito', res.message, 'success');
+                        $('#modalAsignar').modal('hide');
+                        $('#miTabla').DataTable().ajax.reload();
+                    } else {
+                        Swal.fire('Error', res.message, 'error');
+                    }
+                }
+            );
+        }
+    });
 });
+
     </script>
 }
 

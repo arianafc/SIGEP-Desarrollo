@@ -25,4 +25,5 @@ namespace SIGEP.Models
         public int EstudiantesPostulados { get; set; }
         public string Ubicacion { get; set; }
     }
+
 }

@@ -16,7 +16,6 @@ namespace SIGEP.Controllers
         [HttpGet]
         public ActionResult VacantesEstudiantes()
         {
-            // Cargar listas para los dropdowns
             ViewBag.Especialidades = ObtenerEspecialidades();
             ViewBag.Modalidades = ObtenerModalidades();
             ViewBag.Empresas = ObtenerEmpresas();
@@ -33,17 +32,27 @@ namespace SIGEP.Controllers
         {
             using (var db = new SIGEPEntities())
             {
+                // join a empresas y direcciones (left joins) + joins a estados, especialidades, modalidades
                 var query = from v in db.VacantesPracticasTB
                             join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
                             from e in je.DefaultIfEmpty()
+
+                                // join con DireccionesTB a través de e.IdDireccion
+                            join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
+                            from d in jd.DefaultIfEmpty()
+
                             join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
                             from es in jes.DefaultIfEmpty()
+
                             join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
                             from ev in jev.DefaultIfEmpty()
+
                             join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
                             from sp in jsp.DefaultIfEmpty()
+
                             join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
                             from m in jm.DefaultIfEmpty()
+
                             select new VacantePracticaDTO
                             {
                                 IdVacante = v.IdVacante,
@@ -61,7 +70,8 @@ namespace SIGEP.Controllers
                                 EspecialidadNombre = sp != null ? sp.Nombre : "",
                                 IdEstado = v.IdEstado,
                                 EstadoNombre = es != null ? es.Descripcion : "",
-                                Ubicacion = v.Ubicacion,
+                                // <-- Ubicacion viene de DireccionesTB.DireccionExacta (vía EmpresasTB.IdDireccion)
+                                Ubicacion = d != null ? d.DireccionExacta : "",
                                 EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
                             };
 
@@ -83,18 +93,27 @@ namespace SIGEP.Controllers
         // ==============================
         // CREAR VACANTE (POST)
         // ==============================
+        // Nota: no almacenamos "Ubicacion" en la tabla VacantesPracticasTB porque la BD almacena la dirección en DireccionesTB,
+        // vinculada desde EmpresasTB.IdDireccion. Si quieres permitir un "override" por vacante, habría que agregar una columna
+        // a VacantesPracticasTB (no lo hacemos aquí).
         [HttpPost]
-        public JsonResult Crear(VacantePracticaVM model)
+        public JsonResult Crear(VacanteViewModel model)
         {
-            if (model == null)
-                return Json(new { ok = false, message = "Modelo inválido" });
+            if (model == null ||
+                string.IsNullOrWhiteSpace(model.Nombre) ||
+                model.IdEmpresa <= 0 ||
+                string.IsNullOrWhiteSpace(model.Requerimientos) ||
+                model.NumCupos < 1)
+            {
+                return Json(new { ok = false, message = "Debe completar todos los campos obligatorios (Nombre, Empresa, Requisitos, Cupos >= 1)" });
+            }
 
             using (var db = new SIGEPEntities())
             using (var tx = db.Database.BeginTransaction())
             {
                 try
                 {
-                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1;
+                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1; // 1 = No Asignada (según tu catálogo)
 
                     var vacante = new VacantesPracticasTB
                     {
@@ -106,8 +125,8 @@ namespace SIGEP.Controllers
                         NumCupos = model.NumCupos,
                         FechaCierre = model.FechaCierre,
                         IdModalidad = model.IdModalidad,
-                        Descripcion = model.Descripcion,
-                        Ubicacion = model.Ubicacion
+                        Descripcion = model.Descripcion
+                        // NO asignamos Ubicacion aquí (no existe esa columna en la tabla)
                     };
 
                     db.VacantesPracticasTB.Add(vacante);
@@ -115,12 +134,11 @@ namespace SIGEP.Controllers
 
                     if (model.IdEspecialidad > 0)
                     {
-                        var esp = new EspecialidadesVacantesTB
+                        db.EspecialidadesVacantesTB.Add(new EspecialidadesVacantesTB
                         {
                             IdVacante = vacante.IdVacante,
                             IdEspecialidad = model.IdEspecialidad
-                        };
-                        db.EspecialidadesVacantesTB.Add(esp);
+                        });
                         db.SaveChanges();
                     }
 
@@ -146,16 +164,25 @@ namespace SIGEP.Controllers
                 var data = (from v in db.VacantesPracticasTB
                             join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
                             from e in je.DefaultIfEmpty()
+
+                                // join a direcciones para obtener DireccionExacta
+                            join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
+                            from d in jd.DefaultIfEmpty()
+
                             join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
                             from es in jes.DefaultIfEmpty()
+
                             join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
                             from ev in jev.DefaultIfEmpty()
+
                             join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
                             from sp in jsp.DefaultIfEmpty()
+
                             join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
                             from m in jm.DefaultIfEmpty()
+
                             where v.IdVacante == id
-                            select new VacantePracticaVM
+                            select new VacanteViewModel
                             {
                                 IdVacante = v.IdVacante,
                                 Nombre = v.Nombre,
@@ -171,8 +198,9 @@ namespace SIGEP.Controllers
                                 Requerimientos = v.Requerimientos,
                                 Descripcion = v.Descripcion,
                                 IdEstado = v.IdEstado,
-                                Ubicacion = v.Ubicacion,
-                                EstadoNombre = es != null ? es.Descripcion : ""
+                                EstadoNombre = es != null ? es.Descripcion : "",
+                                // <-- tomamos la dirección exacta desde DireccionesTB
+                                Ubicacion = d != null ? d.DireccionExacta : ""
                             }).FirstOrDefault();
 
                 return Json(new { ok = data != null, data }, JsonRequestBehavior.AllowGet);
@@ -183,10 +211,16 @@ namespace SIGEP.Controllers
         // EDITAR VACANTE (POST)
         // ==============================
         [HttpPost]
-        public JsonResult Editar(VacantePracticaVM model)
+        public JsonResult Editar(VacanteViewModel model)
         {
-            if (model == null || model.IdVacante <= 0)
-                return Json(new { ok = false, message = "Modelo inválido" });
+            if (model == null || model.IdVacante <= 0 ||
+                string.IsNullOrWhiteSpace(model.Nombre) ||
+                model.IdEmpresa <= 0 ||
+                string.IsNullOrWhiteSpace(model.Requerimientos) ||
+                model.NumCupos < 1)
+            {
+                return Json(new { ok = false, message = "Debe completar todos los campos obligatorios (Nombre, Empresa, Requisitos, Cupos >= 1)" });
+            }
 
             using (var db = new SIGEPEntities())
             using (var tx = db.Database.BeginTransaction())
@@ -206,11 +240,10 @@ namespace SIGEP.Controllers
                     vacante.FechaCierre = model.FechaCierre;
                     vacante.IdModalidad = model.IdModalidad;
                     vacante.Descripcion = model.Descripcion;
-                    vacante.Ubicacion = model.Ubicacion;
+                    // NO actualizamos Direcciones ni Ubicacion aquí — la dirección está en DireccionesTB vinculada por Empresa.IdDireccion
 
                     db.SaveChanges();
 
-                    // actualizar especialidad
                     var existentes = db.EspecialidadesVacantesTB.Where(x => x.IdVacante == vacante.IdVacante).ToList();
                     if (existentes.Any())
                         db.EspecialidadesVacantesTB.RemoveRange(existentes);
@@ -227,7 +260,7 @@ namespace SIGEP.Controllers
                     db.SaveChanges();
                     tx.Commit();
 
-                    return Json(new { ok = true, message = "Vacante actualizada correctamente" });
+                    return Json(new { ok = true, message = "Práctica actualizada correctamente" });
                 }
                 catch (Exception ex)
                 {
@@ -276,7 +309,6 @@ namespace SIGEP.Controllers
         // ==============================
         // OBTENER POSTULACIONES
         // ==============================
-        
         [HttpGet]
         public JsonResult ObtenerPostulaciones(int idVacante)
         {
@@ -300,8 +332,6 @@ namespace SIGEP.Controllers
             }
         }
 
-
-
         // ==============================
         // ASIGNAR ESTUDIANTE A VACANTE
         // ==============================
@@ -313,9 +343,7 @@ namespace SIGEP.Controllers
                 var estadoAsignado = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Asignado");
 
                 if (estadoAsignado == null)
-                {
-                    return Json(new { ok = false, message = "El estado 'Asignado' no existe en la tabla EstadoTB" }, JsonRequestBehavior.AllowGet);
-                }
+                    return Json(new { ok = false, message = "El estado 'Asignado' no existe en EstadosTB" }, JsonRequestBehavior.AllowGet);
 
                 var existente = db.PracticaEstudianteTB
                     .FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
@@ -340,8 +368,6 @@ namespace SIGEP.Controllers
                 return Json(new { ok = true, message = "Estudiante asignado correctamente." }, JsonRequestBehavior.AllowGet);
             }
         }
-
-
 
         // ==============================
         // MÉTODOS PRIVADOS PARA DROPDOWNS
@@ -403,3 +429,4 @@ namespace SIGEP.Controllers
         }
     }
 }
+
