@@ -4,8 +4,10 @@ using SIGEP.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Services.Description;
 
 namespace SIGEP.Controllers
 {
@@ -141,12 +143,15 @@ namespace SIGEP.Controllers
 
         #endregion
 
+        #region Logout
+
         [HttpGet]
         public ActionResult Logout()
         {
             return RedirectToAction("Login");
         }
 
+        #endregion
 
         [HttpGet]
 
@@ -156,21 +161,61 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-
         public ActionResult RecuperarAcceso(Autenticacion usuario)
         {
-            var cedula = "118810955";
-            if (usuario.Cedula == cedula)
+            using (var dbContext = new SIGEPEntities())
             {
-                TempData["SwalSuccess"] = "Hemos enviado un link de recuperación al correo ari*****@gmail.com";
-                return RedirectToAction("Login");
-            }
-            else
-            {
-                TempData["SwalError"] = "La cédula proporcionada no se encuentra registrada";
-                return View();
+                var result = (from u in dbContext.UsuariosTB
+                              join e in dbContext.EmailsTB on u.IdUsuario equals e.IdUsuario
+                              where u.Cedula == usuario.Cedula
+                              select new
+                              {
+                                  Usuario = u,
+                                  Correo = e.Email
+                              }).FirstOrDefault();
+
+                if (result != null)
+                {
+                    try
+                    {
+                        var Contrasenna = utilitarios.GenerarPassword();
+
+                        // Cambiar la contraseña en la BD
+                        dbContext.CambiarContrasennaSP(usuario.Cedula, Contrasenna);
+
+                        // Construcción del correo
+                        StringBuilder mensaje = new StringBuilder();
+                        mensaje.Append("Estimado " + result.Usuario.Nombre + "<br>");
+                        mensaje.Append("Se ha generado una solicitud de recuperación de contraseña a su nombre.<br><br>");
+                        mensaje.Append("Su contraseña temporal es: <b>" + Contrasenna + "</b><br><br>");
+                        mensaje.Append("Procure realizar el cambio de su contraseña en cuanto ingrese al sistema.<br>");
+                        mensaje.Append("Muchas gracias.");
+
+                        // Enviar correo
+                        if (utilitarios.EnviarCorreo(result.Correo, mensaje.ToString(), "Solicitud de acceso"))
+                        {
+                            TempData["SwalSuccess"] = "Se ha enviado un correo con su nueva contraseña. Por favor, revise su bandeja de entrada.";
+                        }
+                        else
+                        {
+                            TempData["SwalError"] = "No fue posible enviar el correo de recuperación. Intente más tarde.";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["SwalError"] = "Ocurrió un error al procesar la solicitud: " + ex.Message;
+                    }
+                }
+                else
+                {
+                    TempData["SwalError"] = "La cédula ingresada no se encuentra registrada en el sistema.";
+                }
+
+                // Siempre redirige a Login
+                return RedirectToAction("Login", "Home");
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
