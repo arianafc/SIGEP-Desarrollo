@@ -1,6 +1,6 @@
 USE SIGEP;
 
-CREATE PROCEDURE [dbo].[RegistroSP] 
+CREATE OR ALTER PROCEDURE [dbo].[RegistroSP] 
     @Nombre VARCHAR(20), 
     @Apellido1 VARCHAR(50), 
     @Apellido2 VARCHAR(50), 
@@ -87,7 +87,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE PROCEDURE [dbo].[LoginSP]
+CREATE OR ALTER PROCEDURE [dbo].[LoginSP]
     @CEDULA VARCHAR(100),
     @CONTRASENNA VARCHAR(100)
 AS
@@ -102,7 +102,7 @@ BEGIN
         U.IdRol,
         U.IdEstado,
         S.Seccion,
-        E.Nombre
+        E.Nombre AS Especialidad
     FROM dbo.UsuariosTB U 
     INNER JOIN dbo.SeccionesTB S 
     on U.IdSeccion = S.IdSeccion
@@ -114,3 +114,35 @@ BEGIN
     AND Contrasenna = CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', @CONTRASENNA), 2);
 END;
 GO
+
+-----------------------------------------------------------
+--23 DE SEPTIEMBRE -- SP PARA RECUPERAR CONTRASEÑA
+USE [SIGEP]
+GO
+
+/****** Object:  StoredProcedure [dbo].[CambiarContrasennaSP]    Script Date: 9/23/2025 11:12:03 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE OR ALTER PROCEDURE [dbo].[CambiarContrasennaSP]
+    @CEDULA VARCHAR(100),
+    @NUEVA_CONTRASENNA VARCHAR(100)
+AS
+BEGIN
+    -- Verifica si el usuario existe
+    IF NOT EXISTS (SELECT 1 FROM UsuariosTb WHERE Cedula = @CEDULA)
+    BEGIN
+        RAISERROR('El usuario no existe.', 16, 1);
+        RETURN;
+    END
+
+    -- Actualiza la contraseña encriptada
+    UPDATE UsuariosTB
+    SET Contrasenna = CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', @NUEVA_CONTRASENNA), 2)
+    WHERE Cedula = @CEDULA;
+END;
+GO
+
