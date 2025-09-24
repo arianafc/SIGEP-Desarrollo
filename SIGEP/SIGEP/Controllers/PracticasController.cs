@@ -161,10 +161,10 @@ namespace SIGEP.Controllers
                 }
             }
         }
-
         // ==============================
         // DETALLE VACANTE (GET)
         // ==============================
+      
         public JsonResult Detalle(int id)
         {
             using (var db = new SIGEPEntities())
@@ -196,6 +196,7 @@ namespace SIGEP.Controllers
                              v.Nombre,
                              v.IdEmpresa,
                              EmpresaNombre = e != null ? e.NombreEmpresa : "",
+                             NombreContacto = e != null ? e.NombreContacto : "",
                              v.Requerimientos,
                              v.FechaMaxAplicacion,
                              v.NumCupos,
@@ -203,11 +204,23 @@ namespace SIGEP.Controllers
                              v.Descripcion,
                              v.IdModalidad,
                              ModalidadNombre = m != null ? m.Descripcion : "",
-                             ev.IdEspecialidad, // 👈 lo agregamos
+                             ev.IdEspecialidad,
                              EspecialidadNombre = esp != null ? esp.Nombre : "",
                              v.IdEstado,
                              EstadoNombre = es != null ? es.Descripcion : "",
-                             Ubicacion = dir != null ? dir.DireccionExacta : ""
+                             Ubicacion = dir != null ? dir.DireccionExacta : "",
+
+                             // 🔹 Correos relacionados con la empresa
+                             Emails = db.EmailsTB
+                                 .Where(em => em.IdEmpresa == e.IdEmpresa)
+                                 .Select(em => em.Email)
+                                 .ToList(),
+
+                             // 🔹 Teléfonos relacionados con la empresa
+                             Telefonos = db.TelefonosTB
+                                 .Where(t => t.IdEmpresa == e.IdEmpresa)
+                                 .Select(t => t.Telefono)
+                                 .ToList()
                          })
                          .AsEnumerable()
                          .Select(x => new
@@ -216,6 +229,7 @@ namespace SIGEP.Controllers
                              x.Nombre,
                              x.IdEmpresa,
                              x.EmpresaNombre,
+                             x.NombreContacto,
                              x.Requerimientos,
                              FechaMaxAplicacion = x.FechaMaxAplicacion.HasValue
                                  ? x.FechaMaxAplicacion.Value.ToString("yyyy-MM-dd")
@@ -227,11 +241,13 @@ namespace SIGEP.Controllers
                              x.Descripcion,
                              x.IdModalidad,
                              x.ModalidadNombre,
-                             x.IdEspecialidad, // 👈 también aquí
+                             x.IdEspecialidad,
                              x.EspecialidadNombre,
                              x.IdEstado,
                              x.EstadoNombre,
-                             x.Ubicacion
+                             x.Ubicacion,
+                             x.Emails,
+                             x.Telefonos
                          })
                          .FirstOrDefault();
 
@@ -245,7 +261,7 @@ namespace SIGEP.Controllers
         // ==============================
         // EDITAR VACANTE (POST)
         // ==============================
-       
+
         [HttpPost]
         public JsonResult Editar(VacanteViewModel model)
         {
@@ -562,45 +578,66 @@ namespace SIGEP.Controllers
             }
         }
 
+        // ==============================
+        // OBTENER ESTUDIANTES ASIGNADOS
+        // ==============================
+        [HttpGet]
+        public JsonResult GetEstudiantesAsignados(int idVacante)
+        {
+            using (var db = new SIGEPEntities())
+            {
+                var estadoAsignado = db.EstadosTB
+                    .FirstOrDefault(e => e.Descripcion == "Asignado" || e.Descripcion == "Asignada");
 
+                if (estadoAsignado == null)
+                    return Json(new { ok = false, mensaje = "No existe estado 'Asignado' en la BD" }, JsonRequestBehavior.AllowGet);
 
-        ////HU PR5 desasignar estudiante
-        //[HttpPost]
+                var asignados = (from p in db.PracticaEstudianteTB
+                                 join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
+                                 where p.IdVacante == idVacante && p.IdEstado == estadoAsignado.IdEstado
+                                 select new
+                                 {
+                                     u.IdUsuario,
+                                     NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                                     Cedula = u.Cedula
+                                 }).ToList();
+
+                return Json(new { ok = true, data = asignados }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // ==============================
+        // DESASIGNAR ESTUDIANTE
+        // ==============================
         [HttpPost]
         public JsonResult DesasignarEstudiante(int idUsuario, int idVacante)
         {
-            try
+            using (var db = new SIGEPEntities())
             {
-                using (var db = new SIGEPEntities())
+                var practica = db.PracticaEstudianteTB
+                    .FirstOrDefault(p => p.IdUsuario == idUsuario && p.IdVacante == idVacante);
+
+                if (practica == null)
                 {
-                    var practica = db.PracticaEstudianteTB
-                        .FirstOrDefault(p => p.IdUsuario == idUsuario && p.IdVacante == idVacante);
-
-                    if (practica == null)
-                    {
-                        return Json(new { success = false, message = "No se encontró la práctica del estudiante." });
-                    }
-
-                    // Cambiar estado a "Sin práctica asignada"
-                    // Aquí asumo que tienes una tabla EstadoTB con un registro que representa ese estado
-                    var estadoSinPractica = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Sin práctica asignada");
-
-                    if (estadoSinPractica == null)
-                    {
-                        return Json(new { success = false, message = "No existe el estado 'Sin práctica asignada' en la BD." });
-                    }
-
-                    practica.IdEstado = estadoSinPractica.IdEstado;
-                    db.SaveChanges();
-
-                    return Json(new { success = true, message = "Estudiante desasignado correctamente." });
+                    return Json(new { ok = false, mensaje = "No se encontró la práctica del estudiante." }, JsonRequestBehavior.AllowGet);
                 }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Error: " + ex.Message });
+
+                var estadoSinPractica = db.EstadosTB
+                    .FirstOrDefault(e => e.Descripcion == "Sin práctica asignada");
+
+                if (estadoSinPractica == null)
+                {
+                    return Json(new { ok = false, mensaje = "No existe el estado 'Sin práctica asignada' en la BD." }, JsonRequestBehavior.AllowGet);
+                }
+
+                practica.IdEstado = estadoSinPractica.IdEstado;
+                db.SaveChanges();
+
+                return Json(new { ok = true, mensaje = "Estudiante desasignado correctamente." }, JsonRequestBehavior.AllowGet);
             }
         }
+
+
 
     }
 }

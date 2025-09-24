@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AuditoriaGlobalTB">
           <Key>
             <PropertyRef Name="IdAuditoria" />
@@ -227,6 +227,18 @@
         <EntityType Name="RolesTB">
           <Key>
             <PropertyRef Name="IdRol" />
+          </Key>
+          <Property Name="IdRol" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="2000" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="RolesTB_Backup">
+          <Key>
+            <PropertyRef Name="IdRol" />
+            <PropertyRef Name="Descripcion" />
+            <PropertyRef Name="IdEstado" />
           </Key>
           <Property Name="IdRol" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Descripcion" Type="varchar" MaxLength="2000" Nullable="false" />
@@ -857,6 +869,10 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="CambiarContrasennaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CEDULA" Type="varchar" Mode="In" />
+          <Parameter Name="NUEVA_CONTRASENNA" Type="varchar" Mode="In" />
+        </Function>
         <Function Name="LoginSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="CEDULA" Type="varchar" Mode="In" />
           <Parameter Name="CONTRASENNA" Type="varchar" Mode="In" />
@@ -901,6 +917,13 @@
           <EntitySet Name="UsuarioEspecialidadTB" EntityType="Self.UsuarioEspecialidadTB" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UsuariosTB" EntityType="Self.UsuariosTB" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="VacantesPracticasTB" EntityType="Self.VacantesPracticasTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RolesTB_Backup" EntityType="Self.RolesTB_Backup" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [RolesTB_Backup].[IdRol] AS [IdRol], 
+    [RolesTB_Backup].[Descripcion] AS [Descripcion], 
+    [RolesTB_Backup].[IdEstado] AS [IdEstado]
+    FROM [dbo].[RolesTB_Backup] AS [RolesTB_Backup]</DefiningQuery>
+          </EntitySet>
           <AssociationSet Name="FK__Auditoria__IdUsu__6A30C649" Association="Self.FK__Auditoria__IdUsu__6A30C649">
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
             <End Role="AuditoriaGlobalTB" EntitySet="AuditoriaGlobalTB" />
@@ -1090,7 +1113,8 @@
             <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="SIGEPModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1475,6 +1499,16 @@
           <NavigationProperty Name="EstadosTB" Relationship="Self.FK__VacantesP__IdEst__1332DBDC" FromRole="VacantesPracticasTB" ToRole="EstadosTB" />
           <NavigationProperty Name="ModalidadesTB" Relationship="Self.FK_VacantesPracticas_Modalidad" FromRole="VacantesPracticasTB" ToRole="ModalidadesTB" />
           <NavigationProperty Name="PracticaEstudianteTB" Relationship="Self.FK__PracticaE__IdVac__05D8E0BE" FromRole="VacantesPracticasTB" ToRole="PracticaEstudianteTB" />
+        </EntityType>
+        <EntityType Name="RolesTB_Backup">
+          <Key>
+            <PropertyRef Name="IdRol" />
+            <PropertyRef Name="Descripcion" />
+            <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdRol" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
         </EntityType>
         <Association Name="FK__Auditoria__IdUsu__6A30C649">
           <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
@@ -2069,6 +2103,7 @@
           <EntitySet Name="UsuarioEspecialidadTB" EntityType="Self.UsuarioEspecialidadTB" />
           <EntitySet Name="UsuariosTB" EntityType="Self.UsuariosTB" />
           <EntitySet Name="VacantesPracticasTB" EntityType="Self.VacantesPracticasTB" />
+          <EntitySet Name="RolesTB_Backup" EntityType="Self.RolesTB_Backup" />
           <AssociationSet Name="FK__Auditoria__IdUsu__6A30C649" Association="Self.FK__Auditoria__IdUsu__6A30C649">
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
             <End Role="AuditoriaGlobalTB" EntitySet="AuditoriaGlobalTB" />
@@ -2257,6 +2292,10 @@
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
             <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
           </AssociationSet>
+          <FunctionImport Name="CambiarContrasennaSP">
+            <Parameter Name="CEDULA" Mode="In" Type="String" />
+            <Parameter Name="NUEVA_CONTRASENNA" Mode="In" Type="String" />
+          </FunctionImport>
           <FunctionImport Name="LoginSP" ReturnType="Collection(SIGEPModel.LoginSP_Result)">
             <Parameter Name="CEDULA" Mode="In" Type="String" />
             <Parameter Name="CONTRASENNA" Mode="In" Type="String" />
@@ -2282,7 +2321,7 @@
           <Property Type="Int32" Name="IdRol" Nullable="false" />
           <Property Type="Int32" Name="IdEstado" Nullable="false" />
           <Property Type="String" Name="Seccion" Nullable="false" MaxLength="255" />
-          <Property Type="String" Name="Nombre1" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="Especialidad" Nullable="false" MaxLength="255" />
         </ComplexType>
       </Schema>
     </edmx:ConceptualModels>
@@ -2606,6 +2645,16 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="RolesTB_Backup">
+            <EntityTypeMapping TypeName="SIGEPModel.RolesTB_Backup">
+              <MappingFragment StoreEntitySet="RolesTB_Backup">
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="CambiarContrasennaSP" FunctionName="SIGEPModel.Store.CambiarContrasennaSP" />
           <FunctionImportMapping FunctionImportName="LoginSP" FunctionName="SIGEPModel.Store.LoginSP">
             <ResultMapping>
               <ComplexTypeMapping TypeName="SIGEPModel.LoginSP_Result">
@@ -2617,7 +2666,7 @@
                 <ScalarProperty Name="IdRol" ColumnName="IdRol" />
                 <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
                 <ScalarProperty Name="Seccion" ColumnName="Seccion" />
-                <ScalarProperty Name="Nombre1" ColumnName="Nombre1" />
+                <ScalarProperty Name="Especialidad" ColumnName="Especialidad" />
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>

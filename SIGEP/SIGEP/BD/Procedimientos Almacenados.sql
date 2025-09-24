@@ -1,5 +1,7 @@
 USE SIGEP;
 
+Go
+
 CREATE OR ALTER PROCEDURE [dbo].[RegistroSP] 
     @Nombre VARCHAR(20), 
     @Apellido1 VARCHAR(50), 

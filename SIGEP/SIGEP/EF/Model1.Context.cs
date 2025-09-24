@@ -55,6 +55,20 @@ namespace SIGEP.EF
         public virtual DbSet<UsuarioEspecialidadTB> UsuarioEspecialidadTB { get; set; }
         public virtual DbSet<UsuariosTB> UsuariosTB { get; set; }
         public virtual DbSet<VacantesPracticasTB> VacantesPracticasTB { get; set; }
+        public virtual DbSet<RolesTB_Backup> RolesTB_Backup { get; set; }
+    
+        public virtual int CambiarContrasennaSP(string cEDULA, string nUEVA_CONTRASENNA)
+        {
+            var cEDULAParameter = cEDULA != null ?
+                new ObjectParameter("CEDULA", cEDULA) :
+                new ObjectParameter("CEDULA", typeof(string));
+    
+            var nUEVA_CONTRASENNAParameter = nUEVA_CONTRASENNA != null ?
+                new ObjectParameter("NUEVA_CONTRASENNA", nUEVA_CONTRASENNA) :
+                new ObjectParameter("NUEVA_CONTRASENNA", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("CambiarContrasennaSP", cEDULAParameter, nUEVA_CONTRASENNAParameter);
+        }
     
         public virtual ObjectResult<LoginSP_Result> LoginSP(string cEDULA, string cONTRASENNA)
         {

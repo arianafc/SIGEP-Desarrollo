@@ -369,7 +369,8 @@
 
 <!-- MODAL ASIGNAR -->
 <div class="modal fade" id="modalAsignar" tabindex="-1" aria-labelledby="modalAsignarLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <!-- 👇 cambiamos a modal-xl para más ancho -->
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
 
             <!-- HEADER -->
@@ -383,7 +384,7 @@
                 <div class="mb-4 card rounded-5 p-3">
                     <h5 class="section-title">Seleccionar Estudiante para Asignar</h5>
 
-                    <table id="miTablaAsignar" class="display responsive nowrap w-100">
+                    <table id="miTablaAsignar" class="display nowrap w-100">
                         <thead class="table-light">
                             <tr style="text-align: center;">
                                 <th>Nombre</th>
@@ -402,6 +403,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script>
@@ -580,7 +582,7 @@ $('#IdEmpresa').on('change', function () {
         });
     });
 
-  
+
     // --- Visualizar ---
 $('#miTabla').on('click', '.btn-visualizar', function () {
     var id = $(this).data('id');
@@ -634,41 +636,57 @@ $('#miTabla').on('click', '.btn-visualizar', function () {
 
 
     // --- Asignar ---
-    $('#miTabla').on('click', '.btn-asignar', function () {
-        var idVacante = $(this).data('id');
-        $('#modalAsignar').data('idVacante', idVacante);
+  // --- Asignar ---
+$('#miTabla').on('click', '.btn-asignar', function () {
+    var idVacante = $(this).data('id');
+    $('#modalAsignar').data('idVacante', idVacante);
 
-        $.get('@Url.Action("ObtenerEstudiantesParaAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
-            if (res.ok) {
-                var tbody = $('#miTablaAsignar tbody').empty();
-                if (res.data.length > 0) {
-                    res.data.forEach(function (e) {
-                        var estado = e.Asignada
-                            ? '<span class="badge-asignada">Práctica Asignada</span>'
-                            : '<span class="badge-no-asignada">Sin Práctica Asignada</span>';
-                        tbody.append(`
-                            <tr>
-                                <td>${e.NombreCompleto}</td>
-                                <td>${e.Cedula}</td>
-                                <td>${estado}</td>
-                                <td>${e.Especialidad}</td>
-                                <td class="text-center">
-                                    <button class="btn bg-transparent btn-asignar-estudiante" data-id="${e.IdEstudiante}" title="Asignar" style="color:#2d594d">
-                                        <i class="fas fa-user-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `);
-                    });
-                } else {
-                    tbody.append('<tr><td colspan="5" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
-                }
-                $('#modalAsignar').modal('show');
+    $.get('@Url.Action("ObtenerEstudiantesParaAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
+        if (res.ok) {
+            var tbody = $('#miTablaAsignar tbody').empty();
+            if (res.data.length > 0) {
+                res.data.forEach(function (e) {
+                    var estado = e.Asignada
+                        ? '<span class="badge-asignada">Práctica Asignada</span>'
+                        : '<span class="badge-no-asignada">Sin Práctica Asignada</span>';
+                    tbody.append(`
+                        <tr>
+                            <td>${e.NombreCompleto}</td>
+                            <td>${e.Cedula}</td>
+                            <td>${estado}</td>
+                            <td>${e.Especialidad}</td>
+                            <td class="text-center">
+                                <button class="btn bg-transparent btn-asignar-estudiante" data-id="${e.IdEstudiante}" title="Asignar" style="color:#2d594d">
+                                    <i class="fas fa-user-plus"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
             } else {
-                Swal.fire('Error', res.message, 'error');
+                tbody.append('<tr><td colspan="5" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
             }
-        });
+
+            // 👇 Aquí inicializamos DataTable en el modal
+            if ($.fn.DataTable.isDataTable('#miTablaAsignar')) {
+                $('#miTablaAsignar').DataTable().clear().destroy();
+            }
+
+            $('#miTablaAsignar').DataTable({
+                responsive: true,
+                autoWidth: false,
+                scrollX: true,    // 👈 habilita scroll horizontal solo dentro de la tabla
+                pageLength: 5,
+                language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" }
+            });
+
+            $('#modalAsignar').modal('show');
+        } else {
+            Swal.fire('Error', res.message, 'error');
+        }
     });
+});
+
 
     $('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
         var idEstudiante = $(this).data('id');
