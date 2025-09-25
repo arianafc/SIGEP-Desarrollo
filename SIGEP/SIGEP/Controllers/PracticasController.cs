@@ -1,9 +1,15 @@
 ﻿using SIGEP.EF;
 using SIGEP.Models;
+using SIGEP.Services;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Web.Mvc;
 
 namespace SIGEP.Controllers
@@ -163,7 +169,7 @@ namespace SIGEP.Controllers
         // ==============================
         // DETALLE VACANTE (GET)
         // ==============================
-      
+
         public JsonResult Detalle(int id)
         {
             using (var db = new SIGEPEntities())
@@ -628,6 +634,178 @@ namespace SIGEP.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult VisualizacionPostulacion(int idVacante, int idUsuario)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities()) // Cambia por tu contexto
+                {
+                    // Obtener datos principales con el SP
+                    var datosPractica = dbContext.ObtenerVisualizacionPracticaSP(idVacante, idUsuario).FirstOrDefault();
+
+                    if (datosPractica == null)
+                    {
+                        ViewBag.Error = "No se encontró información de la práctica.";
+                        return View(new VacantePracticaVM());
+                    }
+
+                    // Mapear directamente el resultado del SP al ViewModel
+                    var viewModel = new VacantePracticaVM
+                    {
+                        // Datos de la Vacante
+                        IdVacante = datosPractica.IdVacante,
+                        Nombre = datosPractica.Nombre,
+                        EmpresaNombre = datosPractica.EmpresaNombre,
+                        Requerimientos = datosPractica.Requerimientos,
+                        FechaMaxAplicacion = datosPractica.FechaMaxAplicacion,
+                        ModalidadNombre = datosPractica.ModalidadNombre,
+
+                        // Datos del Estudiante
+                        IdUsuario = datosPractica.IdUsuario,
+                        EstudianteNombre = datosPractica.EstudianteNombre,
+                        EstudianteCedula = datosPractica.EstudianteCedula,
+                        EstudianteCorreo = datosPractica.EstudianteCorreo,
+                        EstudianteEdad = datosPractica.EstudianteEdad,
+                        EstudianteEspecialidad = datosPractica.EstudianteEspecialidad,
+
+                        // Datos de Contacto
+                        ContactoEmpresaNombre = datosPractica.ContactoEmpresaNombre,
+                        ContactoEmpresaEmail = datosPractica.ContactoEmpresaEmail,
+                        ContactoEmpresaTelefono = datosPractica.ContactoEmpresaTelefono,
+
+                        // Datos de la Práctica
+                        FechaAplicacion = datosPractica.FechaAplicacion,
+                        EstadoPractica = datosPractica.EstadoPractica,
+
+                        ListaEstados = dbContext.EstadosTB
+                    .Select(e => new EstadoVM { IdEstado = e.IdEstado, Descripcion = e.Descripcion })
+                    .ToList()
+                    };
+
+                    // Obtener comentarios con el segundo SP
+                    var comentarios = dbContext.ObtenerComentariosPracticaSP(idVacante, idUsuario)
+                        .Select(c => new ComentarioVM
+                        {
+                            Id = c.Id,
+                            Fecha = c.Fecha,
+                            Usuario = c.Usuario,
+                            Comentario = c.Comentario
+                        }).ToList();
+
+                    viewModel.Comentarios = comentarios;
+
+                    return View(viewModel);
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar la información: " + ex.Message;
+                // Opcional: Registrar error como lo haces en tu proyecto
+                // Utilitarios.RegistrarError(ex, (int?)Session["idUsuario"]);
+                return View(new VacantePracticaVM());
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AgregarComentario(int idVacante, int idUsuario, string comentario)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                int idUsuarioComentario = Convert.ToInt32(Session["IdUsuario"]);
+
+                if (string.IsNullOrWhiteSpace(comentario))
+                {
+                    return Json(new { success = false, message = "El comentario no puede estar vacío" });
+                }
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var resultado = dbContext.InsertarComentarioPracticaSP(idVacante, idUsuario, comentario, idUsuarioComentario).FirstOrDefault();
+
+                    if (resultado == 1)
+                    {
+                        return Json(new { success = true, message = "Comentario agregado correctamente" });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "No se pudo agregar el comentario" });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Registrar error si tienes utilidades para ello
+                // Utilitarios.RegistrarError(ex, (int?)Session["IdUsuario"]);
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public ActionResult ActualizarEstadoPractica(int idPractica, int idEstado, string comentario)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Ejecutar SP mapeado
+                    var datosPractica = dbContext.ActualizarEstadoPracticaSP(idPractica, idEstado, comentario)
+                                                  .FirstOrDefault();
+
+                    if (datosPractica == null)
+                    {
+                        return Json(new { success = false, message = "No se encontró la práctica." });
+                    }
+
+                    // Crear ViewModel para devolver o usar en la vista
+                    var viewModel = new VacantePracticaVM
+                    {
+                        IdPractica = datosPractica.IdPractica,
+                        IdVacante = datosPractica.IdVacante,
+                        IdUsuario = datosPractica.IdUsuario,
+                        EstudianteNombre = datosPractica.EstudianteNombre,
+                        EstudianteCorreo = datosPractica.EstudianteCorreo,
+                        EstadoDescripcion = datosPractica.EstadoDescripcion,
+                        UltimoComentario = datosPractica.Comentario,
+                        FechaUltimoComentario = datosPractica.FechaComentario,
+                        ListaEstados = dbContext.EstadosTB
+                    .Select(e => new EstadoVM { IdEstado = e.IdEstado, Descripcion = e.Descripcion })
+                    .ToList()
+                    };
+
+                    // Enviar correo al estudiante
+                    if (!string.IsNullOrEmpty(viewModel.EstudianteCorreo))
+                    {
+                        string remitente = ConfigurationManager.AppSettings["CorreoRemitente"];
+                        string password = ConfigurationManager.AppSettings["CorreoPassword"];
+
+                        MailMessage mail = new MailMessage();
+                        mail.From = new MailAddress(remitente);
+                        mail.To.Add(viewModel.EstudianteCorreo);
+                        mail.Subject = "Actualización de estado de práctica";
+                        mail.Body = $"Hola {viewModel.EstudianteNombre},\n\n" +
+                                    $"Tu práctica (ID {viewModel.IdPractica}) ha cambiado al estado: {viewModel.EstadoDescripcion}.\n" +
+                                    $"Comentario: {viewModel.UltimoComentario}\n\nSaludos.";
+
+                        SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587);
+                        smtp.Credentials = new NetworkCredential(remitente, password);
+                        smtp.EnableSsl = true;
+                        smtp.Send(mail);
+                    }
+
+                    return Json(new { success = true, data = viewModel, message = "Estado actualizado y correo enviado." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
 
 

@@ -1,20 +1,24 @@
-﻿@{
+﻿@model SIGEP.Models.VacantePracticaVM
+
+
+@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Vacantes - Prácticas";
-    var rol = Session["rol"] != null ? Convert.ToInt32(Session["rol"]) : 0;
+    var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+}
+@if (rol == 2 || rol == 3)
+{
+    <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
+        Proceso de Aplicación - @(Model?.EstudianteNombre ?? "Estudiante")
+    </h2>
 }
 @if (rol == 1)
 {
     <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
-        Proceso de Aplicación - Ariana Fallas Calderón
+        Mi Práctica - @(Model?.EstudianteNombre ?? "Estudiante")
     </h2>
 }
-@if (rol == 2)
-{
-    <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
-        Mi Práctica - Ariana Fallas Calderón
-    </h2>
-}
+
 <div class="d-flex flex-wrap justify-content-between" style="gap: 2rem;">
     <!-- Columna Izquierda: Información General -->
     <div class="card p-4 shadow mb-4" style="flex: 1 1 48%;">
@@ -27,33 +31,33 @@
             <!-- Columna de Vacante -->
             <div class="col-md-6">
                 <div class="card shadow-sm p-3" style="border-radius: 12px; background-color: #F9F9F9;">
-                    @if (rol == 1 || rol == 4)
+                    @if (rol == 2 || rol == 3)
                     {
                         <h5 class="mb-3" style="color: #2D594D;"><strong>Información de Vacante</strong></h5>
                     }
-                    @if (rol == 2)
+                    @if (rol == 1)
                     {
                         <h5 class="mb-3" style="color: #2D594D;"><strong>Información del Puesto</strong></h5>
                     }
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Nombre</strong></label><br />
-                        <span>Internship IT Asset Management</span>
+                        <span>@(Model?.Nombre ?? "No disponible")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Empresa</strong></label><br />
-                        <span>Boston Scientific</span>
+                        <span>@(Model?.EmpresaNombre ?? "No disponible")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Requerimientos</strong></label><br />
-                        <span>Inglés B1, conocimientos en Active Directory</span>
+                        <span>@(Model?.Requerimientos ?? "No especificados")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Fecha de Aplicación</strong></label><br />
-                        <span>15-07-2025</span>
+                        <span>@(Model?.FechaAplicacion?.ToString("dd-MM-yyyy") ?? "No disponible")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Modalidad</strong></label><br />
-                        <span>Híbrido</span>
+                        <span>@(Model?.ModalidadNombre ?? "No especificada")</span>
                     </div>
                 </div>
             </div>
@@ -61,33 +65,33 @@
             <!-- Columna de Estudiante -->
             <div class="col-md-6">
                 <div class="card shadow-sm p-3" style="border-radius: 12px; background-color: #F9F9F9;">
-                    @if (rol == 1 || rol == 4)
+                    @if (rol == 2 || rol == 3)
                     {
                         <h5 class="mb-3" style="color: #2D594D;"><strong>Información del Estudiante</strong></h5>
                     }
-                    @if (rol == 2)
+                    @if (rol == 1)
                     {
                         <h5 class="mb-3" style="color: #2D594D;"><strong>Mi Información</strong></h5>
                     }
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Nombre</strong></label><br />
-                        <span>Ariana Fallas Calderón</span>
+                        <span>@(Model?.EstudianteNombre ?? "No disponible")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Cédula</strong></label><br />
-                        <span>123456789</span>
+                        <span>@(Model?.EstudianteCedula ?? "No disponible")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Correo</strong></label><br />
-                        <span>afallas@email.com</span>
+                        <span>@(Model?.EstudianteCorreo ?? "No disponible")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Especialidad</strong></label><br />
-                        <span>Informática Empresarial</span>
+                        <span>@(Model?.EstudianteEspecialidad ?? "No especificada")</span>
                     </div>
                     <div class="mb-2">
                         <label class="form-label text-muted"><strong>Edad</strong></label><br />
-                        <span>17 años</span>
+                        <span>@(Model?.EstudianteEdad.ToString() ?? "No disponible") años</span>
                     </div>
                 </div>
             </div>
@@ -96,28 +100,28 @@
 
 
         <hr />
-        @if (rol == 1 || rol == 4)
+        @if (rol == 2 || rol == 3)
         {
             <h3 class="section-title">Información de Contacto</h3>
         }
-        @if (rol == 2)
+        @if (rol == 1)
         {
             <h3 class="section-title">Contacto con la Empresa</h3>
         }
-        <div class="mb-2"><label style="color: #2D594D"><strong>Contacto en la empresa</strong></label><br /><span>Kimberly Rojas Sánchez</span></div>
-        <div class="mb-2"><label style="color: #2D594D"><strong>Email</strong></label><br /><span>krojas@ejemplo.com</span></div>
-        <div class="mb-2"><label style="color: #2D594D"><strong>Teléfono</strong></label><br /><span>88888888</span></div>
+        <div class="mb-2"><label style="color: #2D594D"><strong>Contacto en la empresa</strong></label><br /><span>@(Model?.ContactoEmpresaNombre ?? "No disponible")</span></div>
+        <div class="mb-2"><label style="color: #2D594D"><strong>Email</strong></label><br /><span>@(Model?.ContactoEmpresaEmail ?? "No disponible")</span></div>
+        <div class="mb-2"><label style="color: #2D594D"><strong>Teléfono</strong></label><br /><span>@(Model?.ContactoEmpresaTelefono ?? "No disponible")</span></div>
     </div>
 
     <!-- Columna Derecha: Proceso de Aplicación -->
     <div class="card p-4 shadow mb-4" style="flex: 1 1 48%;">
-        @if (rol == 1 || rol == 4)
+        @if (rol == 2 || rol == 3)
         {
             <h3 class="section-title">Proceso de Aplicación</h3>
             <h4 style="color: #2D594D; font-weight: 600;">Comentarios del Proceso</h4>
             <hr />
         }
-        @if (rol == 2)
+        @if (rol == 1)
         {
             <h3 class="section-title">Proceso de la Práctica</h3>
             <h4 style="color: #2D594D; font-weight: 600;">Comentarios de la Práctica</h4>
@@ -127,31 +131,35 @@
         <!-- Comentarios -->
         <div id="comentariosAnteriores">
             <ul class="list-unstyled">
-                <li>
-                    <strong>03/08/2025 - Ariana Fallas:</strong><br />
-                    Enviada documentación al correo de Kimberly.
-                </li>
-                <li>
-                    <strong>01/08/2025 - Admin:</strong><br />
-                    Se notificó a la estudiante sobre entrevista.
-                </li>
-                <li>
-                    <strong>30/07/2025 - Kimberly Rojas:</strong><br />
-                    La vacante aún está abierta, pero se evaluará el perfil.
-                </li>
+                @if (Model?.Comentarios != null && Model.Comentarios.Any())
+                {
+                    foreach (var comentario in Model.Comentarios)
+                    {
+                        <li>
+                            <strong>@comentario.Fecha.ToString("dd/MM/yyyy") - @comentario.Usuario:</strong><br />
+                            @comentario.Comentario
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li>No hay comentarios disponibles.</li>
+                }
             </ul>
         </div>
 
         <!-- Estado -->
         <div class="mt-4">
             <h4 style="color: #2D594D; font-weight: 600;">Estado Actual</h4>
-            @if (rol == 1 || rol == 4)
+            @if (rol == 2 || rol == 3)
             {
-                <span class="badge badge-asignada">En Progreso</span>
+                <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
+
             }
-            @if (rol == 2)
+            @if (rol == 1)
             {
-                <span class="badge badge-asignada">Asignada</span>
+                <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
+
             }
         </div>
 
@@ -163,7 +171,7 @@
                         Agregar Comentario
                     </button>
                 </div>
-                @if (rol == 1 || rol == 4)
+                @if (rol == 2 || rol == 3)
                 {
                     <div class="col-md-6">
                         <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalActualizarEstado">
@@ -173,8 +181,9 @@
                 }
             </div>
         </div>
+
         <!-- evaluaciones -->
-        @if (rol == 2)
+        @if (rol == 2 || rol == 3)
         {
             <div class="mt-4">
                 <h4 style="color: #2D594D; font-weight: 600;">Evaluaciones</h4>
@@ -185,34 +194,31 @@
         }
 
         <!--MODAL PARA ACTUALIZAR ESTADO-->
-        <div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-labelledby="modalCrearVacanteLabel" aria-hidden="true">
+        <div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-labelledby="modalActualizarEstadoLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-
-                    <!-- HEADER -->
                     <div class="modal-header" style="background-color: #2D594D; color: white;">
-                        <h5 class="modal-title">Nueva Vacante para Práctica</h5>
+                        <h5 class="modal-title">Actualizar Estado</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-
                     <div class="modal-body px-4">
-
-
                         <form id="formActualizarEstado">
+                            <!-- Hidden con IdPractica -->
+                            @Html.Hidden("idPractica", Model?.IdPractica)
+
                             <div class="mb-3">
                                 <label for="nuevoEstado" class="form-label" style="font-size: 14px">Nuevo Estado</label>
                                 <select id="nuevoEstado" name="nuevoEstado" style="font-size: 14px" class="form-select" required>
                                     <option value="">Seleccione un estado</option>
-                                    <option value="En progreso">En progreso</option>
-                                    <option value="Completado">Aceptado</option>
-                                    <option value="Rechazado">Rechazado</option>
-                                    <option value="Cancelado">Cancelado</option>
-                                    <option value="Asignado">Asignado</option>
+                                    @foreach (var estado in Model.ListaEstados)
+                                    {
+                                        <option value="@estado.IdEstado">@estado.Descripcion</option>
+                                    }
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="comentarioEstado" class="form-label">Comentario</label>
-                                <textarea id="comentarioEstado" name="comentarioEstado" class="form-control" rows="4" placeholder="Agrega un comentario sobre esta actualización..."></textarea>
+                                <textarea id="comentarioEstado" name="comentarioEstado" class="form-control" rows="4" placeholder="Agrega un comentario sobre esta actualización..." required></textarea>
                             </div>
                             <div class="text-end">
                                 <button type="submit" class="btn-verde-personalizado" id="BtnActualizarEstado">Actualizar</button>
@@ -223,21 +229,18 @@
             </div>
         </div>
 
+
         <div class="modal fade" id="modalAgregarComentario" tabindex="-1" aria-labelledby="modalCrearVacanteLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-
-                    <!-- HEADER -->
                     <div class="modal-header" style="background-color: #2D594D; color: white;">
                         <h5 class="modal-title">Comentarios</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-
                     <div class="modal-body px-4">
-
-
                         <form id="formAgregarComentario">
-
+                            @Html.Hidden("idVacante", Model?.IdVacante)
+                            @Html.Hidden("idUsuario", Model?.IdUsuario)
                             <div class="mb-3">
                                 <label for="comentarioEstado" class="form-label">Comentario</label>
                                 <textarea id="ComentarioProceso" name="comentarioEstado" class="form-control" rows="4" placeholder="Agrega un comentario sobre el proceso de postulación.."></textarea>
@@ -254,72 +257,6 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $("#BtnActualizarEstado").on("click", function (event) {
-
-                let comentarioInput = $("#comentarioEstado");
-
-                event.preventDefault();
-
-                let comentario = comentarioInput.val().trim();
-
-                if (comentario === "") {
-
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Comentario requerido",
-                        text: "Debes escribir un comentario antes de actualizar el estado.",
-                        confirmButtonColor: "#2D594D"
-                    });
-
-                    comentarioInput.focus();
-                    return;
-                } else {
-
-                    Swal.fire({
-                        icon: "success",
-                        title: "Proceso actualizado",
-                        text: "Proceso de aplicación actualizado correctamente.",
-                        confirmButtonColor: "#2D594D"
-                    }).then(() => {
-                         window.location.href = '@Url.Action("VisualizacionPostulacion", "Practicas")';
-                    });
-                }
-            });
-
-             $("#BtnAgregarComentario").on("click", function (event) {
-
-     let comentarioInput = $("#ComentarioProceso");
-
-     event.preventDefault();
-
-     let comentario = comentarioInput.val().trim();
-
-     if (comentario === "") {
-
-         Swal.fire({
-             icon: "warning",
-             title: "Comentario requerido",
-             text: "Debes escribir un comentario antes de continuar.",
-             confirmButtonColor: "#2D594D"
-         });
-
-         comentarioInput.focus();
-         return;
-     } else {
-
-         Swal.fire({
-             icon: "success",
-             title: "Comentario",
-             text: "Comentario agregado correctamente.",
-             confirmButtonColor: "#2D594D"
-         }).then(() => {
-              window.location.href = '@Url.Action("VisualizacionPostulacion", "Practicas")';
-         });
-     }
- });
-        });
-    </script>
+@section scripts {
+    <script src="~/Scripts/Practicas/ScriptPracticas.js"></script>
 }
