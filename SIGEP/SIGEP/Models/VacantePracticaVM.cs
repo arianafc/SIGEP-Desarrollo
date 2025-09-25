@@ -17,6 +17,7 @@ namespace SIGEP.Models
         public DateTime? FechaCierre { get; set; }
         public int IdModalidad { get; set; }
         public string Descripcion { get; set; }
+        public string Tipo { get; set; }
 
         // Campo extra para la relación many-to-many
         public int IdEspecialidad { get; set; }
@@ -25,6 +26,31 @@ namespace SIGEP.Models
         public string EspecialidadNombre { get; set; }
         public string ModalidadNombre { get; set; }
         public string EstadoNombre { get; set; }
-        public string Ubicacion { get; set; }
+
+        // Información del Estudiante (Usuario)
+        public int IdUsuario { get; set; }
+        public string EstudianteNombre { get; set; }
+        public string EstudianteCedula { get; set; }
+        public string EstudianteCorreo { get; set; }
+        public int EstudianteEdad { get; set; }
+        public string EstudianteEspecialidad { get; set; }
+
+        // Información de Contacto de la Empresa
+        public string ContactoEmpresaNombre { get; set; }
+        public string ContactoEmpresaEmail { get; set; }
+        public string ContactoEmpresaTelefono { get; set; }
+
+        // Información de la Postulación/Práctica
+        public DateTime? FechaAplicacion { get; set; }
+        public string EstadoPractica { get; set; }
+        public List<ComentarioVM> Comentarios { get; set; } = new List<ComentarioVM>();
+    }
+
+    public class ComentarioVM
+    {
+        public int Id { get; set; }
+        public DateTime Fecha { get; set; }
+        public string Usuario { get; set; }
+        public string Comentario { get; set; }
     }
 }

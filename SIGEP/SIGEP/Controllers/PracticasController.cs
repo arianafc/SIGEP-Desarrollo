@@ -61,7 +61,6 @@ namespace SIGEP.Controllers
                                 EspecialidadNombre = sp != null ? sp.Nombre : "",
                                 IdEstado = v.IdEstado,
                                 EstadoNombre = es != null ? es.Descripcion : "",
-                                Ubicacion = v.Ubicacion,
                                 EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
                             };
 
@@ -107,7 +106,6 @@ namespace SIGEP.Controllers
                         FechaCierre = model.FechaCierre,
                         IdModalidad = model.IdModalidad,
                         Descripcion = model.Descripcion,
-                        Ubicacion = model.Ubicacion
                     };
 
                     db.VacantesPracticasTB.Add(vacante);
@@ -171,7 +169,6 @@ namespace SIGEP.Controllers
                                 Requerimientos = v.Requerimientos,
                                 Descripcion = v.Descripcion,
                                 IdEstado = v.IdEstado,
-                                Ubicacion = v.Ubicacion,
                                 EstadoNombre = es != null ? es.Descripcion : ""
                             }).FirstOrDefault();
 
@@ -206,7 +203,6 @@ namespace SIGEP.Controllers
                     vacante.FechaCierre = model.FechaCierre;
                     vacante.IdModalidad = model.IdModalidad;
                     vacante.Descripcion = model.Descripcion;
-                    vacante.Ubicacion = model.Ubicacion;
 
                     db.SaveChanges();
 
@@ -276,7 +272,7 @@ namespace SIGEP.Controllers
         // ==============================
         // OBTENER POSTULACIONES
         // ==============================
-        
+
         [HttpGet]
         public JsonResult ObtenerPostulaciones(int idVacante)
         {
@@ -401,5 +397,169 @@ namespace SIGEP.Controllers
                          }).ToList();
             }
         }
+
+
+
+        [HttpGet]
+        public ActionResult VisualizacionPostulacion()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult VisualizacionPostulacion(int idVacante, int idUsuario)
+        {
+            using (var db = new SIGEPEntities())
+            {
+                try
+                {
+                    // Obtener la información completa usando Entity Framework con los nombres correctos de la BD
+                    var datosVisualizacion = (from v in db.VacantesPracticasTB
+                                              join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa
+                                              join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into modalidadGroup
+                                              from modalidad in modalidadGroup.DefaultIfEmpty()
+                                              join est in db.EstadosTB on v.IdEstado equals est.IdEstado
+                                              join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante
+                                              join esp in db.EspecialidadesTB on ev.IdEspecialidad equals esp.IdEspecialidad
+                                              join p in db.PracticaEstudianteTB on new { v.IdVacante, IdUsuario = idUsuario } equals new { p.IdVacante, p.IdUsuario }
+                                              join usuario in db.UsuariosTB on p.IdUsuario equals usuario.IdUsuario
+                                              join ue in db.UsuarioEspecialidadTB on usuario.IdUsuario equals ue.IdUsuario
+                                              join espEst in db.EspecialidadesTB on ue.IdEspecialidad equals espEst.IdEspecialidad
+                                              join estPractica in db.EstadosTB on p.IdEstado equals estPractica.IdEstado
+                                              where v.IdVacante == idVacante && ue.IdEstado == 1 // Solo especialidades activas
+                                              select new
+                                              {
+                                                  // Información de la Vacante
+                                                  v.IdVacante,
+                                                  v.Nombre,
+                                                  v.IdEmpresa,
+                                                  EmpresaNombre = e.NombreEmpresa,
+                                                  v.Requerimientos,
+                                                  v.FechaMaxAplicacion,
+                                                  v.Modalidad,
+                                                  ModalidadNombre = modalidad != null ? modalidad.Descripcion : v.Modalidad,
+                                                  EstadoNombre = est.Descripcion,
+                                                  EspecialidadNombre = esp.Nombre,
+                                                  v.Tipo,
+
+                                                  // Información del Usuario/Estudiante
+                                                  usuario.IdUsuario,
+                                                  usuario.Cedula,
+                                                  usuario.Nombre,
+                                                  usuario.Apellido1,
+                                                  usuario.Apellido2,
+                                                  usuario.FechaNacimiento,
+                                                  EstudianteEspecialidad = espEst.Nombre,
+
+                                                  // Información de Contacto de la Empresa
+                                                  ContactoEmpresa = e.NombreContacto,
+
+                                                  // Información de la Práctica
+                                                  p.FechaAplicacion,
+                                                  EstadoPractica = estPractica.Descripcion
+                                              }).FirstOrDefault();
+
+                    if (datosVisualizacion == null)
+                    {
+                        return HttpNotFound("No se encontró la información solicitada.");
+                    }
+
+                    // Calcular edad
+                    var edad = DateTime.Now.Year - datosVisualizacion.FechaNacimiento.Year;
+                    if (DateTime.Now.DayOfYear < datosVisualizacion.FechaNacimiento.DayOfYear)
+                        edad--;
+
+                    // Obtener email del usuario
+                    var emailUsuario = db.EmailsTB
+                        .Where(e => e.IdUsuario == datosVisualizacion.IdUsuario)
+                        .Select(e => e.Email)
+                        .FirstOrDefault();
+
+                    // Obtener teléfono del usuario
+                    var telefonoUsuario = db.TelefonosTB
+                        .Where(t => t.IdUsuario == datosVisualizacion.IdUsuario)
+                        .Select(t => t.Telefono)
+                        .FirstOrDefault();
+
+                    // Obtener email de la empresa
+                    var emailEmpresa = db.EmailsTB
+                        .Where(e => e.IdEmpresa == datosVisualizacion.IdEmpresa)
+                        .Select(e => e.Email)
+                        .FirstOrDefault();
+
+                    // Obtener teléfono de la empresa
+                    var telefonoEmpresa = db.TelefonosTB
+                        .Where(t => t.IdEmpresa == datosVisualizacion.IdEmpresa)
+                        .Select(t => t.Telefono)
+                        .FirstOrDefault();
+
+                    // Crear el ViewModel
+                    var viewModel = new VacantePracticaVM
+                    {
+                        // Información de la Vacante
+                        IdVacante = datosVisualizacion.IdVacante,
+                        Nombre = datosVisualizacion.Nombre,
+                        IdEmpresa = datosVisualizacion.IdEmpresa,
+                        EmpresaNombre = datosVisualizacion.EmpresaNombre,
+                        Requerimientos = datosVisualizacion.Requerimientos,
+                        FechaMaxAplicacion = datosVisualizacion.FechaMaxAplicacion,
+                        ModalidadNombre = datosVisualizacion.ModalidadNombre,
+                        EstadoNombre = datosVisualizacion.EstadoNombre,
+                        EspecialidadNombre = datosVisualizacion.EspecialidadNombre,
+                        Tipo = datosVisualizacion.Tipo,
+
+                        // Información del Estudiante
+                        IdUsuario = datosVisualizacion.IdUsuario,
+                        EstudianteNombre = $"{datosVisualizacion.Nombre} {datosVisualizacion.Apellido1} {datosVisualizacion.Apellido2}",
+                        EstudianteCedula = datosVisualizacion.Cedula,
+                        EstudianteCorreo = emailUsuario,
+                        EstudianteEdad = edad,
+                        EstudianteEspecialidad = datosVisualizacion.EstudianteEspecialidad,
+
+                        // Información de Contacto
+                        ContactoEmpresaNombre = datosVisualizacion.ContactoEmpresa,
+                        ContactoEmpresaEmail = emailEmpresa,
+                        ContactoEmpresaTelefono = telefonoEmpresa,
+
+                        // Información de la Práctica
+                        FechaAplicacion = datosVisualizacion.FechaAplicacion,
+                        EstadoPractica = datosVisualizacion.EstadoPractica
+                    };
+
+                    // Obtener los comentarios de la práctica
+                    var idPractica = db.PracticaEstudianteTB
+                        .Where(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario)
+                        .Select(p => p.IdPractica)
+                        .FirstOrDefault();
+
+                    if (idPractica > 0)
+                    {
+                        var comentarios = (from c in db.ComentariosPracticaTB
+                                           join u in db.UsuariosTB on c.IdUsuario equals u.IdUsuario
+                                           where c.IdPractica == idPractica
+                                           orderby c.Fecha descending
+                                           select new ComentarioVM
+                                           {
+                                               Id = c.IdComentario,
+                                               Fecha = c.Fecha,
+                                               Usuario = $"{u.Nombre} {u.Apellido1}",
+                                               Comentario = c.Comentario
+                                           }).ToList();
+
+                        viewModel.Comentarios = comentarios;
+                    }
+
+                    return View(viewModel);
+                }
+                catch (Exception ex)
+                {
+                    // Log del error
+                    // Logger.Error("Error en VisualizacionPostulacion", ex);
+                    ViewBag.Error = "Ha ocurrido un error al cargar la información.";
+                    return View("Error");
+                }
+            }
+        }
+
     }
 }
