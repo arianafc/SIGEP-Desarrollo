@@ -383,12 +383,21 @@ $(function () {
                     ? '<span class="badge bg-success">Práctica Asignada</span>'
                     : '<span class="badge bg-secondary">Sin Práctica Asignada</span>';
 
-                var btn = `
-                    <button class="btn bg-transparent btn-asignar-estudiante"
-                        data-idusuario="${e.IdUsuario}"
-                        style="color:#2d594d">
-                        <i class="fas fa-user-plus"></i>
-                    </button>`;
+                // Aquí decides el botón según el estado
+                var btn;
+                if (e.EstadoPractica === "Práctica Asignada") {
+                    btn = `<button class="btn bg-transparent btn-desasignar-estudiante"
+                     data-idusuario="${e.IdUsuario}"
+                     style="color:darkred">
+                     <i class="fas fa-user-minus"></i>
+               </button>`;
+                } else {
+                    btn = `<button class="btn bg-transparent btn-asignar-estudiante"
+                     data-idusuario="${e.IdUsuario}"
+                     style="color:#2d594d">
+                     <i class="fas fa-user-plus"></i>
+               </button>`;
+                }
 
                 tablaAsignar.row.add([
                     escapeHtml(e.NombreCompleto),
@@ -426,5 +435,38 @@ $(function () {
     });
 
 }); // fin $(function)
+
+        // -------------------------
+// Desasignar estudiante desde el modal ASIGNAR
+// -------------------------
+$(document).on('click', '.btn-desasignar-estudiante', function () {
+    var idUsuario = $(this).data('idusuario');
+    var idVacante = $('#modalAsignarVacante').data('idvacante');
+
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'El estudiante quedará sin práctica asignada.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, desasignar',
+        cancelButtonText: 'Cancelar'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            $.post('@Url.Action("DesasignarEstudiante", "Practicas")',
+                { idUsuario: idUsuario, idVacante: idVacante },
+                function (resp) {
+                    if (resp.ok) {
+                        Swal.fire('Éxito', resp.mensaje, 'success');
+                        // refrescamos la tabla del modal
+                        $('.btn-asignar[data-id="' + idVacante + '"]').trigger('click');
+                        filtrarVacantes();
+                    } else {
+                        Swal.fire('Error', resp.mensaje, 'error');
+                    }
+                });
+        }
+    });
+});
+
     </script>
 }

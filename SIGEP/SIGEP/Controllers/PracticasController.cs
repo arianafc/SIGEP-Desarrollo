@@ -390,7 +390,7 @@ namespace SIGEP.Controllers
         // OBTENER ESTUDIANTES DISPONIBLES PARA ASIGNAR (AJAX usado por modal asignar)
         // ==============================
         [HttpGet]
-        public JsonResult ObtenerEstudiantesParaAsignar(int idVacante)
+        public JsonResult ObtenerEstudiantesAsignar(int idVacante)
         {
             using (var db = new SIGEPEntities())
             {
@@ -426,11 +426,10 @@ namespace SIGEP.Controllers
 
 
         // ==============================
-        // ASIGNAR ESTUDIANTE A VACANTE (POST)
+        // ASIGNAR ESTUDIANTE A VACANTE 
         // ==============================
-        // Nombre antiguo: Asignar (seguimos manteniéndolo)
         [HttpPost]
-        public JsonResult Asignar(int idVacante, int idUsuario)
+        public JsonResult AsignarEstudiante(int idVacante, int idUsuario)
         {
             using (var db = new SIGEPEntities())
             {
@@ -460,12 +459,64 @@ namespace SIGEP.Controllers
             }
         }
 
-        // Alias con el nombre que tu JS podría estar usando: AsignarEstudiante
-        [HttpPost]
-        public JsonResult AsignarEstudiante(int idVacante, int idEstudiante)
+
+        // ==============================
+        // OBTENER ESTUDIANTES ASIGNADOS
+        // ==============================
+        [HttpGet]
+        public JsonResult GetEstudiantesAsignados(int idVacante)
         {
-            // solo un wrapper para evitar que JS y controlador se desincronicen
-            return Asignar(idVacante, idEstudiante);
+            using (var db = new SIGEPEntities())
+            {
+                var estadoAsignado = db.EstadosTB
+                    .FirstOrDefault(e => e.Descripcion == "Asignado" || e.Descripcion == "Asignada");
+
+                if (estadoAsignado == null)
+                    return Json(new { ok = false, mensaje = "No existe estado 'Asignado' en la BD" }, JsonRequestBehavior.AllowGet);
+
+                var asignados = (from p in db.PracticaEstudianteTB
+                                 join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
+                                 where p.IdVacante == idVacante && p.IdEstado == estadoAsignado.IdEstado
+                                 select new
+                                 {
+                                     u.IdUsuario,
+                                     NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                                     Cedula = u.Cedula
+                                 }).ToList();
+
+                return Json(new { ok = true, data = asignados }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // ==============================
+        // DESASIGNAR ESTUDIANTE
+        // ==============================
+        [HttpPost]
+        public JsonResult DesasignarEstudiante(int idUsuario, int idVacante)
+        {
+            using (var db = new SIGEPEntities())
+            {
+                var practica = db.PracticaEstudianteTB
+                    .FirstOrDefault(p => p.IdUsuario == idUsuario && p.IdVacante == idVacante);
+
+                if (practica == null)
+                {
+                    return Json(new { ok = false, mensaje = "No se encontró la práctica del estudiante." }, JsonRequestBehavior.AllowGet);
+                }
+
+                var estadoSinPractica = db.EstadosTB
+                    .FirstOrDefault(e => e.Descripcion == "Sin práctica asignada");
+
+                if (estadoSinPractica == null)
+                {
+                    return Json(new { ok = false, mensaje = "No existe el estado 'Sin práctica asignada' en la BD." }, JsonRequestBehavior.AllowGet);
+                }
+
+                practica.IdEstado = estadoSinPractica.IdEstado;
+                db.SaveChanges();
+
+                return Json(new { ok = true, mensaje = "Estudiante desasignado correctamente." }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         // ==============================
@@ -578,64 +629,6 @@ namespace SIGEP.Controllers
             }
         }
 
-        // ==============================
-        // OBTENER ESTUDIANTES ASIGNADOS
-        // ==============================
-        [HttpGet]
-        public JsonResult GetEstudiantesAsignados(int idVacante)
-        {
-            using (var db = new SIGEPEntities())
-            {
-                var estadoAsignado = db.EstadosTB
-                    .FirstOrDefault(e => e.Descripcion == "Asignado" || e.Descripcion == "Asignada");
-
-                if (estadoAsignado == null)
-                    return Json(new { ok = false, mensaje = "No existe estado 'Asignado' en la BD" }, JsonRequestBehavior.AllowGet);
-
-                var asignados = (from p in db.PracticaEstudianteTB
-                                 join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
-                                 where p.IdVacante == idVacante && p.IdEstado == estadoAsignado.IdEstado
-                                 select new
-                                 {
-                                     u.IdUsuario,
-                                     NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
-                                     Cedula = u.Cedula
-                                 }).ToList();
-
-                return Json(new { ok = true, data = asignados }, JsonRequestBehavior.AllowGet);
-            }
-        }
-
-        // ==============================
-        // DESASIGNAR ESTUDIANTE
-        // ==============================
-        [HttpPost]
-        public JsonResult DesasignarEstudiante(int idUsuario, int idVacante)
-        {
-            using (var db = new SIGEPEntities())
-            {
-                var practica = db.PracticaEstudianteTB
-                    .FirstOrDefault(p => p.IdUsuario == idUsuario && p.IdVacante == idVacante);
-
-                if (practica == null)
-                {
-                    return Json(new { ok = false, mensaje = "No se encontró la práctica del estudiante." }, JsonRequestBehavior.AllowGet);
-                }
-
-                var estadoSinPractica = db.EstadosTB
-                    .FirstOrDefault(e => e.Descripcion == "Sin práctica asignada");
-
-                if (estadoSinPractica == null)
-                {
-                    return Json(new { ok = false, mensaje = "No existe el estado 'Sin práctica asignada' en la BD." }, JsonRequestBehavior.AllowGet);
-                }
-
-                practica.IdEstado = estadoSinPractica.IdEstado;
-                db.SaveChanges();
-
-                return Json(new { ok = true, mensaje = "Estudiante desasignado correctamente." }, JsonRequestBehavior.AllowGet);
-            }
-        }
 
 
 
