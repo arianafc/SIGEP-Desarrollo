@@ -25,6 +25,7 @@ namespace SIGEP.EF
         public int IdDireccion { get; set; }
         public string DireccionExacta { get; set; }
         public int IdEstado { get; set; }
+        public int IdDistrito { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<BolsaEmpleoTB> BolsaEmpleoTB { get; set; }
@@ -33,5 +34,6 @@ namespace SIGEP.EF
         public virtual ICollection<EmpresasTB> EmpresasTB { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UsuariosTB> UsuariosTB { get; set; }
+        public virtual DistritosTB DistritosTB { get; set; }
     }
 }

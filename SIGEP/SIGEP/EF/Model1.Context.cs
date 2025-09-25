@@ -12,6 +12,8 @@ namespace SIGEP.EF
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
+    using System.Data.Entity.Core.Objects;
+    using System.Linq;
     
     public partial class SIGEPEntities : DbContext
     {
@@ -53,5 +55,73 @@ namespace SIGEP.EF
         public virtual DbSet<UsuarioEspecialidadTB> UsuarioEspecialidadTB { get; set; }
         public virtual DbSet<UsuariosTB> UsuariosTB { get; set; }
         public virtual DbSet<VacantesPracticasTB> VacantesPracticasTB { get; set; }
+        public virtual DbSet<RolesTB_Backup> RolesTB_Backup { get; set; }
+    
+        public virtual int CambiarContrasennaSP(string cEDULA, string nUEVA_CONTRASENNA)
+        {
+            var cEDULAParameter = cEDULA != null ?
+                new ObjectParameter("CEDULA", cEDULA) :
+                new ObjectParameter("CEDULA", typeof(string));
+    
+            var nUEVA_CONTRASENNAParameter = nUEVA_CONTRASENNA != null ?
+                new ObjectParameter("NUEVA_CONTRASENNA", nUEVA_CONTRASENNA) :
+                new ObjectParameter("NUEVA_CONTRASENNA", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("CambiarContrasennaSP", cEDULAParameter, nUEVA_CONTRASENNAParameter);
+        }
+    
+        public virtual ObjectResult<LoginSP_Result> LoginSP(string cEDULA, string cONTRASENNA)
+        {
+            var cEDULAParameter = cEDULA != null ?
+                new ObjectParameter("CEDULA", cEDULA) :
+                new ObjectParameter("CEDULA", typeof(string));
+    
+            var cONTRASENNAParameter = cONTRASENNA != null ?
+                new ObjectParameter("CONTRASENNA", cONTRASENNA) :
+                new ObjectParameter("CONTRASENNA", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<LoginSP_Result>("LoginSP", cEDULAParameter, cONTRASENNAParameter);
+        }
+    
+        public virtual ObjectResult<Nullable<int>> RegistroSP(string nombre, string apellido1, string apellido2, string correo, Nullable<int> idEspecialidad, Nullable<System.DateTime> fechaNacimiento, Nullable<int> idSeccion, string contrasenna, string cedula)
+        {
+            var nombreParameter = nombre != null ?
+                new ObjectParameter("Nombre", nombre) :
+                new ObjectParameter("Nombre", typeof(string));
+    
+            var apellido1Parameter = apellido1 != null ?
+                new ObjectParameter("Apellido1", apellido1) :
+                new ObjectParameter("Apellido1", typeof(string));
+    
+            var apellido2Parameter = apellido2 != null ?
+                new ObjectParameter("Apellido2", apellido2) :
+                new ObjectParameter("Apellido2", typeof(string));
+    
+            var correoParameter = correo != null ?
+                new ObjectParameter("Correo", correo) :
+                new ObjectParameter("Correo", typeof(string));
+    
+            var idEspecialidadParameter = idEspecialidad.HasValue ?
+                new ObjectParameter("IdEspecialidad", idEspecialidad) :
+                new ObjectParameter("IdEspecialidad", typeof(int));
+    
+            var fechaNacimientoParameter = fechaNacimiento.HasValue ?
+                new ObjectParameter("FechaNacimiento", fechaNacimiento) :
+                new ObjectParameter("FechaNacimiento", typeof(System.DateTime));
+    
+            var idSeccionParameter = idSeccion.HasValue ?
+                new ObjectParameter("IdSeccion", idSeccion) :
+                new ObjectParameter("IdSeccion", typeof(int));
+    
+            var contrasennaParameter = contrasenna != null ?
+                new ObjectParameter("Contrasenna", contrasenna) :
+                new ObjectParameter("Contrasenna", typeof(string));
+    
+            var cedulaParameter = cedula != null ?
+                new ObjectParameter("Cedula", cedula) :
+                new ObjectParameter("Cedula", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Nullable<int>>("RegistroSP", nombreParameter, apellido1Parameter, apellido2Parameter, correoParameter, idEspecialidadParameter, fechaNacimientoParameter, idSeccionParameter, contrasennaParameter, cedulaParameter);
+        }
     }
 }

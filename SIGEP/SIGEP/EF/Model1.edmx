@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AuditoriaGlobalTB">
           <Key>
             <PropertyRef Name="IdAuditoria" />
@@ -73,6 +73,7 @@
           <Property Name="IdDireccion" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="DireccionExacta" Type="varchar" MaxLength="2000" Nullable="false" />
           <Property Name="IdEstado" Type="int" Nullable="false" />
+          <Property Name="IdDistrito" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="DistritosTB">
           <Key>
@@ -231,6 +232,18 @@
           <Property Name="Descripcion" Type="varchar" MaxLength="2000" Nullable="false" />
           <Property Name="IdEstado" Type="int" Nullable="false" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="RolesTB_Backup">
+          <Key>
+            <PropertyRef Name="IdRol" />
+            <PropertyRef Name="Descripcion" />
+            <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdRol" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="2000" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="SeccionesTB">
           <Key>
             <PropertyRef Name="IdSeccion" />
@@ -270,7 +283,7 @@
           <Property Name="Contrasenna" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="FechaNacimiento" Type="date" Nullable="false" />
           <Property Name="FechaRegistro" Type="date" Nullable="false" />
-          <Property Name="FechaEgreso" Type="date" Nullable="false" />
+          <Property Name="FechaEgreso" Type="date" />
           <Property Name="IdSeccion" Type="int" />
           <Property Name="IdDireccion" Type="int" />
           <Property Name="IdRol" Type="int" Nullable="false" />
@@ -291,7 +304,6 @@
           <Property Name="Tipo" Type="varchar" MaxLength="255" />
           <Property Name="IdEstado" Type="int" Nullable="false" />
           <Property Name="IdModalidad" Type="int" />
-          <Property Name="Ubicacion" Type="nvarchar" MaxLength="200" />
         </EntityType>
         <Association Name="FK__Auditoria__IdUsu__6A30C649">
           <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
@@ -833,6 +845,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_DireccionesTB_DistritosTB">
+          <End Role="DistritosTB" Type="Self.DistritosTB" Multiplicity="1" />
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DistritosTB">
+              <PropertyRef Name="IdDistrito" />
+            </Principal>
+            <Dependent Role="DireccionesTB">
+              <PropertyRef Name="IdDistrito" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_VacantesPracticas_Modalidad">
           <End Role="ModalidadesTB" Type="Self.ModalidadesTB" Multiplicity="0..1" />
           <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="*" />
@@ -845,6 +869,25 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="CambiarContrasennaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CEDULA" Type="varchar" Mode="In" />
+          <Parameter Name="NUEVA_CONTRASENNA" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="LoginSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CEDULA" Type="varchar" Mode="In" />
+          <Parameter Name="CONTRASENNA" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="RegistroSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Nombre" Type="varchar" Mode="In" />
+          <Parameter Name="Apellido1" Type="varchar" Mode="In" />
+          <Parameter Name="Apellido2" Type="varchar" Mode="In" />
+          <Parameter Name="Correo" Type="varchar" Mode="In" />
+          <Parameter Name="IdEspecialidad" Type="int" Mode="In" />
+          <Parameter Name="FechaNacimiento" Type="datetime" Mode="In" />
+          <Parameter Name="IdSeccion" Type="int" Mode="In" />
+          <Parameter Name="Contrasenna" Type="varchar" Mode="In" />
+          <Parameter Name="Cedula" Type="varchar" Mode="In" />
+        </Function>
         <EntityContainer Name="SIGEPModelStoreContainer">
           <EntitySet Name="AuditoriaGlobalTB" EntityType="Self.AuditoriaGlobalTB" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BolsaEmpleoTB" EntityType="Self.BolsaEmpleoTB" Schema="dbo" store:Type="Tables" />
@@ -874,6 +917,13 @@
           <EntitySet Name="UsuarioEspecialidadTB" EntityType="Self.UsuarioEspecialidadTB" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UsuariosTB" EntityType="Self.UsuariosTB" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="VacantesPracticasTB" EntityType="Self.VacantesPracticasTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RolesTB_Backup" EntityType="Self.RolesTB_Backup" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [RolesTB_Backup].[IdRol] AS [IdRol], 
+    [RolesTB_Backup].[Descripcion] AS [Descripcion], 
+    [RolesTB_Backup].[IdEstado] AS [IdEstado]
+    FROM [dbo].[RolesTB_Backup] AS [RolesTB_Backup]</DefiningQuery>
+          </EntitySet>
           <AssociationSet Name="FK__Auditoria__IdUsu__6A30C649" Association="Self.FK__Auditoria__IdUsu__6A30C649">
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
             <End Role="AuditoriaGlobalTB" EntitySet="AuditoriaGlobalTB" />
@@ -1054,12 +1104,17 @@
             <End Role="ModalidadesTB" EntitySet="ModalidadesTB" />
             <End Role="BolsaEmpleoTB" EntitySet="BolsaEmpleoTB" />
           </AssociationSet>
+          <AssociationSet Name="FK_DireccionesTB_DistritosTB" Association="Self.FK_DireccionesTB_DistritosTB">
+            <End Role="DistritosTB" EntitySet="DistritosTB" />
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+          </AssociationSet>
           <AssociationSet Name="FK_VacantesPracticas_Modalidad" Association="Self.FK_VacantesPracticas_Modalidad">
             <End Role="ModalidadesTB" EntitySet="ModalidadesTB" />
             <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="SIGEPModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -1141,10 +1196,12 @@
           <Property Name="IdDireccion" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="DireccionExacta" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <Property Name="IdDistrito" Type="Int32" Nullable="false" />
           <NavigationProperty Name="BolsaEmpleoTB" Relationship="Self.FK__BolsaEmpl__IdDir__6B24EA82" FromRole="DireccionesTB" ToRole="BolsaEmpleoTB" />
           <NavigationProperty Name="EstadosTB" Relationship="Self.FK__Direccion__IdEst__71D1E811" FromRole="DireccionesTB" ToRole="EstadosTB" />
           <NavigationProperty Name="EmpresasTB" Relationship="Self.FK__EmpresasT__IdDir__787EE5A0" FromRole="DireccionesTB" ToRole="EmpresasTB" />
           <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__UsuariosT__IdDir__0E6E26BF" FromRole="DireccionesTB" ToRole="UsuariosTB" />
+          <NavigationProperty Name="DistritosTB" Relationship="Self.FK_DireccionesTB_DistritosTB" FromRole="DireccionesTB" ToRole="DistritosTB" />
         </EntityType>
         <EntityType Name="DistritosTB">
           <Key>
@@ -1154,6 +1211,7 @@
           <Property Name="Nombre" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="IdCanton" Type="Int32" Nullable="false" />
           <NavigationProperty Name="CantonesTB" Relationship="Self.FK__Distritos__IdCan__72C60C4A" FromRole="DistritosTB" ToRole="CantonesTB" />
+          <NavigationProperty Name="DireccionesTB" Relationship="Self.FK_DireccionesTB_DistritosTB" FromRole="DistritosTB" ToRole="DireccionesTB" />
         </EntityType>
         <EntityType Name="DocumentosTB">
           <Key>
@@ -1399,7 +1457,7 @@
           <Property Name="Contrasenna" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="FechaNacimiento" Type="DateTime" Nullable="false" Precision="0" />
           <Property Name="FechaRegistro" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="FechaEgreso" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="FechaEgreso" Type="DateTime" Precision="0" />
           <Property Name="IdSeccion" Type="Int32" />
           <Property Name="IdDireccion" Type="Int32" />
           <Property Name="IdRol" Type="Int32" Nullable="false" />
@@ -1441,7 +1499,16 @@
           <NavigationProperty Name="EstadosTB" Relationship="Self.FK__VacantesP__IdEst__1332DBDC" FromRole="VacantesPracticasTB" ToRole="EstadosTB" />
           <NavigationProperty Name="ModalidadesTB" Relationship="Self.FK_VacantesPracticas_Modalidad" FromRole="VacantesPracticasTB" ToRole="ModalidadesTB" />
           <NavigationProperty Name="PracticaEstudianteTB" Relationship="Self.FK__PracticaE__IdVac__05D8E0BE" FromRole="VacantesPracticasTB" ToRole="PracticaEstudianteTB" />
-          <Property Name="Ubicacion" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="RolesTB_Backup">
+          <Key>
+            <PropertyRef Name="IdRol" />
+            <PropertyRef Name="Descripcion" />
+            <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdRol" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
         </EntityType>
         <Association Name="FK__Auditoria__IdUsu__6A30C649">
           <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
@@ -1596,6 +1663,18 @@
             </Principal>
             <Dependent Role="UsuariosTB">
               <PropertyRef Name="IdDireccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DireccionesTB_DistritosTB">
+          <End Role="DistritosTB" Type="Self.DistritosTB" Multiplicity="1" />
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DistritosTB">
+              <PropertyRef Name="IdDistrito" />
+            </Principal>
+            <Dependent Role="DireccionesTB">
+              <PropertyRef Name="IdDistrito" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2024,6 +2103,7 @@
           <EntitySet Name="UsuarioEspecialidadTB" EntityType="Self.UsuarioEspecialidadTB" />
           <EntitySet Name="UsuariosTB" EntityType="Self.UsuariosTB" />
           <EntitySet Name="VacantesPracticasTB" EntityType="Self.VacantesPracticasTB" />
+          <EntitySet Name="RolesTB_Backup" EntityType="Self.RolesTB_Backup" />
           <AssociationSet Name="FK__Auditoria__IdUsu__6A30C649" Association="Self.FK__Auditoria__IdUsu__6A30C649">
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
             <End Role="AuditoriaGlobalTB" EntitySet="AuditoriaGlobalTB" />
@@ -2075,6 +2155,10 @@
           <AssociationSet Name="FK__UsuariosT__IdDir__0E6E26BF" Association="Self.FK__UsuariosT__IdDir__0E6E26BF">
             <End Role="DireccionesTB" EntitySet="DireccionesTB" />
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DireccionesTB_DistritosTB" Association="Self.FK_DireccionesTB_DistritosTB">
+            <End Role="DistritosTB" EntitySet="DistritosTB" />
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
           </AssociationSet>
           <AssociationSet Name="FK__Documento__IdUsu__73BA3083" Association="Self.FK__Documento__IdUsu__73BA3083">
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
@@ -2208,7 +2292,37 @@
             <End Role="UsuariosTB" EntitySet="UsuariosTB" />
             <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
           </AssociationSet>
+          <FunctionImport Name="CambiarContrasennaSP">
+            <Parameter Name="CEDULA" Mode="In" Type="String" />
+            <Parameter Name="NUEVA_CONTRASENNA" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="LoginSP" ReturnType="Collection(SIGEPModel.LoginSP_Result)">
+            <Parameter Name="CEDULA" Mode="In" Type="String" />
+            <Parameter Name="CONTRASENNA" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="RegistroSP" ReturnType="Collection(Int32)">
+            <Parameter Name="Nombre" Mode="In" Type="String" />
+            <Parameter Name="Apellido1" Mode="In" Type="String" />
+            <Parameter Name="Apellido2" Mode="In" Type="String" />
+            <Parameter Name="Correo" Mode="In" Type="String" />
+            <Parameter Name="IdEspecialidad" Mode="In" Type="Int32" />
+            <Parameter Name="FechaNacimiento" Mode="In" Type="DateTime" />
+            <Parameter Name="IdSeccion" Mode="In" Type="Int32" />
+            <Parameter Name="Contrasenna" Mode="In" Type="String" />
+            <Parameter Name="Cedula" Mode="In" Type="String" />
+          </FunctionImport>
         </EntityContainer>
+        <ComplexType Name="LoginSP_Result">
+          <Property Type="Int32" Name="IdUsuario" Nullable="false" />
+          <Property Type="String" Name="Nombre" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="Apellido1" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="Apellido2" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="Cedula" Nullable="false" MaxLength="20" />
+          <Property Type="Int32" Name="IdRol" Nullable="false" />
+          <Property Type="Int32" Name="IdEstado" Nullable="false" />
+          <Property Type="String" Name="Seccion" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="Especialidad" Nullable="false" MaxLength="255" />
+        </ComplexType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2287,6 +2401,7 @@
                 <ScalarProperty Name="IdDireccion" ColumnName="IdDireccion" />
                 <ScalarProperty Name="DireccionExacta" ColumnName="DireccionExacta" />
                 <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+                <ScalarProperty Name="IdDistrito" ColumnName="IdDistrito" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2516,7 +2631,6 @@
           <EntitySetMapping Name="VacantesPracticasTB">
             <EntityTypeMapping TypeName="SIGEPModel.VacantesPracticasTB">
               <MappingFragment StoreEntitySet="VacantesPracticasTB">
-                <ScalarProperty Name="Ubicacion" ColumnName="Ubicacion" />
                 <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
                 <ScalarProperty Name="Nombre" ColumnName="Nombre" />
                 <ScalarProperty Name="IdEmpresa" ColumnName="IdEmpresa" />
@@ -2531,6 +2645,32 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="RolesTB_Backup">
+            <EntityTypeMapping TypeName="SIGEPModel.RolesTB_Backup">
+              <MappingFragment StoreEntitySet="RolesTB_Backup">
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="CambiarContrasennaSP" FunctionName="SIGEPModel.Store.CambiarContrasennaSP" />
+          <FunctionImportMapping FunctionImportName="LoginSP" FunctionName="SIGEPModel.Store.LoginSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.LoginSP_Result">
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Apellido1" ColumnName="Apellido1" />
+                <ScalarProperty Name="Apellido2" ColumnName="Apellido2" />
+                <ScalarProperty Name="Cedula" ColumnName="Cedula" />
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+                <ScalarProperty Name="Seccion" ColumnName="Seccion" />
+                <ScalarProperty Name="Especialidad" ColumnName="Especialidad" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="RegistroSP" FunctionName="SIGEPModel.Store.RegistroSP" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

@@ -1,61 +1,30 @@
 ﻿using SIGEP.EF;
 using SIGEP.Models;
+using SIGEP.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Services.Description;
 
 namespace SIGEP.Controllers
 {
     public class HomeController : Controller
     {
+
+        Utilitarios utilitarios = new Utilitarios();
         public ActionResult Index()
         {
             return View();
         }
 
-     
-        [HttpGet]
-        public ActionResult Registro()
-        {
-            try
-            {
-                using (var dbContext = new SIGEPEntities())
-                {
-                    var Datos = new Autenticacion();
-
-                    Datos.ListaEspecialidades = dbContext.EspecialidadesTB
-     .Where(e => e.IdEstado == 1)
-     .ToList();
-
-                    Datos.ListaSecciones = dbContext.SeccionesTB
-                        .Where(s => s.IdEstado == 1)
-                        .ToList();
-
-                    return View(Datos);
-                }
-            }
-            catch (Exception e)
-            {
-                TempData["SwalError"] = "Ocurrió un error al cargar el formulario de registro. Por favor, inténtelo de nuevo más tarde.";
-                return View(); 
-            }
-        }
-
-
-
-        [HttpGet]
-
-        public ActionResult Login()
-        {
-            ViewBag.Mensaje = Session["MensajeError"];
-            Session["MensajeError"] = null;
-            return View();
-        }
+        #region Login
 
         [HttpPost]
         public ActionResult Login(Autenticacion Usuario)
+
         {
             try
             {
@@ -69,8 +38,9 @@ namespace SIGEP.Controllers
                         Session["Apellido1"] = resultado.Apellido1;
                         Session["Cedula"] = resultado.Cedula;
                         Session["IdUsuario"] = resultado.IdUsuario;
+                        Session["Especialidad"] = resultado.Especialidad;
 
-                        return Json(new { success = true, message = "¡Bienvenido a SIGEP, " + resultado.Nombre + "!"});
+                        return Json(new { success = true, message = "¡Bienvenido a SIGEP, " + resultado.Nombre + "!" });
                     }
                     else
                     {
@@ -83,17 +53,69 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error en el servidor, intente más tarde." + e });
             }
         }
+       
+
+        [HttpGet]
+
+        public ActionResult Login()
+        {
+            ViewBag.Mensaje = Session["MensajeError"];
+            Session["MensajeError"] = null;
+            return View();
+        }
+
+        #endregion
+
+        #region Registro
+
+        [HttpGet]
+        public ActionResult Registro()
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var Datos = new Autenticacion();
+
+                    Datos.ListaEspecialidades = dbContext.EspecialidadesTB
+                    .Where(e => e.IdEstado == 1)
+                                        .ToList();
+
+                    Datos.ListaSecciones = dbContext.SeccionesTB
+                        .Where(s => s.IdEstado == 1)
+                        .ToList();
+
+                    return View(Datos);
+                }
+            }
+            catch (Exception e)
+            {
+                TempData["SwalError"] = "Ocurrió un error al cargar el formulario de registro. Por favor, inténtelo de nuevo más tarde.";
+                return View();
+            }
+        }
+
+
 
         [HttpPost]
         public ActionResult Registro(Autenticacion Usuario)
         {
             try
             {
-                using ( var dbContext = new SIGEPEntities())
+                using (var dbContext = new SIGEPEntities())
                 {
-                    var resultado = dbContext.RegistroSP(Usuario.Nombre, Usuario.Apellido1, 
-                        Usuario.Apellido2, Usuario.Correo, Usuario.Especialidad, Usuario.FechaNacimiento, 
-                        Usuario.Seccion, Usuario.Contrasenna, Usuario.Cedula).FirstOrDefault();
+                    var resultado = dbContext.RegistroSP(
+                        Usuario.Nombre,
+                        Usuario.Apellido1,
+                        Usuario.Apellido2,
+                        Usuario.Correo,
+                        Usuario.Especialidad,
+                        Usuario.FechaNacimiento,
+                        Usuario.Seccion,
+                        Usuario.Contrasenna,
+                        Usuario.Cedula
+                    ).FirstOrDefault();
+
                     if (resultado.HasValue && resultado.Value != 0)
                     {
                         return Json(new { success = true, message = "¡Registro exitoso! Ahora puede iniciar sesión." });
@@ -104,12 +126,24 @@ namespace SIGEP.Controllers
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error en el servidor, intente más tarde." + e });
+                
+                string mensajeSQL = utilitarios.ObtenerMensajeSQL(ex);
+
+                if (!string.IsNullOrEmpty(mensajeSQL) && mensajeSQL.Contains("Imposible completar el registro. Ya existe una cuenta asociada a esa cédula."))
+                {
+                    return Json(new { success = false, message = "Imposible completar el registro. Ya existe una cuenta asociada a esa cédula." });
+                }
+
+                
+                return Json(new { success = false, message = "Ocurrió un error en el servidor, intente más tarde." });
             }
         }
 
+        #endregion
+
+        #region Logout
 
         [HttpGet]
         public ActionResult Logout()
@@ -117,6 +151,7 @@ namespace SIGEP.Controllers
             return RedirectToAction("Login");
         }
 
+        #endregion
 
         [HttpGet]
 
@@ -126,21 +161,61 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-
         public ActionResult RecuperarAcceso(Autenticacion usuario)
         {
-            var cedula = "118810955";
-            if (usuario.Cedula == cedula)
+            using (var dbContext = new SIGEPEntities())
             {
-                TempData["SwalSuccess"] = "Hemos enviado un link de recuperación al correo ari*****@gmail.com";
-                return RedirectToAction("Login");
-            }
-            else
-            {
-                TempData["SwalError"] = "La cédula proporcionada no se encuentra registrada";
-                return View();
+                var result = (from u in dbContext.UsuariosTB
+                              join e in dbContext.EmailsTB on u.IdUsuario equals e.IdUsuario
+                              where u.Cedula == usuario.Cedula
+                              select new
+                              {
+                                  Usuario = u,
+                                  Correo = e.Email
+                              }).FirstOrDefault();
+
+                if (result != null)
+                {
+                    try
+                    {
+                        var Contrasenna = utilitarios.GenerarPassword();
+
+                        // Cambiar la contraseña en la BD
+                        dbContext.CambiarContrasennaSP(usuario.Cedula, Contrasenna);
+
+                        // Construcción del correo
+                        StringBuilder mensaje = new StringBuilder();
+                        mensaje.Append("Estimado " + result.Usuario.Nombre + "<br>");
+                        mensaje.Append("Se ha generado una solicitud de recuperación de contraseña a su nombre.<br><br>");
+                        mensaje.Append("Su contraseña temporal es: <b>" + Contrasenna + "</b><br><br>");
+                        mensaje.Append("Procure realizar el cambio de su contraseña en cuanto ingrese al sistema.<br>");
+                        mensaje.Append("Muchas gracias.");
+
+                        // Enviar correo
+                        if (utilitarios.EnviarCorreo(result.Correo, mensaje.ToString(), "Solicitud de acceso"))
+                        {
+                            TempData["SwalSuccess"] = "Se ha enviado un correo con su nueva contraseña. Por favor, revise su bandeja de entrada.";
+                        }
+                        else
+                        {
+                            TempData["SwalError"] = "No fue posible enviar el correo de recuperación. Intente más tarde.";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["SwalError"] = "Ocurrió un error al procesar la solicitud: " + ex.Message;
+                    }
+                }
+                else
+                {
+                    TempData["SwalError"] = "La cédula ingresada no se encuentra registrada en el sistema.";
+                }
+
+                // Siempre redirige a Login
+                return RedirectToAction("Login", "Home");
             }
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

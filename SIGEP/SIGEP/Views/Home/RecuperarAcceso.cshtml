@@ -1,4 +1,4 @@
-﻿@model Sigep.UI.Models.Usuario
+﻿@model SIGEP.Models.Autenticacion
 
 @{
     Layout = "~/Views/Shared/_LayoutExterno.cshtml";
@@ -21,13 +21,13 @@
                             {
                                 <div class="input-icon-container mb-3">
                                     <i class="fas fa-envelope"></i>
-                                    @Html.TextBoxFor(m => m.cedula, new { @id = "cedulaLogin", @class = "input-field", placeholder = "Ingresa tu cédula" })
+                                    @Html.TextBoxFor(m => m.Cedula, new { @id = "cedulaLogin", @class = "input-field", placeholder = "Ingresa tu cédula" })
                                 </div>
 
-                              
+
                                 <br />
 
-                             
+
 
                                 <button id="IniciarSesionBTN" class="btnInicio btn btn-lg px-5" type="submit">
                                     Recuperar Acceso
@@ -50,6 +50,7 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -74,7 +75,7 @@
               Swal.fire({
     icon: 'error',
     title: 'Error',
-    text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalError"]?.ToString() ?? ""))',
+    text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalSuccess"]?.ToString() ?? ""))',
     confirmButtonText: 'Entendido',
     confirmButtonColor: '#2D594D'
 });

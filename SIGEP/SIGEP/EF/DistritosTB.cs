@@ -14,10 +14,18 @@ namespace SIGEP.EF
     
     public partial class DistritosTB
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public DistritosTB()
+        {
+            this.DireccionesTB = new HashSet<DireccionesTB>();
+        }
+    
         public int IdDistrito { get; set; }
         public string Nombre { get; set; }
         public int IdCanton { get; set; }
     
         public virtual CantonesTB CantonesTB { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DireccionesTB> DireccionesTB { get; set; }
     }
 }

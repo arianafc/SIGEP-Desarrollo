@@ -1,0 +1,472 @@
+﻿@{
+    ViewBag.Title = "Vacantes - Profesor";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<section class="vacantes-wrapper">
+    <h2 class="vacantes-titulo titulo-principal">Vacantes Disponibles</h2>
+
+    <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-3 align-items-center">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-filter"></i>
+            </button>
+            <div class="dropdown-menu p-3" style="min-width: 300px;">
+                <div class="mb-2">
+                    <label>Estado de vacante</label>
+                    <select id="filtroPractica" class="form-control">
+                        <option value="">Todos</option>
+                        @if (ViewBag.Estados != null)
+                        {
+                            foreach (var s in ViewBag.Estados as List<SelectListItem>)
+                            {
+                                <option value="@s.Text">@s.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label>Modalidad</label>
+                    <select id="filtroModalidad" class="form-control">
+                        <option value="">Todas</option>
+                        @if (ViewBag.Modalidades != null)
+                        {
+                            foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
+                            {
+                                <option value="@m.Value">@m.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label>Especialidad</label>
+                    <select id="filtroEspecialidad" class="form-control">
+                        <option value="">Todas</option>
+                        @if (ViewBag.Especialidades != null)
+                        {
+                            foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                            {
+                                <option value="@e.Value">@e.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="vacantes-lista">
+        <!-- cards renderizadas por JS -->
+    </div>
+</section>
+
+<!-- MODAL VISUALIZAR -->
+<div class="modal fade" id="modalVisualizar" tabindex="-1" aria-labelledby="modalVisualizarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+
+            <!-- HEADER -->
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Visualizar Vacante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body px-4">
+                <section class="vacante-detalle bg-transparent">
+                    <h2 id="vis-Nombre" class="vacante-titulo"></h2>
+                    <p class="vacante-empresa"><strong>Empresa:</strong> <span id="vis-Empresa"></span></p>
+
+                    <div class="vacante-info">
+                        <p><strong>Descripción:</strong> <span id="vis-Descripcion"></span></p>
+                        <p><strong>Requisitos:</strong> <span id="vis-Requisitos"></span></p>
+                        <p><strong>Modalidad:</strong> <span id="vis-Modalidad"></span></p>
+                        <p><strong>Ubicación:</strong> <span id="vis-Ubicacion"></span></p>
+                        <p><strong>Fecha límite de aplicación:</strong> <span id="vis-FechaAplicacion"></span></p>
+                    </div>
+
+                    <hr />
+                    <h5 class="section-title">Información de Contacto</h5>
+                    <p><strong>Nombre:</strong> <span id="vis-NombreContacto"></span></p>
+                    <p><strong>Teléfonos:</strong> <span id="vis-Telefonos"></span></p>
+                    <p><strong>Email(s):</strong> <span id="vis-Emails"></span></p>
+
+                    <hr />
+                    <div class="mb-4">
+                        <h5 class="section-title">Aplicaciones</h5>
+
+                        <ul class="list-group" id="listaPostulaciones">
+                            <!-- Aquí se cargan postulaciones dinámicamente -->
+                        </ul>
+
+                        <span id="mensajeSinAsignados" class="text-muted" style="display: none;">
+                            Ningún estudiante asignado aún
+                        </span>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL ASIGNAR VACANTE -->
+<div class="modal fade" id="modalAsignarVacante" tabindex="-1" aria-labelledby="modalAsignarVacanteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+
+            <!-- HEADER -->
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Asignar Estudiantes</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body px-4">
+
+                <div id="mensajeSinEstudiantes" class="alert alert-warning text-center" style="display: none;">
+                    No hay estudiantes disponibles para asignar a esta vacante.
+                </div>
+
+                <table id="tablaAsignar" class="display responsive nowrap w-100">
+                    <thead class="table-light">
+                        <tr class="text-center">
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                            <th>Especialidad</th>
+                            <th>Estado Práctica</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- filas cargadas dinámicamente -->
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+$(function () {
+
+    // -------------------------
+    // Carga inicial
+    // -------------------------
+    filtrarVacantes();
+
+    // -------------------------
+    // FILTROS
+    // -------------------------
+    $("#filtroPractica, #filtroModalidad, #filtroEspecialidad").change(function () {
+        filtrarVacantes();
+    });
+
+    function filtrarVacantes() {
+        var estado = $("#filtroPractica").val();
+        var modalidad = $("#filtroModalidad").val();
+        var especialidad = $("#filtroEspecialidad").val();
+
+        $.getJSON('@Url.Action("GetVacantes", "Practicas")',
+            { estado: estado, idModalidad: modalidad, idEspecialidad: especialidad },
+            function (resp) {
+                if (resp && resp.data) {
+                    renderVacantes(resp.data);
+                }
+            });
+    }
+
+    // -------------------------
+    // Render tarjetas
+    // -------------------------
+    function renderVacantes(vacantes) {
+        var contenedor = $(".vacantes-lista");
+        contenedor.empty();
+
+        if (!vacantes || vacantes.length === 0) {
+            contenedor.append('<div class="vacante-alerta"><strong>Información:</strong> No se encontraron vacantes.</div>');
+            return;
+        }
+
+        vacantes.forEach(function (v) {
+            var badge = v.NumCupos <= 0
+                ? '<span class="badge text-white fw-bold" style="background-color: darkgoldenrod; font-size: 14px">Vacante llena</span>'
+                : '';
+
+            var aplicacionesCount = v.EstudiantesPostulados || 0;
+
+            var card = `
+                <article class="vacante-card" data-area="${escapeHtml(v.EspecialidadNombre || '')}">
+                    <header class="vacante-header">
+                        <h3 class="vacante-titulo">${escapeHtml(v.Nombre)}</h3>
+                        <span class="vacante-empresa">${escapeHtml(v.EmpresaNombre)}</span>
+                    </header>
+                    <ul class="vacante-detalles">
+                        <li><strong>Requisitos:</strong> ${escapeHtml(v.Requerimientos || '')}</li>
+                        <li><strong>Modalidad:</strong> ${escapeHtml(v.ModalidadNombre || '')}</li>
+                        <li><strong>Fecha límite de aplicación:</strong> ${v.FechaMaxAplicacion ? formatFecha(v.FechaMaxAplicacion) : ''}</li>
+                        <li><strong>Número de cupos:</strong> ${v.NumCupos}</li>
+                        <li><strong>Número de aplicaciones:</strong> ${aplicacionesCount}</li>
+                    </ul>
+                    <div class="row justify-content-between">
+                        <button class="col-md-6 btn btn-cta btn-detalle" data-id="${v.IdVacante}">Ver más</button>
+                        <button class="col-md-5 btn btn-cta btn-asignar" data-id="${v.IdVacante}" ${v.NumCupos <= 0 ? "disabled" : ""}>Asignar</button>
+                    </div>
+                </article>`;
+
+            contenedor.append(card);
+        });
+    }
+
+    // -------------------------
+    // Helpers
+    // -------------------------
+    function formatFecha(isoOrDateString) {
+        if (!isoOrDateString) return "";
+        var d = new Date(isoOrDateString);
+        if (isNaN(d.getTime())) {
+            var parts = isoOrDateString.split('T')[0].split('-');
+            if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+            return isoOrDateString;
+        }
+        return d.toLocaleDateString('es-CR');
+    }
+
+    function escapeHtml(text) {
+        if (!text && text !== 0) return '';
+        return $('<div>').text(text).html();
+    }
+
+    // -------------------------
+    // Ver más -> detalle vacante
+    // -------------------------
+    $(document).on('click', '.btn-detalle', function () {
+        var idVacante = $(this).data('id');
+        if (!idVacante) return;
+
+        $.getJSON('@Url.Action("Detalle", "Practicas")', { id: idVacante }, function (res) {
+            if (!res || !res.ok) {
+                Swal.fire('Error', 'No se pudo cargar la vacante', 'error');
+                return;
+            }
+
+            var d = res.data;
+
+            $('#vis-Nombre').text(d.Nombre || '');
+            $('#vis-Empresa').text(d.EmpresaNombre || '');
+            $('#vis-Descripcion').text(d.Descripcion || '');
+            $('#vis-Requisitos').text(d.Requerimientos || '');
+            $('#vis-Modalidad').text(d.ModalidadNombre || '');
+            $('#vis-Ubicacion').text(d.Ubicacion || '');
+            $('#vis-FechaAplicacion').text(d.FechaMaxAplicacion ? formatFecha(d.FechaMaxAplicacion) : '');
+            $('#vis-NombreContacto').text(d.NombreContacto || '-');
+            $('#vis-Telefonos').text((d.Telefonos && d.Telefonos.length) ? d.Telefonos.join(', ') : 'No disponible');
+            $('#vis-Emails').text((d.Emails && d.Emails.length) ? d.Emails.join(', ') : 'No disponible');
+
+            $('#modalVisualizar').modal('show');
+            cargarPostulaciones(idVacante);
+        });
+    });
+
+    // -------------------------
+    // Postulaciones dentro del modal
+    // -------------------------
+    function cargarPostulaciones(idVacante) {
+        $.getJSON('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: idVacante }, function (res) {
+            var $lista = $('#listaPostulaciones');
+            $lista.empty();
+
+            if (!res || !res.ok || !res.data || res.data.length === 0) {
+                $('#mensajeSinAsignados').show();
+                return;
+            }
+
+            $('#mensajeSinAsignados').hide();
+            var perfilUrl = '@Url.Action("VisualizacionPostulacion", "Practicas")';
+
+            res.data.forEach(function (p) {
+                var estado = (p.EstadoDescripcion || '').toLowerCase();
+                var badgeHtml = (estado.indexOf('acept') >= 0 || estado.indexOf('asign') >= 0)
+                    ? '<span class="badge badge-asignada">Aceptado</span>'
+                    : '<span class="badge badge-no-asignada" style="background-color: darkgoldenrod; color: white">En Proceso</span>';
+
+                var href = perfilUrl + '?idUsuario=' + encodeURIComponent(p.IdUsuario) + '&idVacante=' + encodeURIComponent(idVacante);
+
+                var item = $(`
+                    <a href="${href}" class="d-flex justify-content-between PostulacionesPerfil align-items-center p-2 border rounded mb-2" style="color: #2D594D;">
+                        <span>${escapeHtml(p.NombreCompleto)} | ${escapeHtml(p.Cedula || '')}</span>
+                        <div class="row gx-2 align-items-center">
+                            <div class="col-auto">${badgeHtml}</div>
+                            <div class="col-auto">
+                                <button class="badge btn-desasignar" data-idusuario="${p.IdUsuario}" data-idvacante="${idVacante}" style="color: #2D594D; border:0; background:transparent;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </a>
+                `);
+
+                $lista.append(item);
+            });
+        });
+    }
+
+    // -------------------------
+    // Desasignar estudiante
+    // -------------------------
+    $(document).on('click', '#listaPostulaciones .btn-desasignar', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $(this).data('idvacante');
+        if (!idUsuario || !idVacante) return;
+
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Se marcará al estudiante como "sin práctica asignada".',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#2D594D',
+            confirmButtonText: 'Sí, desasignar',
+            cancelButtonText: 'Cancelar'
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                $.post('@Url.Action("DesasignarEstudiante", "Practicas")',
+                    { idUsuario: idUsuario, idVacante: idVacante },
+                    function (resp) {
+                        if (resp && resp.ok) {
+                            Swal.fire({ icon: 'success', title: 'Desasignado', text: resp.mensaje || 'Operación realizada' });
+                            cargarPostulaciones(idVacante);
+                            filtrarVacantes();
+                        } else {
+                            Swal.fire('Error', resp && resp.mensaje ? resp.mensaje : 'Error al desasignar', 'error');
+                        }
+                    });
+            }
+        });
+    });
+
+    // -------------------------
+    // DataTable en modal ASIGNAR
+    // -------------------------
+    var tablaAsignar = $('#tablaAsignar').DataTable({
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+        responsive: true,
+        pageLength: 5,
+        autoWidth: false,
+        scrollX: false,
+        destroy: true
+    });
+
+    $(document).on('click', '.btn-asignar', function () {
+        var idVacante = $(this).data('id');
+        $('#modalAsignarVacante').data('idvacante', idVacante);
+
+        $.getJSON('@Url.Action("ObtenerEstudiantesAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
+            tablaAsignar.clear();
+
+            if (!res.ok || !res.data || res.data.length === 0) {
+                tablaAsignar.row.add([
+                    '—','—','—','—','<span class="text-danger">No hay estudiantes disponibles</span>'
+                ]);
+                tablaAsignar.draw();
+                return;
+            }
+
+            res.data.forEach(function (e) {
+                var badge = e.EstadoPractica === "Práctica Asignada"
+                    ? '<span class="badge bg-success">Práctica Asignada</span>'
+                    : '<span class="badge bg-secondary">Sin Práctica Asignada</span>';
+
+                // Aquí decides el botón según el estado
+                var btn;
+                if (e.EstadoPractica === "Práctica Asignada") {
+                    btn = `<button class="btn bg-transparent btn-desasignar-estudiante"
+                     data-idusuario="${e.IdUsuario}"
+                     style="color:darkred">
+                     <i class="fas fa-user-minus"></i>
+               </button>`;
+                } else {
+                    btn = `<button class="btn bg-transparent btn-asignar-estudiante"
+                     data-idusuario="${e.IdUsuario}"
+                     style="color:#2d594d">
+                     <i class="fas fa-user-plus"></i>
+               </button>`;
+                }
+
+                tablaAsignar.row.add([
+                    escapeHtml(e.NombreCompleto),
+                    escapeHtml(e.Cedula),
+                    escapeHtml(e.Especialidad),
+                    badge,
+                    btn
+                ]);
+            });
+
+            tablaAsignar.draw();
+        });
+
+        $('#modalAsignarVacante').modal('show');
+    });
+
+    // -------------------------
+    // Asignar estudiante
+    // -------------------------
+    $(document).on('click', '.btn-asignar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignarVacante').data('idvacante');
+
+        $.post('@Url.Action("AsignarEstudiante", "Practicas")',
+            { idUsuario: idUsuario, idVacante: idVacante },
+            function (resp) {
+                if (resp.ok) {
+                    Swal.fire('Éxito', resp.mensaje, 'success');
+                    $('.btn-asignar[data-id="' + idVacante + '"]').trigger('click');
+                    filtrarVacantes();
+                } else {
+                    Swal.fire('Error', resp.mensaje, 'error');
+                }
+            });
+    });
+
+}); // fin $(function)
+
+        // -------------------------
+// Desasignar estudiante desde el modal ASIGNAR
+// -------------------------
+$(document).on('click', '.btn-desasignar-estudiante', function () {
+    var idUsuario = $(this).data('idusuario');
+    var idVacante = $('#modalAsignarVacante').data('idvacante');
+
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'El estudiante quedará sin práctica asignada.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, desasignar',
+        cancelButtonText: 'Cancelar'
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            $.post('@Url.Action("DesasignarEstudiante", "Practicas")',
+                { idUsuario: idUsuario, idVacante: idVacante },
+                function (resp) {
+                    if (resp.ok) {
+                        Swal.fire('Éxito', resp.mensaje, 'success');
+                        // refrescamos la tabla del modal
+                        $('.btn-asignar[data-id="' + idVacante + '"]').trigger('click');
+                        filtrarVacantes();
+                    } else {
+                        Swal.fire('Error', resp.mensaje, 'error');
+                    }
+                });
+        }
+    });
+});
+
+    </script>
+}
