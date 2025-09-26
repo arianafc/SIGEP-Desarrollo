@@ -30,7 +30,7 @@
                             <form id="LoginForm" class="custom-form">
                                 <div class="input-icon-container mb-3">
                                     <i class="fas fa-envelope"></i>
-                                    @Html.TextBoxFor(m => m.Cedula, new { @id = "CedulaLogin", @name= "Cedula", @class = "input-field", placeholder = "Ingresa tu cédula" })
+                                    @Html.TextBoxFor(m => m.Cedula, new { @id = "CedulaLogin", @name = "Cedula", @class = "input-field", placeholder = "Ingresa tu cédula" })
                                 </div>
 
                                 <div class="input-icon-container mb-3">
@@ -47,24 +47,51 @@
                                     Iniciar Sesión
                                 </button>
                             </form>
-                        
-                            <br>
-                        <div>
-                            <p class="mb-0">
-                                ¿No tienes una cuenta? <a href="@Url.Action("Registro", "Home")" class="text-white-50 fw-bold">Regístrate</a>
-                            </p>
-                        </div>
 
+                            <br>
+                            <div>
+                                <p class="mb-0">
+                                    ¿No tienes una cuenta? <a href="@Url.Action("Registro", "Home")" class="text-white-50 fw-bold">Regístrate</a>
+                                </p>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-            </div>
 
     </div>
 </section>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if (TempData["SwalError"] != null)
+{
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalError"].ToString()))',
+            confirmButtonColor: '#2D594D'
+        });
+    </script>
+}
+
+@if (TempData["SwalSuccess"] != null)
+{
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalSuccess"].ToString()))',
+            confirmButtonColor: '#2D594D'
+        });
+    </script>
+
+
+}
 
 <script>
 
@@ -108,7 +135,13 @@
             dataType: "json",
             success: function (resp) {
                 if (resp.success) {
-                    Swal.fire("Éxito", resp.message, "success").then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Inicio de Sesión Correcto',
+                        text: resp.success,
+                        confirmButtonColor: '#2D594D',
+                        confirmButtonText: 'Aceptar'
+                    }).then(() => {
                         window.location.href = '@Url.Action("Index", "Home")';
                     });
                 } else {
@@ -123,29 +156,5 @@
     });
 </script>
 
-@if (TempData["SwalError"] != null)
-{
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalError"].ToString()))',
-            confirmButtonColor: '#2D594D'
-        });
-    </script>
-}
 
-@if (TempData["SwalSuccess"] != null)
-{
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalSuccess"].ToString()))',
-            confirmButtonColor: '#2D594D'
-        });
-    </script>
-
-
-}
 

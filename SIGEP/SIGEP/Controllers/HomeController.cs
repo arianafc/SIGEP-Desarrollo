@@ -1,4 +1,5 @@
-﻿using SIGEP.EF;
+﻿using ProyectoFinal.Models;
+using SIGEP.EF;
 using SIGEP.Models;
 using SIGEP.Services;
 using System;
@@ -15,6 +16,8 @@ namespace SIGEP.Controllers
     {
 
         Utilitarios utilitarios = new Utilitarios();
+        [HttpGet]
+        [FiltroSesion]
         public ActionResult Index()
         {
             return View();
@@ -185,14 +188,46 @@ namespace SIGEP.Controllers
 
                         // Construcción del correo
                         StringBuilder mensaje = new StringBuilder();
-                        mensaje.Append("Estimado " + result.Usuario.Nombre + "<br>");
+
+                        mensaje.Append("<!DOCTYPE html>");
+                        mensaje.Append("<html lang='es'>");
+                        mensaje.Append("<head><meta charset='UTF-8'></head>");
+                        mensaje.Append("<body style='margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;'>");
+
+                        mensaje.Append("<table align='center' width='600' cellpadding='0' cellspacing='0' style='background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);'>");
+
+                        // Encabezado
+                        mensaje.Append("<tr>");
+                        mensaje.Append("<td align='center' style='background-color:#2d594d; padding:20px;'>");
+                        mensaje.Append("<h2 style='color:#ffffff; margin:0; font-size:22px;'>Recupera Tu Acceso</h2>");
+                        mensaje.Append("</td>");
+                        mensaje.Append("</tr>");
+
+                        // Contenido
+                        mensaje.Append("<tr>");
+                        mensaje.Append("<td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>");
+                        mensaje.Append("Estimado <strong>" + result.Usuario.Nombre + "</strong>,<br><br>");
                         mensaje.Append("Se ha generado una solicitud de recuperación de contraseña a su nombre.<br><br>");
-                        mensaje.Append("Su contraseña temporal es: <b>" + Contrasenna + "</b><br><br>");
-                        mensaje.Append("Procure realizar el cambio de su contraseña en cuanto ingrese al sistema.<br>");
-                        mensaje.Append("Muchas gracias.");
+                        mensaje.Append("Su contraseña temporal es: <b style='color:#2d594d; font-size:16px;'>" + Contrasenna + "</b><br><br>");
+                        mensaje.Append("Por favor, realice el cambio de su contraseña en cuanto ingrese al sistema.<br><br>");
+                        mensaje.Append("Muchas gracias.<br>");
+                        mensaje.Append("</td>");
+                        mensaje.Append("</tr>");
+
+                        // Pie
+                        mensaje.Append("<tr>");
+                        mensaje.Append("<td align='center' style='background-color:#f0f0f0; padding:15px; font-size:12px; color:#666666;'>");
+                        mensaje.Append("© 2025 SIGEP. Todos los derechos reservados.");
+                        mensaje.Append("</td>");
+                        mensaje.Append("</tr>");
+
+                        mensaje.Append("</table>");
+                        mensaje.Append("</body>");
+                        mensaje.Append("</html>");
+
 
                         // Enviar correo
-                        if (utilitarios.EnviarCorreo(result.Correo, mensaje.ToString(), "Solicitud de acceso"))
+                        if (utilitarios.EnviarCorreo(result.Correo, mensaje.ToString(), "Recuperación de Acceso"))
                         {
                             TempData["SwalSuccess"] = "Se ha enviado un correo con su nueva contraseña. Por favor, revise su bandeja de entrada.";
                         }
