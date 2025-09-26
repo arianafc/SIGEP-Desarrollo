@@ -81,6 +81,7 @@
         <AssociationConnector Association="SIGEPModel.FK__UsuariosT__IdSec__114A936A" ManuallyRouted="false" />
         <AssociationConnector Association="SIGEPModel.FK__Telefonos__IdUsu__0A9D95DB" ManuallyRouted="false" />
         <AssociationConnector Association="SIGEPModel.FK__UsuarioEs__IdUsu__0D7A0286" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="SIGEPModel.EstadoTB_Backup" Width="1.5" PointX="3.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

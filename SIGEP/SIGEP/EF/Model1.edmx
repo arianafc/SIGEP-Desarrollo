@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AuditoriaGlobalTB">
           <Key>
             <PropertyRef Name="IdAuditoria" />
@@ -157,6 +157,16 @@
         <EntityType Name="EstadosTB">
           <Key>
             <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdEstado" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'SIGEP.dbo.EstadoTB_Backup' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="EstadoTB_Backup">
+          <Key>
+            <PropertyRef Name="IdEstado" />
+            <PropertyRef Name="Descripcion" />
           </Key>
           <Property Name="IdEstado" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Descripcion" Type="varchar" MaxLength="255" Nullable="false" />
@@ -869,13 +879,32 @@ warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="ActualizarEstadoPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdPractica" Type="int" Mode="In" />
+          <Parameter Name="IdEstado" Type="int" Mode="In" />
+          <Parameter Name="Comentario" Type="nvarchar(max)" Mode="In" />
+        </Function>
         <Function Name="CambiarContrasennaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="CEDULA" Type="varchar" Mode="In" />
           <Parameter Name="NUEVA_CONTRASENNA" Type="varchar" Mode="In" />
         </Function>
+        <Function Name="InsertarComentarioPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdVacante" Type="int" Mode="In" />
+          <Parameter Name="IdUsuario" Type="int" Mode="In" />
+          <Parameter Name="Comentario" Type="varchar" Mode="In" />
+          <Parameter Name="IdUsuarioComentario" Type="int" Mode="In" />
+        </Function>
         <Function Name="LoginSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="CEDULA" Type="varchar" Mode="In" />
           <Parameter Name="CONTRASENNA" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="ObtenerComentariosPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdVacante" Type="int" Mode="In" />
+          <Parameter Name="IdUsuario" Type="int" Mode="In" />
+        </Function>
+        <Function Name="ObtenerVisualizacionPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdVacante" Type="int" Mode="In" />
+          <Parameter Name="IdUsuario" Type="int" Mode="In" />
         </Function>
         <Function Name="RegistroSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="Nombre" Type="varchar" Mode="In" />
@@ -917,6 +946,12 @@ warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary 
           <EntitySet Name="UsuarioEspecialidadTB" EntityType="Self.UsuarioEspecialidadTB" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UsuariosTB" EntityType="Self.UsuariosTB" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="VacantesPracticasTB" EntityType="Self.VacantesPracticasTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EstadoTB_Backup" EntityType="Self.EstadoTB_Backup" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [EstadoTB_Backup].[IdEstado] AS [IdEstado], 
+    [EstadoTB_Backup].[Descripcion] AS [Descripcion]
+    FROM [dbo].[EstadoTB_Backup] AS [EstadoTB_Backup]</DefiningQuery>
+          </EntitySet>
           <EntitySet Name="RolesTB_Backup" EntityType="Self.RolesTB_Backup" store:Type="Tables" store:Schema="dbo">
             <DefiningQuery>SELECT 
     [RolesTB_Backup].[IdRol] AS [IdRol], 
@@ -1113,8 +1148,7 @@ warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary 
             <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="SIGEPModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -2311,6 +2345,26 @@ warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary 
             <Parameter Name="Contrasenna" Mode="In" Type="String" />
             <Parameter Name="Cedula" Mode="In" Type="String" />
           </FunctionImport>
+          <EntitySet Name="EstadoTB_Backup" EntityType="SIGEPModel.EstadoTB_Backup" />
+          <FunctionImport Name="ActualizarEstadoPracticaSP" ReturnType="Collection(SIGEPModel.ActualizarEstadoPracticaSP_Result)">
+            <Parameter Name="IdPractica" Mode="In" Type="Int32" />
+            <Parameter Name="IdEstado" Mode="In" Type="Int32" />
+            <Parameter Name="Comentario" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="InsertarComentarioPracticaSP" ReturnType="Collection(Int32)">
+            <Parameter Name="IdVacante" Mode="In" Type="Int32" />
+            <Parameter Name="IdUsuario" Mode="In" Type="Int32" />
+            <Parameter Name="Comentario" Mode="In" Type="String" />
+            <Parameter Name="IdUsuarioComentario" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="ObtenerComentariosPracticaSP" ReturnType="Collection(SIGEPModel.ObtenerComentariosPracticaSP_Result)">
+            <Parameter Name="IdVacante" Mode="In" Type="Int32" />
+            <Parameter Name="IdUsuario" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="ObtenerVisualizacionPracticaSP" ReturnType="Collection(SIGEPModel.ObtenerVisualizacionPracticaSP_Result)">
+            <Parameter Name="IdVacante" Mode="In" Type="Int32" />
+            <Parameter Name="IdUsuario" Mode="In" Type="Int32" />
+          </FunctionImport>
         </EntityContainer>
         <ComplexType Name="LoginSP_Result">
           <Property Type="Int32" Name="IdUsuario" Nullable="false" />
@@ -2322,6 +2376,49 @@ warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary 
           <Property Type="Int32" Name="IdEstado" Nullable="false" />
           <Property Type="String" Name="Seccion" Nullable="false" MaxLength="255" />
           <Property Type="String" Name="Especialidad" Nullable="false" MaxLength="255" />
+        </ComplexType>
+        <EntityType Name="EstadoTB_Backup">
+          <Key>
+            <PropertyRef Name="IdEstado" />
+            <PropertyRef Name="Descripcion" />
+          </Key>
+          <Property Name="IdEstado" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <ComplexType Name="ActualizarEstadoPracticaSP_Result">
+          <Property Type="Int32" Name="IdPractica" Nullable="false" />
+          <Property Type="Int32" Name="IdVacante" Nullable="false" />
+          <Property Type="Int32" Name="IdUsuario" Nullable="false" />
+          <Property Type="String" Name="EstudianteNombre" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="EstudianteCorreo" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="EstadoDescripcion" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="Comentario" Nullable="true" MaxLength="1000" />
+          <Property Type="DateTime" Name="FechaComentario" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="ObtenerComentariosPracticaSP_Result">
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="DateTime" Name="Fecha" Nullable="false" />
+          <Property Type="String" Name="Usuario" Nullable="false" MaxLength="101" />
+          <Property Type="String" Name="Comentario" Nullable="false" MaxLength="1000" />
+        </ComplexType>
+        <ComplexType Name="ObtenerVisualizacionPracticaSP_Result">
+          <Property Type="Int32" Name="IdVacante" Nullable="false" />
+          <Property Type="String" Name="Nombre" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="EmpresaNombre" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="Requerimientos" Nullable="true" MaxLength="1000" />
+          <Property Type="DateTime" Name="FechaMaxAplicacion" Nullable="true" />
+          <Property Type="String" Name="ModalidadNombre" Nullable="true" MaxLength="100" />
+          <Property Type="Int32" Name="IdUsuario" Nullable="false" />
+          <Property Type="String" Name="EstudianteNombre" Nullable="false" MaxLength="152" />
+          <Property Type="String" Name="EstudianteCedula" Nullable="false" MaxLength="20" />
+          <Property Type="Int32" Name="EstudianteEdad" Nullable="true" />
+          <Property Type="String" Name="EstudianteEspecialidad" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="EstudianteCorreo" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="ContactoEmpresaNombre" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="ContactoEmpresaEmail" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="ContactoEmpresaTelefono" Nullable="true" MaxLength="50" />
+          <Property Type="DateTime" Name="FechaAplicacion" Nullable="false" />
+          <Property Type="String" Name="EstadoPractica" Nullable="false" MaxLength="255" />
         </ComplexType>
       </Schema>
     </edmx:ConceptualModels>
@@ -2671,6 +2768,62 @@ warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary 
             </ResultMapping>
           </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="RegistroSP" FunctionName="SIGEPModel.Store.RegistroSP" />
+          <EntitySetMapping Name="EstadoTB_Backup">
+            <EntityTypeMapping TypeName="SIGEPModel.EstadoTB_Backup">
+              <MappingFragment StoreEntitySet="EstadoTB_Backup">
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="ActualizarEstadoPracticaSP" FunctionName="SIGEPModel.Store.ActualizarEstadoPracticaSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.ActualizarEstadoPracticaSP_Result">
+                <ScalarProperty Name="IdPractica" ColumnName="IdPractica" />
+                <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="EstudianteNombre" ColumnName="EstudianteNombre" />
+                <ScalarProperty Name="EstudianteCorreo" ColumnName="EstudianteCorreo" />
+                <ScalarProperty Name="EstadoDescripcion" ColumnName="EstadoDescripcion" />
+                <ScalarProperty Name="Comentario" ColumnName="Comentario" />
+                <ScalarProperty Name="FechaComentario" ColumnName="FechaComentario" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="InsertarComentarioPracticaSP" FunctionName="SIGEPModel.Store.InsertarComentarioPracticaSP" />
+          <FunctionImportMapping FunctionImportName="ObtenerComentariosPracticaSP" FunctionName="SIGEPModel.Store.ObtenerComentariosPracticaSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.ObtenerComentariosPracticaSP_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="Usuario" ColumnName="Usuario" />
+                <ScalarProperty Name="Comentario" ColumnName="Comentario" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="ObtenerVisualizacionPracticaSP" FunctionName="SIGEPModel.Store.ObtenerVisualizacionPracticaSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.ObtenerVisualizacionPracticaSP_Result">
+                <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="EmpresaNombre" ColumnName="EmpresaNombre" />
+                <ScalarProperty Name="Requerimientos" ColumnName="Requerimientos" />
+                <ScalarProperty Name="FechaMaxAplicacion" ColumnName="FechaMaxAplicacion" />
+                <ScalarProperty Name="ModalidadNombre" ColumnName="ModalidadNombre" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="EstudianteNombre" ColumnName="EstudianteNombre" />
+                <ScalarProperty Name="EstudianteCedula" ColumnName="EstudianteCedula" />
+                <ScalarProperty Name="EstudianteEdad" ColumnName="EstudianteEdad" />
+                <ScalarProperty Name="EstudianteEspecialidad" ColumnName="EstudianteEspecialidad" />
+                <ScalarProperty Name="EstudianteCorreo" ColumnName="EstudianteCorreo" />
+                <ScalarProperty Name="ContactoEmpresaNombre" ColumnName="ContactoEmpresaNombre" />
+                <ScalarProperty Name="ContactoEmpresaEmail" ColumnName="ContactoEmpresaEmail" />
+                <ScalarProperty Name="ContactoEmpresaTelefono" ColumnName="ContactoEmpresaTelefono" />
+                <ScalarProperty Name="FechaAplicacion" ColumnName="FechaAplicacion" />
+                <ScalarProperty Name="EstadoPractica" ColumnName="EstadoPractica" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

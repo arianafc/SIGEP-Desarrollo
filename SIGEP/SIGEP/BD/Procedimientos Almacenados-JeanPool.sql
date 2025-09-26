@@ -1,5 +1,5 @@
 USE SIGEP
-
+go
 -- Stored Procedure principal para obtener todos los datos
 CREATE OR ALTER PROCEDURE [dbo].[ObtenerVisualizacionPracticaSP]
     @IdVacante INT,

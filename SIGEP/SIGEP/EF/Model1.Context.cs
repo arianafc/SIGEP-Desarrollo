@@ -56,6 +56,7 @@ namespace SIGEP.EF
         public virtual DbSet<UsuariosTB> UsuariosTB { get; set; }
         public virtual DbSet<VacantesPracticasTB> VacantesPracticasTB { get; set; }
         public virtual DbSet<RolesTB_Backup> RolesTB_Backup { get; set; }
+        public virtual DbSet<EstadoTB_Backup> EstadoTB_Backup { get; set; }
     
         public virtual int CambiarContrasennaSP(string cEDULA, string nUEVA_CONTRASENNA)
         {
@@ -122,6 +123,70 @@ namespace SIGEP.EF
                 new ObjectParameter("Cedula", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Nullable<int>>("RegistroSP", nombreParameter, apellido1Parameter, apellido2Parameter, correoParameter, idEspecialidadParameter, fechaNacimientoParameter, idSeccionParameter, contrasennaParameter, cedulaParameter);
+        }
+    
+        public virtual ObjectResult<ActualizarEstadoPracticaSP_Result> ActualizarEstadoPracticaSP(Nullable<int> idPractica, Nullable<int> idEstado, string comentario)
+        {
+            var idPracticaParameter = idPractica.HasValue ?
+                new ObjectParameter("IdPractica", idPractica) :
+                new ObjectParameter("IdPractica", typeof(int));
+    
+            var idEstadoParameter = idEstado.HasValue ?
+                new ObjectParameter("IdEstado", idEstado) :
+                new ObjectParameter("IdEstado", typeof(int));
+    
+            var comentarioParameter = comentario != null ?
+                new ObjectParameter("Comentario", comentario) :
+                new ObjectParameter("Comentario", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ActualizarEstadoPracticaSP_Result>("ActualizarEstadoPracticaSP", idPracticaParameter, idEstadoParameter, comentarioParameter);
+        }
+    
+        public virtual ObjectResult<Nullable<int>> InsertarComentarioPracticaSP(Nullable<int> idVacante, Nullable<int> idUsuario, string comentario, Nullable<int> idUsuarioComentario)
+        {
+            var idVacanteParameter = idVacante.HasValue ?
+                new ObjectParameter("IdVacante", idVacante) :
+                new ObjectParameter("IdVacante", typeof(int));
+    
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            var comentarioParameter = comentario != null ?
+                new ObjectParameter("Comentario", comentario) :
+                new ObjectParameter("Comentario", typeof(string));
+    
+            var idUsuarioComentarioParameter = idUsuarioComentario.HasValue ?
+                new ObjectParameter("IdUsuarioComentario", idUsuarioComentario) :
+                new ObjectParameter("IdUsuarioComentario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Nullable<int>>("InsertarComentarioPracticaSP", idVacanteParameter, idUsuarioParameter, comentarioParameter, idUsuarioComentarioParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerComentariosPracticaSP_Result> ObtenerComentariosPracticaSP(Nullable<int> idVacante, Nullable<int> idUsuario)
+        {
+            var idVacanteParameter = idVacante.HasValue ?
+                new ObjectParameter("IdVacante", idVacante) :
+                new ObjectParameter("IdVacante", typeof(int));
+    
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerComentariosPracticaSP_Result>("ObtenerComentariosPracticaSP", idVacanteParameter, idUsuarioParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerVisualizacionPracticaSP_Result> ObtenerVisualizacionPracticaSP(Nullable<int> idVacante, Nullable<int> idUsuario)
+        {
+            var idVacanteParameter = idVacante.HasValue ?
+                new ObjectParameter("IdVacante", idVacante) :
+                new ObjectParameter("IdVacante", typeof(int));
+    
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerVisualizacionPracticaSP_Result>("ObtenerVisualizacionPracticaSP", idVacanteParameter, idUsuarioParameter);
         }
     }
 }
