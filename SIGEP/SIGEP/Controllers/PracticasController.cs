@@ -335,35 +335,55 @@ namespace SIGEP.Controllers
         [HttpPost]
         public JsonResult Eliminar(int id)
         {
-            using (var db = new SIGEPEntities())
-            using (var tx = db.Database.BeginTransaction())
+            try
             {
-                try
+                using (var db = new SIGEPEntities()) // tu contexto real del model1.edmx
                 {
-                    var especialidades = db.EspecialidadesVacantesTB.Where(ev => ev.IdVacante == id).ToList();
-                    if (especialidades.Any())
-                        db.EspecialidadesVacantesTB.RemoveRange(especialidades);
-
-                    var postulaciones = db.PracticaEstudianteTB.Where(p => p.IdVacante == id).ToList();
-                    if (postulaciones.Any())
-                        db.PracticaEstudianteTB.RemoveRange(postulaciones);
-
                     var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
-                    if (vacante != null)
+
+                    if (vacante == null)
+                    {
+                        return Json(new { ok = false, message = "La vacante no existe." });
+                    }
+
+                    // Validar si tiene estudiantes asignados en PracticaEstudianteTB
+                    bool tieneAsignados = db.PracticaEstudianteTB.Any(pe => pe.IdVacante == id);
+
+                    if (tieneAsignados)
+                    {
+                        return Json(new
+                        {
+                            ok = false,
+                            message = "No se puede eliminar: vacante tiene estudiantes asignados."
+                        });
+                    }
+
+                    // 🔹 Eliminar lógicamente (cambiar estado a 'Eliminada')
+                    // Primero asegúrate de tener un IdEstado que represente 'Eliminada'
+                    // Por ejemplo, si en EstadoTB tienes uno con nombre 'Eliminada'
+                    var estadoEliminada = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Eliminada");
+
+                    if (estadoEliminada != null)
+                    {
+                        vacante.IdEstado = estadoEliminada.IdEstado;
+                    }
+                    else
+                    {
+                        // Si no tienes ese estado en catálogo, puedes eliminar físicamente:
                         db.VacantesPracticasTB.Remove(vacante);
+                    }
 
                     db.SaveChanges();
-                    tx.Commit();
 
                     return Json(new { ok = true, message = "Vacante eliminada correctamente." });
                 }
-                catch (Exception ex)
-                {
-                    tx.Rollback();
-                    return Json(new { ok = false, message = "Error: " + ex.Message });
-                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, message = "Error al eliminar: " + ex.Message });
             }
         }
+
 
         // ==============================
         // OBTENER POSTULACIONES
