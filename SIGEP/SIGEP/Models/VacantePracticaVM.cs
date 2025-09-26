@@ -7,7 +7,9 @@ namespace SIGEP.Models
 {
     public class VacantePracticaVM
     {
-        public int IdVacante { get; set; }         
+        public int IdVacante { get; set; }
+        public int IdPractica { get; set; }
+
         public string Nombre { get; set; }
         public int IdEmpresa { get; set; }
         public int IdEstado { get; set; }
@@ -18,6 +20,7 @@ namespace SIGEP.Models
         public int IdModalidad { get; set; }
         public string Descripcion { get; set; }
         public string Tipo { get; set; }
+        public List<EstadoVM> ListaEstados { get; set; } = new List<EstadoVM>();
 
         // Campo extra para la relación many-to-many
         public int IdEspecialidad { get; set; }
@@ -32,7 +35,7 @@ namespace SIGEP.Models
         public string EstudianteNombre { get; set; }
         public string EstudianteCedula { get; set; }
         public string EstudianteCorreo { get; set; }
-        public int EstudianteEdad { get; set; }
+        public int? EstudianteEdad { get; set; }
         public string EstudianteEspecialidad { get; set; }
 
         // Información de Contacto de la Empresa
@@ -43,6 +46,11 @@ namespace SIGEP.Models
         // Información de la Postulación/Práctica
         public DateTime? FechaAplicacion { get; set; }
         public string EstadoPractica { get; set; }
+
+        public string EstadoDescripcion { get; set; }
+        public string UltimoComentario { get; set; }
+        public DateTime? FechaUltimoComentario { get; set; }
+
         public List<ComentarioVM> Comentarios { get; set; } = new List<ComentarioVM>();
     }
 
