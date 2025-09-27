@@ -666,14 +666,14 @@ table#miTablaAsignar {
         background-color: #768C46;
     }
 
-.btn-eliminar {
-    background-color: #E04F4F !important;
-}
-
+/*.btn-eliminar {*/
+   /* background-color: #E04F4F !important;*/
+/*}*/
+/*
     .btn-eliminar:hover {
         background-color: #b83b3b !important;
         color: #fff !important;
-    }
+    }*/
 
 
 
