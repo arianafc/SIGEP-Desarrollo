@@ -133,9 +133,9 @@
     </div>
 </section>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+@section scripts {
 
-<script>
+    <script>
 $(function () {
 
     // Inicializar datepicker
@@ -175,7 +175,7 @@ $(function () {
         }
 
         if (edad < 17) {
-            e.preventDefault(); // Evita enviar el formulario
+            e.preventDefault();
             Swal.fire({
                 icon: 'warning',
                 title: 'Edad insuficiente',
@@ -214,7 +214,7 @@ $(function () {
         }
 
         if (formData.Contrasenna.length < 8) {
-        
+
             Swal.fire({
                 icon: 'warning',
                 title: 'Error',
@@ -246,14 +246,14 @@ $(function () {
                     Swal.fire({
                         icon: 'success',
                         title: 'Cuenta creada correctamente',
-                        text: resp.success,
+                        text: resp.success.message,
                         confirmButtonColor: '#2D594D',
                         confirmButtonText: 'Aceptar'
                     }).then(() => {
                         window.location.href = '@Url.Action("Login", "Home")';
                     });
                 } else {
-                  
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -275,4 +275,7 @@ $(function () {
         });
     });
 });
-</script>
+    </script>
+
+
+}

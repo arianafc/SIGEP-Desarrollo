@@ -26,7 +26,12 @@
                         $("#Apellido1").val(capitalizeWords(persona.lastname1));
                         $("#Apellido2").val(capitalizeWords(persona.lastname2));
                     } else {
-                        alert("No se encontró información para esa cédula");
+                        Swal.fire({
+                            icon: "warning",          
+                            title: "Aviso",
+                            text: "No se encontró información para la cédula nacional específicada.",
+                            confirmButtonText: "Aceptar"
+                        });
                     }
                 },
                 error: function () {

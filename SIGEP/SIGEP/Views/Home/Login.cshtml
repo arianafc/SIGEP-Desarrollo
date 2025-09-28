@@ -64,36 +64,9 @@
     </div>
 </section>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@if (TempData["SwalError"] != null)
-{
+@section scripts {
     <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalError"].ToString()))',
-            confirmButtonColor: '#2D594D'
-        });
-    </script>
-}
-
-@if (TempData["SwalSuccess"] != null)
-{
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: '@Html.Raw(HttpUtility.JavaScriptStringEncode(TempData["SwalSuccess"].ToString()))',
-            confirmButtonColor: '#2D594D'
-        });
-    </script>
-
-
-}
-
-<script>
 
     $(function () {
 
@@ -126,7 +99,7 @@
             }
 
 
-            $.ajax({
+           $.ajax({
                 type: "POST",
                 url: '@Url.Action("Login", "Home")',
                 data: {
@@ -138,9 +111,8 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Inicio de Sesión Correcto',
-                        text: resp.success,
-                        confirmButtonColor: '#2D594D',
-                        confirmButtonText: 'Aceptar'
+                        text: resp.message,
+
                     }).then(() => {
                         window.location.href = '@Url.Action("Index", "Home")';
                     });
@@ -154,7 +126,9 @@
         });
         });
     });
-</script>
+    </script>
+
+}
 
 
 

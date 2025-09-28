@@ -1,0 +1,530 @@
+﻿@model Autenticacion
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+@{
+    var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+    var usuario = Session["IdUsuario"] != null ? Convert.ToInt32(Session["IdUsuario"]) : 0;
+    var Nombre = Session["Nombre"] + " " + Session["Apellido1"];
+}
+@section Styles {
+    <style>
+
+        body {
+            background-color: #F2F2F2;
+            font-family: 'Rubik', sans-serif;
+        }
+
+        .perfil-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .info-box {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .perfil-icon {
+            width: 120px;
+            height: 120px;
+            background-color: #2D594D;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 50px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .section-title {
+            color: #2D594D;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #8CA653;
+            padding-bottom: .5rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #2D594D;
+        }
+
+        .form-control {
+            background-color: #ffffff;
+            border: 1px solid #8CA653;
+            border-radius: 6px;
+        }
+    </style>
+}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="perfil-wrapper">
+    @if (rol == 1 || rol == 3)
+    {
+        <!-- BOTONES DOCUMENTOS ARRIBA -->
+        <div class="row top-buttons mb-4 action-buttons">
+            <div class="col-md-6">
+                <button data-bs-toggle="modal" data-bs-target="#modalSubirDoc">
+                    <i class="fas fa-folder-open me-2"></i> Subir Documentos
+                </button>
+            </div>
+            <div class="col-md-6">
+                <button data-bs-toggle="modal" data-bs-target="#modalVerDocs">
+                    <i class="fas fa-folder-open me-2"></i> Ver Mis Documentos
+                </button>
+            </div>
+        </div>
+    }
+    <div class="info-box">
+        <div class="perfil-icon">
+            <img src="@Url.Content("~/Images/logoSIGEP.png")" alt="Perfil" class="perfil-img" width="65">
+        </div>
+
+
+        <h5 class="section-title">INFORMACIÓN PERSONAL</h5>
+        <div class="row" id="info-personal">
+            <div class="col-md-6 form-group">
+                <label>Nombre y Apellidos</label>
+                <input type="text" class="form-control" value=@Nombre required />
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Cédula</label>
+                <input type="text" class="form-control" value="305550650" required />
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Teléfono</label>
+                <input type="text" class="form-control" value="8888-0000" required />
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Correo Electrónico</label>
+                <input type="email" class="form-control" value="johnny.castillo@hotmail.com" required />
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Correo Electrónico MEP</label>
+                <input type="email" class="form-control" value="305550650@mep.ac.cr" required />
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Dirección</label>
+                <input type="text" class="form-control" value="San José, Costa Rica" required />
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Sexo</label>
+                <input type="text" class="form-control" value="Masculino" required />
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Nacionalidad</label>
+                <input type="text" class="form-control" value="Costarricense" required />
+            </div>
+        </div>
+
+        <div class="action-buttons mt-3 mb-4">
+            <button type="button" id="btnActualizarInfo">
+                <i class="fas fa-edit me-2"></i> Actualizar Información Personal
+            </button>
+        </div>
+
+
+        <h5 class="section-title">ACTUALIZAR CONTRASEÑA</h5>
+        @using (Html.BeginForm("CambiarContrasenna", "Perfil", FormMethod.Post, new { @id = "CambiarContrasennaForm", @class = "row" }))
+        {
+
+
+            <div class="col-md-12 form-group">
+                <label>Contraseña</label>
+                @Html.TextBoxFor(m => m.Contrasenna, new { @id = "ContrasennaNueva", @type = "password", @class = "form-control", placeholder = "Ingresa tu nueva contraseña" })
+
+            </div>
+            <div class="col-md-12 form-group">
+                <label>Confirmar Contraseña</label>
+                @Html.TextBoxFor(m => m.NuevaContrasenna, new { @id = "ConfirmarContrasenna", @type = "password", @class = "form-control", placeholder = "Confirma tu contraseña" })
+
+            </div>
+
+
+            <div class="action-buttons mt-3 mb-4">
+                <button type="submit" id="BtnActualizarContrasenna">
+                    <i class="fas fa-edit me-2"></i> Actualizar Contraseña
+                </button>
+            </div>
+        }
+        <div class="row" id="info-personal">
+
+
+            @if (rol == 1 || rol == 3)
+            {
+                <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
+                <div class="row">
+                    @if (rol == 1)
+                    {
+                        <div class="col-md-6 form-group">
+                            <label>Especialidad</label>
+                            <input type="text" class="form-control" value="Ejecutivo Para Centros de Servicio" />
+                        </div>
+                    }
+                    @if (rol == 3)
+                    {
+                        <div class="col-md-6 form-group">
+                            <label>Carrera</label>
+                            <input type="email" class="form-control" value="xxxxxxxxx" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Año De Graduación</label>
+                            <input type="text" class="form-control" value="2022" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Título</label>
+                            <input type="email" class="form-control" value="xxxxxx" />
+                        </div>
+
+                    }
+                </div>
+
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="button" id="btnActualizarAcademica">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Académica
+                    </button>
+                </div>
+            }
+            @if (rol == 1)
+            {
+                <!-- CONTACTO EMERGENCIA -->
+                <h5 class="section-title">ENCARGADOS</h5>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Cédula</label>
+                        <input type="text" class="form-control" value="1-1035-0212" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Nombre y Apellidos</label>
+                        <input type="text" class="form-control" value="Carlos Fallas" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Teléfono</label>
+                        <input type="text" class="form-control" value="8899-1122" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Parentesco</label>
+                        <input type="text" class="form-control" value="Padre" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Residencia o Trabajo</label>
+                        <input type="text" class="form-control" value="Cartago, CR" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Ocupación</label>
+                        <input type="text" class="form-control" value="Ingeniero Civil" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="action-buttons mt-3 col-md-6 form-group">
+                        <button type="button" id="btnActualizarEncargado">
+                            <i class="fas fa-edit me-2"></i> Actualizar Encargado
+                        </button>
+                    </div>
+
+                    <div class="action-buttons mt-3 col-md-6 form-group">
+                        <button type="button" id="btnEliminarEncargado">
+                            <i class="fas fa-trash-alt me-2"></i> Eliminar Encargado
+                        </button>
+                    </div>
+                </div>
+                <div class="action-buttons mt-3">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
+                        <i class="fas fa-plus me-2"></i> Agregar Encargado
+                    </button>
+                </div>
+            }
+            @if (rol == 3)
+            {
+                <h5 class="section-title">INFORMACIÓN LABORAL</h5>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Empresa</label>
+                        <input type="text" class="form-control" value="BOSCH" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Puesto</label>
+                        <input type="text" class="form-control" value="Payroll Analyst" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Correo Electrónico Laboral</label>
+                        <input type="email" class="form-control" value="johnny@bosch.com" />
+                    </div>
+                </div>
+
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="button" id="btnActualizarLaboral">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
+                    </button>
+                </div>
+            }
+            @if (rol == 2)
+            {
+                <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Padécimientos</label>
+                        <input type="text" class="form-control" value="Asma" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Medicamentos</label>
+                        <input type="text" class="form-control" value="N/A" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Alergías</label>
+                        <input type="email" class="form-control" value="Tomate" />
+                    </div>
+                </div>
+
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="button" id="btnActualizarMedica">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Médica
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+
+    <!-- Modal para Agregar Encargado -->
+    <div class="modal fade" id="modalAgregarEncargado" tabindex="-1" aria-labelledby="modalAgregarEncargadoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+                <!-- Header -->
+                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <h5 class="modal-title text-white" id="modalAgregarEncargadoLabel">Agregar Nuevo Encargado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Cédula</label>
+                                <input type="text" class="form-control" placeholder="Ej. 1-1035-0212">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Nombre y Apellidos</label>
+                                <input type="text" class="form-control" placeholder="Ej. Juan Pérez">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Teléfono</label>
+                                <input type="text" class="form-control" placeholder="Ej. 8888-9999">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Parentesco</label>
+                                <input type="text" class="form-control" placeholder="Ej. Madre, Tío, etc.">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Residencia o Trabajo</label>
+                                <input type="text" class="form-control" placeholder="Ej. Cartago, CR">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Ocupación</label>
+                                <input type="text" class="form-control" placeholder="Ej. Ingeniero Civil">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnGuardarEncargado" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Encargado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal para Subir Documento -->
+    <div class="modal fade" id="modalSubirDoc" tabindex="-1" aria-labelledby="modalSubirDocLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+                <!-- Header -->
+                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <h5 class="modal-title text-white" id="modalSubirDocLabel">Subir Documento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <form>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Archivo</label><br />
+                            <button type="button" class="btn" style="background-color: #8CA653; color: white;">
+                                <i class="fas fa-folder-open me-2"></i>Seleccionar Documento
+                            </button>
+                            <div class="mt-2" style="color: #A0A0A0; font-size: 0.9rem;">
+                                * CV_JOHNNYCASTILLO.pdf
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnSubirDoc" class="btn" style="background-color: #2D594D; color: white; border: none;" data-bs-dismiss="modal">Subir Documento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Ver Documentos -->
+    <div class="modal fade" id="modalVerDocs" tabindex="-1" aria-labelledby="modalVerDocsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+                <!-- Header -->
+                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <h5 class="modal-title text-white" id="modalVerDocsLabel">Mis Documentos</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <div class="list-group">
+
+                        <div class="list-group-item d-flex justify-content-between align-items-center" style="background-color: white; border: 1px solid #8CA653; border-radius: 8px; margin-bottom: 10px;">
+                            <div>
+                                <strong>cedula_johnny_castillo.pdf</strong><br />
+                                <small>Cargado: 2025-07-28</small>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <button title="Ver" class="btn btn-link p-0 text-secondary" id="btnVerFile">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button title="Descargar" class="btn btn-link p-0 text-secondary" id="btnDescargarFile">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button title="Eliminar" class="btn btn-link p-0 text-secondary" id="btnEliminarFile">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            var Contrasenna = $('#ContrasennaNueva');
+            var ConfirmarContrasenna = $('#ConfirmarContrasenna');
+            var BtnActualizar = $('#BtnActualizarContrasenna');
+            var Form = $('#CambiarContrasennaForm');
+
+            function validarContrasenna() {
+                let pass = Contrasenna.val().trim();
+                let confirm = ConfirmarContrasenna.val().trim();
+
+                if (pass.length < 8) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Contraseña muy corta',
+                        text: 'La contraseña debe tener al menos 8 caracteres.',
+                        confirmButtonColor: '#8CA653'
+                    });
+                    return false;
+                }
+
+                if (pass !== confirm) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Las contraseñas no coinciden',
+                        text: 'Por favor, verifique que ambas contraseñas sean iguales.',
+                        confirmButtonColor: '#8CA653'
+                    });
+                    return false;
+                }
+
+                return true;
+            }
+
+            Form.on("submit", function (e) {
+                if (!validarContrasenna()) {
+                    e.preventDefault(); // evita que se mande si no pasa validación
+                    return false;
+                }
+            });
+        });
+
+
+        // Validación de info personal
+        document.getElementById("btnActualizarInfo")?.addEventListener("click", function () {
+            const campos = document.querySelectorAll('#info-personal input');
+            let incompletos = false;
+
+            campos.forEach(input => {
+                if (input.value.trim() === "") {
+                    incompletos = true;
+                }
+            });
+
+            if (incompletos) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Por favor complete todos los campos obligatorios',
+                    confirmButtonColor: '#8CA653'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Información actualizada correctamente',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
+
+        // Reutilizable éxito
+        function mostrarSuccessMensaje() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Información guardada correctamente',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+
+        ["btnActualizarAcademica", "btnActualizarEncargado", "btnActualizarLaboral", "btnActualizarMedica", "btnSubirDoc"].forEach(id => {
+            document.getElementById(id)?.addEventListener("click", mostrarSuccessMensaje);
+        });
+
+        // Reutilizable warning
+        function mostrarWarningMensaje() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Ha ocurrido un error',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+
+        ["btnEliminarEncargado", "btnEliminarFile", "btnDescargarFile", "btnVerFile", "btnGuardarEncargado"].forEach(id => {
+            document.getElementById(id)?.addEventListener("click", mostrarWarningMensaje);
+        });
+    </script>
+    
+    
+    }
+

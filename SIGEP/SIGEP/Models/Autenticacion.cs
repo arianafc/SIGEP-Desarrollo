@@ -9,7 +9,7 @@ namespace SIGEP.Models
     public class Autenticacion
     {
 
-        
+        public String NuevaContrasenna { get; set; }
         public int IdUsuario { get; set; }
         public string Cedula { get; set; }
         public string Nombre { get; set; }

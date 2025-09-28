@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace ProyectoFinal.Models
+namespace SIGEP.Models
 {
     public class FiltroSesion : ActionFilterAttribute
     {
