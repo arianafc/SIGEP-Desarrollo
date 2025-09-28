@@ -369,7 +369,7 @@
 
 <!-- MODAL ASIGNAR -->
 <div class="modal fade" id="modalAsignar" tabindex="-1" aria-labelledby="modalAsignarLabel" aria-hidden="true">
-    <!-- 👇 cambiamos a modal-xl para más ancho -->
+
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
 
@@ -406,7 +406,7 @@
 
 
 @section Scripts {
-    <script>
+<script>
 $(function () {
     // --- Inicializar DataTable ---
     var tabla = $('#miTabla').DataTable({
@@ -417,6 +417,7 @@ $(function () {
                 d.estado = $('#filtroPractica').val() || '';
                 d.idEspecialidad = $('#filtroEspecialidad').val() || 0;
                 d.idModalidad = $('#filtroModalidad').val() || 0;
+                return d;
             },
             dataSrc: 'data'
         },
@@ -429,9 +430,11 @@ $(function () {
             {
                 data: 'EstadoNombre',
                 render: function (data) {
-                    return data === 'Asignada'
-                        ? `<span class="badge badge-asignada">Asignada</span>`
-                        : `<span class="badge badge-no-asignada">No Asignada</span>`;
+                  if (data === "Activo") {
+            return `<span class="badge badge-asignada">Activa</span>`;
+        } else {
+            return `<span class="badge badge-no-asignada">Inactiva</span>`;
+        }
                 }
             },
             {
@@ -667,7 +670,7 @@ $('#miTabla').on('click', '.btn-asignar', function () {
                 tbody.append('<tr><td colspan="5" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
             }
 
-            // 👇 Aquí inicializamos DataTable en el modal
+
             if ($.fn.DataTable.isDataTable('#miTablaAsignar')) {
                 $('#miTablaAsignar').DataTable().clear().destroy();
             }
@@ -718,6 +721,4 @@ $('#miTabla').on('click', '.btn-asignar', function () {
 });
     </script>
 }
-
-
 

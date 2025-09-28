@@ -85,7 +85,7 @@
                             </li>
                         }
 
-                        @if (rol == 1 || rol == 4)
+                        @if (rol == 2 || rol == 3)
                         {
                             <li class="sidebar-item">
                                 <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false">
@@ -93,7 +93,7 @@
                                     <span class="hide-menu">Prácticas Profesionales</span>
                                 </a>
                                 <ul aria-expanded="false" class="collapse first-level">
-                                    @if (rol == 1)
+                                    @if (rol == 2)
                                     {
                                         <li class="sidebar-item">
                                             <a href="@Url.Action("VacantesEstudiantes", "Practicas")" class="sidebar-link">
@@ -102,7 +102,7 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (rol == 4)
+                                    @if (rol == 3)
                                     {
                                         <li class="sidebar-item">
                                             <a href="@Url.Action("VistaVacantesProfesor", "Practicas")" class="sidebar-link">
@@ -132,7 +132,7 @@
                                     <span class="hide-menu">Estudiantes</span>
                                 </a>
                             </li>
-                            if (rol == 1)
+                            if (rol == 2)
                             {
                                 <li class="sidebar-item">
                                     <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("ListaEmpresas", "Empresa")">
@@ -143,8 +143,8 @@
                             }
                         }
 
-                        @* Empresas para rol 2 *@
-                        @if (rol == 2)
+                        @*  Estudiantes rol 1 *@
+                        @if (rol == 1)
                         {
                             <li class="sidebar-item">
                                 <a href="@Url.Action("PostulacionesEstudiantes", "Practicas")" class="sidebar-link">
@@ -172,14 +172,14 @@
                         </li>
 
                         <!-- EGRESADOS -->
-                        @if (rol == 1 || rol == 3)
+                        @if (rol == 2 || rol == 4)
                         {
                             <li class="nav-small-cap">
                                 <i class="mdi mdi-dots-horizontal"></i>
                                 <span class="hide-menu">EGRESADOS</span>
                             </li>
 
-                            if (rol == 1)
+                            if (rol == 2)
                             {
                                 <li class="sidebar-item">
                                     <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("ListaEgresados", "Coordinador")">
@@ -210,7 +210,7 @@
                             <i class="mdi mdi-dots-horizontal"></i>
                             <span class="hide-menu">ADMINISTRACIÓN</span>
                         </li>
-                        @if (rol == 1)
+                        @if (rol == 2)
                         {
                             <li class="sidebar-item">
                                 <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("GestionAdministracion", "AdministracionGeneral")">

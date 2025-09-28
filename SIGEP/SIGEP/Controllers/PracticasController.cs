@@ -11,7 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Web.Mvc;
-using ProyectoFinal.Models;
+
 
 namespace SIGEP.Controllers
 {
@@ -22,6 +22,8 @@ namespace SIGEP.Controllers
         // VISTA PRINCIPAL VACANTES
         // ==============================
         [HttpGet]
+        [FiltroSesion]
+        [FiltroUsuarioAdmin]
         public ActionResult VacantesEstudiantes()
         {
             ViewBag.Especialidades = ObtenerEspecialidades();
