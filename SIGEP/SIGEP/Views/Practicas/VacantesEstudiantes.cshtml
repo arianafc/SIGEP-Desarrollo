@@ -406,7 +406,7 @@
 
 
 @section Scripts {
-<script>
+    <script>
 $(function () {
     // --- Inicializar DataTable ---
     var tabla = $('#miTabla').DataTable({
@@ -545,22 +545,36 @@ $('#IdEmpresa').on('change', function () {
         });
     });
 
-    $('#btnActualizarVacante').on('click', function () {
-        var $form = $('#formEditarVacante');
-        if (!$form[0].checkValidity()) {
-            $form[0].reportValidity();
-            return;
-        }
-        $.post('@Url.Action("Editar", "Practicas")', $form.serialize(), function (res) {
+    $('#btnActualizarVacante').on('click', function (e) {
+    e.preventDefault(); // 👈 evita que se cierre el modal por submit normal
+    var $form = $('#formEditarVacante');
+    if (!$form[0].checkValidity()) {
+        $form[0].reportValidity();
+        return;
+    }
+
+    $.ajax({
+        url: '@Url.Action("Editar", "Practicas")',
+        type: 'POST',
+        data: $form.serialize(),
+        success: function (res) {
             if (res.ok) {
                 Swal.fire('Éxito', res.message, 'success');
                 $('#modalEditarVacante').modal('hide');
                 tabla.ajax.reload();
             } else {
-                Swal.fire('Error', res.message, 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: res.message || 'Error en validación'
+                });
             }
-        });
+        },
+        error: function () {
+            Swal.fire('Error', 'Error en la petición al servidor.', 'error');
+        }
     });
+});
 
     // --- Eliminar ---
     $('#miTabla').on('click', '.btn-eliminar', function () {

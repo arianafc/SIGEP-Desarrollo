@@ -22,8 +22,8 @@ namespace SIGEP.Controllers
         // VISTA PRINCIPAL VACANTES
         // ==============================
         [HttpGet]
-        [FiltroSesion]
-        [FiltroUsuarioAdmin]
+        //[FiltroSesion]
+        //[FiltroUsuarioAdmin]
         public ActionResult VacantesEstudiantes()
         {
             ViewBag.Especialidades = ObtenerEspecialidades();
@@ -112,8 +112,6 @@ namespace SIGEP.Controllers
                 return Json(new { data = outList }, JsonRequestBehavior.AllowGet);
             }
         }
-
-
         // ==============================
         // CREAR VACANTE (POST)
         // ==============================
@@ -127,6 +125,15 @@ namespace SIGEP.Controllers
                 model.NumCupos < 1)
             {
                 return Json(new { ok = false, message = "Debe completar todos los campos obligatorios (Nombre, Empresa, Requisitos, Cupos >= 1)" });
+            }
+
+            // 🔹 Validación de fechas
+            if (model.FechaMaxAplicacion.HasValue && model.FechaCierre.HasValue)
+            {
+                if (model.FechaMaxAplicacion.Value > model.FechaCierre.Value)
+                {
+                    return Json(new { ok = false, message = "La fecha de aplicación no puede ser mayor a la fecha de cierre." });
+                }
             }
 
             using (var db = new SIGEPEntities())
@@ -171,10 +178,11 @@ namespace SIGEP.Controllers
                 }
             }
         }
+
+
         // ==============================
         // DETALLE VACANTE (GET)
         // ==============================
-
         public JsonResult Detalle(int id)
         {
             using (var db = new SIGEPEntities())
@@ -192,7 +200,6 @@ namespace SIGEP.Controllers
                          join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
                          from m in jm.DefaultIfEmpty()
 
-                             // 🔹 Join con especialidad
                          join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
                          from ev in jev.DefaultIfEmpty()
 
@@ -204,7 +211,7 @@ namespace SIGEP.Controllers
                          {
                              v.IdVacante,
                              v.Nombre,
-                             v.IdEmpresa,
+                             IdEmpresa = (int?)v.IdEmpresa,
                              EmpresaNombre = e != null ? e.NombreEmpresa : "",
                              NombreContacto = e != null ? e.NombreContacto : "",
                              v.Requerimientos,
@@ -212,32 +219,21 @@ namespace SIGEP.Controllers
                              v.NumCupos,
                              v.FechaCierre,
                              v.Descripcion,
-                             v.IdModalidad,
+                             IdModalidad = (int?)v.IdModalidad,
                              ModalidadNombre = m != null ? m.Descripcion : "",
-                             ev.IdEspecialidad,
+                             IdEspecialidad = (int?)ev.IdEspecialidad,
                              EspecialidadNombre = esp != null ? esp.Nombre : "",
-                             v.IdEstado,
+                             IdEstado = (int?)v.IdEstado,
                              EstadoNombre = es != null ? es.Descripcion : "",
                              Ubicacion = dir != null ? dir.DireccionExacta : "",
-
-                             // 🔹 Correos relacionados con la empresa
-                             Emails = db.EmailsTB
-                                 .Where(em => em.IdEmpresa == e.IdEmpresa)
-                                 .Select(em => em.Email)
-                                 .ToList(),
-
-                             // 🔹 Teléfonos relacionados con la empresa
-                             Telefonos = db.TelefonosTB
-                                 .Where(t => t.IdEmpresa == e.IdEmpresa)
-                                 .Select(t => t.Telefono)
-                                 .ToList()
+                             EmpresaIdForContact = e != null ? (int?)e.IdEmpresa : null
                          })
-                         .AsEnumerable()
+                         .AsEnumerable() // 🔹 de aquí en adelante ya es LINQ to Objects
                          .Select(x => new
                          {
                              x.IdVacante,
                              x.Nombre,
-                             x.IdEmpresa,
+                             IdEmpresa = x.IdEmpresa ?? 0,
                              x.EmpresaNombre,
                              x.NombreContacto,
                              x.Requerimientos,
@@ -249,15 +245,26 @@ namespace SIGEP.Controllers
                                  ? x.FechaCierre.Value.ToString("yyyy-MM-dd")
                                  : null,
                              x.Descripcion,
-                             x.IdModalidad,
+                             IdModalidad = x.IdModalidad ?? 0,
                              x.ModalidadNombre,
-                             x.IdEspecialidad,
+                             IdEspecialidad = x.IdEspecialidad ?? 0,
                              x.EspecialidadNombre,
-                             x.IdEstado,
+                             IdEstado = x.IdEstado ?? 0,
                              x.EstadoNombre,
                              x.Ubicacion,
-                             x.Emails,
-                             x.Telefonos
+
+                             // 🔹 Ahora sí, en memoria puedo armar las listas
+                             Emails = x.EmpresaIdForContact.HasValue
+                                 ? db.EmailsTB.Where(em => em.IdEmpresa == x.EmpresaIdForContact.Value)
+                                              .Select(em => em.Email)
+                                              .ToList()
+                                 : new List<string>(),
+
+                             Telefonos = x.EmpresaIdForContact.HasValue
+                                 ? db.TelefonosTB.Where(t => t.IdEmpresa == x.EmpresaIdForContact.Value)
+                                                 .Select(t => t.Telefono)
+                                                 .ToList()
+                                 : new List<string>()
                          })
                          .FirstOrDefault();
 
@@ -267,11 +274,9 @@ namespace SIGEP.Controllers
 
 
 
-
         // ==============================
         // EDITAR VACANTE (POST)
         // ==============================
-
         [HttpPost]
         public JsonResult Editar(VacanteViewModel model)
         {
@@ -284,6 +289,15 @@ namespace SIGEP.Controllers
                 return Json(new { ok = false, message = "Debe completar todos los campos obligatorios (Nombre, Empresa, Requisitos, Cupos >= 1)" });
             }
 
+            // 🔹 Validación de fechas
+            if (model.FechaMaxAplicacion.HasValue && model.FechaCierre.HasValue)
+            {
+                if (model.FechaMaxAplicacion.Value > model.FechaCierre.Value)
+                {
+                    return Json(new { ok = false, message = "La fecha de aplicación no puede ser mayor a la fecha de cierre." });
+                }
+            }
+
             using (var db = new SIGEPEntities())
             using (var tx = db.Database.BeginTransaction())
             {
@@ -293,10 +307,8 @@ namespace SIGEP.Controllers
                     if (vacante == null)
                         return Json(new { ok = false, message = "Vacante no encontrada" });
 
-                    // Actualizar solamente los campos permitidos aquí (NO tocar IdEstado)
                     vacante.Nombre = model.Nombre;
                     vacante.IdEmpresa = model.IdEmpresa;
-                    // <- no tocar vacante.IdEstado (lo gestiona otro módulo)
                     vacante.Requerimientos = model.Requerimientos;
                     vacante.FechaMaxAplicacion = model.FechaMaxAplicacion;
                     vacante.NumCupos = model.NumCupos;
@@ -306,7 +318,7 @@ namespace SIGEP.Controllers
 
                     db.SaveChanges();
 
-                    // Reemplazar especialidad (tabla intermedia)
+                    // Reemplazar especialidad
                     var existentes = db.EspecialidadesVacantesTB.Where(x => x.IdVacante == vacante.IdVacante).ToList();
                     if (existentes.Any())
                         db.EspecialidadesVacantesTB.RemoveRange(existentes);
@@ -332,6 +344,9 @@ namespace SIGEP.Controllers
                 }
             }
         }
+
+
+
         // ==============================
         // ELIMINAR VACANTE (POST)
         // ==============================
@@ -979,6 +994,80 @@ namespace SIGEP.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0)
+        {
+            using (var db = new SIGEPEntities())
+            {
+                // 1️⃣ Validar sesión de profesor
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { ok = false, mensaje = "Sesión expirada o no hay profesor logueado." }, JsonRequestBehavior.AllowGet);
+                }
+
+                int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
+
+                // 2️⃣ Obtener especialidades del profesor
+                var especialidadesProfesor = db.UsuarioEspecialidadTB
+                    .Where(ue => ue.IdUsuario == idProfesor && ue.IdEstado == 1)
+                    .Select(ue => ue.IdEspecialidad)
+                    .ToList();
+
+                if (!especialidadesProfesor.Any())
+                {
+                    return Json(new { ok = false, mensaje = "El profesor no tiene especialidades registradas." }, JsonRequestBehavior.AllowGet);
+                }
+
+                // 3️⃣ Vacantes filtradas solo por las especialidades del profesor
+                var query = from v in db.VacantesPracticasTB
+                            join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
+                            from e in je.DefaultIfEmpty()
+                            join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
+                            from d in jd.DefaultIfEmpty()
+                            join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
+                            from es in jes.DefaultIfEmpty()
+                            join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
+                            from ev in jev.DefaultIfEmpty()
+                            join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
+                            from sp in jsp.DefaultIfEmpty()
+                            join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
+                            from m in jm.DefaultIfEmpty()
+                            where especialidadesProfesor.Contains(ev.IdEspecialidad) // 🔹 filtro por especialidad del profesor
+                            select new VacantePracticaDTO
+                            {
+                                IdVacante = v.IdVacante,
+                                Nombre = v.Nombre,
+                                IdEmpresa = v.IdEmpresa,
+                                EmpresaNombre = e != null ? e.NombreEmpresa : "",
+                                Requerimientos = v.Requerimientos,
+                                FechaMaxAplicacion = v.FechaMaxAplicacion,
+                                NumCupos = v.NumCupos ?? 0,
+                                FechaCierre = v.FechaCierre,
+                                IdModalidad = v.IdModalidad ?? 0,
+                                ModalidadNombre = m != null ? m.Descripcion : "",
+                                Descripcion = v.Descripcion,
+                                IdEspecialidad = ev != null ? ev.IdEspecialidad : 0,
+                                EspecialidadNombre = sp != null ? sp.Nombre : "",
+                                IdEstado = v.IdEstado,
+                                EstadoNombre = es != null ? es.Descripcion : "",
+                                EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
+                            };
+
+                //Excluir vacantes Inactivas
+                query = query.Where(x => x.EstadoNombre != "Inactivo");
+
+                if (!string.IsNullOrEmpty(estado))
+                    query = query.Where(x => x.EstadoNombre == estado);
+
+                if (idModalidad > 0)
+                    query = query.Where(x => x.IdModalidad == idModalidad);
+
+                var list = query.OrderByDescending(x => x.IdVacante).ToList();
+
+                return Json(new { ok = true, data = list }, JsonRequestBehavior.AllowGet);
             }
         }
 

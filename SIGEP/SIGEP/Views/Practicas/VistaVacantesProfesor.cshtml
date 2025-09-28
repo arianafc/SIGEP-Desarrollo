@@ -171,7 +171,7 @@ $(function () {
         var modalidad = $("#filtroModalidad").val();
         var especialidad = $("#filtroEspecialidad").val();
 
-        $.getJSON('@Url.Action("GetVacantes", "Practicas")',
+        $.getJSON('@Url.Action("GetVacantesProfesor", "Practicas")',
             { estado: estado, idModalidad: modalidad, idEspecialidad: especialidad },
             function (resp) {
                 if (resp && resp.data) {
