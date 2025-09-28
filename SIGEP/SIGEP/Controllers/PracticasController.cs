@@ -1162,7 +1162,45 @@ namespace SIGEP.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult MiPractica()
+        {
+            if (Session["IdUsuario"] == null)
+            {
+                return RedirectToAction("IniciarSesion", "Home");
+            }
 
+            int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+            using (var dbContext = new SIGEPEntities())
+            {
+                var practica = dbContext.PracticaEstudianteTB
+                    .Where(p => p.IdUsuario == idUsuario)
+                    .FirstOrDefault();
+
+                if (practica == null)
+                {
+                    // Usar TempData para mostrar SweetAlert en el Index
+                    TempData["SwalWarning"] = "Aún no tienes una práctica asignada. Mantente atento a las actualizaciones del sistema.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                // Redirigir al action existente con los parámetros necesarios
+                return RedirectToAction("VisualizacionPostulacion", new
+                {
+                    idVacante = practica.IdVacante,
+                    idUsuario = practica.IdUsuario
+                });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult PostulacionesEstudiantes()
+        {
+           
+            return View();
+
+        }
 
     }
 }

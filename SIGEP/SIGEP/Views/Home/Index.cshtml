@@ -160,110 +160,126 @@
 
     }
 
-        @if (rol == 2)
-        {
-            <!-- Estudiante -->
-            <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">
-                <h2 class="fw-bold mb-3" style="color:#2D594D;">¡Bienvenido a SIGEP!</h2>
-                <p style="font-size:1.2rem; max-width:600px; margin:auto;">
-                    Aquí podrás gestionar todo lo relacionado con tu práctica profesional de forma sencilla y organizada.
-                </p>
-                <a href="@Url.Action("PostulacionesEstudiantes", "Practicas")" class="btn btn-lg mt-3" style="background-color:#2D594D; color:white;">Mis Postulaciones</a>
-            </section>
+    @if (rol == 2)
+    {
+        <!-- Estudiante -->
+        <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">
+            <h2 class="fw-bold mb-3" style="color:#2D594D;">¡Bienvenido a SIGEP!</h2>
+            <p style="font-size:1.2rem; max-width:600px; margin:auto;">
+                Aquí podrás gestionar todo lo relacionado con tu práctica profesional de forma sencilla y organizada.
+            </p>
+            <a href="@Url.Action("PostulacionesEstudiantes", "Practicas")" class="btn btn-lg mt-3" style="background-color:#2D594D; color:white;">Mis Postulaciones</a>
+        </section>
 
-            <section class="row g-4 text-center">
-                <div class="col-md-4">
-                    <div class="card shadow-sm h-100" style="border:none;">
-                        <div class="card-body">
-                            <i class="fas fa-briefcase fa-3x mb-3" style="color:#8CA653;"></i>
-                            <h5 class="fw-bold">Mis Postulaciones</h5>
-                            <p>Explora oportunidades disponibles y gestiona tu postulación fácilmente.</p>
-                            <a href="@Url.Action("PostulacionesEstudiantes", "Practicas")" class="btn btn-sm" style="background-color:#8CA653; color:white;">Ver Postulaciones</a>
-                        </div>
+        <section class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100" style="border:none;">
+                    <div class="card-body">
+                        <i class="fas fa-briefcase fa-3x mb-3" style="color:#8CA653;"></i>
+                        <h5 class="fw-bold">Mis Postulaciones</h5>
+                        <p>Explora oportunidades disponibles y gestiona tu postulación fácilmente.</p>
+                        <a href="@Url.Action("PostulacionesEstudiantes", "Practicas")" class="btn btn-sm" style="background-color:#8CA653; color:white;">Ver Postulaciones</a>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="card shadow-sm h-100" style="border:none;">
-                        <div class="card-body">
-                            <i class="fas fa-tasks fa-3x mb-3" style="color:#768C46;"></i>
-                            <h5 class="fw-bold">Mi Práctica</h5>
-                            <p>Consulta el estado y detalles de tu práctica profesional actual.</p>
-                            <a href="@Url.Action("VisualizacionPostulacion", "Practicas")" class="btn btn-sm" style="background-color:#768C46; color:white;">Ver Mi Práctica</a>
-                        </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100" style="border:none;">
+                    <div class="card-body">
+                        <i class="fas fa-tasks fa-3x mb-3" style="color:#768C46;"></i>
+                        <h5 class="fw-bold">Mi Práctica</h5>
+                        <p>Consulta el estado y detalles de tu práctica profesional actual.</p>
+                        <a href="@Url.Action("VisualizacionPostulacion", "Practicas")" class="btn btn-sm" style="background-color:#768C46; color:white;">Ver Mi Práctica</a>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="card shadow-sm h-100" style="border:none;">
-                        <div class="card-body">
-                            <i class="fas fa-bullhorn fa-3x mb-3" style="color:#2D594D;"></i>
-                            <h5 class="fw-bold">Comunicados</h5>
-                            <p>Mantente informado con anuncios y noticias relevantes de coordinación.</p>
-                            <a href="@Url.Action("Comunicados", "Comunicados")" class="btn btn-sm" style="background-color:#2D594D; color:white;">Ver Comunicados</a>
-                        </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100" style="border:none;">
+                    <div class="card-body">
+                        <i class="fas fa-bullhorn fa-3x mb-3" style="color:#2D594D;"></i>
+                        <h5 class="fw-bold">Comunicados</h5>
+                        <p>Mantente informado con anuncios y noticias relevantes de coordinación.</p>
+                        <a href="@Url.Action("Comunicados", "Comunicados")" class="btn btn-sm" style="background-color:#2D594D; color:white;">Ver Comunicados</a>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="text-center mt-5">
-                <p class="text-muted">Mantén tu perfil siempre actualizado para aprovechar al máximo tus oportunidades.</p>
-                <a href="@Url.Action("MiPerfil", "Perfil")"
-                   class="btn btn-lg"
-                   style="background-color: #2D594D; color: #fff; border-radius: 50px; padding: 0.75rem 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
-                    <i class="fas fa-user-circle me-2"></i>Ir a Mi Perfil
-                </a>
-            </section>
-        }
-        else if (rol == 3)
-        {
-            <!-- Egresado -->
-            <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">
-                <h2 class="fw-bold mb-3" style="color:#2D594D;">Bienvenido Egresado</h2>
-                <p style="font-size:1.2rem; max-width:600px; margin:auto;">
-                    Descubre oportunidades laborales, mantente informado y potencia tu perfil profesional.
-                </p>
-                <a href="@Url.Action("ListaVacanteCoordinador", "Vacante")" class="btn btn-lg mt-3" style="background-color:#2D594D; color:white;">Explorar Bolsa de Empleo</a>
-            </section>
+        <section class="text-center mt-5">
+            <p class="text-muted">Mantén tu perfil siempre actualizado para aprovechar al máximo tus oportunidades.</p>
+            <a href="@Url.Action("MiPerfil", "Perfil")"
+               class="btn btn-lg"
+               style="background-color: #2D594D; color: #fff; border-radius: 50px; padding: 0.75rem 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s;">
+                <i class="fas fa-user-circle me-2"></i>Ir a Mi Perfil
+            </a>
+        </section>
+    }
+    else if (rol == 3)
+    {
+        <!-- Egresado -->
+        <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">
+            <h2 class="fw-bold mb-3" style="color:#2D594D;">Bienvenido Egresado</h2>
+            <p style="font-size:1.2rem; max-width:600px; margin:auto;">
+                Descubre oportunidades laborales, mantente informado y potencia tu perfil profesional.
+            </p>
+            <a href="@Url.Action("ListaVacanteCoordinador", "Vacante")" class="btn btn-lg mt-3" style="background-color:#2D594D; color:white;">Explorar Bolsa de Empleo</a>
+        </section>
 
-            <section class="row g-4 text-center">
-                <div class="col-md-4">
-                    <div class="card shadow-sm h-100" style="border:none;">
-                        <div class="card-body">
-                            <i class="fas fa-briefcase fa-3x mb-3" style="color:#8CA653;"></i>
-                            <h5 class="fw-bold">Bolsa de Empleo</h5>
-                            <p>Encuentra ofertas laborales ajustadas a tu perfil profesional.</p>
-                            <a href="@Url.Action("ListaVacanteCoordinador", "Vacante")" class="btn btn-sm" style="background-color:#8CA653; color:white;">Ver Ofertas</a>
-                        </div>
+        <section class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100" style="border:none;">
+                    <div class="card-body">
+                        <i class="fas fa-briefcase fa-3x mb-3" style="color:#8CA653;"></i>
+                        <h5 class="fw-bold">Bolsa de Empleo</h5>
+                        <p>Encuentra ofertas laborales ajustadas a tu perfil profesional.</p>
+                        <a href="@Url.Action("ListaVacanteCoordinador", "Vacante")" class="btn btn-sm" style="background-color:#8CA653; color:white;">Ver Ofertas</a>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="card shadow-sm h-100" style="border:none;">
-                        <div class="card-body">
-                            <i class="fas fa-bullhorn fa-3x mb-3" style="color:#768C46;"></i>
-                            <h5 class="fw-bold">Comunicados</h5>
-                            <p>Revisa noticias, actualizaciones y avisos para egresados.</p>
-                            <a href="@Url.Action("Comunicados", "Comunicados")" class="btn btn-sm" style="background-color:#768C46; color:white;">Ver Comunicados</a>
-                        </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100" style="border:none;">
+                    <div class="card-body">
+                        <i class="fas fa-bullhorn fa-3x mb-3" style="color:#768C46;"></i>
+                        <h5 class="fw-bold">Comunicados</h5>
+                        <p>Revisa noticias, actualizaciones y avisos para egresados.</p>
+                        <a href="@Url.Action("Comunicados", "Comunicados")" class="btn btn-sm" style="background-color:#768C46; color:white;">Ver Comunicados</a>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="card shadow-sm h-100" style="border:none;">
-                        <div class="card-body">
-                            <i class="fas fa-user fa-3x mb-3" style="color:#2D594D;"></i>
-                            <h5 class="fw-bold">Mi Perfil</h5>
-                            <p>Actualiza tu información y destaca tus logros profesionales.</p>
-                            <a href="@Url.Action("MiPerfil", "Perfil")" class="btn btn-sm" style="background-color:#2D594D; color:white;">Editar Perfil</a>
-                        </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100" style="border:none;">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-3x mb-3" style="color:#2D594D;"></i>
+                        <h5 class="fw-bold">Mi Perfil</h5>
+                        <p>Actualiza tu información y destaca tus logros profesionales.</p>
+                        <a href="@Url.Action("MiPerfil", "Perfil")" class="btn btn-sm" style="background-color:#2D594D; color:white;">Editar Perfil</a>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="text-center mt-5">
-                <p class="text-muted">Tu futuro comienza hoy. Aprovecha cada oportunidad.</p>
-            </section>
-        }
+        <section class="text-center mt-5">
+            <p class="text-muted">Tu futuro comienza hoy. Aprovecha cada oportunidad.</p>
+        </section>
+    }
 
 </main>
+
+@section Scripts {
+
+    @if (TempData["SwalWarning"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sin Práctica Asignada',
+                text: @Html.Raw(Json.Encode(TempData["SwalWarning"].ToString())),
+                confirmButtonColor: '#2D594D',
+                confirmButtonText: 'Entendido'
+            });
+        </script>
+    }
+}

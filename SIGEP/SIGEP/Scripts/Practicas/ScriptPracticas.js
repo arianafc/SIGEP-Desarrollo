@@ -1,5 +1,4 @@
 ﻿$(document).ready(function () {
-
     // Función para agregar comentario
     $("#BtnAgregarComentario").on("click", function (event) {
         event.preventDefault();

@@ -1,0 +1,345 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Mis Postulaciones";
+    var rol = Session["rol"] != null ? Convert.ToInt32(Session["rol"]) : 0;
+}
+
+@section Styles {
+    <style>
+        body {
+            background-color: #F2F2F2;
+            font-family: 'Rubik', sans-serif;
+        }
+
+        .postulaciones-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section-title {
+            color: #2D594D;
+            font-weight: 600;
+            border-bottom: 2px solid #8CA653;
+            margin-bottom: 1.5rem;
+            padding-bottom: .5rem;
+        }
+
+        .card-postulacion {
+            background-color: white;
+            border-left: 8px solid #2D594D;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .estado-badge {
+            font-weight: bold;
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .estado-Aprobada {
+            background-color: #2D594D;
+        }
+
+        .estado-Asignada {
+            background-color: #8CA653;
+        }
+
+        .estado-Pendiente {
+            background-color: #d1a602;
+        }
+
+        .estado-Cancelada {
+            background-color: #B00020;
+        }
+
+
+        .btn-verde-oscuro {
+            background-color: #2D594D;
+            color: white;
+            border: none;
+        }
+
+        .btn-verde-medio {
+            background-color: #8CA653;
+            color: white;
+            border: none;
+        }
+
+        .btn-verde-oliva {
+            background-color: #768C46;
+            color: white;
+            border: none;
+        }
+
+        .btn-gris {
+            background-color: #F2F2F2;
+            color: #2D594D;
+            border: 1px solid #2D594D;
+        }
+
+        .btn-outline-verde {
+            background-color: transparent;
+            border: 1px solid #8CA653;
+            color: #2D594D;
+            border-radius: 6px;
+            padding: 6px 12px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+            .btn-outline-verde i {
+                color: #2D594D;
+            }
+
+            .btn-outline-verde:hover {
+                background-color: #8CA653;
+                color: white;
+            }
+
+                .btn-outline-verde:hover i {
+                    color: white;
+                }
+
+        .btn:hover,
+        .btn:focus {
+            opacity: 0.85;
+        }
+    </style>
+}
+
+<div class="postulaciones-wrapper">
+    <h4 class="section-title">Mis Postulaciones</h4>
+
+    <button class="btn btn-verde-oscuro mb-3" data-bs-toggle="modal" data-bs-target="#modalAutogestion">
+        <i class="fas fa-plus me-2"></i>Autogestionar Práctica
+    </button>
+
+
+    <div class="card-postulacion">
+        <div>
+            <h5>Internship IT Asset Management</h5>
+            <span class="estado-badge estado-Asignada">Asignada</span>
+        </div>
+        <a href="@Url.Action("VisualizacionPostulacion", "Practicas")" class="btn btn-outline-verde">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+
+    <div class="card-postulacion">
+        <div>
+            <h5>Desarrollador Junior</h5>
+            <span class="estado-badge estado-Aprobada">Aprobada</span>
+        </div>
+        <button class="btn btn-outline-verde">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <div class="card-postulacion">
+        <div>
+            <h5>Practicante en UX/UI</h5>
+            <span class="estado-badge estado-Cancelada">Cancelada</span>
+        </div>
+        <button class="btn btn-outline-verde">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal Autogestionar Práctica -->
+<div class="modal fade" id="modalAutogestion" tabindex="-1" aria-labelledby="modalAutogestionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+            <div class="modal-header" style="background-color: #2D594D; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title" id="modalAutogestionLabel">Autogestionar Práctica</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formAutogestion">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Nombre de la Empresa</label>
+                            <input type="text" class="form-control" name="empresa" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Sector</label>
+                            <input type="text" class="form-control" name="sector" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Nombre del Encargado</label>
+                            <input type="text" class="form-control" name="encargado" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Puesto</label>
+                            <input type="text" class="form-control" name="puesto" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Correo</label>
+                            <input type="email" class="form-control" name="correo" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Teléfono</label>
+                            <input type="text" class="form-control" name="telefono" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label>Provincia</label>
+                            <select class="form-select" id="provincia" onchange="cargarCantones()">
+                                <option value="">Seleccione una provincia</option>
+                                <option value="San José">San José</option>
+                                <option value="Alajuela">Alajuela</option>
+                                <option value="Cartago">Cartago</option>
+                                <option value="Heredia">Heredia</option>
+                                <option value="Guanacaste">Guanacaste</option>
+                                <option value="Puntarenas">Puntarenas</option>
+                                <option value="Limón">Limón</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label>Cantón</label>
+                            <select class="form-select" id="canton" onchange="cargarDistritos()">
+                                <option value="">Seleccione un cantón</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label>Distrito</label>
+                            <select class="form-select" id="distrito">
+                                <option value="">Seleccione un distrito</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label>Dirección exacta</label>
+                            <input type="text" class="form-control" name="direccion" />
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label>Descripción de Tareas</label>
+                            <textarea class="form-control" rows="3" name="descripcion"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Duración</label>
+                            <input type="text" class="form-control" name="duracion" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-gris" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-verde-medio" onclick="registrarPostulacion()">Registrar Vacante</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>*@
+
+<script>
+    function registrarPostulacion() {
+        const form = document.getElementById("formAutogestion");
+        const inputs = form.querySelectorAll("input, textarea");
+        let camposVacios = false;
+
+        inputs.forEach(input => {
+            if (input.value.trim() === "") {
+                camposVacios = true;
+            }
+        });
+
+        if (camposVacios) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Todos los campos son obligatorios',
+                confirmButtonColor: '#8CA653'
+            });
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'Vacante registrada correctamente',
+                confirmButtonColor: '#8CA653',
+                timer: 2000
+            });
+
+            const wrapper = document.querySelector('.postulaciones-wrapper');
+            const nuevaCard = document.createElement('div');
+            nuevaCard.className = 'card-postulacion';
+            nuevaCard.innerHTML = `
+                <div>
+                    <h5>${form.puesto.value}</h5>
+                    <span class="estado-badge estado-Pendiente">Pendiente</span>
+                </div>
+                <button class="btn btn-outline-verde">
+                    <i class="fas fa-plus"></i>
+                </button>
+            `;
+            wrapper.appendChild(nuevaCard);
+
+            form.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalAutogestion'));
+            modal.hide();
+        }
+    }
+
+        const datosCR = {
+            "San José": {
+            "San José": ["Carmen", "Merced", "Hospital", "Uruca", "Mata Redonda"],
+        "Escazú": ["Escazú Centro", "San Rafael", "San Antonio"],
+        "Desamparados": ["Desamparados", "San Rafael Arriba", "San Miguel"]
+        },
+        "Alajuela": {
+            "Alajuela": ["Alajuela", "San José", "Carrizal"],
+        "San Ramón": ["San Ramón", "Santiago", "San Juan"],
+        "Grecia": ["Grecia", "San Isidro", "San Roque"]
+        },
+        "Cartago": {
+            "Cartago": ["Oriental", "Occidental", "Carmen"],
+        "Turrialba": ["Turrialba", "La Suiza", "Peralta"]
+        }
+
+    };
+
+        function cargarCantones() {
+        const provincia = document.getElementById("provincia").value;
+        const cantonSelect = document.getElementById("canton");
+        const distritoSelect = document.getElementById("distrito");
+
+        cantonSelect.innerHTML = '<option value="">Seleccione un cantón</option>';
+        distritoSelect.innerHTML = '<option value="">Seleccione un distrito</option>';
+
+        if (datosCR[provincia]) {
+            Object.keys(datosCR[provincia]).forEach(canton => {
+                const option = document.createElement("option");
+                option.value = canton;
+                option.textContent = canton;
+                cantonSelect.appendChild(option);
+            });
+        }
+    }
+
+        function cargarDistritos() {
+        const provincia = document.getElementById("provincia").value;
+        const canton = document.getElementById("canton").value;
+        const distritoSelect = document.getElementById("distrito");
+
+        distritoSelect.innerHTML = '<option value="">Seleccione un distrito</option>';
+
+        if (datosCR[provincia] && datosCR[provincia][canton]) {
+            datosCR[provincia][canton].forEach(distrito => {
+                const option = document.createElement("option");
+                option.value = distrito;
+                option.textContent = distrito;
+                distritoSelect.appendChild(option);
+            });
+        }
+    }
+</script>
