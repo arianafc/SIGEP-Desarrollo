@@ -61,4 +61,10 @@ namespace SIGEP.Models
         public string Usuario { get; set; }
         public string Comentario { get; set; }
     }
+
+    public class EstadoVM
+    {
+        public int IdEstado { get; set; }
+        public string Descripcion { get; set; }
+    }
 }

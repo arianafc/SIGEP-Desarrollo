@@ -10,14 +10,18 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 using System.Web.Mvc;
 
 
 namespace SIGEP.Controllers
 {
     //[FiltroProfesor]
+    
     public class PracticasController : Controller
     {
+        Utilitarios utilitarios = new Utilitarios();
+
         // ==============================
         // VISTA PRINCIPAL VACANTES
         // ==============================
@@ -829,7 +833,7 @@ namespace SIGEP.Controllers
         {
             try
             {
-                using (var dbContext = new SIGEPEntities()) // Cambia por tu contexto
+                using (var dbContext = new SIGEPEntities())
                 {
                     // Obtener datos principales con el SP
                     var datosPractica = dbContext.ObtenerVisualizacionPracticaSP(idVacante, idUsuario).FirstOrDefault();
@@ -864,13 +868,15 @@ namespace SIGEP.Controllers
                         ContactoEmpresaEmail = datosPractica.ContactoEmpresaEmail,
                         ContactoEmpresaTelefono = datosPractica.ContactoEmpresaTelefono,
 
-                        // Datos de la Práctica
+                        // Datos de la Práctica - AGREGADO IdPractica
+                        IdPractica = datosPractica.IdPractica,
                         FechaAplicacion = datosPractica.FechaAplicacion,
                         EstadoPractica = datosPractica.EstadoPractica,
 
+                        // Cargar lista de estados para el dropdown
                         ListaEstados = dbContext.EstadosTB
-                    .Select(e => new EstadoVM { IdEstado = e.IdEstado, Descripcion = e.Descripcion })
-                    .ToList()
+                            .Select(e => new EstadoVM { IdEstado = e.IdEstado, Descripcion = e.Descripcion })
+                            .ToList()
                     };
 
                     // Obtener comentarios con el segundo SP
@@ -891,8 +897,6 @@ namespace SIGEP.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = "Error al cargar la información: " + ex.Message;
-                // Opcional: Registrar error como lo haces en tu proyecto
-                // Utilitarios.RegistrarError(ex, (int?)Session["idUsuario"]);
                 return View(new VacantePracticaVM());
             }
         }
@@ -916,22 +920,22 @@ namespace SIGEP.Controllers
 
                 using (var dbContext = new SIGEPEntities())
                 {
+                    // Ejecutar el SP
                     var resultado = dbContext.InsertarComentarioPracticaSP(idVacante, idUsuario, comentario, idUsuarioComentario).FirstOrDefault();
 
-                    if (resultado == 1)
+                    // Verificar si se insertó al menos una fila
+                    if (resultado > 0)
                     {
                         return Json(new { success = true, message = "Comentario agregado correctamente" });
                     }
                     else
                     {
-                        return Json(new { success = false, message = "No se pudo agregar el comentario" });
+                        return Json(new { success = false, message = "No se pudo agregar el comentario. Verifique que la práctica exista." });
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Registrar error si tienes utilidades para ello
-                // Utilitarios.RegistrarError(ex, (int?)Session["IdUsuario"]);
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
@@ -941,59 +945,146 @@ namespace SIGEP.Controllers
         {
             try
             {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
                 using (var dbContext = new SIGEPEntities())
                 {
-                    // Ejecutar SP mapeado
-                    var datosPractica = dbContext.ActualizarEstadoPracticaSP(idPractica, idEstado, comentario)
-                                                  .FirstOrDefault();
+                    // Ejecutar SP para actualizar estado
+                    var resultado = dbContext.ActualizarEstadoPracticaSP(idPractica, idEstado, comentario).FirstOrDefault();
 
-                    if (datosPractica == null)
+                    if (resultado == null)
                     {
                         return Json(new { success = false, message = "No se encontró la práctica." });
                     }
 
-                    // Crear ViewModel para devolver o usar en la vista
-                    var viewModel = new VacantePracticaVM
+                    // Crear el correo HTML usando tu formato existente
+                    if (!string.IsNullOrEmpty(resultado.EstudianteCorreo))
                     {
-                        IdPractica = datosPractica.IdPractica,
-                        IdVacante = datosPractica.IdVacante,
-                        IdUsuario = datosPractica.IdUsuario,
-                        EstudianteNombre = datosPractica.EstudianteNombre,
-                        EstudianteCorreo = datosPractica.EstudianteCorreo,
-                        EstadoDescripcion = datosPractica.EstadoDescripcion,
-                        UltimoComentario = datosPractica.Comentario,
-                        FechaUltimoComentario = datosPractica.FechaComentario,
-                        ListaEstados = dbContext.EstadosTB
-                    .Select(e => new EstadoVM { IdEstado = e.IdEstado, Descripcion = e.Descripcion })
-                    .ToList()
-                    };
+                        try
+                        {
+                            StringBuilder mensaje = new StringBuilder();
+                            mensaje.Append("<!DOCTYPE html>");
+                            mensaje.Append("<html lang='es'>");
+                            mensaje.Append("<head><meta charset='UTF-8'></head>");
+                            mensaje.Append("<body style='margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;'>");
+                            mensaje.Append("<table align='center' width='600' cellpadding='0' cellspacing='0' style='background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);'>");
 
-                    // Enviar correo al estudiante
-                    if (!string.IsNullOrEmpty(viewModel.EstudianteCorreo))
-                    {
-                        string remitente = ConfigurationManager.AppSettings["CorreoRemitente"];
-                        string password = ConfigurationManager.AppSettings["CorreoPassword"];
+                            // Encabezado
+                            mensaje.Append("<tr>");
+                            mensaje.Append("<td align='center' style='background-color:#2d594d; padding:20px;'>");
+                            mensaje.Append("<h2 style='color:#ffffff; margin:0; font-size:22px;'>Actualización de Estado de Práctica</h2>");
+                            mensaje.Append("</td>");
+                            mensaje.Append("</tr>");
 
-                        MailMessage mail = new MailMessage();
-                        mail.From = new MailAddress(remitente);
-                        mail.To.Add(viewModel.EstudianteCorreo);
-                        mail.Subject = "Actualización de estado de práctica";
-                        mail.Body = $"Hola {viewModel.EstudianteNombre},\n\n" +
-                                    $"Tu práctica (ID {viewModel.IdPractica}) ha cambiado al estado: {viewModel.EstadoDescripcion}.\n" +
-                                    $"Comentario: {viewModel.UltimoComentario}\n\nSaludos.";
+                            // Contenido
+                            mensaje.Append("<tr>");
+                            mensaje.Append("<td style='padding:30px; color:#333333; font-size:15px; line-height:1.6;'>");
+                            mensaje.Append("Estimado(a) <strong>" + resultado.EstudianteNombre + "</strong>,<br><br>");
+                            mensaje.Append("Le informamos que su práctica profesional ha cambiado de estado.<br><br>");
+                            mensaje.Append("<table style='width:100%; border-collapse:collapse; margin:20px 0;'>");
+                            mensaje.Append("<tr style='background-color:#f8f9fa;'>");
+                            mensaje.Append("<td style='padding:12px; border:1px solid #dee2e6; font-weight:bold; color:#2d594d;'>Nuevo Estado:</td>");
+                            mensaje.Append("<td style='padding:12px; border:1px solid #dee2e6;'>" + resultado.EstadoDescripcion + "</td>");
+                            mensaje.Append("</tr>");
+                            mensaje.Append("<tr>");
+                            mensaje.Append("<td style='padding:12px; border:1px solid #dee2e6; font-weight:bold; color:#2d594d;'>Comentario:</td>");
+                            mensaje.Append("<td style='padding:12px; border:1px solid #dee2e6;'>" + resultado.Comentario + "</td>");
+                            mensaje.Append("</tr>");
+                            mensaje.Append("<tr style='background-color:#f8f9fa;'>");
+                            mensaje.Append("<td style='padding:12px; border:1px solid #dee2e6; font-weight:bold; color:#2d594d;'>Fecha de Actualización:</td>");
+                            mensaje.Append("<td style='padding:12px; border:1px solid #dee2e6;'>" + resultado.FechaComentario?.ToString("dd/MM/yyyy HH:mm") + "</td>");
+                            mensaje.Append("</tr>");
+                            mensaje.Append("</table>");
+                            mensaje.Append("Para más información, puede ingresar al sistema SIGEP.<br><br>");
+                            mensaje.Append("Saludos cordiales,<br>");
+                            mensaje.Append("<strong>Sistema SIGEP</strong>");
+                            mensaje.Append("</td>");
+                            mensaje.Append("</tr>");
 
-                        SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587);
-                        smtp.Credentials = new NetworkCredential(remitente, password);
-                        smtp.EnableSsl = true;
-                        smtp.Send(mail);
+                            // Pie
+                            mensaje.Append("<tr>");
+                            mensaje.Append("<td align='center' style='background-color:#f0f0f0; padding:15px; font-size:12px; color:#666666;'>");
+                            mensaje.Append("© 2025 SIGEP. Todos los derechos reservados.");
+                            mensaje.Append("</td>");
+                            mensaje.Append("</tr>");
+                            mensaje.Append("</table>");
+                            mensaje.Append("</body>");
+                            mensaje.Append("</html>");
+
+                            // Enviar correo usando tu método utilitario
+                            bool correoEnviado = utilitarios.EnviarCorreo(
+                                resultado.EstudianteCorreo,
+                                mensaje.ToString(),
+                                "Actualización de Estado de Práctica - SIGEP"
+                            );
+
+                            if (correoEnviado)
+                            {
+                                return Json(new
+                                {
+                                    success = true,
+                                    message = "Estado actualizado correctamente y notificación enviada por correo.",
+                                    data = new
+                                    {
+                                        estado = resultado.EstadoDescripcion,
+                                        comentario = resultado.Comentario,
+                                        fecha = resultado.FechaComentario?.ToString("dd/MM/yyyy HH:mm")
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                return Json(new
+                                {
+                                    success = true,
+                                    message = "Estado actualizado correctamente, pero no se pudo enviar el correo de notificación.",
+                                    data = new
+                                    {
+                                        estado = resultado.EstadoDescripcion,
+                                        comentario = resultado.Comentario,
+                                        fecha = resultado.FechaComentario?.ToString("dd/MM/yyyy HH:mm")
+                                    }
+                                });
+                            }
+                        }
+                        catch (Exception emailEx)
+                        {
+                            // Error en el envío de correo, pero el estado se actualizó
+                            return Json(new
+                            {
+                                success = true,
+                                message = "Estado actualizado correctamente, pero ocurrió un error al enviar el correo: " + emailEx.Message,
+                                data = new
+                                {
+                                    estado = resultado.EstadoDescripcion,
+                                    comentario = resultado.Comentario,
+                                    fecha = resultado.FechaComentario?.ToString("dd/MM/yyyy HH:mm")
+                                }
+                            });
+                        }
                     }
-
-                    return Json(new { success = true, data = viewModel, message = "Estado actualizado y correo enviado." });
+                    else
+                    {
+                        return Json(new
+                        {
+                            success = true,
+                            message = "Estado actualizado correctamente, pero no se encontró correo del estudiante.",
+                            data = new
+                            {
+                                estado = resultado.EstadoDescripcion,
+                                comentario = resultado.Comentario,
+                                fecha = resultado.FechaComentario?.ToString("dd/MM/yyyy HH:mm")
+                            }
+                        });
+                    }
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
 

@@ -30,7 +30,8 @@ BEGIN
         ee.Email as ContactoEmpresaEmail,
         te.Telefono as ContactoEmpresaTelefono,
         
-        -- Datos de la Práctica
+        -- Datos de la Práctica (AGREGADO IdPractica)
+        p.IdPractica,
         p.FechaAplicacion,
         est.Descripcion as EstadoPractica
         
@@ -80,6 +81,7 @@ BEGIN
     SET NOCOUNT ON;
     
     DECLARE @IdPractica INT;
+    DECLARE @FilasAfectadas INT = 0;
     
     -- Obtener el IdPractica
     SELECT @IdPractica = IdPractica 
@@ -93,12 +95,11 @@ BEGIN
         VALUES 
         (@Comentario, GETDATE(), @IdUsuarioComentario, @IdPractica, 'General');
         
-        SELECT 1 as Resultado; -- Éxito
+        SET @FilasAfectadas = @@ROWCOUNT;
     END
-    ELSE
-    BEGIN
-        SELECT 0 as Resultado; -- Error: no se encontró la práctica
-    END
+    
+    -- Devolver el número de filas afectadas
+    SELECT @FilasAfectadas as FilasAfectadas;
 END
 
 -- Stored Procedure para actualizar estado de la practica
