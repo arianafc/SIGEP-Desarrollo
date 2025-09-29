@@ -1122,7 +1122,14 @@ namespace SIGEP.Controllers
                 using (var dbContext = new SIGEPEntities())
                 {
                     // Ejecutar SP para actualizar estado
-                    var resultado = dbContext.ActualizarEstadoPracticaSP(idPractica, idEstado, comentario).FirstOrDefault();
+                    int idUsuarioSesion = Convert.ToInt32(Session["IdUsuario"]);
+
+                    var resultado = dbContext.ActualizarEstadoPracticaSP(
+                        idPractica,
+                        idEstado,
+                        comentario,
+                        idUsuarioSesion  // Agregar este parámetro
+                    ).FirstOrDefault();
 
                     if (resultado == null)
                     {
@@ -1256,6 +1263,17 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
+
+
+        [HttpGet]
+        public ActionResult PracticasCoordinador()
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Home");
+
+            return View(); // buscará Views/Practicas/PracticasCoordinador.cshtml
+        }
+
 
         [HttpGet]
         public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0)
@@ -1404,6 +1422,191 @@ namespace SIGEP.Controllers
                 return View(new MisPostulacionesVM());
             }
         }
+
+
+        [HttpGet]
+        public ActionResult ListadoEstudiantes()
+        {
+            if (Session["IdUsuario"] == null)
+                return RedirectToAction("Login", "Home");
+
+            return View(); // la vista que te dejo abajo
+        }
+
+        // === API para DataTables (AJAX) ===
+        // Devuelve estudiantes (de las especialidades del profesor) y su situación global de práctica,
+        // más datos de contacto/empresa y relación con alguna vacante reciente.
+        [HttpGet]
+        public JsonResult ListarEstudiantesJson(int? idVacante = null)
+        {
+            if (Session["IdUsuario"] == null)
+                return Json(new { data = new object[0] }, JsonRequestBehavior.AllowGet);
+
+            int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
+
+            // 1) Traer base desde SP (ya lo tienes en BDD)
+            //    SELECT global: EstadoPractica (Asignada / Con Procesos Activos / Sin Procesos Activos),
+            //    EstadoUsuario, Especialidad, TieneRelacionEnVacante, EstadoVacante, IdPracticaVacante
+            var lista = db.ObtenerEstudiantesProfesorSP(idProfesor, idVacante).ToList();
+
+            // 2) Proyectar con datos adicionales (teléfono y última empresa)
+            var rows = lista.Select(x => new EstudianteListadoVM
+            {
+                IdUsuario = x.IdUsuario,
+                Cedula = x.Cedula,
+                Nombre = x.Nombre,
+                Especialidad = x.Especialidad,
+
+                Telefono = db.TelefonosTB
+                 .Where(t => t.IdUsuario == x.IdUsuario)
+                 .Select(t => t.Telefono)
+                 .FirstOrDefault(),
+
+                EstadoPostulacion = x.EstadoPractica,
+                Empresa = UltimaEmpresa(x.IdUsuario),
+
+                // ⬇️ Normalizamos el nullable a bool y además caemos a IdPracticaVacante si hace falta
+                TieneRelacionEnVacante =
+        ( /* si existe en el SP */ (bool?)(x.TieneRelacionEnVacante ?? null) ?? false)
+        || (x.IdPracticaVacante != null),
+
+                // Usa el valor de EstadoVacante si viene; si no, muestra “Con relación” si hay relación
+                Tipo = !string.IsNullOrEmpty(x.EstadoVacante)
+            ? x.EstadoVacante
+            : (((bool?)(x.TieneRelacionEnVacante ?? null) ?? false) || (x.IdPracticaVacante != null) ? "Con relación" : "—"),
+
+                IdPracticaVacante = x.IdPracticaVacante,
+                EstadoVacante = x.EstadoVacante,
+                IdVacanteUltima = UltimaVacanteId(x.IdUsuario)
+            }).ToList();
+
+
+            return Json(new { data = rows }, JsonRequestBehavior.AllowGet);
+        }
+
+        private string UltimaEmpresa(int idUsuario)
+        {
+            var q = from p in db.PracticaEstudianteTB
+                    join v in db.VacantesPracticasTB on p.IdVacante equals v.IdVacante
+                    join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa
+                    where p.IdUsuario == idUsuario
+                    orderby p.FechaAplicacion descending, p.IdPractica descending
+                    select e.NombreEmpresa;
+            return q.FirstOrDefault();
+        }
+
+        private int? UltimaVacanteId(int idUsuario)
+        {
+            var q = from p in db.PracticaEstudianteTB
+                    where p.IdUsuario == idUsuario
+                    orderby p.FechaAplicacion descending, p.IdPractica descending
+                    select (int?)p.IdVacante;
+            return q.FirstOrDefault();
+        }
+
+        // === Desasignar/retirar práctica (usa SP de actualización de estado) ===
+        [HttpPost]
+        public JsonResult DesasignarPractica(int idPractica, string comentario)
+        {
+            try
+            {
+                // Buscar estado "Retirada" o "Cancelada" (usa el que exista en EstadosTB)
+                int idEstado = EstadoIdPorDescripcion(new[] { "Retirada", "Cancelada" });
+
+                db.Database.ExecuteSqlCommand(
+                    "EXEC dbo.ActualizarEstadoPracticaSP @IdPractica, @IdEstado, @Comentario",
+                    new SqlParameter("@IdPractica", idPractica),
+                    new SqlParameter("@IdEstado", idEstado),
+                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
+                );
+
+                return Json(new { ok = true, msg = "Práctica desasignada correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, msg = ex.Message });
+            }
+        }
+
+        // === Cambiar estado académico del usuario (actualiza UsuariosTB.IdEstado) ===
+        [HttpPost]
+        public JsonResult CambiarEstadoAcademico(int idUsuario, string nuevoEstado)
+        {
+            try
+            {
+                int idEstado = EstadoIdPorDescripcion(new[] { nuevoEstado }); // p.ej. "Aprobado" o "Rezagado"
+                var u = db.UsuariosTB.Find(idUsuario);
+                if (u == null) return Json(new { ok = false, msg = "Usuario no encontrado." });
+
+                u.IdEstado = idEstado;
+                db.SaveChanges();
+
+                return Json(new { ok = true, msg = "Estado académico actualizado." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, msg = ex.Message });
+            }
+        }
+
+        // === Visualización de la postulación (usa SP que ya tienes) ===
+        
+        // Helpers
+
+        private int EstadoIdPorDescripcion(IEnumerable<string> descripciones)
+        {
+            var set = descripciones.Select(d => d.Trim()).ToList();
+            var estado = db.EstadosTB.FirstOrDefault(e => set.Contains(e.Descripcion));
+            if (estado == null)
+                throw new Exception("No se encontró un estado válido en EstadosTB: " + string.Join(" / ", set));
+            return estado.IdEstado;
+        }
+
+        // DTO para DataTables
+        public class EstudianteListadoVM
+        {
+            public int IdUsuario { get; set; }
+            public string Cedula { get; set; }
+            public string Nombre { get; set; }
+            public string Especialidad { get; set; }
+            public string Telefono { get; set; }
+            public string EstadoPostulacion { get; set; }
+            public string Empresa { get; set; }
+            public string Tipo { get; set; }
+            public int? IdPracticaVacante { get; set; }
+            public string EstadoVacante { get; set; }
+            public int? IdVacanteUltima { get; set; }
+
+            // ⬇️ NUEVA: para evitar el "no existe en el contexto actual"
+            public bool TieneRelacionEnVacante { get; set; }
+        }
+
+
+        // ViewModel para la Visualización (propiedades que devuelve tu SP)
+        public class VisualizacionVM
+        {
+            public int IdVacante { get; set; }
+            public string Nombre { get; set; }
+            public string EmpresaNombre { get; set; }
+            public string Requerimientos { get; set; }
+            public DateTime? FechaMaxAplicacion { get; set; }
+            public string ModalidadNombre { get; set; }
+
+            public int IdUsuario { get; set; }
+            public string EstudianteNombre { get; set; }
+            public string EstudianteCedula { get; set; }
+            public int EstudianteEdad { get; set; }
+            public string EstudianteEspecialidad { get; set; }
+            public string EstudianteCorreo { get; set; }
+
+            public string ContactoEmpresaNombre { get; set; }
+            public string ContactoEmpresaEmail { get; set; }
+            public string ContactoEmpresaTelefono { get; set; }
+
+            public DateTime? FechaAplicacion { get; set; }
+            public string EstadoPractica { get; set; }
+        }
+
 
         [HttpPost]
         public ActionResult RegistrarAutogestion(AutogestionPracticaVM model)
