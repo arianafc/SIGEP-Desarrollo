@@ -67,19 +67,14 @@
     </table>
 </div>
 
-
 <!-- MODAL CREAR -->
 <div class="modal fade" id="modalCrearVacante" tabindex="-1" aria-labelledby="modalCrearVacanteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-
-            <!-- HEADER -->
             <div class="modal-header" style="background-color: #2D594D; color: white;">
                 <h5 class="modal-title">Nueva Vacante para Práctica</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
-            <!-- BODY -->
             <div class="modal-body px-4">
                 <div class="mb-4">
                     <h5 class="section-title">Información General</h5>
@@ -89,7 +84,6 @@
                                 <label>Nombre de la Vacante <span class="text-danger">*</span></label>
                                 <input type="text" name="Nombre" class="form-control" placeholder="Ejemplo: Asistente bancario" required />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Empresa <span class="text-danger">*</span></label>
                                 <select id="IdEmpresa" name="IdEmpresa" class="form-control" required>
@@ -100,12 +94,10 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label for="ubicacionEmpresa">Ubicación</label>
                                 <input type="text" id="ubicacionEmpresa" class="form-control" readonly />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Especialidad <span class="text-danger">*</span></label>
                                 <select name="IdEspecialidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
@@ -116,12 +108,10 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Cantidad de Cupos <span class="text-danger">*</span></label>
                                 <input type="number" name="NumCupos" min="1" class="form-control" placeholder="Ejemplo: 3" required />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Modalidad <span class="text-danger">*</span></label>
                                 <select name="IdModalidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
@@ -132,22 +122,18 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
                                 <input type="date" name="FechaMaxAplicacion" class="form-control" required />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Fecha de Cierre <span class="text-danger">*</span></label>
                                 <input type="date" name="FechaCierre" class="form-control" required />
                             </div>
-
                             <div class="col-12 form-group mb-3">
                                 <label>Requisitos <span class="text-danger">*</span></label>
                                 <textarea name="Requerimientos" rows="3" class="form-control" placeholder="Habilidades y conocimientos requeridos" required></textarea>
                             </div>
-
                             <div class="col-12 form-group mb-3">
                                 <label>Descripción <span class="text-danger">*</span></label>
                                 <textarea name="Descripcion" rows="3" class="form-control" placeholder="Detalles de la vacante..." required></textarea>
@@ -157,8 +143,6 @@
                     </form>
                 </div>
             </div>
-
-            <!-- FOOTER -->
             <div class="modal-footer px-4">
                 <button id="btnGuardarVacante" type="submit" form="formCrearVacante" class="btn CerrarModal">Guardar y Publicar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -171,26 +155,20 @@
 <div class="modal fade" id="modalEditarVacante" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-
-            <!-- HEADER -->
             <div class="modal-header" style="background-color: #2D594D; color: white;">
                 <h5 class="modal-title">Edición de Vacante</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
-            <!-- BODY -->
             <div class="modal-body px-4">
                 <div class="mb-4">
                     <h5 class="section-title">Información General</h5>
                     <form id="formEditarVacante">
                         <input type="hidden" name="IdVacante" id="edit-IdVacante" />
-
                         <div class="row">
                             <div class="col-md-6 form-group mb-3">
                                 <label>Nombre de la Vacante <span class="text-danger">*</span></label>
                                 <input type="text" id="edit-Nombre" name="Nombre" class="form-control" placeholder="Ejemplo: Asistente bancario" required />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label for="edit-IdEmpresa">Empresa</label>
                                 <select id="edit-IdEmpresa" name="IdEmpresa" class="form-control" required>
@@ -201,12 +179,10 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label for="edit-Ubicacion">Ubicación</label>
                                 <input type="text" id="edit-Ubicacion" class="form-control" readonly />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Especialidad <span class="text-danger">*</span></label>
                                 <select id="edit-IdEspecialidad" name="IdEspecialidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
@@ -217,12 +193,10 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Cantidad de Cupos <span class="text-danger">*</span></label>
                                 <input type="number" id="edit-NumCupos" name="NumCupos" class="form-control" min="1" placeholder="Ejemplo: 3" required />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Modalidad <span class="text-danger">*</span></label>
                                 <select id="edit-IdModalidad" name="IdModalidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
@@ -233,22 +207,18 @@
                                     }
                                 </select>
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Fecha límite de aplicación <span class="text-danger">*</span></label>
                                 <input type="date" id="edit-FechaMaxAplicacion" name="FechaMaxAplicacion" class="form-control" required />
                             </div>
-
                             <div class="col-md-6 form-group mb-3">
                                 <label>Fecha de cierre <span class="text-danger">*</span></label>
                                 <input type="date" id="edit-FechaCierre" name="FechaCierre" class="form-control" required />
                             </div>
-
                             <div class="col-12 form-group mb-3">
                                 <label>Requisitos <span class="text-danger">*</span></label>
                                 <textarea id="edit-Requerimientos" name="Requerimientos" rows="3" class="form-control" placeholder="Habilidades y conocimientos requeridos" required></textarea>
                             </div>
-
                             <div class="col-12 form-group mb-3">
                                 <label>Descripción <span class="text-danger">*</span></label>
                                 <textarea id="edit-Descripcion" name="Descripcion" rows="3" class="form-control" placeholder="Detalles de la vacante..." required></textarea>
@@ -257,8 +227,6 @@
                     </form>
                 </div>
             </div>
-
-            <!-- FOOTER -->
             <div class="modal-footer px-4">
                 <button id="btnActualizarVacante" type="submit" form="formEditarVacante" class="btn CerrarModal">Actualizar Vacante</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -267,19 +235,14 @@
     </div>
 </div>
 
-
 <!-- MODAL VISUALIZAR -->
 <div class="modal fade" id="modalVisualizarVacante" tabindex="-1" aria-labelledby="modalVisualizarVacanteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-
-            <!-- HEADER -->
             <div class="modal-header" style="background-color: #2D594D; color: white;">
                 <h5 class="modal-title">Visualizar Vacante</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-
-            <!-- BODY -->
             <div class="modal-body px-4">
                 <div class="mb-4">
                     <h5 class="section-title">Información General</h5>
@@ -288,7 +251,6 @@
                             <label>Nombre de la Vacante <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="vis-Nombre" readonly>
                         </div>
-
                         <div class="col-md-6 form-group mb-3">
                             <label>Empresa <span class="text-danger">*</span></label>
                             <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Empresa" disabled>
@@ -299,12 +261,10 @@
                                 }
                             </select>
                         </div>
-
                         <div class="col-md-6 form-group mb-3">
                             <label>Lugar / Ubicación <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="vis-Ubicacion" readonly>
                         </div>
-
                         <div class="col-md-6 form-group mb-3">
                             <label>Especialidad <span class="text-danger">*</span></label>
                             <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Especialidad" disabled>
@@ -315,12 +275,10 @@
                                 }
                             </select>
                         </div>
-
                         <div class="col-md-6 form-group mb-3">
                             <label>Cantidad de Cupos <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="vis-NumCupos" readonly>
                         </div>
-
                         <div class="col-md-6 form-group mb-3">
                             <label>Modalidad <span class="text-danger">*</span></label>
                             <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Modalidad" disabled>
@@ -331,22 +289,18 @@
                                 }
                             </select>
                         </div>
-
                         <div class="col-md-6 form-group mb-3">
                             <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="vis-FechaAplicacion" readonly>
                         </div>
-
                         <div class="col-md-6 form-group mb-3">
                             <label>Fecha de Cierre <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="vis-FechaCierre" readonly>
                         </div>
-
                         <div class="col-12 form-group mb-3">
                             <label>Requisitos <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="vis-Requerimientos" rows="3" readonly></textarea>
                         </div>
-
                         <div class="col-12 form-group mb-3">
                             <label>Descripción <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="vis-Descripcion" rows="3" readonly></textarea>
@@ -357,9 +311,7 @@
                 <!-- LISTADO DE POSTULACIONES -->
                 <div class="mb-4">
                     <h5 class="section-title">Aplicaciones</h5>
-                    <ul class="list-group" id="listaPostulaciones">
-                        <!-- Se carga dinámicamente desde JS -->
-                    </ul>
+                    <ul class="list-group" id="listaPostulaciones"></ul>
                     <span id="mensajeSinAsignados" class="text-muted" style="display:none;">Ningún estudiante asignado aún</span>
                 </div>
             </div>
@@ -369,34 +321,26 @@
 
 <!-- MODAL ASIGNAR -->
 <div class="modal fade" id="modalAsignar" tabindex="-1" aria-labelledby="modalAsignarLabel" aria-hidden="true">
-
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-
-            <!-- HEADER -->
             <div class="modal-header" style="background-color: #2D594D; color: white;">
                 <h5 class="modal-title">Asignar Vacante</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-
-            <!-- BODY -->
             <div class="modal-body px-4">
                 <div class="mb-4 card rounded-5 p-3">
                     <h5 class="section-title">Seleccionar Estudiante para Asignar</h5>
-
                     <table id="miTablaAsignar" class="display nowrap w-100">
                         <thead class="table-light">
                             <tr style="text-align: center;">
                                 <th>Nombre</th>
                                 <th>Cédula</th>
-                                <th>Estado Práctica</th>
                                 <th>Especialidad</th>
+                                <th>Estado Práctica</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Se carga dinámicamente desde JS -->
-                        </tbody>
+                        <tbody><!-- dinámico --></tbody>
                     </table>
                 </div>
             </div>
@@ -407,7 +351,10 @@
 @section Scripts {
     <script>
 $(function () {
-    // --- Inicializar DataTable principal ---
+
+    // ===============================
+    // DataTable PRINCIPAL
+    // ===============================
     var tabla = $('#miTabla').DataTable({
         responsive: true,
         ajax: {
@@ -437,32 +384,38 @@ $(function () {
             {
                 data: 'IdVacante',
                 orderable: false,
-                render: function (data) {
+                render: function (data, type, row) {
                     return `
-                        <button class="btn bg-transparent btn-asignar" data-id="${data}" title="Asignar" style="color:#2d594d"><i class="fas fa-user-plus"></i></button>
-                        <button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d"><i class="fas fa-eye"></i></button>
-                        <button class="btn bg-transparent btn-editar" data-id="${data}" title="Editar" style="color:#2d594d"><i class="fas fa-sync-alt"></i></button>
-                        <button class="btn bg-transparent btn-eliminar" data-id="${data}" title="Eliminar" style="color:#2d594d"><i class="fas fa-trash"></i></button>
+                        <button class="btn bg-transparent btn-asignar" data-id="${data}" title="Asignar" style="color:#2d594d">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-editar" data-id="${data}" title="Editar" style="color:#2d594d">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-eliminar" data-id="${data}" title="Eliminar" style="color:#2d594d">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     `;
                 }
             }
         ]
     });
 
-    // --- Filtros ---
+    // Filtros
     $('#filtroPractica, #filtroEspecialidad, #filtroModalidad').on('change', function () {
         tabla.ajax.reload();
     });
 
-    // --- Crear vacante ---
+    // ===============================
+    // CREAR
+    // ===============================
     $('#btnGuardarVacante').on('click', function (e) {
         e.preventDefault();
         var $form = $('#formCrearVacante');
-
-        if (!$form[0].checkValidity()) {
-            $form[0].reportValidity();
-            return;
-        }
+        if (!$form[0].checkValidity()) { $form[0].reportValidity(); return; }
 
         $.ajax({
             url: '@Url.Action("Crear", "Practicas")',
@@ -480,46 +433,37 @@ $(function () {
                     Swal.fire({ icon: 'error', title: 'Error', text: res.message || 'Error en servidor' });
                 }
             },
-            error: function () {
-                Swal.fire('Error', 'Error en la petición al servidor.', 'error');
-            }
+            error: function () { Swal.fire('Error', 'Error en la petición al servidor.', 'error'); }
         });
     });
 
-    // --- Cambiar empresa en CREAR ---
+    // Ubicación empresa (crear / editar)
     $('#IdEmpresa').on('change', function () {
         var idEmpresa = $(this).val();
         if (idEmpresa) {
             $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
-                { idEmpresa: idEmpresa }, function (res) {
+                { idEmpresa }, function (res) {
                     $('#ubicacionEmpresa').val(res.ok ? res.ubicacion : '');
-                }).fail(function () {
-                    $('#ubicacionEmpresa').val('');
-                });
-        } else {
-            $('#ubicacionEmpresa').val('');
-        }
+                }).fail(function(){ $('#ubicacionEmpresa').val(''); });
+        } else { $('#ubicacionEmpresa').val(''); }
     });
 
-    // --- Cambiar empresa en EDITAR ---
     $('#edit-IdEmpresa').on('change', function () {
         var idEmpresa = $(this).val();
         if (idEmpresa) {
             $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
-                { idEmpresa: idEmpresa }, function (res) {
+                { idEmpresa }, function (res) {
                     $('#edit-Ubicacion').val(res.ok ? res.ubicacion : '');
-                }).fail(function () {
-                    $('#edit-Ubicacion').val('');
-                });
-        } else {
-            $('#edit-Ubicacion').val('');
-        }
+                }).fail(function(){ $('#edit-Ubicacion').val(''); });
+        } else { $('#edit-Ubicacion').val(''); }
     });
 
-    // --- Editar ---
+    // ===============================
+    // EDITAR
+    // ===============================
     $('#miTabla').on('click', '.btn-editar', function () {
         var id = $(this).data('id');
-        $.get('@Url.Action("Detalle", "Practicas")', { id: id }, function (res) {
+        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res) {
             if (res.ok && res.data) {
                 var d = res.data;
                 $('#edit-IdVacante').val(d.IdVacante);
@@ -543,10 +487,7 @@ $(function () {
     $('#btnActualizarVacante').on('click', function (e) {
         e.preventDefault();
         var $form = $('#formEditarVacante');
-        if (!$form[0].checkValidity()) {
-            $form[0].reportValidity();
-            return;
-        }
+        if (!$form[0].checkValidity()) { $form[0].reportValidity(); return; }
 
         $.ajax({
             url: '@Url.Action("Editar", "Practicas")',
@@ -561,13 +502,13 @@ $(function () {
                     Swal.fire({ icon: 'error', title: 'Error', text: res.message || 'Error en validación' });
                 }
             },
-            error: function () {
-                Swal.fire('Error', 'Error en la petición al servidor.', 'error');
-            }
+            error: function () { Swal.fire('Error', 'Error en la petición al servidor.', 'error'); }
         });
     });
 
-    // --- Eliminar ---
+    // ===============================
+    // ELIMINAR
+    // ===============================
     $('#miTabla').on('click', '.btn-eliminar', function () {
         var id = $(this).data('id');
         Swal.fire({
@@ -578,7 +519,7 @@ $(function () {
             confirmButtonText: 'Sí, eliminar'
         }).then((result) => {
             if (result.isConfirmed) {
-                $.post('@Url.Action("Eliminar", "Practicas")', { id: id }, function (res) {
+                $.post('@Url.Action("Eliminar", "Practicas")', { id }, function (res) {
                     if (res.ok) {
                         Swal.fire('Eliminado', res.message, 'success');
                         tabla.ajax.reload();
@@ -590,13 +531,14 @@ $(function () {
         });
     });
 
-    // --- Visualizar ---
+    // ===============================
+    // VISUALIZAR + Postulaciones
+    // ===============================
     $('#miTabla').on('click', '.btn-visualizar', function () {
         var id = $(this).data('id');
-        $.get('@Url.Action("Detalle", "Practicas")', { id: id }, function (res) {
+        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res) {
             if (res.ok && res.data) {
                 var d = res.data;
-
                 $('#vis-Nombre').val(d.Nombre);
                 $('#vis-Empresa').val(d.IdEmpresa);
                 $('#vis-Ubicacion').val(d.Ubicacion);
@@ -605,17 +547,13 @@ $(function () {
                 $('#vis-Modalidad').val(d.IdModalidad);
                 $('#vis-Requerimientos').val(d.Requerimientos);
                 $('#vis-Descripcion').val(d.Descripcion);
-
                 $('#vis-FechaAplicacion').val(d.FechaMaxAplicacion ? d.FechaMaxAplicacion.split('T')[0] : '');
                 $('#vis-FechaCierre').val(d.FechaCierre ? d.FechaCierre.split('T')[0] : '');
-
                 $('#modalVisualizarVacante').modal('show');
 
-                // Cargar postulaciones
                 $.get('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: d.IdVacante }, function (res2) {
                     var $lista = $('#listaPostulaciones');
                     $lista.empty();
-
                     if (res2.ok && res2.data && res2.data.length > 0) {
                         $('#mensajeSinAsignados').hide();
                         res2.data.forEach(function (p) {
@@ -631,111 +569,129 @@ $(function () {
         });
     });
 
-    // --- Asignar (FIX COMPLETO) ---
+    // ===============================
+    // ASIGNAR (mismo comportamiento que VistaVacantesProfesor)
+    // ===============================
+    function escapeHtml(text){ if(!text&&text!==0) return ''; return $('<div>').text(text).html(); }
+    function badgeEstado(estado) {
+        var est = (estado || '').toLowerCase();
+        var cls = 'bg-secondary';
+        if (['asignada','asignado'].includes(est)) cls = 'bg-success';
+        else if (['en proceso','en progreso','pendiente de aprobación'].includes(est)) cls = 'bg-warning';
+        else if (['rechazada','retirada','rezagado'].includes(est)) cls = 'bg-danger';
+        else if (['aprobada','finalizada'].includes(est)) cls = 'bg-primary';
+        return `<span class="badge ${cls}">${estado || '—'}</span>`;
+    }
+
     $('#miTabla').on('click', '.btn-asignar', function () {
         var idVacante = $(this).data('id');
         $('#modalAsignar').data('idVacante', idVacante);
 
-        // 1) Si ya hay DataTable, destruir ANTES de tocar el DOM
         if ($.fn.DataTable.isDataTable('#miTablaAsignar')) {
             $('#miTablaAsignar').DataTable().clear().destroy();
         }
-
-        // 2) Limpiar tbody sin insertar filas con colspan
         var $tbody = $('#miTablaAsignar tbody').empty();
 
-        // 3) Traer datos
-        $.get('@Url.Action("ObtenerEstudiantesParaAsignar", "Practicas")', { idVacante: idVacante })
-            .done(function (res) {
-                if (!res.ok) {
-                    Swal.fire('Error', res.message || 'No se pudo cargar estudiantes', 'error');
-                    return;
-                }
+        // Usa la misma acción que el profesor
+        $.getJSON('@Url.Action("ObtenerEstudiantesAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
+            if (!res || !res.ok) {
+                Swal.fire('Error', res && res.message || 'No se pudo cargar estudiantes', 'error');
+                return;
+            }
 
-                var lista = Array.isArray(res.data) ? res.data : [];
+            var lista = Array.isArray(res.data) ? res.data : [];
+            if (lista.length === 0) {
+                $tbody.append('<tr><td colspan="5" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
+            } else {
+                lista.forEach(function(e){
+                    var estado = (e.EstadoVacante || e.EstadoMostrar || '').trim();
+                    var est = (estado || '').toLowerCase();
+                    var badge = badgeEstado(estado || (e.TieneRelacionEnVacante ? 'Con Procesos Activos' : 'Sin Procesos Activos'));
 
-                if (lista.length > 0) {
-                    lista.forEach(function (e) {
-                        // Estado visual:
-                        // - Si tiene EstadoVacante, muéstralo (p.ej. "En proceso")
-                        // - Si no, usa Asignada global
-                        var estadoHtml = e.EstadoVacante
-                            ? `<span class="badge-en-proceso">${e.EstadoVacante}</span>`
-                            : (e.Asignada
-                                ? '<span class="badge-asignada">Práctica Asignada</span>'
-                                : '<span class="badge-no-asignada">Sin Práctica</span>');
+                    var btn = '';
+                    if (!e.TieneRelacionEnVacante) {
+                        btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante" data-idusuario="${e.IdUsuario}">Asignar</button>`;
+                    } else if (est === 'retirada') {
+                        btn = `<button class="btn btn-sm btn-outline-success btn-reactivar-estudiante" data-idusuario="${e.IdUsuario}">Reactivar</button>`;
+                    } else if (!['rechazada','aprobada','finalizada'].includes(est)) {
+                        btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante" data-idusuario="${e.IdUsuario}">Retirar</button>`;
+                    } // finales -> sin botón
 
-                        var disabled = e.TieneRelacionEnVacante
-                            ? 'disabled title="Ya tiene proceso en esta vacante"'
-                            : '';
-
-                        // EXACTAMENTE 5 celdas (coinciden con <thead>)
-                        $tbody.append(`
-                            <tr>
-                                <td>${e.NombreCompleto}</td>
-                                <td>${e.Cedula || ''}</td>
-                                <td>${estadoHtml}</td>
-                                <td>${e.Especialidad || ''}</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-success btn-asignar-estudiante"
-                                            data-id="${e.IdEstudiante}" ${disabled}>Asignar</button>
-                                </td>
-                            </tr>
-                        `);
-                    });
-                }
-
-                // 4) Inicializar DataTable DESPUÉS de pintar filas
-                $('#miTablaAsignar').DataTable({
-                    responsive: true,
-                    autoWidth: false,
-                    scrollX: true,
-                    pageLength: 5,
-                    deferRender: true,
-                    language: {
-                        url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
-                        emptyTable: "No hay estudiantes disponibles"
-                    }
+                    $tbody.append(`
+                        <tr>
+                            <td>${escapeHtml(e.NombreCompleto)}</td>
+                            <td>${escapeHtml(e.Cedula || '')}</td>
+                            <td>${escapeHtml(e.Especialidad || '')}</td>
+                            <td>${badge}</td>
+                            <td class="text-center">${btn}</td>
+                        </tr>
+                    `);
                 });
+            }
 
-                // 5) Mostrar modal
-                $('#modalAsignar').modal('show');
-            })
-            .fail(function () {
-                Swal.fire('Error', 'Error en la petición al servidor.', 'error');
+            $('#miTablaAsignar').DataTable({
+                responsive: true,
+                autoWidth: false,
+                scrollX: true,
+                pageLength: 5,
+                deferRender: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+                    emptyTable: "No hay estudiantes disponibles"
+                }
             });
+
+            $('#modalAsignar').modal('show');
+        }).fail(function () {
+            Swal.fire('Error', 'Error en la petición al servidor.', 'error');
+        });
     });
 
-    // --- Click Asignar Estudiante (delegado) ---
     $('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
-        var idEstudiante = $(this).data('id');
+        var idUsuario = $(this).data('idusuario');
         var idVacante = $('#modalAsignar').data('idVacante');
 
-        Swal.fire({
-            title: '¿Asignar este estudiante?',
-            text: 'El estudiante será asignado a la vacante seleccionada',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, asignar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post('@Url.Action("AsignarEstudiante", "Practicas")',
-                    { idVacante: idVacante, idEstudiante: idEstudiante },
-                    function (res) {
-                        if (res.ok) {
-                            Swal.fire('Éxito', res.message, 'success');
-                            $('#modalAsignar').modal('hide');
-                            tabla.ajax.reload();
-                        } else {
-                            Swal.fire('Error', res.message, 'error');
-                        }
-                    }
-                );
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Éxito', resp.message || 'Asignado a "En proceso".', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                $('#miTabla').DataTable().ajax.reload(null, false);
+            } else {
+                Swal.fire('Error', resp && resp.message || 'No se pudo asignar.', 'error');
             }
         });
     });
-});
+
+    $('#miTablaAsignar').on('click', '.btn-retirar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignar').data('idVacante');
+
+        $.post('@Url.Action("RetirarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Listo', resp.message || 'Marcado como Retirada.', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                $('#miTabla').DataTable().ajax.reload(null, false);
+            } else {
+                Swal.fire('Error', resp && resp.message || 'No se pudo retirar.', 'error');
+            }
+        });
+    });
+
+    $('#miTablaAsignar').on('click', '.btn-reactivar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignar').data('idVacante');
+
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Listo', resp.message || 'Reactivado a "En proceso".', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                $('#miTabla').DataTable().ajax.reload(null, false);
+            } else {
+                Swal.fire('Error', resp && resp.message || 'No se pudo reactivar.', 'error');
+            }
+        });
+    });
+
+}); // fin ready
     </script>
 }
-
-
