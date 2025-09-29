@@ -829,3 +829,111 @@ table.dataTable {
     background-color: transparent; /* sin fondo */
     /* Puedes agregar algún efecto si quieres */
 }
+
+
+/*Estilos de la vista PostulacionesEstudiantes en practicas*/
+body {
+    background-color: #F2F2F2;
+    font-family: 'Rubik', sans-serif;
+}
+
+.postulaciones-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.section-title {
+    color: #2D594D;
+    font-weight: 600;
+    border-bottom: 2px solid #8CA653;
+    margin-bottom: 1.5rem;
+    padding-bottom: .5rem;
+}
+
+.card-postulacion {
+    background-color: white;
+    border-left: 8px solid #2D594D;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.estado-badge {
+    font-weight: bold;
+    padding: .5rem 1rem;
+    border-radius: 8px;
+    color: white;
+}
+
+.estado-Aprobada {
+    background-color: #2D594D;
+}
+
+.estado-Asignada {
+    background-color: #8CA653;
+}
+
+.estado-Pendiente {
+    background-color: #d1a602;
+}
+
+.estado-Cancelada {
+    background-color: #B00020;
+}
+
+
+.btn-verde-oscuro {
+    background-color: #2D594D;
+    color: white;
+    border: none;
+}
+
+.btn-verde-medio {
+    background-color: #8CA653;
+    color: white;
+    border: none;
+}
+
+.btn-verde-oliva {
+    background-color: #768C46;
+    color: white;
+    border: none;
+}
+
+.btn-gris {
+    background-color: #F2F2F2;
+    color: #2D594D;
+    border: 1px solid #2D594D;
+}
+
+.btn-outline-verde {
+    background-color: transparent;
+    border: 1px solid #8CA653;
+    color: #2D594D;
+    border-radius: 6px;
+    padding: 6px 12px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+    .btn-outline-verde i {
+        color: #2D594D;
+    }
+
+    .btn-outline-verde:hover {
+        background-color: #8CA653;
+        color: white;
+    }
+
+        .btn-outline-verde:hover i {
+            color: white;
+        }
+
+.btn:hover,
+.btn:focus {
+    opacity: 0.85;
+}

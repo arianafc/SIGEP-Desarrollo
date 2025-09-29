@@ -1197,10 +1197,220 @@ namespace SIGEP.Controllers
         [HttpGet]
         public ActionResult PostulacionesEstudiantes()
         {
-           
-            return View();
+            if (Session["IdUsuario"] == null)
+            {
+                return RedirectToAction("IniciarSesion", "Home");
+            }
 
+            try
+            {
+                int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var postulaciones = dbContext.ObtenerPostulacionesEstudianteSP(idUsuario)
+                        .Select(p => new PostulacionEstudianteVM
+                        {
+                            IdPractica = p.IdPractica,
+                            IdVacante = p.IdVacante,
+                            IdUsuario = p.IdUsuario,
+                            NombreVacante = p.NombreVacante,
+                            NombreEmpresa = p.NombreEmpresa,
+                            EstadoPractica = p.EstadoPractica,
+                            FechaAplicacion = p.FechaAplicacion,
+                            EsAutogestionada = p.EsAutogestionada ?? false
+                        }).ToList();
+
+                    var viewModel = new MisPostulacionesVM
+                    {
+                        Postulaciones = postulaciones
+                    };
+
+                    return View(viewModel);
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error al cargar las postulaciones: " + ex.Message;
+                return View(new MisPostulacionesVM());
+            }
         }
 
+        [HttpPost]
+        public ActionResult RegistrarAutogestion(AutogestionPracticaVM model)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                // Validaciones básicas
+                if (string.IsNullOrWhiteSpace(model.NombreEmpresa) ||
+                    string.IsNullOrWhiteSpace(model.Sector) ||
+                    string.IsNullOrWhiteSpace(model.NombreEncargado) ||
+                    string.IsNullOrWhiteSpace(model.Puesto) ||
+                    string.IsNullOrWhiteSpace(model.Correo) ||
+                    string.IsNullOrWhiteSpace(model.Telefono) ||
+                    string.IsNullOrWhiteSpace(model.Provincia) ||
+                    string.IsNullOrWhiteSpace(model.Canton) ||
+                    string.IsNullOrWhiteSpace(model.Distrito) ||
+                    string.IsNullOrWhiteSpace(model.DireccionExacta) ||
+                    string.IsNullOrWhiteSpace(model.DescripcionTareas) ||
+                    string.IsNullOrWhiteSpace(model.Duracion) ||
+                    model.IdModalidad == 0)
+                {
+                    return Json(new { success = false, message = "Todos los campos son obligatorios" });
+                }
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Validar que la modalidad existe
+                    var modalidad = dbContext.ModalidadesTB.FirstOrDefault(m => m.IdModalidad == model.IdModalidad);
+                    if (modalidad == null)
+                    {
+                        return Json(new { success = false, message = "La modalidad seleccionada no es válida" });
+                    }
+
+                    // Verificar que existe al menos un estado activo
+                    var estadoActivo = dbContext.EstadosTB.FirstOrDefault(e => e.IdEstado == 1);
+                    if (estadoActivo == null)
+                    {
+                        // Crear estado activo si no existe
+                        var nuevoEstado = new EstadosTB { Descripcion = "Activo" };
+                        dbContext.EstadosTB.Add(nuevoEstado);
+                        dbContext.SaveChanges();
+                        estadoActivo = nuevoEstado;
+                    }
+
+                    // Buscar o crear provincia
+                    var provincia = dbContext.ProvinciasTB.FirstOrDefault(p => p.Nombre == model.Provincia);
+                    if (provincia == null)
+                    {
+                        provincia = new ProvinciasTB { Nombre = model.Provincia };
+                        dbContext.ProvinciasTB.Add(provincia);
+                        dbContext.SaveChanges();
+                    }
+
+                    // Buscar o crear cantón
+                    var canton = dbContext.CantonesTB.FirstOrDefault(c => c.Nombre == model.Canton && c.IdProvincia == provincia.IdProvincia);
+                    if (canton == null)
+                    {
+                        canton = new CantonesTB { Nombre = model.Canton, IdProvincia = provincia.IdProvincia };
+                        dbContext.CantonesTB.Add(canton);
+                        dbContext.SaveChanges();
+                    }
+
+                    // Buscar o crear distrito
+                    var distrito = dbContext.DistritosTB.FirstOrDefault(d => d.Nombre == model.Distrito && d.IdCanton == canton.IdCanton);
+                    if (distrito == null)
+                    {
+                        distrito = new DistritosTB { Nombre = model.Distrito, IdCanton = canton.IdCanton };
+                        dbContext.DistritosTB.Add(distrito);
+                        dbContext.SaveChanges();
+                    }
+
+                    // Crear la dirección
+                    var direccion = new DireccionesTB
+                    {
+                        DireccionExacta = model.DireccionExacta.Trim(),
+                        IdDistrito = distrito.IdDistrito,
+                        IdEstado = estadoActivo.IdEstado
+                    };
+
+                    dbContext.DireccionesTB.Add(direccion);
+                    dbContext.SaveChanges();
+
+                    // Crear la empresa
+                    var empresa = new EmpresasTB
+                    {
+                        NombreEmpresa = model.NombreEmpresa.Trim(),
+                        NombreContacto = model.NombreEncargado.Trim(),
+                        AreasAfines = model.Sector.Trim(),
+                        IdDireccion = direccion.IdDireccion,
+                        IdEstado = estadoActivo.IdEstado
+                    };
+
+                    dbContext.EmpresasTB.Add(empresa);
+                    dbContext.SaveChanges();
+
+                    // Buscar o crear estado "Pendiente de Aprobación"
+                    var estadoPendiente = dbContext.EstadosTB.FirstOrDefault(e => e.Descripcion == "Pendiente de Aprobación");
+                    if (estadoPendiente == null)
+                    {
+                        estadoPendiente = new EstadosTB { Descripcion = "Pendiente de Aprobación" };
+                        dbContext.EstadosTB.Add(estadoPendiente);
+                        dbContext.SaveChanges();
+                    }
+
+                    // Crear la vacante de práctica autogestionada
+                    var vacante = new VacantesPracticasTB
+                    {
+                        Nombre = $"Práctica Autogestionada - {model.NombreEmpresa}",
+                        IdEmpresa = empresa.IdEmpresa,
+                        Descripcion = model.DescripcionTareas.Trim(),
+                        Requerimientos = $"Duración: {model.Duracion}",
+                        Tipo = "Autogestionada",
+                        IdModalidad = model.IdModalidad,
+                        IdEstado = estadoPendiente.IdEstado,
+                        FechaMaxAplicacion = DateTime.Now.AddDays(30),
+                        NumCupos = 1
+                    };
+
+                    dbContext.VacantesPracticasTB.Add(vacante);
+                    dbContext.SaveChanges();
+
+                    // Crear la práctica del estudiante
+                    var practica = new PracticaEstudianteTB
+                    {
+                        IdVacante = vacante.IdVacante,
+                        IdUsuario = idUsuario,
+                        FechaAplicacion = DateTime.Now,
+                        IdEstado = estadoPendiente.IdEstado
+                    };
+
+                    dbContext.PracticaEstudianteTB.Add(practica);
+
+                    // Guardar email y teléfono de la empresa
+                    var email = new EmailsTB
+                    {
+                        IdEmpresa = empresa.IdEmpresa,
+                        Email = model.Correo.Trim()
+                    };
+                    dbContext.EmailsTB.Add(email);
+
+                    var telefono = new TelefonosTB
+                    {
+                        IdEmpresa = empresa.IdEmpresa,
+                        Telefono = model.Telefono.Trim()
+                    };
+                    dbContext.TelefonosTB.Add(telefono);
+
+                    dbContext.SaveChanges();
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Práctica autogestionada registrada exitosamente. Pendiente de aprobación por coordinación."
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log más detallado del error
+                System.Diagnostics.Debug.WriteLine($"Error en RegistrarAutogestion: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+
+                return Json(new { success = false, message = "Error interno del servidor: " + ex.Message });
+            }
+        }
     }
 }

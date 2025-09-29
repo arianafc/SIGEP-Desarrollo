@@ -155,6 +155,91 @@ BEGIN
     END CATCH
 END
 
+-- SP para registrar autogestión de práctica
+CREATE OR ALTER PROCEDURE [dbo].[RegistrarAutogestionPracticaSP]
+    @IdUsuario INT,
+    @NombreEmpresa VARCHAR(255),
+    @Sector VARCHAR(255),
+    @NombreEncargado VARCHAR(255),
+    @Puesto VARCHAR(255),
+    @Correo VARCHAR(255),
+    @Telefono VARCHAR(50),
+    @IdDistrito INT,
+    @DireccionExacta VARCHAR(2000),
+    @DescripcionTareas VARCHAR(1000),
+    @Duracion VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        
+        DECLARE @IdDireccion INT, @IdEmpresa INT, @IdVacante INT, @IdPractica INT;
+        
+        -- 1. Crear dirección
+        INSERT INTO DireccionesTB (DireccionExacta, IdEstado, IdDistrito)
+        VALUES (@DireccionExacta, 1, @IdDistrito);
+        SET @IdDireccion = SCOPE_IDENTITY();
+        
+        -- 2. Crear empresa
+        INSERT INTO EmpresasTB (NombreEmpresa, NombreContacto, IdDireccion, AreasAfines, IdEstado)
+        VALUES (@NombreEmpresa, @NombreEncargado, @IdDireccion, @Sector, 1);
+        SET @IdEmpresa = SCOPE_IDENTITY();
+        
+        -- 3. Insertar email y teléfono de la empresa
+        INSERT INTO EmailsTB (IdEmpresa, Email) VALUES (@IdEmpresa, @Correo);
+        INSERT INTO TelefonosTB (IdEmpresa, Telefono) VALUES (@IdEmpresa, @Telefono);
+        
+        -- 4. Crear vacante
+        INSERT INTO VacantesPracticasTB (Nombre, IdEmpresa, Requerimientos, FechaMaxAplicacion, 
+                                        NumCupos, IdModalidad, Descripcion, Tipo, IdEstado)
+        VALUES (@Puesto, @IdEmpresa, 'Práctica autogestionada por estudiante', GETDATE(), 
+                1, 'Híbrido', @DescripcionTareas, 'Autogestionada', 1);
+        SET @IdVacante = SCOPE_IDENTITY();
+        
+        -- 5. Crear práctica con estado "Pendiente de Aprobación" (asumiendo IdEstado = 5)
+        INSERT INTO PracticaEstudianteTB (IdVacante, IdUsuario, FechaAplicacion, IdEstado)
+        VALUES (@IdVacante, @IdUsuario, GETDATE(), 5); -- Estado pendiente de aprobación
+        SET @IdPractica = SCOPE_IDENTITY();
+        
+        -- 6. Agregar comentario inicial
+        INSERT INTO ComentariosPracticaTB (Comentario, Fecha, IdUsuario, IdPractica, Tipo)
+        VALUES ('Práctica autogestionada registrada por el estudiante. Pendiente de aprobación.', 
+                GETDATE(), @IdUsuario, @IdPractica, 'Autogestion');
+        
+        COMMIT TRANSACTION;
+        SELECT 1 as Resultado, @IdPractica as IdPractica;
+        
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        SELECT 0 as Resultado, ERROR_MESSAGE() as Error;
+    END CATCH
+END
 
-
-
+-- SP para obtener postulaciones del estudiante
+CREATE OR ALTER PROCEDURE [dbo].[ObtenerPostulacionesEstudianteSP]
+    @IdUsuario INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        p.IdPractica,
+        v.IdVacante,
+        p.IdUsuario,  -- Agregar IdUsuario
+        v.Nombre as NombreVacante,
+        e.NombreEmpresa,
+        est.Descripcion as EstadoPractica,
+        p.FechaAplicacion,
+        CASE 
+            WHEN v.Tipo = 'Autogestionada' THEN CAST(1 AS BIT)
+            ELSE CAST(0 AS BIT)
+        END as EsAutogestionada  -- Agregar EsAutogestionada
+    FROM PracticaEstudianteTB p
+    INNER JOIN VacantesPracticasTB v ON p.IdVacante = v.IdVacante
+    INNER JOIN EmpresasTB e ON v.IdEmpresa = e.IdEmpresa
+    INNER JOIN EstadosTB est ON p.IdEstado = est.IdEstado
+    WHERE p.IdUsuario = @IdUsuario
+    ORDER BY p.FechaAplicacion DESC
+END
