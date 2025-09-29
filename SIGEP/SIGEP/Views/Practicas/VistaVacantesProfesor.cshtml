@@ -56,9 +56,7 @@
         </div>
     </div>
 
-    <div class="vacantes-lista">
-       
-    </div>
+    <div class="vacantes-lista"></div>
 </section>
 
 <!-- MODAL VISUALIZAR -->
@@ -66,13 +64,11 @@
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
 
-            <!-- HEADER -->
             <div class="modal-header" style="background-color: #2D594D; color: white;">
                 <h5 class="modal-title">Visualizar Vacante</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
 
-            <!-- BODY -->
             <div class="modal-body px-4">
                 <section class="vacante-detalle bg-transparent">
                     <h2 id="vis-Nombre" class="vacante-titulo"></h2>
@@ -96,9 +92,7 @@
                     <div class="mb-4">
                         <h5 class="section-title">Aplicaciones</h5>
 
-                        <ul class="list-group" id="listaPostulaciones">
-                            <!-- Aquí se cargan postulaciones dinámicamente -->
-                        </ul>
+                        <ul class="list-group" id="listaPostulaciones"></ul>
 
                         <span id="mensajeSinAsignados" class="text-muted" style="display: none;">
                             Ningún estudiante asignado aún
@@ -110,21 +104,16 @@
     </div>
 </div>
 
-
 <!-- MODAL ASIGNAR VACANTE -->
 <div class="modal fade" id="modalAsignarVacante" tabindex="-1" aria-labelledby="modalAsignarVacanteLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-
-            <!-- HEADER -->
             <div class="modal-header" style="background-color: #2D594D; color: white;">
                 <h5 class="modal-title">Asignar Estudiantes</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
 
-            <!-- BODY -->
             <div class="modal-body px-4">
-
                 <div id="mensajeSinEstudiantes" class="alert alert-warning text-center" style="display: none;">
                     No hay estudiantes disponibles para asignar a esta vacante.
                 </div>
@@ -139,9 +128,7 @@
                             <th>Acción</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- filas cargadas dinámicamente -->
-                    </tbody>
+                    <tbody></tbody>
                 </table>
 
             </div>
@@ -149,22 +136,15 @@
     </div>
 </div>
 
-
 @section Scripts {
     <script>
 $(function () {
 
     // -------------------------
-    // Carga inicial
+    // Carga inicial y filtros
     // -------------------------
     filtrarVacantes();
-
-    // -------------------------
-    // FILTROS
-    // -------------------------
-    $("#filtroPractica, #filtroModalidad, #filtroEspecialidad").change(function () {
-        filtrarVacantes();
-    });
+    $("#filtroPractica, #filtroModalidad, #filtroEspecialidad").change(filtrarVacantes);
 
     function filtrarVacantes() {
         var estado = $("#filtroPractica").val();
@@ -174,9 +154,7 @@ $(function () {
         $.getJSON('@Url.Action("GetVacantesProfesor", "Practicas")',
             { estado: estado, idModalidad: modalidad, idEspecialidad: especialidad },
             function (resp) {
-                if (resp && resp.data) {
-                    renderVacantes(resp.data);
-                }
+                if (resp && resp.data) renderVacantes(resp.data);
             });
     }
 
@@ -217,7 +195,6 @@ $(function () {
                         <button class="col-md-5 btn btn-cta btn-asignar" data-id="${v.IdVacante}" ${v.NumCupos <= 0 ? "disabled" : ""}>Asignar</button>
                     </div>
                 </article>`;
-
             contenedor.append(card);
         });
     }
@@ -229,17 +206,13 @@ $(function () {
         if (!isoOrDateString) return "";
         var d = new Date(isoOrDateString);
         if (isNaN(d.getTime())) {
-            var parts = isoOrDateString.split('T')[0].split('-');
+            var parts = (isoOrDateString + '').split('T')[0].split('-');
             if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
             return isoOrDateString;
         }
         return d.toLocaleDateString('es-CR');
     }
-
-    function escapeHtml(text) {
-        if (!text && text !== 0) return '';
-        return $('<div>').text(text).html();
-    }
+    function escapeHtml(text) { if (!text && text !== 0) return ''; return $('<div>').text(text).html(); }
 
     // -------------------------
     // Ver más -> detalle vacante
@@ -249,13 +222,9 @@ $(function () {
         if (!idVacante) return;
 
         $.getJSON('@Url.Action("Detalle", "Practicas")', { id: idVacante }, function (res) {
-            if (!res || !res.ok) {
-                Swal.fire('Error', 'No se pudo cargar la vacante', 'error');
-                return;
-            }
+            if (!res || !res.ok) { Swal.fire('Error', 'No se pudo cargar la vacante', 'error'); return; }
 
             var d = res.data;
-
             $('#vis-Nombre').text(d.Nombre || '');
             $('#vis-Empresa').text(d.EmpresaNombre || '');
             $('#vis-Descripcion').text(d.Descripcion || '');
@@ -273,7 +242,7 @@ $(function () {
     });
 
     // -------------------------
-    // Postulaciones dentro del modal
+    // Postulaciones dentro del modal Visualizar
     // -------------------------
     function cargarPostulaciones(idVacante) {
         $.getJSON('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: idVacante }, function (res) {
@@ -284,70 +253,73 @@ $(function () {
                 $('#mensajeSinAsignados').show();
                 return;
             }
-
             $('#mensajeSinAsignados').hide();
+
             var perfilUrl = '@Url.Action("VisualizacionPostulacion", "Practicas")';
 
             res.data.forEach(function (p) {
-                var estado = (p.EstadoDescripcion || '').toLowerCase();
-                var badgeHtml = (estado.indexOf('acept') >= 0 || estado.indexOf('asign') >= 0)
-                    ? '<span class="badge badge-asignada">Aceptado</span>'
-                    : '<span class="badge badge-no-asignada" style="background-color: darkgoldenrod; color: white">En Proceso</span>';
+                var estado = (p.EstadoDescripcion || p.EstadoVacante || '').trim();
+                var est = estado.toLowerCase();
+
+                var badgeClass = 'bg-secondary';
+                if (['asignada','asignado'].includes(est)) badgeClass = 'bg-success';
+                else if (['en progreso','en proceso','pendiente de aprobación'].includes(est)) badgeClass = 'bg-warning';
+                else if (['rechazada','retirada','rezagado'].includes(est)) badgeClass = 'bg-danger';
+                else if (['aprobada','finalizada'].includes(est)) badgeClass = 'bg-primary';
+
+                var badgeHtml = `<span class="badge ${badgeClass}">${escapeHtml(estado || '—')}</span>`;
+
+                // botón: retirada -> Reactivar; estados cerrados (rechazada/aprobada/finalizada) -> sin botón; otros -> Retirar
+                var btnHtml = '';
+                if (est === 'retirada') {
+                    btnHtml = `<button class="btn btn-sm btn-outline-success btn-reactivar"
+                                      data-idusuario="${p.IdUsuario}" data-idvacante="${idVacante}">
+                                  Reactivar
+                               </button>`;
+                } else if (!['rechazada','aprobada','finalizada'].includes(est)) {
+                    btnHtml = `<button class="btn btn-sm btn-outline-danger btn-retirar"
+                                      data-idusuario="${p.IdUsuario}" data-idvacante="${idVacante}">
+                                  Retirar
+                               </button>`;
+                }
 
                 var href = perfilUrl + '?idUsuario=' + encodeURIComponent(p.IdUsuario) + '&idVacante=' + encodeURIComponent(idVacante);
 
                 var item = $(`
-                    <a href="${href}" class="d-flex justify-content-between PostulacionesPerfil align-items-center p-2 border rounded mb-2" style="color: #2D594D;">
+                    <a href="${href}" class="d-flex justify-content-between PostulacionesPerfil align-items-center p-2 border rounded mb-2" style="color:#2D594D;">
                         <span>${escapeHtml(p.NombreCompleto)} | ${escapeHtml(p.Cedula || '')}</span>
                         <div class="row gx-2 align-items-center">
                             <div class="col-auto">${badgeHtml}</div>
-                            <div class="col-auto">
-                                <button class="badge btn-desasignar" data-idusuario="${p.IdUsuario}" data-idvacante="${idVacante}" style="color: #2D594D; border:0; background:transparent;">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
+                            <div class="col-auto">${btnHtml}</div>
                         </div>
                     </a>
                 `);
-
                 $lista.append(item);
             });
         });
     }
 
-    // -------------------------
-    // Desasignar estudiante
-    // -------------------------
-    $(document).on('click', '#listaPostulaciones .btn-desasignar', function (ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-
+    // Retirar / Reactivar (lista Visualizar)
+    $(document).on('click', '#listaPostulaciones .btn-retirar', function (ev) {
+        ev.preventDefault(); ev.stopPropagation();
         var idUsuario = $(this).data('idusuario');
         var idVacante = $(this).data('idvacante');
-        if (!idUsuario || !idVacante) return;
-
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: 'Se marcará al estudiante como "sin práctica asignada".',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#2D594D',
-            confirmButtonText: 'Sí, desasignar',
-            cancelButtonText: 'Cancelar'
-        }).then(function (result) {
-            if (result.isConfirmed) {
-                $.post('@Url.Action("DesasignarEstudiante", "Practicas")',
-                    { idUsuario: idUsuario, idVacante: idVacante },
-                    function (resp) {
-                        if (resp && resp.ok) {
-                            Swal.fire({ icon: 'success', title: 'Desasignado', text: resp.mensaje || 'Operación realizada' });
-                            cargarPostulaciones(idVacante);
-                            filtrarVacantes();
-                        } else {
-                            Swal.fire('Error', resp && resp.mensaje ? resp.mensaje : 'Error al desasignar', 'error');
-                        }
-                    });
-            }
+        $.post('@Url.Action("RetirarEstudiante", "Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Retirada', resp.message || 'Marcado como Retirada.', 'success');
+                cargarPostulaciones(idVacante); filtrarVacantes();
+            } else { Swal.fire('Error', resp && resp.message || 'No se pudo retirar.', 'error'); }
+        });
+    });
+    $(document).on('click', '#listaPostulaciones .btn-reactivar', function (ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $(this).data('idvacante');
+        $.post('@Url.Action("AsignarEstudiante", "Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Listo', resp.message || 'Reactivado a "En proceso".', 'success');
+                cargarPostulaciones(idVacante); filtrarVacantes();
+            } else { Swal.fire('Error', resp && resp.message || 'No se pudo reactivar.', 'error'); }
         });
     });
 
@@ -356,11 +328,7 @@ $(function () {
     // -------------------------
     var tablaAsignar = $('#tablaAsignar').DataTable({
         language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-        responsive: true,
-        pageLength: 5,
-        autoWidth: false,
-        scrollX: false,
-        destroy: true
+        responsive: true, pageLength: 5, autoWidth: false, scrollX: false, destroy: true
     });
 
     $(document).on('click', '.btn-asignar', function () {
@@ -371,33 +339,40 @@ $(function () {
             tablaAsignar.clear();
 
             if (!res.ok || !res.data || res.data.length === 0) {
-                tablaAsignar.row.add([
-                    '—','—','—','—','<span class="text-danger">No hay estudiantes disponibles</span>'
-                ]);
+                tablaAsignar.row.add(['—','—','—','—','<span class="text-danger">No hay estudiantes disponibles</span>']);
                 tablaAsignar.draw();
                 return;
             }
 
             res.data.forEach(function (e) {
-                var badge = e.EstadoPractica === "Práctica Asignada"
-                    ? '<span class="badge bg-success">Práctica Asignada</span>'
-                    : '<span class="badge bg-secondary">Sin Práctica Asignada</span>';
+                var estado = (e.EstadoVacante || e.EstadoMostrar || '').trim();
+                var est = (estado || '').toLowerCase();
 
-                // Aquí decides el botón según el estado
-                var btn;
-                if (e.EstadoPractica === "Práctica Asignada") {
-                    btn = `<button class="btn bg-transparent btn-desasignar-estudiante"
-                     data-idusuario="${e.IdUsuario}"
-                     style="color:darkred">
-                     <i class="fas fa-user-minus"></i>
-               </button>`;
-                } else {
-                    btn = `<button class="btn bg-transparent btn-asignar-estudiante"
-                     data-idusuario="${e.IdUsuario}"
-                     style="color:#2d594d">
-                     <i class="fas fa-user-plus"></i>
-               </button>`;
-                }
+                var badge = `<span class="badge ${
+                    e.TieneRelacionEnVacante ? 'bg-info'
+                    : (estado === 'Con Procesos Activos' ? 'bg-warning' : 'bg-secondary')
+                }">${escapeHtml(estado || '—')}</span>`;
+
+                var btn = '';
+                if (!e.TieneRelacionEnVacante) {
+                    // sin relación → Asignar
+                    btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante"
+                                   data-idusuario="${e.IdUsuario}">
+                              Asignar
+                           </button>`;
+                } else if (est === 'retirada') {
+                    // relación retirada → Reactivar
+                    btn = `<button class="btn btn-sm btn-outline-success btn-reactivar-estudiante"
+                                   data-idusuario="${e.IdUsuario}">
+                              Reactivar
+                           </button>`;
+                } else if (!['rechazada','aprobada','finalizada'].includes(est)) {
+                    // relación activa → Retirar
+                    btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante"
+                                   data-idusuario="${e.IdUsuario}">
+                              Retirar
+                           </button>`;
+                } // (rechazada/aprobada/finalizada) → sin botón
 
                 tablaAsignar.row.add([
                     escapeHtml(e.NombreCompleto),
@@ -415,58 +390,47 @@ $(function () {
     });
 
     // -------------------------
-    // Asignar estudiante
+    // Acciones del modal ASIGNAR
     // -------------------------
     $(document).on('click', '.btn-asignar-estudiante', function () {
         var idUsuario = $(this).data('idusuario');
         var idVacante = $('#modalAsignarVacante').data('idvacante');
 
-        $.post('@Url.Action("AsignarEstudiante", "Practicas")',
-            { idUsuario: idUsuario, idVacante: idVacante },
-            function (resp) {
-                if (resp.ok) {
-                    Swal.fire('Éxito', resp.mensaje, 'success');
-                    $('.btn-asignar[data-id="' + idVacante + '"]').trigger('click');
-                    filtrarVacantes();
-                } else {
-                    Swal.fire('Error', resp.mensaje, 'error');
-                }
-            });
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp.ok) {
+                Swal.fire('Éxito', resp.message, 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                filtrarVacantes();
+            } else { Swal.fire('Error', resp.message, 'error'); }
+        });
+    });
+
+    $(document).on('click', '.btn-retirar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignarVacante').data('idvacante');
+
+        $.post('@Url.Action("RetirarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp.ok) {
+                Swal.fire('Listo', resp.message || 'Marcado como Retirada.', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                filtrarVacantes();
+            } else { Swal.fire('Error', resp.message || 'No se pudo retirar.', 'error'); }
+        });
+    });
+
+    $(document).on('click', '.btn-reactivar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignarVacante').data('idvacante');
+
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp.ok) {
+                Swal.fire('Listo', resp.message || 'Reactivado a "En proceso".', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                filtrarVacantes();
+            } else { Swal.fire('Error', resp.message || 'No se pudo reactivar.', 'error'); }
+        });
     });
 
 }); // fin $(function)
-
-        // -------------------------
-// Desasignar estudiante desde el modal ASIGNAR
-// -------------------------
-$(document).on('click', '.btn-desasignar-estudiante', function () {
-    var idUsuario = $(this).data('idusuario');
-    var idVacante = $('#modalAsignarVacante').data('idvacante');
-
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'El estudiante quedará sin práctica asignada.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, desasignar',
-        cancelButtonText: 'Cancelar'
-    }).then(function (result) {
-        if (result.isConfirmed) {
-            $.post('@Url.Action("DesasignarEstudiante", "Practicas")',
-                { idUsuario: idUsuario, idVacante: idVacante },
-                function (resp) {
-                    if (resp.ok) {
-                        Swal.fire('Éxito', resp.mensaje, 'success');
-                        // refrescamos la tabla del modal
-                        $('.btn-asignar[data-id="' + idVacante + '"]').trigger('click');
-                        filtrarVacantes();
-                    } else {
-                        Swal.fire('Error', resp.mensaje, 'error');
-                    }
-                });
-        }
-    });
-});
-
     </script>
 }
