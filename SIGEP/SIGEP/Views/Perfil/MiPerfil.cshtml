@@ -5,7 +5,7 @@
 @{
     var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
     var usuario = Session["IdUsuario"] != null ? Convert.ToInt32(Session["IdUsuario"]) : 0;
-    var Nombre = Session["Nombre"] + " " + Session["Apellido1"];
+    var NombreCompleto = $"{Session["Nombre"] ?? ""} {Session["Apellido1"] ?? ""}";
 }
 @section Styles {
     <style>
@@ -91,12 +91,21 @@
         <h5 class="section-title">INFORMACIÓN PERSONAL</h5>
         <div class="row" id="info-personal">
             <div class="col-md-6 form-group">
-                <label>Nombre y Apellidos</label>
-                <input type="text" class="form-control" value=@Nombre required />
+                <label>Nombre</label>
+                @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control" })
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Primer Apellido</label>
+                @Html.TextBoxFor(m => m.Apellido1, new { @class = "form-control" })
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Segundo Apellido</label>
+                @Html.TextBoxFor(m => m.Apellido2, new { @class = "form-control" })
             </div>
             <div class="col-md-6 form-group">
                 <label>Cédula</label>
-                <input type="text" class="form-control" value="305550650" required />
+                @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control" })
+
             </div>
             <div class="col-md-6 form-group">
                 <label>Teléfono</label>
@@ -104,11 +113,11 @@
             </div>
             <div class="col-md-6 form-group">
                 <label>Correo Electrónico</label>
-                <input type="email" class="form-control" value="johnny.castillo@hotmail.com" required />
+                @Html.TextBoxFor(m => m.Correo, new { @class = "form-control" })
             </div>
             <div class="col-md-6 form-group">
                 <label>Correo Electrónico MEP</label>
-                <input type="email" class="form-control" value="305550650@mep.ac.cr" required />
+                @Html.TextBoxFor(m => m.Correo, new { @class = "form-control" }) <!--FALTA VALIDAR QUE TENGA MEP-->
             </div>
             <div class="col-md-6 form-group">
                 <label>Dirección</label>
@@ -138,12 +147,12 @@
 
             <div class="col-md-12 form-group">
                 <label>Contraseña</label>
-                @Html.TextBoxFor(m => m.Contrasenna, new { @id = "ContrasennaNueva", @type = "password", @class = "form-control", placeholder = "Ingresa tu nueva contraseña" })
+                @Html.PasswordFor(m => m.Contrasenna, new { @id = "ContrasennaNueva", @type = "password", @class = "form-control", placeholder = "Ingresa tu nueva contraseña" })
 
             </div>
             <div class="col-md-12 form-group">
                 <label>Confirmar Contraseña</label>
-                @Html.TextBoxFor(m => m.NuevaContrasenna, new { @id = "ConfirmarContrasenna", @type = "password", @class = "form-control", placeholder = "Confirma tu contraseña" })
+                @Html.PasswordFor(m => m.NuevaContrasenna, new { @id = "ConfirmarContrasenna", @type = "password", @class = "form-control", placeholder = "Confirma tu contraseña" })
 
             </div>
 
