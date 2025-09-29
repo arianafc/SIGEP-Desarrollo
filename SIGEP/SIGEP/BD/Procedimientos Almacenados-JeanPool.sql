@@ -110,30 +110,34 @@ CREATE OR ALTER PROCEDURE ActualizarEstadoPracticaSP
 AS
 BEGIN
     SET NOCOUNT ON;
-
     BEGIN TRY
         BEGIN TRANSACTION;
-
+        
         -- 1. Actualizar estado de la práctica
         UPDATE PracticaEstudianteTB
         SET IdEstado = @IdEstado
         WHERE IdPractica = @IdPractica;
-
+        
         -- 2. Insertar comentario si se proporcionó
+        DECLARE @IdComentarioNuevo INT = NULL;
+        
         IF @Comentario IS NOT NULL AND LTRIM(RTRIM(@Comentario)) <> ''
         BEGIN
             INSERT INTO ComentariosPracticaTB (Comentario, Fecha, IdUsuario, IdPractica, Tipo)
             SELECT @Comentario, GETDATE(), p.IdUsuario, p.IdPractica, 'Actualización Estado'
             FROM PracticaEstudianteTB p
             WHERE p.IdPractica = @IdPractica;
+            
+            -- Capturar el ID del comentario recién insertado
+            SET @IdComentarioNuevo = SCOPE_IDENTITY();
         END
-
+        
         -- 3. Devolver información relevante
         SELECT 
             p.IdPractica,
             p.IdVacante,
             p.IdUsuario,
-            u.Nombre AS EstudianteNombre,
+            u.Nombre + ' ' + u.Apellido1 + ' ' + ISNULL(u.Apellido2, '') AS EstudianteNombre,
             e.Email AS EstudianteCorreo,
             es.Descripcion AS EstadoDescripcion,
             c.Comentario,
@@ -142,15 +146,15 @@ BEGIN
         INNER JOIN UsuariosTB u ON p.IdUsuario = u.IdUsuario
         LEFT JOIN EmailsTB e ON u.IdUsuario = e.IdUsuario
         INNER JOIN EstadosTB es ON p.IdEstado = es.IdEstado
-        LEFT JOIN ComentariosPracticaTB c 
-            ON c.IdPractica = p.IdPractica
-           AND c.Fecha = (SELECT MAX(Fecha) FROM ComentariosPracticaTB WHERE IdPractica = p.IdPractica)
+        -- Usar el comentario específico que acabamos de insertar
+        LEFT JOIN ComentariosPracticaTB c ON c.IdComentario = @IdComentarioNuevo
         WHERE p.IdPractica = @IdPractica;
-
+        
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
-        ROLLBACK TRANSACTION;
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
         THROW;
     END CATCH
 END
