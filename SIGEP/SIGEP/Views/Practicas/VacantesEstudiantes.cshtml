@@ -1,0 +1,697 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Vacantes - Prácticas";
+}
+
+<h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
+    Vacantes @DateTime.Now.Year
+</h2>
+
+<div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
+    <button type="button" class="btn-cta btn-nuevo mb-0" data-bs-toggle="modal" data-bs-target="#modalCrearVacante">
+        + Registrar
+    </button>
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-filter"></i>
+        </button>
+        <div class="dropdown-menu p-3" style="min-width: 300px;">
+            <div class="mb-2">
+                <label>Estado de vacante</label>
+                <select id="filtroPractica" class="form-control">
+                    <option value="">Todos</option>
+                    @foreach (var s in ViewBag.Estados as List<SelectListItem>)
+                    {
+                        <option value="@s.Value">@s.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-2">
+                <label>Modalidad</label>
+                <select id="filtroModalidad" class="form-control">
+                    <option value="">Todas</option>
+                    @foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
+                    {
+                        <option value="@m.Value">@m.Text</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label>Especialidad</label>
+                <select id="filtroEspecialidad" class="form-control">
+                    <option value="">Todas</option>
+                    @foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                    {
+                        <option value="@e.Value">@e.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card rounded-5 p-3">
+    <table id="miTabla" class="display responsive nowrap w-100">
+        <thead>
+            <tr>
+                <th>Empresa</th>
+                <th>Especialidad</th>
+                <th>Requisitos</th>
+                <th>Cupos Disponibles</th>
+                <th>Estudiantes Postulados</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- MODAL CREAR -->
+<div class="modal fade" id="modalCrearVacante" tabindex="-1" aria-labelledby="modalCrearVacanteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Nueva Vacante para Práctica</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4">
+                <div class="mb-4">
+                    <h5 class="section-title">Información General</h5>
+                    <form id="formCrearVacante">
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Nombre de la Vacante <span class="text-danger">*</span></label>
+                                <input type="text" name="Nombre" class="form-control" placeholder="Ejemplo: Asistente bancario" required />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Empresa <span class="text-danger">*</span></label>
+                                <select id="IdEmpresa" name="IdEmpresa" class="form-control" required>
+                                    <option value="">-- Seleccione Empresa --</option>
+                                    @foreach (var e in ViewBag.Empresas as List<SelectListItem>)
+                                    {
+                                        <option value="@e.Value">@e.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="ubicacionEmpresa">Ubicación</label>
+                                <input type="text" id="ubicacionEmpresa" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Especialidad <span class="text-danger">*</span></label>
+                                <select name="IdEspecialidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
+                                    <option value="">-- Seleccione especialidad --</option>
+                                    @foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                                    {
+                                        <option value="@e.Value">@e.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Cantidad de Cupos <span class="text-danger">*</span></label>
+                                <input type="number" name="NumCupos" min="1" class="form-control" placeholder="Ejemplo: 3" required />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Modalidad <span class="text-danger">*</span></label>
+                                <select name="IdModalidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
+                                    <option value="">-- Seleccione modalidad --</option>
+                                    @foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
+                                    {
+                                        <option value="@m.Value">@m.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
+                                <input type="date" name="FechaMaxAplicacion" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Fecha de Cierre <span class="text-danger">*</span></label>
+                                <input type="date" name="FechaCierre" class="form-control" required />
+                            </div>
+                            <div class="col-12 form-group mb-3">
+                                <label>Requisitos <span class="text-danger">*</span></label>
+                                <textarea name="Requerimientos" rows="3" class="form-control" placeholder="Habilidades y conocimientos requeridos" required></textarea>
+                            </div>
+                            <div class="col-12 form-group mb-3">
+                                <label>Descripción <span class="text-danger">*</span></label>
+                                <textarea name="Descripcion" rows="3" class="form-control" placeholder="Detalles de la vacante..." required></textarea>
+                            </div>
+                        </div>
+                        <input type="hidden" name="IdVacante" id="IdVacante" value="0" />
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer px-4">
+                <button id="btnGuardarVacante" type="submit" form="formCrearVacante" class="btn CerrarModal">Guardar y Publicar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="modalEditarVacante" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Edición de Vacante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4">
+                <div class="mb-4">
+                    <h5 class="section-title">Información General</h5>
+                    <form id="formEditarVacante">
+                        <input type="hidden" name="IdVacante" id="edit-IdVacante" />
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Nombre de la Vacante <span class="text-danger">*</span></label>
+                                <input type="text" id="edit-Nombre" name="Nombre" class="form-control" placeholder="Ejemplo: Asistente bancario" required />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="edit-IdEmpresa">Empresa</label>
+                                <select id="edit-IdEmpresa" name="IdEmpresa" class="form-control" required>
+                                    <option value="">-- Seleccione una empresa --</option>
+                                    @foreach (var emp in ViewBag.Empresas as List<SelectListItem>)
+                                    {
+                                        <option value="@emp.Value">@emp.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="edit-Ubicacion">Ubicación</label>
+                                <input type="text" id="edit-Ubicacion" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Especialidad <span class="text-danger">*</span></label>
+                                <select id="edit-IdEspecialidad" name="IdEspecialidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
+                                    <option value="">-- Seleccione especialidad --</option>
+                                    @foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                                    {
+                                        <option value="@e.Value">@e.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Cantidad de Cupos <span class="text-danger">*</span></label>
+                                <input type="number" id="edit-NumCupos" name="NumCupos" class="form-control" min="1" placeholder="Ejemplo: 3" required />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Modalidad <span class="text-danger">*</span></label>
+                                <select id="edit-IdModalidad" name="IdModalidad" class="form-select OpcionesVacantes w-100" style="font-size:14px" required>
+                                    <option value="">-- Seleccione modalidad --</option>
+                                    @foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
+                                    {
+                                        <option value="@m.Value">@m.Text</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Fecha límite de aplicación <span class="text-danger">*</span></label>
+                                <input type="date" id="edit-FechaMaxAplicacion" name="FechaMaxAplicacion" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Fecha de cierre <span class="text-danger">*</span></label>
+                                <input type="date" id="edit-FechaCierre" name="FechaCierre" class="form-control" required />
+                            </div>
+                            <div class="col-12 form-group mb-3">
+                                <label>Requisitos <span class="text-danger">*</span></label>
+                                <textarea id="edit-Requerimientos" name="Requerimientos" rows="3" class="form-control" placeholder="Habilidades y conocimientos requeridos" required></textarea>
+                            </div>
+                            <div class="col-12 form-group mb-3">
+                                <label>Descripción <span class="text-danger">*</span></label>
+                                <textarea id="edit-Descripcion" name="Descripcion" rows="3" class="form-control" placeholder="Detalles de la vacante..." required></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer px-4">
+                <button id="btnActualizarVacante" type="submit" form="formEditarVacante" class="btn CerrarModal">Actualizar Vacante</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL VISUALIZAR -->
+<div class="modal fade" id="modalVisualizarVacante" tabindex="-1" aria-labelledby="modalVisualizarVacanteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Visualizar Vacante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body px-4">
+                <div class="mb-4">
+                    <h5 class="section-title">Información General</h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Nombre de la Vacante <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="vis-Nombre" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Empresa <span class="text-danger">*</span></label>
+                            <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Empresa" disabled>
+                                <option value="">-- Seleccione empresa --</option>
+                                @foreach (var em in ViewBag.Empresas as List<SelectListItem>)
+                                {
+                                    <option value="@em.Value">@em.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Lugar / Ubicación <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="vis-Ubicacion" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Especialidad <span class="text-danger">*</span></label>
+                            <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Especialidad" disabled>
+                                <option value="">-- Seleccione especialidad --</option>
+                                @foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                                {
+                                    <option value="@e.Value">@e.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Cantidad de Cupos <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="vis-NumCupos" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Modalidad <span class="text-danger">*</span></label>
+                            <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Modalidad" disabled>
+                                <option value="">-- Seleccione modalidad --</option>
+                                @foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
+                                {
+                                    <option value="@m.Value">@m.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="vis-FechaAplicacion" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Fecha de Cierre <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="vis-FechaCierre" readonly>
+                        </div>
+                        <div class="col-12 form-group mb-3">
+                            <label>Requisitos <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="vis-Requerimientos" rows="3" readonly></textarea>
+                        </div>
+                        <div class="col-12 form-group mb-3">
+                            <label>Descripción <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="vis-Descripcion" rows="3" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LISTADO DE POSTULACIONES -->
+                <div class="mb-4">
+                    <h5 class="section-title">Aplicaciones</h5>
+                    <ul class="list-group" id="listaPostulaciones"></ul>
+                    <span id="mensajeSinAsignados" class="text-muted" style="display:none;">Ningún estudiante asignado aún</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ASIGNAR -->
+<div class="modal fade" id="modalAsignar" tabindex="-1" aria-labelledby="modalAsignarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Asignar Vacante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body px-4">
+                <div class="mb-4 card rounded-5 p-3">
+                    <h5 class="section-title">Seleccionar Estudiante para Asignar</h5>
+                    <table id="miTablaAsignar" class="display nowrap w-100">
+                        <thead class="table-light">
+                            <tr style="text-align: center;">
+                                <th>Nombre</th>
+                                <th>Cédula</th>
+                                <th>Especialidad</th>
+                                <th>Estado Práctica</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody><!-- dinámico --></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+$(function () {
+
+    // ===============================
+    // DataTable PRINCIPAL
+    // ===============================
+    var tabla = $('#miTabla').DataTable({
+        responsive: true,
+        ajax: {
+            url: '@Url.Action("GetVacantes", "Practicas")',
+            data: function (d) {
+                d.estado = $('#filtroPractica').val() || '';
+                d.idEspecialidad = $('#filtroEspecialidad').val() || 0;
+                d.idModalidad = $('#filtroModalidad').val() || 0;
+                return d;
+            },
+            dataSrc: 'data'
+        },
+        columns: [
+            { data: 'EmpresaNombre' },
+            { data: 'EspecialidadNombre' },
+            { data: 'Requerimientos' },
+            { data: 'NumCupos' },
+            { data: 'EstudiantesPostulados' },
+            {
+                data: 'EstadoNombre',
+                render: function (data) {
+                    return (data === "Activo")
+                        ? '<span class="badge badge-asignada">Activa</span>'
+                        : '<span class="badge badge-no-asignada">Inactiva</span>';
+                }
+            },
+            {
+                data: 'IdVacante',
+                orderable: false,
+                render: function (data, type, row) {
+                    return `
+                        <button class="btn bg-transparent btn-asignar" data-id="${data}" title="Asignar" style="color:#2d594d">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-editar" data-id="${data}" title="Editar" style="color:#2d594d">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-eliminar" data-id="${data}" title="Eliminar" style="color:#2d594d">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                }
+            }
+        ]
+    });
+
+    // Filtros
+    $('#filtroPractica, #filtroEspecialidad, #filtroModalidad').on('change', function () {
+        tabla.ajax.reload();
+    });
+
+    // ===============================
+    // CREAR
+    // ===============================
+    $('#btnGuardarVacante').on('click', function (e) {
+        e.preventDefault();
+        var $form = $('#formCrearVacante');
+        if (!$form[0].checkValidity()) { $form[0].reportValidity(); return; }
+
+        $.ajax({
+            url: '@Url.Action("Crear", "Practicas")',
+            type: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            success: function (res) {
+                if (res.ok) {
+                    Swal.fire('Éxito', res.message, 'success');
+                    $('#modalCrearVacante').modal('hide');
+                    $form[0].reset();
+                    $('#ubicacionEmpresa').val('');
+                    tabla.ajax.reload();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message || 'Error en servidor' });
+                }
+            },
+            error: function () { Swal.fire('Error', 'Error en la petición al servidor.', 'error'); }
+        });
+    });
+
+    // Ubicación empresa (crear / editar)
+    $('#IdEmpresa').on('change', function () {
+        var idEmpresa = $(this).val();
+        if (idEmpresa) {
+            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
+                { idEmpresa }, function (res) {
+                    $('#ubicacionEmpresa').val(res.ok ? res.ubicacion : '');
+                }).fail(function(){ $('#ubicacionEmpresa').val(''); });
+        } else { $('#ubicacionEmpresa').val(''); }
+    });
+
+    $('#edit-IdEmpresa').on('change', function () {
+        var idEmpresa = $(this).val();
+        if (idEmpresa) {
+            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
+                { idEmpresa }, function (res) {
+                    $('#edit-Ubicacion').val(res.ok ? res.ubicacion : '');
+                }).fail(function(){ $('#edit-Ubicacion').val(''); });
+        } else { $('#edit-Ubicacion').val(''); }
+    });
+
+    // ===============================
+    // EDITAR
+    // ===============================
+    $('#miTabla').on('click', '.btn-editar', function () {
+        var id = $(this).data('id');
+        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res) {
+            if (res.ok && res.data) {
+                var d = res.data;
+                $('#edit-IdVacante').val(d.IdVacante);
+                $('#edit-Nombre').val(d.Nombre);
+                $('#edit-IdEmpresa').val(d.IdEmpresa).trigger('change');
+                $('#edit-IdEspecialidad').val(d.IdEspecialidad);
+                $('#edit-IdModalidad').val(d.IdModalidad);
+                $('#edit-NumCupos').val(d.NumCupos);
+                $('#edit-FechaMaxAplicacion').val(d.FechaMaxAplicacion ? d.FechaMaxAplicacion.split('T')[0] : '');
+                $('#edit-FechaCierre').val(d.FechaCierre ? d.FechaCierre.split('T')[0] : '');
+                $('#edit-Requerimientos').val(d.Requerimientos);
+                $('#edit-Descripcion').val(d.Descripcion);
+                $('#edit-Ubicacion').val(d.Ubicacion);
+                $('#modalEditarVacante').modal('show');
+            } else {
+                Swal.fire('Error', 'No se pudo cargar la vacante', 'error');
+            }
+        });
+    });
+
+    $('#btnActualizarVacante').on('click', function (e) {
+        e.preventDefault();
+        var $form = $('#formEditarVacante');
+        if (!$form[0].checkValidity()) { $form[0].reportValidity(); return; }
+
+        $.ajax({
+            url: '@Url.Action("Editar", "Practicas")',
+            type: 'POST',
+            data: $form.serialize(),
+            success: function (res) {
+                if (res.ok) {
+                    Swal.fire('Éxito', res.message, 'success');
+                    $('#modalEditarVacante').modal('hide');
+                    tabla.ajax.reload();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message || 'Error en validación' });
+                }
+            },
+            error: function () { Swal.fire('Error', 'Error en la petición al servidor.', 'error'); }
+        });
+    });
+
+    // ===============================
+    // ELIMINAR
+    // ===============================
+    $('#miTabla').on('click', '.btn-eliminar', function () {
+        var id = $(this).data('id');
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'No podrás revertirlo',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('@Url.Action("Eliminar", "Practicas")', { id }, function (res) {
+                    if (res.ok) {
+                        Swal.fire('Eliminado', res.message, 'success');
+                        tabla.ajax.reload();
+                    } else {
+                        Swal.fire('Error', res.message, 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // ===============================
+    // VISUALIZAR + Postulaciones
+    // ===============================
+    $('#miTabla').on('click', '.btn-visualizar', function () {
+        var id = $(this).data('id');
+        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res) {
+            if (res.ok && res.data) {
+                var d = res.data;
+                $('#vis-Nombre').val(d.Nombre);
+                $('#vis-Empresa').val(d.IdEmpresa);
+                $('#vis-Ubicacion').val(d.Ubicacion);
+                $('#vis-Especialidad').val(d.IdEspecialidad);
+                $('#vis-NumCupos').val(d.NumCupos);
+                $('#vis-Modalidad').val(d.IdModalidad);
+                $('#vis-Requerimientos').val(d.Requerimientos);
+                $('#vis-Descripcion').val(d.Descripcion);
+                $('#vis-FechaAplicacion').val(d.FechaMaxAplicacion ? d.FechaMaxAplicacion.split('T')[0] : '');
+                $('#vis-FechaCierre').val(d.FechaCierre ? d.FechaCierre.split('T')[0] : '');
+                $('#modalVisualizarVacante').modal('show');
+
+                $.get('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: d.IdVacante }, function (res2) {
+                    var $lista = $('#listaPostulaciones');
+                    $lista.empty();
+                    if (res2.ok && res2.data && res2.data.length > 0) {
+                        $('#mensajeSinAsignados').hide();
+                        res2.data.forEach(function (p) {
+                            $lista.append(`<li class="list-group-item">${p.NombreCompleto} - ${p.EstadoDescripcion}</li>`);
+                        });
+                    } else {
+                        $('#mensajeSinAsignados').show();
+                    }
+                });
+            } else {
+                Swal.fire('Error', 'No se pudo cargar la vacante', 'error');
+            }
+        });
+    });
+
+    // ===============================
+    // ASIGNAR (mismo comportamiento que VistaVacantesProfesor)
+    // ===============================
+    function escapeHtml(text){ if(!text&&text!==0) return ''; return $('<div>').text(text).html(); }
+    function badgeEstado(estado) {
+        var est = (estado || '').toLowerCase();
+        var cls = 'bg-secondary';
+        if (['asignada','asignado'].includes(est)) cls = 'bg-success';
+        else if (['en proceso','en progreso','pendiente de aprobación'].includes(est)) cls = 'bg-warning';
+        else if (['rechazada','retirada','rezagado'].includes(est)) cls = 'bg-danger';
+        else if (['aprobada','finalizada'].includes(est)) cls = 'bg-primary';
+        return `<span class="badge ${cls}">${estado || '—'}</span>`;
+    }
+
+    $('#miTabla').on('click', '.btn-asignar', function () {
+        var idVacante = $(this).data('id');
+        $('#modalAsignar').data('idVacante', idVacante);
+
+        if ($.fn.DataTable.isDataTable('#miTablaAsignar')) {
+            $('#miTablaAsignar').DataTable().clear().destroy();
+        }
+        var $tbody = $('#miTablaAsignar tbody').empty();
+
+        // Usa la misma acción que el profesor
+        $.getJSON('@Url.Action("ObtenerEstudiantesAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
+            if (!res || !res.ok) {
+                Swal.fire('Error', res && res.message || 'No se pudo cargar estudiantes', 'error');
+                return;
+            }
+
+            var lista = Array.isArray(res.data) ? res.data : [];
+            if (lista.length === 0) {
+                $tbody.append('<tr><td colspan="5" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
+            } else {
+                lista.forEach(function(e){
+                    var estado = (e.EstadoVacante || e.EstadoMostrar || '').trim();
+                    var est = (estado || '').toLowerCase();
+                    var badge = badgeEstado(estado || (e.TieneRelacionEnVacante ? 'Con Procesos Activos' : 'Sin Procesos Activos'));
+
+                    var btn = '';
+                    if (!e.TieneRelacionEnVacante) {
+                        btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante" data-idusuario="${e.IdUsuario}">Asignar</button>`;
+                    } else if (est === 'retirada') {
+                        btn = `<button class="btn btn-sm btn-outline-success btn-reactivar-estudiante" data-idusuario="${e.IdUsuario}">Reactivar</button>`;
+                    } else if (!['rechazada','aprobada','finalizada'].includes(est)) {
+                        btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante" data-idusuario="${e.IdUsuario}">Retirar</button>`;
+                    } // finales -> sin botón
+
+                    $tbody.append(`
+                        <tr>
+                            <td>${escapeHtml(e.NombreCompleto)}</td>
+                            <td>${escapeHtml(e.Cedula || '')}</td>
+                            <td>${escapeHtml(e.Especialidad || '')}</td>
+                            <td>${badge}</td>
+                            <td class="text-center">${btn}</td>
+                        </tr>
+                    `);
+                });
+            }
+
+            $('#miTablaAsignar').DataTable({
+                responsive: true,
+                autoWidth: false,
+                scrollX: true,
+                pageLength: 5,
+                deferRender: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json",
+                    emptyTable: "No hay estudiantes disponibles"
+                }
+            });
+
+            $('#modalAsignar').modal('show');
+        }).fail(function () {
+            Swal.fire('Error', 'Error en la petición al servidor.', 'error');
+        });
+    });
+
+    $('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignar').data('idVacante');
+
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Éxito', resp.message || 'Asignado a "En proceso".', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                $('#miTabla').DataTable().ajax.reload(null, false);
+            } else {
+                Swal.fire('Error', resp && resp.message || 'No se pudo asignar.', 'error');
+            }
+        });
+    });
+
+    $('#miTablaAsignar').on('click', '.btn-retirar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignar').data('idVacante');
+
+        $.post('@Url.Action("RetirarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Listo', resp.message || 'Marcado como Retirada.', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                $('#miTabla').DataTable().ajax.reload(null, false);
+            } else {
+                Swal.fire('Error', resp && resp.message || 'No se pudo retirar.', 'error');
+            }
+        });
+    });
+
+    $('#miTablaAsignar').on('click', '.btn-reactivar-estudiante', function () {
+        var idUsuario = $(this).data('idusuario');
+        var idVacante = $('#modalAsignar').data('idVacante');
+
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+            if (resp && resp.ok) {
+                Swal.fire('Listo', resp.message || 'Reactivado a "En proceso".', 'success');
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
+                $('#miTabla').DataTable().ajax.reload(null, false);
+            } else {
+                Swal.fire('Error', resp && resp.message || 'No se pudo reactivar.', 'error');
+            }
+        });
+    });
+
+}); // fin ready
+    </script>
+}

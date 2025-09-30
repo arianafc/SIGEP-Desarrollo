@@ -1,7 +1,134 @@
-﻿
+﻿@model SIGEP.Models.Autenticacion
+
 @{
-    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LayoutExterno.cshtml";
 }
 
-<h2>Login</h2>
+<style>
+
+    .password-input::-ms-reveal,
+    .password-input::-ms-clear,
+    .password-input::-webkit-credentials-auto-fill-button,
+    .password-input::-webkit-password-toggle-button {
+        display: none !important;
+    }
+</style>
+
+<section class="vh-100 gradient-custom">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="card cardLogin" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+
+                        <div class="mb-md-5 mt-md-4 pb-5">
+
+                            <h2 class="fw-bold mb-2 ">BIENVENIDO A SIGEP</h2>
+                            <hr />
+                            <p style="color:red">@ViewBag.Mensaje</p>
+
+                            <form id="LoginForm" class="custom-form">
+                                <div class="input-icon-container mb-3">
+                                    <i class="fas fa-envelope"></i>
+                                    @Html.TextBoxFor(m => m.Cedula, new { @id = "CedulaLogin", @name = "Cedula", @class = "input-field", placeholder = "Ingresa tu cédula" })
+                                </div>
+
+                                <div class="input-icon-container mb-3">
+                                    <i class="fas fa-lock"></i>
+                                    @Html.PasswordFor(m => m.Contrasenna, new { @id = "ContrasennaLogin", @name = "Contrasenna", @class = "input-field password-input", placeholder = "Ingresa tu contraseña" })
+                                    <i class="fas fa-eye-slash toggle-password"></i>
+                                </div>
+
+                                <br />
+
+                                <p><a class="text-white-50" href="@Url.Action("RecuperarAcceso", "Home")">¿Olvidaste tu contraseña? Recupera tu acceso!</a></p>
+
+                                <button id="IniciarSesionBTN" class="btnInicio btn btn-lg px-5" type="submit">
+                                    Iniciar Sesión
+                                </button>
+                            </form>
+
+                            <br>
+                            <div>
+                                <p class="mb-0">
+                                    ¿No tienes una cuenta? <a href="@Url.Action("Registro", "Home")" class="text-white-50 fw-bold">Regístrate</a>
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+@section scripts {
+    <script>
+
+    $(function () {
+
+        const toggle = document.querySelector('.toggle-password');
+        const input = document.querySelector('.password-input');
+
+        if (toggle && input) {
+            toggle.addEventListener('click', function () {
+                const type = input.type === 'password' ? 'text' : 'password';
+                input.type = type;
+                toggle.classList.toggle('fa-eye');
+                toggle.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        $("#LoginForm").on("submit", function (e) {
+            e.preventDefault();
+
+            let cedula = $("#CedulaLogin").val().trim();
+            let contrasenna = $("#ContrasennaLogin").val().trim();
+
+            if (!cedula || !contrasenna) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Campos vacíos",
+                    text: "Por favor, completa ambos campos para continuar.",
+                    confirmButtonColor: "#2D594D"
+                });
+                return;
+            }
+
+
+           $.ajax({
+                type: "POST",
+                url: '@Url.Action("Login", "Home")',
+                data: {
+                    Cedula: cedula, Contrasenna: contrasenna
+                },
+            dataType: "json",
+            success: function (resp) {
+                if (resp.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Inicio de Sesión Correcto',
+                        text: resp.message,
+
+                    }).then(() => {
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    });
+                } else {
+                    Swal.fire("Error", resp.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("Error", "Error de comunicación con el servidor", "error");
+            }
+        });
+        });
+    });
+    </script>
+
+}
+
+
 

@@ -1,0 +1,140 @@
+﻿@model SIGEP.Models.MisPostulacionesVM
+
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Mis Postulaciones";
+    var rol = Session["rol"] != null ? Convert.ToInt32(Session["rol"]) : 0;
+}
+
+<div class="postulaciones-wrapper">
+    <h4 class="section-title">Mis Postulaciones</h4>
+
+    <button class="btn btn-verde-oscuro mb-3" data-bs-toggle="modal" data-bs-target="#modalAutogestion">
+        <i class="fas fa-plus me-2"></i>Autogestionar Práctica
+    </button>
+
+    @if (Model?.Postulaciones != null && Model.Postulaciones.Any())
+    {
+        foreach (var postulacion in Model.Postulaciones)
+        {
+            <div class="card-postulacion">
+                <div>
+                    <h5>@postulacion.NombreVacante</h5>
+                    <span class="estado-badge estado-@postulacion.EstadoPractica.Replace(" ", "")">@postulacion.EstadoPractica</span>
+                </div>
+                <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { idVacante = postulacion.IdVacante, idUsuario = postulacion.IdUsuario })" class="btn btn-outline-verde">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No tienes postulaciones registradas. Utiliza el botón "Autogestionar Práctica" para registrar una nueva práctica.
+        </div>
+    }
+</div>
+
+<!-- Modal Autogestionar Práctica -->
+<div class="modal fade" id="modalAutogestion" tabindex="-1" aria-labelledby="modalAutogestionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+            <div class="modal-header" style="background-color: #2D594D; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title" id="modalAutogestionLabel">Autogestionar Práctica</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formAutogestion">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre de la Empresa <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="empresa" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Sector <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="sector" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre del Encargado <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="encargado" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Puesto <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="puesto" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="correo" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" name="telefono" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Provincia <span class="text-danger">*</span></label>
+                            <select class="form-select" id="provincia" name="provincia" onchange="cargarCantones()" required>
+                                <option value="">Seleccione una provincia</option>
+                                <option value="San José">San José</option>
+                                <option value="Alajuela">Alajuela</option>
+                                <option value="Cartago">Cartago</option>
+                                <option value="Heredia">Heredia</option>
+                                <option value="Guanacaste">Guanacaste</option>
+                                <option value="Puntarenas">Puntarenas</option>
+                                <option value="Limón">Limón</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Cantón <span class="text-danger">*</span></label>
+                            <select class="form-select" id="canton" name="canton" onchange="cargarDistritos()" required>
+                                <option value="">Seleccione un cantón</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Distrito <span class="text-danger">*</span></label>
+                            <select class="form-select" id="distrito" name="distrito" required>
+                                <option value="">Seleccione un distrito</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="direccion" required />
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Descripción de Tareas <span class="text-danger">*</span></label>
+                            <textarea class="form-control" rows="3" name="descripcion" required></textarea>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Duración de la Práctica <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="duracion" placeholder="Ej: 3 meses, 6 meses, etc." required />
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Modalidad <span class="text-danger">*</span></label>
+                        <select class="form-select" name="modalidad" required>
+                            <option value="">Seleccione una modalidad</option>
+                            <option value="1">Presencial</option>
+                            <option value="2">Virtual</option>
+                            <option value="3">Híbrido</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-gris" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-verde-medio" onclick="registrarPostulacion()">Registrar Práctica</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/Practicas/Autogestion.js"></script>
+}

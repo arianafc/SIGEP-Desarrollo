@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="b197d08a29a241bebc5837bea5c8cb9b" Name="Diagram1">
+        <EntityTypeShape EntityType="SIGEPModel.AuditoriaGlobalTB" Width="1.5" PointX="7.5" PointY="34.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.BolsaEmpleoTB" Width="1.5" PointX="3" PointY="30.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.CantonesTB" Width="1.5" PointX="1.5" PointY="23.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.ComentariosPracticaTB" Width="1.5" PointX="16" PointY="35.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.ComunicadosTB" Width="1.5" PointX="6" PointY="30.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.DireccionesTB" Width="1.5" PointX="3" PointY="26.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.DistritosTB" Width="1.5" PointX="0.75" PointY="27.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.DocumentosTB" Width="1.5" PointX="7.5" PointY="38.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EmailsTB" Width="1.5" PointX="8.5" PointY="31" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EmpleosTB" Width="1.5" PointX="3" PointY="36.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EmpresasTB" Width="1.5" PointX="5.25" PointY="26" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EncargadosTB" Width="1.5" PointX="3" PointY="39.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EspecialidadesTB" Width="1.5" PointX="3" PointY="43.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EspecialidadesVacantesTB" Width="1.5" PointX="12.75" PointY="34.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EstadosTB" Width="1.5" PointX="0.75" PointY="30.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.EstudianteEncargadoTB" Width="1.5" PointX="10.5" PointY="39.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.FormacionAcademicaTB" Width="1.5" PointX="7.5" PointY="41.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.InformacionLaboralTB" Width="1.5" PointX="7.5" PointY="44.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.InformacionMedicaTB" Width="1.5" PointX="7.5" PointY="47.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.ModalidadesTB" Width="1.5" PointX="6.25" PointY="23.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.PracticaEstudianteTB" Width="1.5" PointX="13.75" PointY="30.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.ProvinciasTB" Width="1.5" PointX="1.5" PointY="20.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.RolesTB" Width="1.5" PointX="3" PointY="46.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.SeccionesTB" Width="1.5" PointX="3" PointY="49" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.TelefonosTB" Width="1.5" PointX="10.5" PointY="35" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.UsuarioEspecialidadTB" Width="1.5" PointX="11.5" PointY="31.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.UsuariosTB" Width="1.5" PointX="5.25" PointY="35.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.VacantesPracticasTB" Width="1.5" PointX="8.5" PointY="26.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="SIGEPModel.RolesTB_Backup" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <AssociationConnector Association="SIGEPModel.FK__Auditoria__IdUsu__6A30C649" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__BolsaEmpl__IdDir__6B24EA82" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__BolsaEmpl__IdEst__6C190EBB" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK_BolsaEmpleo_Modalidad" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__CantonesT__IdPro__6D0D32F4" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Distritos__IdCan__72C60C4A" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Comentari__IdPra__6E01572D" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Comentari__IdUsu__6EF57B66" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Comunicad__IdEst__6FE99F9F" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Comunicad__IdUsu__70DDC3D8" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Direccion__IdEst__71D1E811" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__EmpresasT__IdDir__787EE5A0" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__UsuariosT__IdDir__0E6E26BF" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK_DireccionesTB_DistritosTB" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Documento__IdUsu__73BA3083" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__EmailsTB__IdEmpr__74AE54BC" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__EmailsTB__IdEnca__75A278F5" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__EmailsTB__IdUsua__76969D2E" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__EmpleosTB__IdEst__778AC167" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__EmpresasT__IdEst__797309D9" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Telefonos__IdEmp__08B54D69" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__VacantesP__IdEmp__123EB7A3" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Encargado__IdEst__7A672E12" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Estudiant__IdEnc__7E37BEF6" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Telefonos__IdEnc__09A971A2" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Especiali__IdEsp__7C4F7684" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Especiali__IdEst__7B5B524B" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__UsuarioEs__IdEsp__0B91BA14" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Especiali__IdVac__7D439ABD" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Estudiant__IdEst__7F2BE32F" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__PracticaE__IdEst__03F0984C" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__RolesTB__IdEstad__06CD04F7" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Secciones__IdEst__07C12930" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__UsuarioEs__IdEst__0C85DE4D" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__UsuariosT__IdEst__0F624AF8" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__VacantesP__IdEst__1332DBDC" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Estudiant__IdUsu__00200768" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Formacion__IdUsu__01142BA1" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Informaci__IdUsu__02084FDA" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Informaci__IdUsu__02FC7413" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK_VacantesPracticas_Modalidad" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__PracticaE__IdUsu__04E4BC85" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__PracticaE__IdVac__05D8E0BE" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__UsuariosT__IdRol__10566F31" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__UsuariosT__IdSec__114A936A" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__Telefonos__IdUsu__0A9D95DB" ManuallyRouted="false" />
+        <AssociationConnector Association="SIGEPModel.FK__UsuarioEs__IdUsu__0D7A0286" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="SIGEPModel.EstadoTB_Backup" Width="1.5" PointX="3.375" PointY="0.75" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

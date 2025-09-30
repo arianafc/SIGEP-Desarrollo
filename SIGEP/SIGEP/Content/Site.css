@@ -1,20 +1,278 @@
 ﻿/* Set padding to keep content from hitting the edges */
 .body-content {
+    font-family: 'Inter', sans-serif;
     margin-top: 15px;
     padding-left: 15px;
     padding-right: 15px;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
+
 .dl-horizontal dt {
     white-space: normal;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
-input,
-select,
-textarea {
-    max-width: 280px;
+
+.gradient-custom {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('imagenes/CTP_BG.jpg') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardLogin {
+    background-color: #2d594d;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+
+.input-icon-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #ccc;
+}
+
+    .input-icon-container i {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: white;
+        font-size: 1rem;
+    }
+
+    .input-icon-container .fa-envelope,
+    .input-icon-container .fa-lock {
+        left: 0.5rem;
+    }
+
+    .input-icon-container .toggle-password {
+        right: 0.5rem;
+        cursor: pointer;
+    }
+
+.input-field {
+    width: 100%;
+    padding: 0.75rem 2rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: white;
+    background-color: #2d594d;
+}
+
+    .input-field::placeholder {
+        color: white;
+        opacity: 1;
+    }
+
+    .input-field::-webkit-input-placeholder {
+        color: white;
+    }
+
+    .input-field:-moz-placeholder {
+        color: white;
+    }
+
+    .input-field::-moz-placeholder {
+        color: white;
+    }
+
+    .input-field:-ms-input-placeholder {
+        color: white;
+    }
+
+.btnInicio {
+    background-color: transparent !important;
+    border: 1px solid white;
+    color: white;
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+    .btnInicio:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px #8CA653;
+    }
+
+.badge-asignada {
+    background-color: #768C46;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.badge-no-asignada {
+    background-color: #f2f2f2;
+    color: #2d594d;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.badge-desasignada {
+    background-color: #EAF2D8;
+    color: #2d594d;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-verde-personalizado {
+    background-color: #2d594d !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-verde-personalizado:hover {
+        background-color: #244738 !important;
+    }
+
+.section-title {
+    color: #2D594D;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #8CA653;
+    padding-bottom: .5rem;
+}
+
+.PostulacionesPerfil {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .PostulacionesPerfil:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+    }
+
+.CerrarModal {
+    background-color: #2d594d;
+    color: white;
+    border-radius: 2px;
+}
+
+    .CerrarModal:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+    }
+
+.comentario-item {
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+#comentariosAnteriores {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+    #comentariosAnteriores li {
+        word-break: break-word;
+        white-space: pre-wrap;
+        background-color: #f1f1f1;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+.action-buttons button {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: #2D594D;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+    .action-buttons button:hover {
+        background-color: #768C46;
+    }
+
+.top-buttons .col-md-6 {
+    margin-bottom: 1rem;
+}
+
+.ui-datepicker {
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 10px;
+}
+
+
+.ui-datepicker-header {
+    background-color: #2D594D !important;
+    color: #2D594D !important;
+    border-radius: 6px 6px 0 0;
+    padding: 0.4em 0;
+}
+
+
+.ui-datepicker-prev, .ui-datepicker-next {
+    cursor: pointer;
+    color: white;
+}
+
+    .ui-datepicker-prev:hover, .ui-datepicker-next:hover {
+        color: #a6d8b0;
+    }
+
+
+.ui-datepicker-today a {
+    background-color: #2D594D !important;
+    color: #2D594D !important;
+    font-weight: bold;
+    border-radius: 50%;
+}
+
+
+.ui-datepicker-calendar td a {
+    color: #2D594D !important;
+    padding: 0.4em;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+    .ui-datepicker-calendar td a:hover {
+        background-color: #d4f0d5;
+        color: #145214;
+    }
+
+
+.ui-datepicker-close {
+    background: #2D594D !important;
+    color: white;
+    border: none;
+    padding: 0.4em 0.8em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+    .ui-datepicker-close:hover {
+        background: #245238;
+    }
+
+.password-input::-ms-reveal,
+.password-input::-ms-clear,
+.password-input::-webkit-credentials-auto-fill-button,
+.password-input::-webkit-password-toggle-button {
+    display: none !important;
 }

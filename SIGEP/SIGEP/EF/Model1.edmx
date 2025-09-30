@@ -1,0 +1,2850 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="SIGEPModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="AuditoriaGlobalTB">
+          <Key>
+            <PropertyRef Name="IdAuditoria" />
+          </Key>
+          <Property Name="IdAuditoria" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="TablaAfectada" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="IdRegistro" Type="int" Nullable="false" />
+          <Property Name="Accion" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CampoAfectado" Type="varchar" MaxLength="255" />
+          <Property Name="DatosAnteriores" Type="varchar" MaxLength="2000" />
+          <Property Name="DatosNuevos" Type="varchar" MaxLength="2000" />
+        </EntityType>
+        <EntityType Name="BolsaEmpleoTB">
+          <Key>
+            <PropertyRef Name="IdEmpleo" />
+          </Key>
+          <Property Name="IdEmpleo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Empresa" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="2000" />
+          <Property Name="Requisitos" Type="varchar" MaxLength="2000" />
+          <Property Name="FechaPublicacion" Type="date" Nullable="false" />
+          <Property Name="FechaLimite" Type="date" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+          <Property Name="AreaAfin" Type="varchar" MaxLength="255" />
+          <Property Name="IdDireccion" Type="int" />
+          <Property Name="IdModalidad" Type="int" />
+        </EntityType>
+        <EntityType Name="CantonesTB">
+          <Key>
+            <PropertyRef Name="IdCanton" />
+          </Key>
+          <Property Name="IdCanton" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="IdProvincia" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ComentariosPracticaTB">
+          <Key>
+            <PropertyRef Name="IdComentario" />
+          </Key>
+          <Property Name="IdComentario" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Comentario" Type="varchar" MaxLength="1000" Nullable="false" />
+          <Property Name="Fecha" Type="date" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="IdPractica" Type="int" Nullable="false" />
+          <Property Name="Nota" Type="varchar" MaxLength="100" />
+          <Property Name="Tipo" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="ComunicadosTB">
+          <Key>
+            <PropertyRef Name="IdComunicado" />
+          </Key>
+          <Property Name="IdComunicado" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Informacion" Type="varchar" MaxLength="2000" Nullable="false" />
+          <Property Name="Fecha" Type="date" Nullable="false" />
+          <Property Name="Poblacion" Type="varchar" MaxLength="255" />
+          <Property Name="FechaLimite" Type="date" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DireccionesTB">
+          <Key>
+            <PropertyRef Name="IdDireccion" />
+          </Key>
+          <Property Name="IdDireccion" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DireccionExacta" Type="varchar" MaxLength="2000" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+          <Property Name="IdDistrito" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DistritosTB">
+          <Key>
+            <PropertyRef Name="IdDistrito" />
+          </Key>
+          <Property Name="IdDistrito" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="IdCanton" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DocumentosTB">
+          <Key>
+            <PropertyRef Name="IdDocumento" />
+          </Key>
+          <Property Name="IdDocumento" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Documento" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Tipo" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="RutaArchivo" Type="varchar" MaxLength="500" Nullable="false" />
+          <Property Name="FechaSubida" Type="datetime" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EmailsTB">
+          <Key>
+            <PropertyRef Name="IdEmail" />
+          </Key>
+          <Property Name="IdEmail" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" />
+          <Property Name="IdEmpresa" Type="int" />
+          <Property Name="IdEncargado" Type="int" />
+          <Property Name="Email" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EmpleosTB">
+          <Key>
+            <PropertyRef Name="IdEmpleo" />
+          </Key>
+          <Property Name="IdEmpleo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NombrePuesto" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Mensaje" Type="varchar" MaxLength="1000" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EmpresasTB">
+          <Key>
+            <PropertyRef Name="IdEmpresa" />
+          </Key>
+          <Property Name="IdEmpresa" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NombreEmpresa" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="NombreContacto" Type="varchar" MaxLength="255" />
+          <Property Name="IdDireccion" Type="int" />
+          <Property Name="AreasAfines" Type="varchar" MaxLength="255" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EncargadosTB">
+          <Key>
+            <PropertyRef Name="IdEncargado" />
+          </Key>
+          <Property Name="IdEncargado" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Cedula" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Apellido1" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Apellido2" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="FechaRegistro" Type="date" Nullable="false" />
+          <Property Name="Ocupacion" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="LugarTrabajo" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EspecialidadesTB">
+          <Key>
+            <PropertyRef Name="IdEspecialidad" />
+          </Key>
+          <Property Name="IdEspecialidad" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EspecialidadesVacantesTB">
+          <Key>
+            <PropertyRef Name="IdEspecialidadVacante" />
+          </Key>
+          <Property Name="IdEspecialidadVacante" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdEspecialidad" Type="int" Nullable="false" />
+          <Property Name="IdVacante" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EstadosTB">
+          <Key>
+            <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdEstado" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'SIGEP.dbo.EstadoTB_Backup' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="EstadoTB_Backup">
+          <Key>
+            <PropertyRef Name="IdEstado" />
+            <PropertyRef Name="Descripcion" />
+          </Key>
+          <Property Name="IdEstado" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EstudianteEncargadoTB">
+          <Key>
+            <PropertyRef Name="IdEstudianteEncargado" />
+          </Key>
+          <Property Name="IdEstudianteEncargado" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdEncargado" Type="int" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="Parentesco" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="FormacionAcademicaTB">
+          <Key>
+            <PropertyRef Name="IdFormacion" />
+          </Key>
+          <Property Name="IdFormacion" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="Carrera" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Titulo" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="AnnoGraduacion" Type="date" />
+        </EntityType>
+        <EntityType Name="InformacionLaboralTB">
+          <Key>
+            <PropertyRef Name="IdLaboral" />
+          </Key>
+          <Property Name="IdLaboral" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="EmpresaActual" Type="varchar" MaxLength="255" />
+          <Property Name="PuestoActual" Type="varchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="InformacionMedicaTB">
+          <Key>
+            <PropertyRef Name="IdInfoMedica" />
+          </Key>
+          <Property Name="IdInfoMedica" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="Padecimiento" Type="varchar" MaxLength="500" />
+          <Property Name="Tratamiento" Type="varchar" MaxLength="500" />
+          <Property Name="Alergia" Type="varchar" MaxLength="500" />
+        </EntityType>
+        <EntityType Name="ModalidadesTB">
+          <Key>
+            <PropertyRef Name="IdModalidad" />
+          </Key>
+          <Property Name="IdModalidad" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="100" Nullable="false" />
+        </EntityType>
+        <EntityType Name="PracticaEstudianteTB">
+          <Key>
+            <PropertyRef Name="IdPractica" />
+          </Key>
+          <Property Name="IdPractica" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdVacante" Type="int" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="FechaAplicacion" Type="date" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProvinciasTB">
+          <Key>
+            <PropertyRef Name="IdProvincia" />
+          </Key>
+          <Property Name="IdProvincia" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="RolesTB">
+          <Key>
+            <PropertyRef Name="IdRol" />
+          </Key>
+          <Property Name="IdRol" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="2000" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'SIGEP.dbo.RolesTB_Backup' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="RolesTB_Backup">
+          <Key>
+            <PropertyRef Name="IdRol" />
+            <PropertyRef Name="Descripcion" />
+            <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdRol" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="2000" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SeccionesTB">
+          <Key>
+            <PropertyRef Name="IdSeccion" />
+          </Key>
+          <Property Name="IdSeccion" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Seccion" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TelefonosTB">
+          <Key>
+            <PropertyRef Name="IdTelefono" />
+          </Key>
+          <Property Name="IdTelefono" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" />
+          <Property Name="IdEmpresa" Type="int" />
+          <Property Name="IdEncargado" Type="int" />
+          <Property Name="Telefono" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UsuarioEspecialidadTB">
+          <Key>
+            <PropertyRef Name="IdUsuarioEspecialidad" />
+          </Key>
+          <Property Name="IdUsuarioEspecialidad" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdEspecialidad" Type="int" Nullable="false" />
+          <Property Name="IdUsuario" Type="int" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UsuariosTB">
+          <Key>
+            <PropertyRef Name="IdUsuario" />
+          </Key>
+          <Property Name="IdUsuario" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Cedula" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Apellido1" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Apellido2" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Contrasenna" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="FechaNacimiento" Type="date" Nullable="false" />
+          <Property Name="FechaRegistro" Type="date" Nullable="false" />
+          <Property Name="FechaEgreso" Type="date" />
+          <Property Name="IdSeccion" Type="int" />
+          <Property Name="IdDireccion" Type="int" />
+          <Property Name="IdRol" Type="int" Nullable="false" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="VacantesPracticasTB">
+          <Key>
+            <PropertyRef Name="IdVacante" />
+          </Key>
+          <Property Name="IdVacante" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Nombre" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="IdEmpresa" Type="int" Nullable="false" />
+          <Property Name="Requerimientos" Type="varchar" MaxLength="1000" />
+          <Property Name="FechaMaxAplicacion" Type="date" />
+          <Property Name="NumCupos" Type="int" />
+          <Property Name="FechaCierre" Type="date" />
+          <Property Name="Descripcion" Type="varchar" MaxLength="1000" />
+          <Property Name="Tipo" Type="varchar" MaxLength="255" />
+          <Property Name="IdEstado" Type="int" Nullable="false" />
+          <Property Name="IdModalidad" Type="int" />
+        </EntityType>
+        <Association Name="FK__Auditoria__IdUsu__6A30C649">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="AuditoriaGlobalTB" Type="Self.AuditoriaGlobalTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="AuditoriaGlobalTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BolsaEmpl__IdDir__6B24EA82">
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="0..1" />
+          <End Role="BolsaEmpleoTB" Type="Self.BolsaEmpleoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DireccionesTB">
+              <PropertyRef Name="IdDireccion" />
+            </Principal>
+            <Dependent Role="BolsaEmpleoTB">
+              <PropertyRef Name="IdDireccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BolsaEmpl__IdEst__6C190EBB">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="BolsaEmpleoTB" Type="Self.BolsaEmpleoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="BolsaEmpleoTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CantonesT__IdPro__6D0D32F4">
+          <End Role="ProvinciasTB" Type="Self.ProvinciasTB" Multiplicity="1" />
+          <End Role="CantonesTB" Type="Self.CantonesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ProvinciasTB">
+              <PropertyRef Name="IdProvincia" />
+            </Principal>
+            <Dependent Role="CantonesTB">
+              <PropertyRef Name="IdProvincia" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comentari__IdPra__6E01572D">
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="1" />
+          <End Role="ComentariosPracticaTB" Type="Self.ComentariosPracticaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdPractica" />
+            </Principal>
+            <Dependent Role="ComentariosPracticaTB">
+              <PropertyRef Name="IdPractica" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comentari__IdUsu__6EF57B66">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="ComentariosPracticaTB" Type="Self.ComentariosPracticaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="ComentariosPracticaTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comunicad__IdEst__6FE99F9F">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="ComunicadosTB" Type="Self.ComunicadosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="ComunicadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comunicad__IdUsu__70DDC3D8">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="ComunicadosTB" Type="Self.ComunicadosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="ComunicadosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Direccion__IdEst__71D1E811">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="DireccionesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Distritos__IdCan__72C60C4A">
+          <End Role="CantonesTB" Type="Self.CantonesTB" Multiplicity="1" />
+          <End Role="DistritosTB" Type="Self.DistritosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CantonesTB">
+              <PropertyRef Name="IdCanton" />
+            </Principal>
+            <Dependent Role="DistritosTB">
+              <PropertyRef Name="IdCanton" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Documento__IdUsu__73BA3083">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="DocumentosTB" Type="Self.DocumentosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="DocumentosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmailsTB__IdEmpr__74AE54BC">
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="0..1" />
+          <End Role="EmailsTB" Type="Self.EmailsTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmpresasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Principal>
+            <Dependent Role="EmailsTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmailsTB__IdEnca__75A278F5">
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="0..1" />
+          <End Role="EmailsTB" Type="Self.EmailsTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EncargadosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Principal>
+            <Dependent Role="EmailsTB">
+              <PropertyRef Name="IdEncargado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmailsTB__IdUsua__76969D2E">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="0..1" />
+          <End Role="EmailsTB" Type="Self.EmailsTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="EmailsTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmpleosTB__IdEst__778AC167">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EmpleosTB" Type="Self.EmpleosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EmpleosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmpresasT__IdDir__787EE5A0">
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="0..1" />
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DireccionesTB">
+              <PropertyRef Name="IdDireccion" />
+            </Principal>
+            <Dependent Role="EmpresasTB">
+              <PropertyRef Name="IdDireccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmpresasT__IdEst__797309D9">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EmpresasTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Encargado__IdEst__7A672E12">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EncargadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Especiali__IdEsp__7C4F7684">
+          <End Role="EspecialidadesTB" Type="Self.EspecialidadesTB" Multiplicity="1" />
+          <End Role="EspecialidadesVacantesTB" Type="Self.EspecialidadesVacantesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EspecialidadesTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Principal>
+            <Dependent Role="EspecialidadesVacantesTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Especiali__IdEst__7B5B524B">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EspecialidadesTB" Type="Self.EspecialidadesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EspecialidadesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Especiali__IdVac__7D439ABD">
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="1" />
+          <End Role="EspecialidadesVacantesTB" Type="Self.EspecialidadesVacantesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VacantesPracticasTB">
+              <PropertyRef Name="IdVacante" />
+            </Principal>
+            <Dependent Role="EspecialidadesVacantesTB">
+              <PropertyRef Name="IdVacante" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Estudiant__IdEnc__7E37BEF6">
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="1" />
+          <End Role="EstudianteEncargadoTB" Type="Self.EstudianteEncargadoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EncargadosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Principal>
+            <Dependent Role="EstudianteEncargadoTB">
+              <PropertyRef Name="IdEncargado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Estudiant__IdEst__7F2BE32F">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EstudianteEncargadoTB" Type="Self.EstudianteEncargadoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EstudianteEncargadoTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Estudiant__IdUsu__00200768">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="EstudianteEncargadoTB" Type="Self.EstudianteEncargadoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="EstudianteEncargadoTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Formacion__IdUsu__01142BA1">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="FormacionAcademicaTB" Type="Self.FormacionAcademicaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="FormacionAcademicaTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Informaci__IdUsu__02084FDA">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="InformacionLaboralTB" Type="Self.InformacionLaboralTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="InformacionLaboralTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Informaci__IdUsu__02FC7413">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="InformacionMedicaTB" Type="Self.InformacionMedicaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="InformacionMedicaTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PracticaE__IdEst__03F0984C">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PracticaE__IdUsu__04E4BC85">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PracticaE__IdVac__05D8E0BE">
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="1" />
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VacantesPracticasTB">
+              <PropertyRef Name="IdVacante" />
+            </Principal>
+            <Dependent Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdVacante" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__RolesTB__IdEstad__06CD04F7">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="RolesTB" Type="Self.RolesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="RolesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Secciones__IdEst__07C12930">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="SeccionesTB" Type="Self.SeccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="SeccionesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Telefonos__IdEmp__08B54D69">
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="0..1" />
+          <End Role="TelefonosTB" Type="Self.TelefonosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmpresasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Principal>
+            <Dependent Role="TelefonosTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Telefonos__IdEnc__09A971A2">
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="0..1" />
+          <End Role="TelefonosTB" Type="Self.TelefonosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EncargadosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Principal>
+            <Dependent Role="TelefonosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Telefonos__IdUsu__0A9D95DB">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="0..1" />
+          <End Role="TelefonosTB" Type="Self.TelefonosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="TelefonosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuarioEs__IdEsp__0B91BA14">
+          <End Role="EspecialidadesTB" Type="Self.EspecialidadesTB" Multiplicity="1" />
+          <End Role="UsuarioEspecialidadTB" Type="Self.UsuarioEspecialidadTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EspecialidadesTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Principal>
+            <Dependent Role="UsuarioEspecialidadTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuarioEs__IdEst__0C85DE4D">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="UsuarioEspecialidadTB" Type="Self.UsuarioEspecialidadTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="UsuarioEspecialidadTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuarioEs__IdUsu__0D7A0286">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="UsuarioEspecialidadTB" Type="Self.UsuarioEspecialidadTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="UsuarioEspecialidadTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdDir__0E6E26BF">
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="0..1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DireccionesTB">
+              <PropertyRef Name="IdDireccion" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdDireccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdEst__0F624AF8">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdRol__10566F31">
+          <End Role="RolesTB" Type="Self.RolesTB" Multiplicity="1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RolesTB">
+              <PropertyRef Name="IdRol" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdRol" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdSec__114A936A">
+          <End Role="SeccionesTB" Type="Self.SeccionesTB" Multiplicity="0..1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeccionesTB">
+              <PropertyRef Name="IdSeccion" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdSeccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__VacantesP__IdEmp__123EB7A3">
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="1" />
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmpresasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Principal>
+            <Dependent Role="VacantesPracticasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__VacantesP__IdEst__1332DBDC">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="VacantesPracticasTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BolsaEmpleo_Modalidad">
+          <End Role="ModalidadesTB" Type="Self.ModalidadesTB" Multiplicity="0..1" />
+          <End Role="BolsaEmpleoTB" Type="Self.BolsaEmpleoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ModalidadesTB">
+              <PropertyRef Name="IdModalidad" />
+            </Principal>
+            <Dependent Role="BolsaEmpleoTB">
+              <PropertyRef Name="IdModalidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DireccionesTB_DistritosTB">
+          <End Role="DistritosTB" Type="Self.DistritosTB" Multiplicity="1" />
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DistritosTB">
+              <PropertyRef Name="IdDistrito" />
+            </Principal>
+            <Dependent Role="DireccionesTB">
+              <PropertyRef Name="IdDistrito" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VacantesPracticas_Modalidad">
+          <End Role="ModalidadesTB" Type="Self.ModalidadesTB" Multiplicity="0..1" />
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ModalidadesTB">
+              <PropertyRef Name="IdModalidad" />
+            </Principal>
+            <Dependent Role="VacantesPracticasTB">
+              <PropertyRef Name="IdModalidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="ActualizarEstadoPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdPractica" Type="int" Mode="In" />
+          <Parameter Name="IdEstado" Type="int" Mode="In" />
+          <Parameter Name="Comentario" Type="nvarchar(max)" Mode="In" />
+        </Function>
+        <Function Name="CambiarContrasennaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CEDULA" Type="varchar" Mode="In" />
+          <Parameter Name="NUEVA_CONTRASENNA" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="InsertarComentarioPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdVacante" Type="int" Mode="In" />
+          <Parameter Name="IdUsuario" Type="int" Mode="In" />
+          <Parameter Name="Comentario" Type="varchar" Mode="In" />
+          <Parameter Name="IdUsuarioComentario" Type="int" Mode="In" />
+        </Function>
+        <Function Name="LoginSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CEDULA" Type="varchar" Mode="In" />
+          <Parameter Name="CONTRASENNA" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="ObtenerComentariosPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdVacante" Type="int" Mode="In" />
+          <Parameter Name="IdUsuario" Type="int" Mode="In" />
+        </Function>
+        <Function Name="ObtenerVisualizacionPracticaSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="IdVacante" Type="int" Mode="In" />
+          <Parameter Name="IdUsuario" Type="int" Mode="In" />
+        </Function>
+        <Function Name="RegistroSP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Nombre" Type="varchar" Mode="In" />
+          <Parameter Name="Apellido1" Type="varchar" Mode="In" />
+          <Parameter Name="Apellido2" Type="varchar" Mode="In" />
+          <Parameter Name="Correo" Type="varchar" Mode="In" />
+          <Parameter Name="IdEspecialidad" Type="int" Mode="In" />
+          <Parameter Name="FechaNacimiento" Type="datetime" Mode="In" />
+          <Parameter Name="IdSeccion" Type="int" Mode="In" />
+          <Parameter Name="Contrasenna" Type="varchar" Mode="In" />
+          <Parameter Name="Cedula" Type="varchar" Mode="In" />
+        </Function>
+        <EntityContainer Name="SIGEPModelStoreContainer">
+          <EntitySet Name="AuditoriaGlobalTB" EntityType="Self.AuditoriaGlobalTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BolsaEmpleoTB" EntityType="Self.BolsaEmpleoTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CantonesTB" EntityType="Self.CantonesTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ComentariosPracticaTB" EntityType="Self.ComentariosPracticaTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ComunicadosTB" EntityType="Self.ComunicadosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DireccionesTB" EntityType="Self.DireccionesTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DistritosTB" EntityType="Self.DistritosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DocumentosTB" EntityType="Self.DocumentosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmailsTB" EntityType="Self.EmailsTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmpleosTB" EntityType="Self.EmpleosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmpresasTB" EntityType="Self.EmpresasTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EncargadosTB" EntityType="Self.EncargadosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EspecialidadesTB" EntityType="Self.EspecialidadesTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EspecialidadesVacantesTB" EntityType="Self.EspecialidadesVacantesTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EstadosTB" EntityType="Self.EstadosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EstudianteEncargadoTB" EntityType="Self.EstudianteEncargadoTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FormacionAcademicaTB" EntityType="Self.FormacionAcademicaTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="InformacionLaboralTB" EntityType="Self.InformacionLaboralTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="InformacionMedicaTB" EntityType="Self.InformacionMedicaTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ModalidadesTB" EntityType="Self.ModalidadesTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PracticaEstudianteTB" EntityType="Self.PracticaEstudianteTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProvinciasTB" EntityType="Self.ProvinciasTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RolesTB" EntityType="Self.RolesTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SeccionesTB" EntityType="Self.SeccionesTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TelefonosTB" EntityType="Self.TelefonosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UsuarioEspecialidadTB" EntityType="Self.UsuarioEspecialidadTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UsuariosTB" EntityType="Self.UsuariosTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="VacantesPracticasTB" EntityType="Self.VacantesPracticasTB" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EstadoTB_Backup" EntityType="Self.EstadoTB_Backup" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [EstadoTB_Backup].[IdEstado] AS [IdEstado], 
+    [EstadoTB_Backup].[Descripcion] AS [Descripcion]
+    FROM [dbo].[EstadoTB_Backup] AS [EstadoTB_Backup]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="RolesTB_Backup" EntityType="Self.RolesTB_Backup" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [RolesTB_Backup].[IdRol] AS [IdRol], 
+    [RolesTB_Backup].[Descripcion] AS [Descripcion], 
+    [RolesTB_Backup].[IdEstado] AS [IdEstado]
+    FROM [dbo].[RolesTB_Backup] AS [RolesTB_Backup]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK__Auditoria__IdUsu__6A30C649" Association="Self.FK__Auditoria__IdUsu__6A30C649">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="AuditoriaGlobalTB" EntitySet="AuditoriaGlobalTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BolsaEmpl__IdDir__6B24EA82" Association="Self.FK__BolsaEmpl__IdDir__6B24EA82">
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+            <End Role="BolsaEmpleoTB" EntitySet="BolsaEmpleoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BolsaEmpl__IdEst__6C190EBB" Association="Self.FK__BolsaEmpl__IdEst__6C190EBB">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="BolsaEmpleoTB" EntitySet="BolsaEmpleoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CantonesT__IdPro__6D0D32F4" Association="Self.FK__CantonesT__IdPro__6D0D32F4">
+            <End Role="ProvinciasTB" EntitySet="ProvinciasTB" />
+            <End Role="CantonesTB" EntitySet="CantonesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comentari__IdPra__6E01572D" Association="Self.FK__Comentari__IdPra__6E01572D">
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+            <End Role="ComentariosPracticaTB" EntitySet="ComentariosPracticaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comentari__IdUsu__6EF57B66" Association="Self.FK__Comentari__IdUsu__6EF57B66">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="ComentariosPracticaTB" EntitySet="ComentariosPracticaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comunicad__IdEst__6FE99F9F" Association="Self.FK__Comunicad__IdEst__6FE99F9F">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="ComunicadosTB" EntitySet="ComunicadosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comunicad__IdUsu__70DDC3D8" Association="Self.FK__Comunicad__IdUsu__70DDC3D8">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="ComunicadosTB" EntitySet="ComunicadosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Direccion__IdEst__71D1E811" Association="Self.FK__Direccion__IdEst__71D1E811">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Distritos__IdCan__72C60C4A" Association="Self.FK__Distritos__IdCan__72C60C4A">
+            <End Role="CantonesTB" EntitySet="CantonesTB" />
+            <End Role="DistritosTB" EntitySet="DistritosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Documento__IdUsu__73BA3083" Association="Self.FK__Documento__IdUsu__73BA3083">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="DocumentosTB" EntitySet="DocumentosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmailsTB__IdEmpr__74AE54BC" Association="Self.FK__EmailsTB__IdEmpr__74AE54BC">
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+            <End Role="EmailsTB" EntitySet="EmailsTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmailsTB__IdEnca__75A278F5" Association="Self.FK__EmailsTB__IdEnca__75A278F5">
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+            <End Role="EmailsTB" EntitySet="EmailsTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmailsTB__IdUsua__76969D2E" Association="Self.FK__EmailsTB__IdUsua__76969D2E">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="EmailsTB" EntitySet="EmailsTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmpleosTB__IdEst__778AC167" Association="Self.FK__EmpleosTB__IdEst__778AC167">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EmpleosTB" EntitySet="EmpleosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmpresasT__IdDir__787EE5A0" Association="Self.FK__EmpresasT__IdDir__787EE5A0">
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmpresasT__IdEst__797309D9" Association="Self.FK__EmpresasT__IdEst__797309D9">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Encargado__IdEst__7A672E12" Association="Self.FK__Encargado__IdEst__7A672E12">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Especiali__IdEsp__7C4F7684" Association="Self.FK__Especiali__IdEsp__7C4F7684">
+            <End Role="EspecialidadesTB" EntitySet="EspecialidadesTB" />
+            <End Role="EspecialidadesVacantesTB" EntitySet="EspecialidadesVacantesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Especiali__IdEst__7B5B524B" Association="Self.FK__Especiali__IdEst__7B5B524B">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EspecialidadesTB" EntitySet="EspecialidadesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Especiali__IdVac__7D439ABD" Association="Self.FK__Especiali__IdVac__7D439ABD">
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+            <End Role="EspecialidadesVacantesTB" EntitySet="EspecialidadesVacantesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Estudiant__IdEnc__7E37BEF6" Association="Self.FK__Estudiant__IdEnc__7E37BEF6">
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+            <End Role="EstudianteEncargadoTB" EntitySet="EstudianteEncargadoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Estudiant__IdEst__7F2BE32F" Association="Self.FK__Estudiant__IdEst__7F2BE32F">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EstudianteEncargadoTB" EntitySet="EstudianteEncargadoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Estudiant__IdUsu__00200768" Association="Self.FK__Estudiant__IdUsu__00200768">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="EstudianteEncargadoTB" EntitySet="EstudianteEncargadoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Formacion__IdUsu__01142BA1" Association="Self.FK__Formacion__IdUsu__01142BA1">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="FormacionAcademicaTB" EntitySet="FormacionAcademicaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Informaci__IdUsu__02084FDA" Association="Self.FK__Informaci__IdUsu__02084FDA">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="InformacionLaboralTB" EntitySet="InformacionLaboralTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Informaci__IdUsu__02FC7413" Association="Self.FK__Informaci__IdUsu__02FC7413">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="InformacionMedicaTB" EntitySet="InformacionMedicaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PracticaE__IdEst__03F0984C" Association="Self.FK__PracticaE__IdEst__03F0984C">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PracticaE__IdUsu__04E4BC85" Association="Self.FK__PracticaE__IdUsu__04E4BC85">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PracticaE__IdVac__05D8E0BE" Association="Self.FK__PracticaE__IdVac__05D8E0BE">
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__RolesTB__IdEstad__06CD04F7" Association="Self.FK__RolesTB__IdEstad__06CD04F7">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="RolesTB" EntitySet="RolesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Secciones__IdEst__07C12930" Association="Self.FK__Secciones__IdEst__07C12930">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="SeccionesTB" EntitySet="SeccionesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Telefonos__IdEmp__08B54D69" Association="Self.FK__Telefonos__IdEmp__08B54D69">
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+            <End Role="TelefonosTB" EntitySet="TelefonosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Telefonos__IdEnc__09A971A2" Association="Self.FK__Telefonos__IdEnc__09A971A2">
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+            <End Role="TelefonosTB" EntitySet="TelefonosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Telefonos__IdUsu__0A9D95DB" Association="Self.FK__Telefonos__IdUsu__0A9D95DB">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="TelefonosTB" EntitySet="TelefonosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuarioEs__IdEsp__0B91BA14" Association="Self.FK__UsuarioEs__IdEsp__0B91BA14">
+            <End Role="EspecialidadesTB" EntitySet="EspecialidadesTB" />
+            <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuarioEs__IdEst__0C85DE4D" Association="Self.FK__UsuarioEs__IdEst__0C85DE4D">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuarioEs__IdUsu__0D7A0286" Association="Self.FK__UsuarioEs__IdUsu__0D7A0286">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdDir__0E6E26BF" Association="Self.FK__UsuariosT__IdDir__0E6E26BF">
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdEst__0F624AF8" Association="Self.FK__UsuariosT__IdEst__0F624AF8">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdRol__10566F31" Association="Self.FK__UsuariosT__IdRol__10566F31">
+            <End Role="RolesTB" EntitySet="RolesTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdSec__114A936A" Association="Self.FK__UsuariosT__IdSec__114A936A">
+            <End Role="SeccionesTB" EntitySet="SeccionesTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__VacantesP__IdEmp__123EB7A3" Association="Self.FK__VacantesP__IdEmp__123EB7A3">
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__VacantesP__IdEst__1332DBDC" Association="Self.FK__VacantesP__IdEst__1332DBDC">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BolsaEmpleo_Modalidad" Association="Self.FK_BolsaEmpleo_Modalidad">
+            <End Role="ModalidadesTB" EntitySet="ModalidadesTB" />
+            <End Role="BolsaEmpleoTB" EntitySet="BolsaEmpleoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DireccionesTB_DistritosTB" Association="Self.FK_DireccionesTB_DistritosTB">
+            <End Role="DistritosTB" EntitySet="DistritosTB" />
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VacantesPracticas_Modalidad" Association="Self.FK_VacantesPracticas_Modalidad">
+            <End Role="ModalidadesTB" EntitySet="ModalidadesTB" />
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="SIGEPModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="AuditoriaGlobalTB">
+          <Key>
+            <PropertyRef Name="IdAuditoria" />
+          </Key>
+          <Property Name="IdAuditoria" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="TablaAfectada" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdRegistro" Type="Int32" Nullable="false" />
+          <Property Name="Accion" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CampoAfectado" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="DatosAnteriores" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="DatosNuevos" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Auditoria__IdUsu__6A30C649" FromRole="AuditoriaGlobalTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="BolsaEmpleoTB">
+          <Key>
+            <PropertyRef Name="IdEmpleo" />
+          </Key>
+          <Property Name="IdEmpleo" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Empresa" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Descripcion" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="Requisitos" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="FechaPublicacion" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="FechaLimite" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <Property Name="AreaAfin" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="IdDireccion" Type="Int32" />
+          <Property Name="IdModalidad" Type="Int32" />
+          <NavigationProperty Name="DireccionesTB" Relationship="Self.FK__BolsaEmpl__IdDir__6B24EA82" FromRole="BolsaEmpleoTB" ToRole="DireccionesTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__BolsaEmpl__IdEst__6C190EBB" FromRole="BolsaEmpleoTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="ModalidadesTB" Relationship="Self.FK_BolsaEmpleo_Modalidad" FromRole="BolsaEmpleoTB" ToRole="ModalidadesTB" />
+        </EntityType>
+        <EntityType Name="CantonesTB">
+          <Key>
+            <PropertyRef Name="IdCanton" />
+          </Key>
+          <Property Name="IdCanton" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdProvincia" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="ProvinciasTB" Relationship="Self.FK__CantonesT__IdPro__6D0D32F4" FromRole="CantonesTB" ToRole="ProvinciasTB" />
+          <NavigationProperty Name="DistritosTB" Relationship="Self.FK__Distritos__IdCan__72C60C4A" FromRole="CantonesTB" ToRole="DistritosTB" />
+        </EntityType>
+        <EntityType Name="ComentariosPracticaTB">
+          <Key>
+            <PropertyRef Name="IdComentario" />
+          </Key>
+          <Property Name="IdComentario" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Comentario" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Fecha" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="IdPractica" Type="Int32" Nullable="false" />
+          <Property Name="Nota" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Tipo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="PracticaEstudianteTB" Relationship="Self.FK__Comentari__IdPra__6E01572D" FromRole="ComentariosPracticaTB" ToRole="PracticaEstudianteTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Comentari__IdUsu__6EF57B66" FromRole="ComentariosPracticaTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="ComunicadosTB">
+          <Key>
+            <PropertyRef Name="IdComunicado" />
+          </Key>
+          <Property Name="IdComunicado" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Informacion" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Fecha" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Poblacion" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="FechaLimite" Type="DateTime" Precision="0" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__Comunicad__IdEst__6FE99F9F" FromRole="ComunicadosTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Comunicad__IdUsu__70DDC3D8" FromRole="ComunicadosTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="DireccionesTB">
+          <Key>
+            <PropertyRef Name="IdDireccion" />
+          </Key>
+          <Property Name="IdDireccion" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DireccionExacta" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <Property Name="IdDistrito" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="BolsaEmpleoTB" Relationship="Self.FK__BolsaEmpl__IdDir__6B24EA82" FromRole="DireccionesTB" ToRole="BolsaEmpleoTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__Direccion__IdEst__71D1E811" FromRole="DireccionesTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="EmpresasTB" Relationship="Self.FK__EmpresasT__IdDir__787EE5A0" FromRole="DireccionesTB" ToRole="EmpresasTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__UsuariosT__IdDir__0E6E26BF" FromRole="DireccionesTB" ToRole="UsuariosTB" />
+          <NavigationProperty Name="DistritosTB" Relationship="Self.FK_DireccionesTB_DistritosTB" FromRole="DireccionesTB" ToRole="DistritosTB" />
+        </EntityType>
+        <EntityType Name="DistritosTB">
+          <Key>
+            <PropertyRef Name="IdDistrito" />
+          </Key>
+          <Property Name="IdDistrito" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdCanton" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="CantonesTB" Relationship="Self.FK__Distritos__IdCan__72C60C4A" FromRole="DistritosTB" ToRole="CantonesTB" />
+          <NavigationProperty Name="DireccionesTB" Relationship="Self.FK_DireccionesTB_DistritosTB" FromRole="DistritosTB" ToRole="DireccionesTB" />
+        </EntityType>
+        <EntityType Name="DocumentosTB">
+          <Key>
+            <PropertyRef Name="IdDocumento" />
+          </Key>
+          <Property Name="IdDocumento" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Documento" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Tipo" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="RutaArchivo" Type="String" MaxLength="500" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FechaSubida" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Documento__IdUsu__73BA3083" FromRole="DocumentosTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="EmailsTB">
+          <Key>
+            <PropertyRef Name="IdEmail" />
+          </Key>
+          <Property Name="IdEmail" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" />
+          <Property Name="IdEmpresa" Type="Int32" />
+          <Property Name="IdEncargado" Type="Int32" />
+          <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="EmpresasTB" Relationship="Self.FK__EmailsTB__IdEmpr__74AE54BC" FromRole="EmailsTB" ToRole="EmpresasTB" />
+          <NavigationProperty Name="EncargadosTB" Relationship="Self.FK__EmailsTB__IdEnca__75A278F5" FromRole="EmailsTB" ToRole="EncargadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__EmailsTB__IdUsua__76969D2E" FromRole="EmailsTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="EmpleosTB">
+          <Key>
+            <PropertyRef Name="IdEmpleo" />
+          </Key>
+          <Property Name="IdEmpleo" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NombrePuesto" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Mensaje" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__EmpleosTB__IdEst__778AC167" FromRole="EmpleosTB" ToRole="EstadosTB" />
+        </EntityType>
+        <EntityType Name="EmpresasTB">
+          <Key>
+            <PropertyRef Name="IdEmpresa" />
+          </Key>
+          <Property Name="IdEmpresa" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NombreEmpresa" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NombreContacto" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="IdDireccion" Type="Int32" />
+          <Property Name="AreasAfines" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="DireccionesTB" Relationship="Self.FK__EmpresasT__IdDir__787EE5A0" FromRole="EmpresasTB" ToRole="DireccionesTB" />
+          <NavigationProperty Name="EmailsTB" Relationship="Self.FK__EmailsTB__IdEmpr__74AE54BC" FromRole="EmpresasTB" ToRole="EmailsTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__EmpresasT__IdEst__797309D9" FromRole="EmpresasTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="TelefonosTB" Relationship="Self.FK__Telefonos__IdEmp__08B54D69" FromRole="EmpresasTB" ToRole="TelefonosTB" />
+          <NavigationProperty Name="VacantesPracticasTB" Relationship="Self.FK__VacantesP__IdEmp__123EB7A3" FromRole="EmpresasTB" ToRole="VacantesPracticasTB" />
+        </EntityType>
+        <EntityType Name="EncargadosTB">
+          <Key>
+            <PropertyRef Name="IdEncargado" />
+          </Key>
+          <Property Name="IdEncargado" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Cedula" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Apellido1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Apellido2" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FechaRegistro" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Ocupacion" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="LugarTrabajo" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EmailsTB" Relationship="Self.FK__EmailsTB__IdEnca__75A278F5" FromRole="EncargadosTB" ToRole="EmailsTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__Encargado__IdEst__7A672E12" FromRole="EncargadosTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="EstudianteEncargadoTB" Relationship="Self.FK__Estudiant__IdEnc__7E37BEF6" FromRole="EncargadosTB" ToRole="EstudianteEncargadoTB" />
+          <NavigationProperty Name="TelefonosTB" Relationship="Self.FK__Telefonos__IdEnc__09A971A2" FromRole="EncargadosTB" ToRole="TelefonosTB" />
+        </EntityType>
+        <EntityType Name="EspecialidadesTB">
+          <Key>
+            <PropertyRef Name="IdEspecialidad" />
+          </Key>
+          <Property Name="IdEspecialidad" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EspecialidadesVacantesTB" Relationship="Self.FK__Especiali__IdEsp__7C4F7684" FromRole="EspecialidadesTB" ToRole="EspecialidadesVacantesTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__Especiali__IdEst__7B5B524B" FromRole="EspecialidadesTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="UsuarioEspecialidadTB" Relationship="Self.FK__UsuarioEs__IdEsp__0B91BA14" FromRole="EspecialidadesTB" ToRole="UsuarioEspecialidadTB" />
+        </EntityType>
+        <EntityType Name="EspecialidadesVacantesTB">
+          <Key>
+            <PropertyRef Name="IdEspecialidadVacante" />
+          </Key>
+          <Property Name="IdEspecialidadVacante" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdEspecialidad" Type="Int32" Nullable="false" />
+          <Property Name="IdVacante" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EspecialidadesTB" Relationship="Self.FK__Especiali__IdEsp__7C4F7684" FromRole="EspecialidadesVacantesTB" ToRole="EspecialidadesTB" />
+          <NavigationProperty Name="VacantesPracticasTB" Relationship="Self.FK__Especiali__IdVac__7D439ABD" FromRole="EspecialidadesVacantesTB" ToRole="VacantesPracticasTB" />
+        </EntityType>
+        <EntityType Name="EstadosTB">
+          <Key>
+            <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdEstado" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="BolsaEmpleoTB" Relationship="Self.FK__BolsaEmpl__IdEst__6C190EBB" FromRole="EstadosTB" ToRole="BolsaEmpleoTB" />
+          <NavigationProperty Name="ComunicadosTB" Relationship="Self.FK__Comunicad__IdEst__6FE99F9F" FromRole="EstadosTB" ToRole="ComunicadosTB" />
+          <NavigationProperty Name="DireccionesTB" Relationship="Self.FK__Direccion__IdEst__71D1E811" FromRole="EstadosTB" ToRole="DireccionesTB" />
+          <NavigationProperty Name="EmpleosTB" Relationship="Self.FK__EmpleosTB__IdEst__778AC167" FromRole="EstadosTB" ToRole="EmpleosTB" />
+          <NavigationProperty Name="EmpresasTB" Relationship="Self.FK__EmpresasT__IdEst__797309D9" FromRole="EstadosTB" ToRole="EmpresasTB" />
+          <NavigationProperty Name="EncargadosTB" Relationship="Self.FK__Encargado__IdEst__7A672E12" FromRole="EstadosTB" ToRole="EncargadosTB" />
+          <NavigationProperty Name="EspecialidadesTB" Relationship="Self.FK__Especiali__IdEst__7B5B524B" FromRole="EstadosTB" ToRole="EspecialidadesTB" />
+          <NavigationProperty Name="EstudianteEncargadoTB" Relationship="Self.FK__Estudiant__IdEst__7F2BE32F" FromRole="EstadosTB" ToRole="EstudianteEncargadoTB" />
+          <NavigationProperty Name="PracticaEstudianteTB" Relationship="Self.FK__PracticaE__IdEst__03F0984C" FromRole="EstadosTB" ToRole="PracticaEstudianteTB" />
+          <NavigationProperty Name="RolesTB" Relationship="Self.FK__RolesTB__IdEstad__06CD04F7" FromRole="EstadosTB" ToRole="RolesTB" />
+          <NavigationProperty Name="SeccionesTB" Relationship="Self.FK__Secciones__IdEst__07C12930" FromRole="EstadosTB" ToRole="SeccionesTB" />
+          <NavigationProperty Name="UsuarioEspecialidadTB" Relationship="Self.FK__UsuarioEs__IdEst__0C85DE4D" FromRole="EstadosTB" ToRole="UsuarioEspecialidadTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__UsuariosT__IdEst__0F624AF8" FromRole="EstadosTB" ToRole="UsuariosTB" />
+          <NavigationProperty Name="VacantesPracticasTB" Relationship="Self.FK__VacantesP__IdEst__1332DBDC" FromRole="EstadosTB" ToRole="VacantesPracticasTB" />
+        </EntityType>
+        <EntityType Name="EstudianteEncargadoTB">
+          <Key>
+            <PropertyRef Name="IdEstudianteEncargado" />
+          </Key>
+          <Property Name="IdEstudianteEncargado" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdEncargado" Type="Int32" Nullable="false" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="Parentesco" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EncargadosTB" Relationship="Self.FK__Estudiant__IdEnc__7E37BEF6" FromRole="EstudianteEncargadoTB" ToRole="EncargadosTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__Estudiant__IdEst__7F2BE32F" FromRole="EstudianteEncargadoTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Estudiant__IdUsu__00200768" FromRole="EstudianteEncargadoTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="FormacionAcademicaTB">
+          <Key>
+            <PropertyRef Name="IdFormacion" />
+          </Key>
+          <Property Name="IdFormacion" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="Carrera" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Titulo" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="AnnoGraduacion" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Formacion__IdUsu__01142BA1" FromRole="FormacionAcademicaTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="InformacionLaboralTB">
+          <Key>
+            <PropertyRef Name="IdLaboral" />
+          </Key>
+          <Property Name="IdLaboral" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="EmpresaActual" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="PuestoActual" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Informaci__IdUsu__02084FDA" FromRole="InformacionLaboralTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="InformacionMedicaTB">
+          <Key>
+            <PropertyRef Name="IdInfoMedica" />
+          </Key>
+          <Property Name="IdInfoMedica" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="Padecimiento" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Tratamiento" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Alergia" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Informaci__IdUsu__02FC7413" FromRole="InformacionMedicaTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="ModalidadesTB">
+          <Key>
+            <PropertyRef Name="IdModalidad" />
+          </Key>
+          <Property Name="IdModalidad" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="BolsaEmpleoTB" Relationship="Self.FK_BolsaEmpleo_Modalidad" FromRole="ModalidadesTB" ToRole="BolsaEmpleoTB" />
+          <NavigationProperty Name="VacantesPracticasTB" Relationship="Self.FK_VacantesPracticas_Modalidad" FromRole="ModalidadesTB" ToRole="VacantesPracticasTB" />
+        </EntityType>
+        <EntityType Name="PracticaEstudianteTB">
+          <Key>
+            <PropertyRef Name="IdPractica" />
+          </Key>
+          <Property Name="IdPractica" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdVacante" Type="Int32" Nullable="false" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="FechaAplicacion" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="ComentariosPracticaTB" Relationship="Self.FK__Comentari__IdPra__6E01572D" FromRole="PracticaEstudianteTB" ToRole="ComentariosPracticaTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__PracticaE__IdEst__03F0984C" FromRole="PracticaEstudianteTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__PracticaE__IdUsu__04E4BC85" FromRole="PracticaEstudianteTB" ToRole="UsuariosTB" />
+          <NavigationProperty Name="VacantesPracticasTB" Relationship="Self.FK__PracticaE__IdVac__05D8E0BE" FromRole="PracticaEstudianteTB" ToRole="VacantesPracticasTB" />
+        </EntityType>
+        <EntityType Name="ProvinciasTB">
+          <Key>
+            <PropertyRef Name="IdProvincia" />
+          </Key>
+          <Property Name="IdProvincia" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="CantonesTB" Relationship="Self.FK__CantonesT__IdPro__6D0D32F4" FromRole="ProvinciasTB" ToRole="CantonesTB" />
+        </EntityType>
+        <EntityType Name="RolesTB">
+          <Key>
+            <PropertyRef Name="IdRol" />
+          </Key>
+          <Property Name="IdRol" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__RolesTB__IdEstad__06CD04F7" FromRole="RolesTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__UsuariosT__IdRol__10566F31" FromRole="RolesTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="SeccionesTB">
+          <Key>
+            <PropertyRef Name="IdSeccion" />
+          </Key>
+          <Property Name="IdSeccion" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Seccion" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__Secciones__IdEst__07C12930" FromRole="SeccionesTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__UsuariosT__IdSec__114A936A" FromRole="SeccionesTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="TelefonosTB">
+          <Key>
+            <PropertyRef Name="IdTelefono" />
+          </Key>
+          <Property Name="IdTelefono" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdUsuario" Type="Int32" />
+          <Property Name="IdEmpresa" Type="Int32" />
+          <Property Name="IdEncargado" Type="Int32" />
+          <Property Name="Telefono" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="EmpresasTB" Relationship="Self.FK__Telefonos__IdEmp__08B54D69" FromRole="TelefonosTB" ToRole="EmpresasTB" />
+          <NavigationProperty Name="EncargadosTB" Relationship="Self.FK__Telefonos__IdEnc__09A971A2" FromRole="TelefonosTB" ToRole="EncargadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__Telefonos__IdUsu__0A9D95DB" FromRole="TelefonosTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="UsuarioEspecialidadTB">
+          <Key>
+            <PropertyRef Name="IdUsuarioEspecialidad" />
+          </Key>
+          <Property Name="IdUsuarioEspecialidad" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdEspecialidad" Type="Int32" Nullable="false" />
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="EspecialidadesTB" Relationship="Self.FK__UsuarioEs__IdEsp__0B91BA14" FromRole="UsuarioEspecialidadTB" ToRole="EspecialidadesTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__UsuarioEs__IdEst__0C85DE4D" FromRole="UsuarioEspecialidadTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="UsuariosTB" Relationship="Self.FK__UsuarioEs__IdUsu__0D7A0286" FromRole="UsuarioEspecialidadTB" ToRole="UsuariosTB" />
+        </EntityType>
+        <EntityType Name="UsuariosTB">
+          <Key>
+            <PropertyRef Name="IdUsuario" />
+          </Key>
+          <Property Name="IdUsuario" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Cedula" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Apellido1" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Apellido2" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Contrasenna" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FechaNacimiento" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="FechaRegistro" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="FechaEgreso" Type="DateTime" Precision="0" />
+          <Property Name="IdSeccion" Type="Int32" />
+          <Property Name="IdDireccion" Type="Int32" />
+          <Property Name="IdRol" Type="Int32" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="AuditoriaGlobalTB" Relationship="Self.FK__Auditoria__IdUsu__6A30C649" FromRole="UsuariosTB" ToRole="AuditoriaGlobalTB" />
+          <NavigationProperty Name="ComentariosPracticaTB" Relationship="Self.FK__Comentari__IdUsu__6EF57B66" FromRole="UsuariosTB" ToRole="ComentariosPracticaTB" />
+          <NavigationProperty Name="ComunicadosTB" Relationship="Self.FK__Comunicad__IdUsu__70DDC3D8" FromRole="UsuariosTB" ToRole="ComunicadosTB" />
+          <NavigationProperty Name="DireccionesTB" Relationship="Self.FK__UsuariosT__IdDir__0E6E26BF" FromRole="UsuariosTB" ToRole="DireccionesTB" />
+          <NavigationProperty Name="DocumentosTB" Relationship="Self.FK__Documento__IdUsu__73BA3083" FromRole="UsuariosTB" ToRole="DocumentosTB" />
+          <NavigationProperty Name="EmailsTB" Relationship="Self.FK__EmailsTB__IdUsua__76969D2E" FromRole="UsuariosTB" ToRole="EmailsTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__UsuariosT__IdEst__0F624AF8" FromRole="UsuariosTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="EstudianteEncargadoTB" Relationship="Self.FK__Estudiant__IdUsu__00200768" FromRole="UsuariosTB" ToRole="EstudianteEncargadoTB" />
+          <NavigationProperty Name="FormacionAcademicaTB" Relationship="Self.FK__Formacion__IdUsu__01142BA1" FromRole="UsuariosTB" ToRole="FormacionAcademicaTB" />
+          <NavigationProperty Name="InformacionLaboralTB" Relationship="Self.FK__Informaci__IdUsu__02084FDA" FromRole="UsuariosTB" ToRole="InformacionLaboralTB" />
+          <NavigationProperty Name="InformacionMedicaTB" Relationship="Self.FK__Informaci__IdUsu__02FC7413" FromRole="UsuariosTB" ToRole="InformacionMedicaTB" />
+          <NavigationProperty Name="PracticaEstudianteTB" Relationship="Self.FK__PracticaE__IdUsu__04E4BC85" FromRole="UsuariosTB" ToRole="PracticaEstudianteTB" />
+          <NavigationProperty Name="RolesTB" Relationship="Self.FK__UsuariosT__IdRol__10566F31" FromRole="UsuariosTB" ToRole="RolesTB" />
+          <NavigationProperty Name="SeccionesTB" Relationship="Self.FK__UsuariosT__IdSec__114A936A" FromRole="UsuariosTB" ToRole="SeccionesTB" />
+          <NavigationProperty Name="TelefonosTB" Relationship="Self.FK__Telefonos__IdUsu__0A9D95DB" FromRole="UsuariosTB" ToRole="TelefonosTB" />
+          <NavigationProperty Name="UsuarioEspecialidadTB" Relationship="Self.FK__UsuarioEs__IdUsu__0D7A0286" FromRole="UsuariosTB" ToRole="UsuarioEspecialidadTB" />
+        </EntityType>
+        <EntityType Name="VacantesPracticasTB">
+          <Key>
+            <PropertyRef Name="IdVacante" />
+          </Key>
+          <Property Name="IdVacante" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Nombre" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEmpresa" Type="Int32" Nullable="false" />
+          <Property Name="Requerimientos" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="FechaMaxAplicacion" Type="DateTime" Precision="0" />
+          <Property Name="NumCupos" Type="Int32" />
+          <Property Name="FechaCierre" Type="DateTime" Precision="0" />
+          <Property Name="Descripcion" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="Tipo" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+          <Property Name="IdModalidad" Type="Int32" />
+          <NavigationProperty Name="EmpresasTB" Relationship="Self.FK__VacantesP__IdEmp__123EB7A3" FromRole="VacantesPracticasTB" ToRole="EmpresasTB" />
+          <NavigationProperty Name="EspecialidadesVacantesTB" Relationship="Self.FK__Especiali__IdVac__7D439ABD" FromRole="VacantesPracticasTB" ToRole="EspecialidadesVacantesTB" />
+          <NavigationProperty Name="EstadosTB" Relationship="Self.FK__VacantesP__IdEst__1332DBDC" FromRole="VacantesPracticasTB" ToRole="EstadosTB" />
+          <NavigationProperty Name="ModalidadesTB" Relationship="Self.FK_VacantesPracticas_Modalidad" FromRole="VacantesPracticasTB" ToRole="ModalidadesTB" />
+          <NavigationProperty Name="PracticaEstudianteTB" Relationship="Self.FK__PracticaE__IdVac__05D8E0BE" FromRole="VacantesPracticasTB" ToRole="PracticaEstudianteTB" />
+        </EntityType>
+        <EntityType Name="RolesTB_Backup">
+          <Key>
+            <PropertyRef Name="IdRol" />
+            <PropertyRef Name="Descripcion" />
+            <PropertyRef Name="IdEstado" />
+          </Key>
+          <Property Name="IdRol" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IdEstado" Type="Int32" Nullable="false" />
+        </EntityType>
+        <Association Name="FK__Auditoria__IdUsu__6A30C649">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="AuditoriaGlobalTB" Type="Self.AuditoriaGlobalTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="AuditoriaGlobalTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BolsaEmpl__IdDir__6B24EA82">
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="0..1" />
+          <End Role="BolsaEmpleoTB" Type="Self.BolsaEmpleoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DireccionesTB">
+              <PropertyRef Name="IdDireccion" />
+            </Principal>
+            <Dependent Role="BolsaEmpleoTB">
+              <PropertyRef Name="IdDireccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__BolsaEmpl__IdEst__6C190EBB">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="BolsaEmpleoTB" Type="Self.BolsaEmpleoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="BolsaEmpleoTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BolsaEmpleo_Modalidad">
+          <End Role="ModalidadesTB" Type="Self.ModalidadesTB" Multiplicity="0..1" />
+          <End Role="BolsaEmpleoTB" Type="Self.BolsaEmpleoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ModalidadesTB">
+              <PropertyRef Name="IdModalidad" />
+            </Principal>
+            <Dependent Role="BolsaEmpleoTB">
+              <PropertyRef Name="IdModalidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CantonesT__IdPro__6D0D32F4">
+          <End Role="ProvinciasTB" Type="Self.ProvinciasTB" Multiplicity="1" />
+          <End Role="CantonesTB" Type="Self.CantonesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ProvinciasTB">
+              <PropertyRef Name="IdProvincia" />
+            </Principal>
+            <Dependent Role="CantonesTB">
+              <PropertyRef Name="IdProvincia" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Distritos__IdCan__72C60C4A">
+          <End Role="CantonesTB" Type="Self.CantonesTB" Multiplicity="1" />
+          <End Role="DistritosTB" Type="Self.DistritosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CantonesTB">
+              <PropertyRef Name="IdCanton" />
+            </Principal>
+            <Dependent Role="DistritosTB">
+              <PropertyRef Name="IdCanton" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comentari__IdPra__6E01572D">
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="1" />
+          <End Role="ComentariosPracticaTB" Type="Self.ComentariosPracticaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdPractica" />
+            </Principal>
+            <Dependent Role="ComentariosPracticaTB">
+              <PropertyRef Name="IdPractica" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comentari__IdUsu__6EF57B66">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="ComentariosPracticaTB" Type="Self.ComentariosPracticaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="ComentariosPracticaTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comunicad__IdEst__6FE99F9F">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="ComunicadosTB" Type="Self.ComunicadosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="ComunicadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Comunicad__IdUsu__70DDC3D8">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="ComunicadosTB" Type="Self.ComunicadosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="ComunicadosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Direccion__IdEst__71D1E811">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="DireccionesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmpresasT__IdDir__787EE5A0">
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="0..1" />
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DireccionesTB">
+              <PropertyRef Name="IdDireccion" />
+            </Principal>
+            <Dependent Role="EmpresasTB">
+              <PropertyRef Name="IdDireccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdDir__0E6E26BF">
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="0..1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DireccionesTB">
+              <PropertyRef Name="IdDireccion" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdDireccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DireccionesTB_DistritosTB">
+          <End Role="DistritosTB" Type="Self.DistritosTB" Multiplicity="1" />
+          <End Role="DireccionesTB" Type="Self.DireccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DistritosTB">
+              <PropertyRef Name="IdDistrito" />
+            </Principal>
+            <Dependent Role="DireccionesTB">
+              <PropertyRef Name="IdDistrito" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Documento__IdUsu__73BA3083">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="DocumentosTB" Type="Self.DocumentosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="DocumentosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmailsTB__IdEmpr__74AE54BC">
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="0..1" />
+          <End Role="EmailsTB" Type="Self.EmailsTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmpresasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Principal>
+            <Dependent Role="EmailsTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmailsTB__IdEnca__75A278F5">
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="0..1" />
+          <End Role="EmailsTB" Type="Self.EmailsTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EncargadosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Principal>
+            <Dependent Role="EmailsTB">
+              <PropertyRef Name="IdEncargado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmailsTB__IdUsua__76969D2E">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="0..1" />
+          <End Role="EmailsTB" Type="Self.EmailsTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="EmailsTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmpleosTB__IdEst__778AC167">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EmpleosTB" Type="Self.EmpleosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EmpleosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EmpresasT__IdEst__797309D9">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EmpresasTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Telefonos__IdEmp__08B54D69">
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="0..1" />
+          <End Role="TelefonosTB" Type="Self.TelefonosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmpresasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Principal>
+            <Dependent Role="TelefonosTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__VacantesP__IdEmp__123EB7A3">
+          <End Role="EmpresasTB" Type="Self.EmpresasTB" Multiplicity="1" />
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EmpresasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Principal>
+            <Dependent Role="VacantesPracticasTB">
+              <PropertyRef Name="IdEmpresa" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Encargado__IdEst__7A672E12">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EncargadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Estudiant__IdEnc__7E37BEF6">
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="1" />
+          <End Role="EstudianteEncargadoTB" Type="Self.EstudianteEncargadoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EncargadosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Principal>
+            <Dependent Role="EstudianteEncargadoTB">
+              <PropertyRef Name="IdEncargado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Telefonos__IdEnc__09A971A2">
+          <End Role="EncargadosTB" Type="Self.EncargadosTB" Multiplicity="0..1" />
+          <End Role="TelefonosTB" Type="Self.TelefonosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EncargadosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Principal>
+            <Dependent Role="TelefonosTB">
+              <PropertyRef Name="IdEncargado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Especiali__IdEsp__7C4F7684">
+          <End Role="EspecialidadesTB" Type="Self.EspecialidadesTB" Multiplicity="1" />
+          <End Role="EspecialidadesVacantesTB" Type="Self.EspecialidadesVacantesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EspecialidadesTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Principal>
+            <Dependent Role="EspecialidadesVacantesTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Especiali__IdEst__7B5B524B">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EspecialidadesTB" Type="Self.EspecialidadesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EspecialidadesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuarioEs__IdEsp__0B91BA14">
+          <End Role="EspecialidadesTB" Type="Self.EspecialidadesTB" Multiplicity="1" />
+          <End Role="UsuarioEspecialidadTB" Type="Self.UsuarioEspecialidadTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EspecialidadesTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Principal>
+            <Dependent Role="UsuarioEspecialidadTB">
+              <PropertyRef Name="IdEspecialidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Especiali__IdVac__7D439ABD">
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="1" />
+          <End Role="EspecialidadesVacantesTB" Type="Self.EspecialidadesVacantesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VacantesPracticasTB">
+              <PropertyRef Name="IdVacante" />
+            </Principal>
+            <Dependent Role="EspecialidadesVacantesTB">
+              <PropertyRef Name="IdVacante" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Estudiant__IdEst__7F2BE32F">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="EstudianteEncargadoTB" Type="Self.EstudianteEncargadoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="EstudianteEncargadoTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PracticaE__IdEst__03F0984C">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__RolesTB__IdEstad__06CD04F7">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="RolesTB" Type="Self.RolesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="RolesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Secciones__IdEst__07C12930">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="SeccionesTB" Type="Self.SeccionesTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="SeccionesTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuarioEs__IdEst__0C85DE4D">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="UsuarioEspecialidadTB" Type="Self.UsuarioEspecialidadTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="UsuarioEspecialidadTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdEst__0F624AF8">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__VacantesP__IdEst__1332DBDC">
+          <End Role="EstadosTB" Type="Self.EstadosTB" Multiplicity="1" />
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EstadosTB">
+              <PropertyRef Name="IdEstado" />
+            </Principal>
+            <Dependent Role="VacantesPracticasTB">
+              <PropertyRef Name="IdEstado" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Estudiant__IdUsu__00200768">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="EstudianteEncargadoTB" Type="Self.EstudianteEncargadoTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="EstudianteEncargadoTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Formacion__IdUsu__01142BA1">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="FormacionAcademicaTB" Type="Self.FormacionAcademicaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="FormacionAcademicaTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Informaci__IdUsu__02084FDA">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="InformacionLaboralTB" Type="Self.InformacionLaboralTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="InformacionLaboralTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Informaci__IdUsu__02FC7413">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="InformacionMedicaTB" Type="Self.InformacionMedicaTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="InformacionMedicaTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VacantesPracticas_Modalidad">
+          <End Role="ModalidadesTB" Type="Self.ModalidadesTB" Multiplicity="0..1" />
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ModalidadesTB">
+              <PropertyRef Name="IdModalidad" />
+            </Principal>
+            <Dependent Role="VacantesPracticasTB">
+              <PropertyRef Name="IdModalidad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PracticaE__IdUsu__04E4BC85">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PracticaE__IdVac__05D8E0BE">
+          <End Role="VacantesPracticasTB" Type="Self.VacantesPracticasTB" Multiplicity="1" />
+          <End Role="PracticaEstudianteTB" Type="Self.PracticaEstudianteTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VacantesPracticasTB">
+              <PropertyRef Name="IdVacante" />
+            </Principal>
+            <Dependent Role="PracticaEstudianteTB">
+              <PropertyRef Name="IdVacante" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdRol__10566F31">
+          <End Role="RolesTB" Type="Self.RolesTB" Multiplicity="1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RolesTB">
+              <PropertyRef Name="IdRol" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdRol" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuariosT__IdSec__114A936A">
+          <End Role="SeccionesTB" Type="Self.SeccionesTB" Multiplicity="0..1" />
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeccionesTB">
+              <PropertyRef Name="IdSeccion" />
+            </Principal>
+            <Dependent Role="UsuariosTB">
+              <PropertyRef Name="IdSeccion" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Telefonos__IdUsu__0A9D95DB">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="0..1" />
+          <End Role="TelefonosTB" Type="Self.TelefonosTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="TelefonosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__UsuarioEs__IdUsu__0D7A0286">
+          <End Role="UsuariosTB" Type="Self.UsuariosTB" Multiplicity="1" />
+          <End Role="UsuarioEspecialidadTB" Type="Self.UsuarioEspecialidadTB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UsuariosTB">
+              <PropertyRef Name="IdUsuario" />
+            </Principal>
+            <Dependent Role="UsuarioEspecialidadTB">
+              <PropertyRef Name="IdUsuario" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="SIGEPEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="AuditoriaGlobalTB" EntityType="Self.AuditoriaGlobalTB" />
+          <EntitySet Name="BolsaEmpleoTB" EntityType="Self.BolsaEmpleoTB" />
+          <EntitySet Name="CantonesTB" EntityType="Self.CantonesTB" />
+          <EntitySet Name="ComentariosPracticaTB" EntityType="Self.ComentariosPracticaTB" />
+          <EntitySet Name="ComunicadosTB" EntityType="Self.ComunicadosTB" />
+          <EntitySet Name="DireccionesTB" EntityType="Self.DireccionesTB" />
+          <EntitySet Name="DistritosTB" EntityType="Self.DistritosTB" />
+          <EntitySet Name="DocumentosTB" EntityType="Self.DocumentosTB" />
+          <EntitySet Name="EmailsTB" EntityType="Self.EmailsTB" />
+          <EntitySet Name="EmpleosTB" EntityType="Self.EmpleosTB" />
+          <EntitySet Name="EmpresasTB" EntityType="Self.EmpresasTB" />
+          <EntitySet Name="EncargadosTB" EntityType="Self.EncargadosTB" />
+          <EntitySet Name="EspecialidadesTB" EntityType="Self.EspecialidadesTB" />
+          <EntitySet Name="EspecialidadesVacantesTB" EntityType="Self.EspecialidadesVacantesTB" />
+          <EntitySet Name="EstadosTB" EntityType="Self.EstadosTB" />
+          <EntitySet Name="EstudianteEncargadoTB" EntityType="Self.EstudianteEncargadoTB" />
+          <EntitySet Name="FormacionAcademicaTB" EntityType="Self.FormacionAcademicaTB" />
+          <EntitySet Name="InformacionLaboralTB" EntityType="Self.InformacionLaboralTB" />
+          <EntitySet Name="InformacionMedicaTB" EntityType="Self.InformacionMedicaTB" />
+          <EntitySet Name="ModalidadesTB" EntityType="Self.ModalidadesTB" />
+          <EntitySet Name="PracticaEstudianteTB" EntityType="Self.PracticaEstudianteTB" />
+          <EntitySet Name="ProvinciasTB" EntityType="Self.ProvinciasTB" />
+          <EntitySet Name="RolesTB" EntityType="Self.RolesTB" />
+          <EntitySet Name="SeccionesTB" EntityType="Self.SeccionesTB" />
+          <EntitySet Name="TelefonosTB" EntityType="Self.TelefonosTB" />
+          <EntitySet Name="UsuarioEspecialidadTB" EntityType="Self.UsuarioEspecialidadTB" />
+          <EntitySet Name="UsuariosTB" EntityType="Self.UsuariosTB" />
+          <EntitySet Name="VacantesPracticasTB" EntityType="Self.VacantesPracticasTB" />
+          <EntitySet Name="RolesTB_Backup" EntityType="Self.RolesTB_Backup" />
+          <AssociationSet Name="FK__Auditoria__IdUsu__6A30C649" Association="Self.FK__Auditoria__IdUsu__6A30C649">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="AuditoriaGlobalTB" EntitySet="AuditoriaGlobalTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BolsaEmpl__IdDir__6B24EA82" Association="Self.FK__BolsaEmpl__IdDir__6B24EA82">
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+            <End Role="BolsaEmpleoTB" EntitySet="BolsaEmpleoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__BolsaEmpl__IdEst__6C190EBB" Association="Self.FK__BolsaEmpl__IdEst__6C190EBB">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="BolsaEmpleoTB" EntitySet="BolsaEmpleoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BolsaEmpleo_Modalidad" Association="Self.FK_BolsaEmpleo_Modalidad">
+            <End Role="ModalidadesTB" EntitySet="ModalidadesTB" />
+            <End Role="BolsaEmpleoTB" EntitySet="BolsaEmpleoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CantonesT__IdPro__6D0D32F4" Association="Self.FK__CantonesT__IdPro__6D0D32F4">
+            <End Role="ProvinciasTB" EntitySet="ProvinciasTB" />
+            <End Role="CantonesTB" EntitySet="CantonesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Distritos__IdCan__72C60C4A" Association="Self.FK__Distritos__IdCan__72C60C4A">
+            <End Role="CantonesTB" EntitySet="CantonesTB" />
+            <End Role="DistritosTB" EntitySet="DistritosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comentari__IdPra__6E01572D" Association="Self.FK__Comentari__IdPra__6E01572D">
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+            <End Role="ComentariosPracticaTB" EntitySet="ComentariosPracticaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comentari__IdUsu__6EF57B66" Association="Self.FK__Comentari__IdUsu__6EF57B66">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="ComentariosPracticaTB" EntitySet="ComentariosPracticaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comunicad__IdEst__6FE99F9F" Association="Self.FK__Comunicad__IdEst__6FE99F9F">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="ComunicadosTB" EntitySet="ComunicadosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Comunicad__IdUsu__70DDC3D8" Association="Self.FK__Comunicad__IdUsu__70DDC3D8">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="ComunicadosTB" EntitySet="ComunicadosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Direccion__IdEst__71D1E811" Association="Self.FK__Direccion__IdEst__71D1E811">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmpresasT__IdDir__787EE5A0" Association="Self.FK__EmpresasT__IdDir__787EE5A0">
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdDir__0E6E26BF" Association="Self.FK__UsuariosT__IdDir__0E6E26BF">
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DireccionesTB_DistritosTB" Association="Self.FK_DireccionesTB_DistritosTB">
+            <End Role="DistritosTB" EntitySet="DistritosTB" />
+            <End Role="DireccionesTB" EntitySet="DireccionesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Documento__IdUsu__73BA3083" Association="Self.FK__Documento__IdUsu__73BA3083">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="DocumentosTB" EntitySet="DocumentosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmailsTB__IdEmpr__74AE54BC" Association="Self.FK__EmailsTB__IdEmpr__74AE54BC">
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+            <End Role="EmailsTB" EntitySet="EmailsTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmailsTB__IdEnca__75A278F5" Association="Self.FK__EmailsTB__IdEnca__75A278F5">
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+            <End Role="EmailsTB" EntitySet="EmailsTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmailsTB__IdUsua__76969D2E" Association="Self.FK__EmailsTB__IdUsua__76969D2E">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="EmailsTB" EntitySet="EmailsTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmpleosTB__IdEst__778AC167" Association="Self.FK__EmpleosTB__IdEst__778AC167">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EmpleosTB" EntitySet="EmpleosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EmpresasT__IdEst__797309D9" Association="Self.FK__EmpresasT__IdEst__797309D9">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Telefonos__IdEmp__08B54D69" Association="Self.FK__Telefonos__IdEmp__08B54D69">
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+            <End Role="TelefonosTB" EntitySet="TelefonosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__VacantesP__IdEmp__123EB7A3" Association="Self.FK__VacantesP__IdEmp__123EB7A3">
+            <End Role="EmpresasTB" EntitySet="EmpresasTB" />
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Encargado__IdEst__7A672E12" Association="Self.FK__Encargado__IdEst__7A672E12">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Estudiant__IdEnc__7E37BEF6" Association="Self.FK__Estudiant__IdEnc__7E37BEF6">
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+            <End Role="EstudianteEncargadoTB" EntitySet="EstudianteEncargadoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Telefonos__IdEnc__09A971A2" Association="Self.FK__Telefonos__IdEnc__09A971A2">
+            <End Role="EncargadosTB" EntitySet="EncargadosTB" />
+            <End Role="TelefonosTB" EntitySet="TelefonosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Especiali__IdEsp__7C4F7684" Association="Self.FK__Especiali__IdEsp__7C4F7684">
+            <End Role="EspecialidadesTB" EntitySet="EspecialidadesTB" />
+            <End Role="EspecialidadesVacantesTB" EntitySet="EspecialidadesVacantesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Especiali__IdEst__7B5B524B" Association="Self.FK__Especiali__IdEst__7B5B524B">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EspecialidadesTB" EntitySet="EspecialidadesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuarioEs__IdEsp__0B91BA14" Association="Self.FK__UsuarioEs__IdEsp__0B91BA14">
+            <End Role="EspecialidadesTB" EntitySet="EspecialidadesTB" />
+            <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Especiali__IdVac__7D439ABD" Association="Self.FK__Especiali__IdVac__7D439ABD">
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+            <End Role="EspecialidadesVacantesTB" EntitySet="EspecialidadesVacantesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Estudiant__IdEst__7F2BE32F" Association="Self.FK__Estudiant__IdEst__7F2BE32F">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="EstudianteEncargadoTB" EntitySet="EstudianteEncargadoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PracticaE__IdEst__03F0984C" Association="Self.FK__PracticaE__IdEst__03F0984C">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__RolesTB__IdEstad__06CD04F7" Association="Self.FK__RolesTB__IdEstad__06CD04F7">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="RolesTB" EntitySet="RolesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Secciones__IdEst__07C12930" Association="Self.FK__Secciones__IdEst__07C12930">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="SeccionesTB" EntitySet="SeccionesTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuarioEs__IdEst__0C85DE4D" Association="Self.FK__UsuarioEs__IdEst__0C85DE4D">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdEst__0F624AF8" Association="Self.FK__UsuariosT__IdEst__0F624AF8">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__VacantesP__IdEst__1332DBDC" Association="Self.FK__VacantesP__IdEst__1332DBDC">
+            <End Role="EstadosTB" EntitySet="EstadosTB" />
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Estudiant__IdUsu__00200768" Association="Self.FK__Estudiant__IdUsu__00200768">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="EstudianteEncargadoTB" EntitySet="EstudianteEncargadoTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Formacion__IdUsu__01142BA1" Association="Self.FK__Formacion__IdUsu__01142BA1">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="FormacionAcademicaTB" EntitySet="FormacionAcademicaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Informaci__IdUsu__02084FDA" Association="Self.FK__Informaci__IdUsu__02084FDA">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="InformacionLaboralTB" EntitySet="InformacionLaboralTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Informaci__IdUsu__02FC7413" Association="Self.FK__Informaci__IdUsu__02FC7413">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="InformacionMedicaTB" EntitySet="InformacionMedicaTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VacantesPracticas_Modalidad" Association="Self.FK_VacantesPracticas_Modalidad">
+            <End Role="ModalidadesTB" EntitySet="ModalidadesTB" />
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PracticaE__IdUsu__04E4BC85" Association="Self.FK__PracticaE__IdUsu__04E4BC85">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PracticaE__IdVac__05D8E0BE" Association="Self.FK__PracticaE__IdVac__05D8E0BE">
+            <End Role="VacantesPracticasTB" EntitySet="VacantesPracticasTB" />
+            <End Role="PracticaEstudianteTB" EntitySet="PracticaEstudianteTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdRol__10566F31" Association="Self.FK__UsuariosT__IdRol__10566F31">
+            <End Role="RolesTB" EntitySet="RolesTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuariosT__IdSec__114A936A" Association="Self.FK__UsuariosT__IdSec__114A936A">
+            <End Role="SeccionesTB" EntitySet="SeccionesTB" />
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Telefonos__IdUsu__0A9D95DB" Association="Self.FK__Telefonos__IdUsu__0A9D95DB">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="TelefonosTB" EntitySet="TelefonosTB" />
+          </AssociationSet>
+          <AssociationSet Name="FK__UsuarioEs__IdUsu__0D7A0286" Association="Self.FK__UsuarioEs__IdUsu__0D7A0286">
+            <End Role="UsuariosTB" EntitySet="UsuariosTB" />
+            <End Role="UsuarioEspecialidadTB" EntitySet="UsuarioEspecialidadTB" />
+          </AssociationSet>
+          <FunctionImport Name="CambiarContrasennaSP">
+            <Parameter Name="CEDULA" Mode="In" Type="String" />
+            <Parameter Name="NUEVA_CONTRASENNA" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="LoginSP" ReturnType="Collection(SIGEPModel.LoginSP_Result)">
+            <Parameter Name="CEDULA" Mode="In" Type="String" />
+            <Parameter Name="CONTRASENNA" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="RegistroSP" ReturnType="Collection(Int32)">
+            <Parameter Name="Nombre" Mode="In" Type="String" />
+            <Parameter Name="Apellido1" Mode="In" Type="String" />
+            <Parameter Name="Apellido2" Mode="In" Type="String" />
+            <Parameter Name="Correo" Mode="In" Type="String" />
+            <Parameter Name="IdEspecialidad" Mode="In" Type="Int32" />
+            <Parameter Name="FechaNacimiento" Mode="In" Type="DateTime" />
+            <Parameter Name="IdSeccion" Mode="In" Type="Int32" />
+            <Parameter Name="Contrasenna" Mode="In" Type="String" />
+            <Parameter Name="Cedula" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="EstadoTB_Backup" EntityType="SIGEPModel.EstadoTB_Backup" />
+          <FunctionImport Name="ActualizarEstadoPracticaSP" ReturnType="Collection(SIGEPModel.ActualizarEstadoPracticaSP_Result)">
+            <Parameter Name="IdPractica" Mode="In" Type="Int32" />
+            <Parameter Name="IdEstado" Mode="In" Type="Int32" />
+            <Parameter Name="Comentario" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="InsertarComentarioPracticaSP" ReturnType="Collection(Int32)">
+            <Parameter Name="IdVacante" Mode="In" Type="Int32" />
+            <Parameter Name="IdUsuario" Mode="In" Type="Int32" />
+            <Parameter Name="Comentario" Mode="In" Type="String" />
+            <Parameter Name="IdUsuarioComentario" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="ObtenerComentariosPracticaSP" ReturnType="Collection(SIGEPModel.ObtenerComentariosPracticaSP_Result)">
+            <Parameter Name="IdVacante" Mode="In" Type="Int32" />
+            <Parameter Name="IdUsuario" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="ObtenerVisualizacionPracticaSP" ReturnType="Collection(SIGEPModel.ObtenerVisualizacionPracticaSP_Result)">
+            <Parameter Name="IdVacante" Mode="In" Type="Int32" />
+            <Parameter Name="IdUsuario" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="LoginSP_Result">
+          <Property Type="Int32" Name="IdUsuario" Nullable="false" />
+          <Property Type="String" Name="Nombre" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="Apellido1" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="Apellido2" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="Cedula" Nullable="false" MaxLength="20" />
+          <Property Type="Int32" Name="IdRol" Nullable="false" />
+          <Property Type="Int32" Name="IdEstado" Nullable="false" />
+          <Property Type="String" Name="Seccion" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="Especialidad" Nullable="false" MaxLength="255" />
+        </ComplexType>
+        <EntityType Name="EstadoTB_Backup">
+          <Key>
+            <PropertyRef Name="IdEstado" />
+            <PropertyRef Name="Descripcion" />
+          </Key>
+          <Property Name="IdEstado" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Descripcion" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <ComplexType Name="ActualizarEstadoPracticaSP_Result">
+          <Property Type="Int32" Name="IdPractica" Nullable="false" />
+          <Property Type="Int32" Name="IdVacante" Nullable="false" />
+          <Property Type="Int32" Name="IdUsuario" Nullable="false" />
+          <Property Type="String" Name="EstudianteNombre" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="EstudianteCorreo" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="EstadoDescripcion" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="Comentario" Nullable="true" MaxLength="1000" />
+          <Property Type="DateTime" Name="FechaComentario" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="ObtenerComentariosPracticaSP_Result">
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="DateTime" Name="Fecha" Nullable="false" />
+          <Property Type="String" Name="Usuario" Nullable="false" MaxLength="101" />
+          <Property Type="String" Name="Comentario" Nullable="false" MaxLength="1000" />
+        </ComplexType>
+        <ComplexType Name="ObtenerVisualizacionPracticaSP_Result">
+          <Property Type="Int32" Name="IdVacante" Nullable="false" />
+          <Property Type="String" Name="Nombre" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="EmpresaNombre" Nullable="false" MaxLength="255" />
+          <Property Type="String" Name="Requerimientos" Nullable="true" MaxLength="1000" />
+          <Property Type="DateTime" Name="FechaMaxAplicacion" Nullable="true" />
+          <Property Type="String" Name="ModalidadNombre" Nullable="true" MaxLength="100" />
+          <Property Type="Int32" Name="IdUsuario" Nullable="false" />
+          <Property Type="String" Name="EstudianteNombre" Nullable="false" MaxLength="152" />
+          <Property Type="String" Name="EstudianteCedula" Nullable="false" MaxLength="20" />
+          <Property Type="Int32" Name="EstudianteEdad" Nullable="true" />
+          <Property Type="String" Name="EstudianteEspecialidad" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="EstudianteCorreo" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="ContactoEmpresaNombre" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="ContactoEmpresaEmail" Nullable="true" MaxLength="255" />
+          <Property Type="String" Name="ContactoEmpresaTelefono" Nullable="true" MaxLength="50" />
+          <Property Type="DateTime" Name="FechaAplicacion" Nullable="false" />
+          <Property Type="String" Name="EstadoPractica" Nullable="false" MaxLength="255" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="SIGEPModelStoreContainer" CdmEntityContainer="SIGEPEntities">
+          <EntitySetMapping Name="AuditoriaGlobalTB">
+            <EntityTypeMapping TypeName="SIGEPModel.AuditoriaGlobalTB">
+              <MappingFragment StoreEntitySet="AuditoriaGlobalTB">
+                <ScalarProperty Name="IdAuditoria" ColumnName="IdAuditoria" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="TablaAfectada" ColumnName="TablaAfectada" />
+                <ScalarProperty Name="IdRegistro" ColumnName="IdRegistro" />
+                <ScalarProperty Name="Accion" ColumnName="Accion" />
+                <ScalarProperty Name="CampoAfectado" ColumnName="CampoAfectado" />
+                <ScalarProperty Name="DatosAnteriores" ColumnName="DatosAnteriores" />
+                <ScalarProperty Name="DatosNuevos" ColumnName="DatosNuevos" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BolsaEmpleoTB">
+            <EntityTypeMapping TypeName="SIGEPModel.BolsaEmpleoTB">
+              <MappingFragment StoreEntitySet="BolsaEmpleoTB">
+                <ScalarProperty Name="IdEmpleo" ColumnName="IdEmpleo" />
+                <ScalarProperty Name="Empresa" ColumnName="Empresa" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="Requisitos" ColumnName="Requisitos" />
+                <ScalarProperty Name="FechaPublicacion" ColumnName="FechaPublicacion" />
+                <ScalarProperty Name="FechaLimite" ColumnName="FechaLimite" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+                <ScalarProperty Name="AreaAfin" ColumnName="AreaAfin" />
+                <ScalarProperty Name="IdDireccion" ColumnName="IdDireccion" />
+                <ScalarProperty Name="IdModalidad" ColumnName="IdModalidad" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CantonesTB">
+            <EntityTypeMapping TypeName="SIGEPModel.CantonesTB">
+              <MappingFragment StoreEntitySet="CantonesTB">
+                <ScalarProperty Name="IdCanton" ColumnName="IdCanton" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="IdProvincia" ColumnName="IdProvincia" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ComentariosPracticaTB">
+            <EntityTypeMapping TypeName="SIGEPModel.ComentariosPracticaTB">
+              <MappingFragment StoreEntitySet="ComentariosPracticaTB">
+                <ScalarProperty Name="IdComentario" ColumnName="IdComentario" />
+                <ScalarProperty Name="Comentario" ColumnName="Comentario" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdPractica" ColumnName="IdPractica" />
+                <ScalarProperty Name="Nota" ColumnName="Nota" />
+                <ScalarProperty Name="Tipo" ColumnName="Tipo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ComunicadosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.ComunicadosTB">
+              <MappingFragment StoreEntitySet="ComunicadosTB">
+                <ScalarProperty Name="IdComunicado" ColumnName="IdComunicado" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Informacion" ColumnName="Informacion" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="Poblacion" ColumnName="Poblacion" />
+                <ScalarProperty Name="FechaLimite" ColumnName="FechaLimite" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DireccionesTB">
+            <EntityTypeMapping TypeName="SIGEPModel.DireccionesTB">
+              <MappingFragment StoreEntitySet="DireccionesTB">
+                <ScalarProperty Name="IdDireccion" ColumnName="IdDireccion" />
+                <ScalarProperty Name="DireccionExacta" ColumnName="DireccionExacta" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+                <ScalarProperty Name="IdDistrito" ColumnName="IdDistrito" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DistritosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.DistritosTB">
+              <MappingFragment StoreEntitySet="DistritosTB">
+                <ScalarProperty Name="IdDistrito" ColumnName="IdDistrito" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="IdCanton" ColumnName="IdCanton" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DocumentosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.DocumentosTB">
+              <MappingFragment StoreEntitySet="DocumentosTB">
+                <ScalarProperty Name="IdDocumento" ColumnName="IdDocumento" />
+                <ScalarProperty Name="Documento" ColumnName="Documento" />
+                <ScalarProperty Name="Tipo" ColumnName="Tipo" />
+                <ScalarProperty Name="RutaArchivo" ColumnName="RutaArchivo" />
+                <ScalarProperty Name="FechaSubida" ColumnName="FechaSubida" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmailsTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EmailsTB">
+              <MappingFragment StoreEntitySet="EmailsTB">
+                <ScalarProperty Name="IdEmail" ColumnName="IdEmail" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdEmpresa" ColumnName="IdEmpresa" />
+                <ScalarProperty Name="IdEncargado" ColumnName="IdEncargado" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmpleosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EmpleosTB">
+              <MappingFragment StoreEntitySet="EmpleosTB">
+                <ScalarProperty Name="IdEmpleo" ColumnName="IdEmpleo" />
+                <ScalarProperty Name="NombrePuesto" ColumnName="NombrePuesto" />
+                <ScalarProperty Name="Mensaje" ColumnName="Mensaje" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmpresasTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EmpresasTB">
+              <MappingFragment StoreEntitySet="EmpresasTB">
+                <ScalarProperty Name="IdEmpresa" ColumnName="IdEmpresa" />
+                <ScalarProperty Name="NombreEmpresa" ColumnName="NombreEmpresa" />
+                <ScalarProperty Name="NombreContacto" ColumnName="NombreContacto" />
+                <ScalarProperty Name="IdDireccion" ColumnName="IdDireccion" />
+                <ScalarProperty Name="AreasAfines" ColumnName="AreasAfines" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EncargadosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EncargadosTB">
+              <MappingFragment StoreEntitySet="EncargadosTB">
+                <ScalarProperty Name="IdEncargado" ColumnName="IdEncargado" />
+                <ScalarProperty Name="Cedula" ColumnName="Cedula" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Apellido1" ColumnName="Apellido1" />
+                <ScalarProperty Name="Apellido2" ColumnName="Apellido2" />
+                <ScalarProperty Name="FechaRegistro" ColumnName="FechaRegistro" />
+                <ScalarProperty Name="Ocupacion" ColumnName="Ocupacion" />
+                <ScalarProperty Name="LugarTrabajo" ColumnName="LugarTrabajo" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EspecialidadesTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EspecialidadesTB">
+              <MappingFragment StoreEntitySet="EspecialidadesTB">
+                <ScalarProperty Name="IdEspecialidad" ColumnName="IdEspecialidad" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EspecialidadesVacantesTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EspecialidadesVacantesTB">
+              <MappingFragment StoreEntitySet="EspecialidadesVacantesTB">
+                <ScalarProperty Name="IdEspecialidadVacante" ColumnName="IdEspecialidadVacante" />
+                <ScalarProperty Name="IdEspecialidad" ColumnName="IdEspecialidad" />
+                <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EstadosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EstadosTB">
+              <MappingFragment StoreEntitySet="EstadosTB">
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EstudianteEncargadoTB">
+            <EntityTypeMapping TypeName="SIGEPModel.EstudianteEncargadoTB">
+              <MappingFragment StoreEntitySet="EstudianteEncargadoTB">
+                <ScalarProperty Name="IdEstudianteEncargado" ColumnName="IdEstudianteEncargado" />
+                <ScalarProperty Name="IdEncargado" ColumnName="IdEncargado" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Parentesco" ColumnName="Parentesco" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FormacionAcademicaTB">
+            <EntityTypeMapping TypeName="SIGEPModel.FormacionAcademicaTB">
+              <MappingFragment StoreEntitySet="FormacionAcademicaTB">
+                <ScalarProperty Name="IdFormacion" ColumnName="IdFormacion" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Carrera" ColumnName="Carrera" />
+                <ScalarProperty Name="Titulo" ColumnName="Titulo" />
+                <ScalarProperty Name="AnnoGraduacion" ColumnName="AnnoGraduacion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="InformacionLaboralTB">
+            <EntityTypeMapping TypeName="SIGEPModel.InformacionLaboralTB">
+              <MappingFragment StoreEntitySet="InformacionLaboralTB">
+                <ScalarProperty Name="IdLaboral" ColumnName="IdLaboral" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="EmpresaActual" ColumnName="EmpresaActual" />
+                <ScalarProperty Name="PuestoActual" ColumnName="PuestoActual" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="InformacionMedicaTB">
+            <EntityTypeMapping TypeName="SIGEPModel.InformacionMedicaTB">
+              <MappingFragment StoreEntitySet="InformacionMedicaTB">
+                <ScalarProperty Name="IdInfoMedica" ColumnName="IdInfoMedica" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Padecimiento" ColumnName="Padecimiento" />
+                <ScalarProperty Name="Tratamiento" ColumnName="Tratamiento" />
+                <ScalarProperty Name="Alergia" ColumnName="Alergia" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ModalidadesTB">
+            <EntityTypeMapping TypeName="SIGEPModel.ModalidadesTB">
+              <MappingFragment StoreEntitySet="ModalidadesTB">
+                <ScalarProperty Name="IdModalidad" ColumnName="IdModalidad" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PracticaEstudianteTB">
+            <EntityTypeMapping TypeName="SIGEPModel.PracticaEstudianteTB">
+              <MappingFragment StoreEntitySet="PracticaEstudianteTB">
+                <ScalarProperty Name="IdPractica" ColumnName="IdPractica" />
+                <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="FechaAplicacion" ColumnName="FechaAplicacion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProvinciasTB">
+            <EntityTypeMapping TypeName="SIGEPModel.ProvinciasTB">
+              <MappingFragment StoreEntitySet="ProvinciasTB">
+                <ScalarProperty Name="IdProvincia" ColumnName="IdProvincia" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RolesTB">
+            <EntityTypeMapping TypeName="SIGEPModel.RolesTB">
+              <MappingFragment StoreEntitySet="RolesTB">
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SeccionesTB">
+            <EntityTypeMapping TypeName="SIGEPModel.SeccionesTB">
+              <MappingFragment StoreEntitySet="SeccionesTB">
+                <ScalarProperty Name="IdSeccion" ColumnName="IdSeccion" />
+                <ScalarProperty Name="Seccion" ColumnName="Seccion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TelefonosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.TelefonosTB">
+              <MappingFragment StoreEntitySet="TelefonosTB">
+                <ScalarProperty Name="IdTelefono" ColumnName="IdTelefono" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdEmpresa" ColumnName="IdEmpresa" />
+                <ScalarProperty Name="IdEncargado" ColumnName="IdEncargado" />
+                <ScalarProperty Name="Telefono" ColumnName="Telefono" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UsuarioEspecialidadTB">
+            <EntityTypeMapping TypeName="SIGEPModel.UsuarioEspecialidadTB">
+              <MappingFragment StoreEntitySet="UsuarioEspecialidadTB">
+                <ScalarProperty Name="IdUsuarioEspecialidad" ColumnName="IdUsuarioEspecialidad" />
+                <ScalarProperty Name="IdEspecialidad" ColumnName="IdEspecialidad" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UsuariosTB">
+            <EntityTypeMapping TypeName="SIGEPModel.UsuariosTB">
+              <MappingFragment StoreEntitySet="UsuariosTB">
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Cedula" ColumnName="Cedula" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Apellido1" ColumnName="Apellido1" />
+                <ScalarProperty Name="Apellido2" ColumnName="Apellido2" />
+                <ScalarProperty Name="Contrasenna" ColumnName="Contrasenna" />
+                <ScalarProperty Name="FechaNacimiento" ColumnName="FechaNacimiento" />
+                <ScalarProperty Name="FechaRegistro" ColumnName="FechaRegistro" />
+                <ScalarProperty Name="FechaEgreso" ColumnName="FechaEgreso" />
+                <ScalarProperty Name="IdSeccion" ColumnName="IdSeccion" />
+                <ScalarProperty Name="IdDireccion" ColumnName="IdDireccion" />
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VacantesPracticasTB">
+            <EntityTypeMapping TypeName="SIGEPModel.VacantesPracticasTB">
+              <MappingFragment StoreEntitySet="VacantesPracticasTB">
+                <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="IdEmpresa" ColumnName="IdEmpresa" />
+                <ScalarProperty Name="Requerimientos" ColumnName="Requerimientos" />
+                <ScalarProperty Name="FechaMaxAplicacion" ColumnName="FechaMaxAplicacion" />
+                <ScalarProperty Name="NumCupos" ColumnName="NumCupos" />
+                <ScalarProperty Name="FechaCierre" ColumnName="FechaCierre" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="Tipo" ColumnName="Tipo" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+                <ScalarProperty Name="IdModalidad" ColumnName="IdModalidad" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RolesTB_Backup">
+            <EntityTypeMapping TypeName="SIGEPModel.RolesTB_Backup">
+              <MappingFragment StoreEntitySet="RolesTB_Backup">
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="CambiarContrasennaSP" FunctionName="SIGEPModel.Store.CambiarContrasennaSP" />
+          <FunctionImportMapping FunctionImportName="LoginSP" FunctionName="SIGEPModel.Store.LoginSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.LoginSP_Result">
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="Apellido1" ColumnName="Apellido1" />
+                <ScalarProperty Name="Apellido2" ColumnName="Apellido2" />
+                <ScalarProperty Name="Cedula" ColumnName="Cedula" />
+                <ScalarProperty Name="IdRol" ColumnName="IdRol" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+                <ScalarProperty Name="Seccion" ColumnName="Seccion" />
+                <ScalarProperty Name="Especialidad" ColumnName="Especialidad" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="RegistroSP" FunctionName="SIGEPModel.Store.RegistroSP" />
+          <EntitySetMapping Name="EstadoTB_Backup">
+            <EntityTypeMapping TypeName="SIGEPModel.EstadoTB_Backup">
+              <MappingFragment StoreEntitySet="EstadoTB_Backup">
+                <ScalarProperty Name="Descripcion" ColumnName="Descripcion" />
+                <ScalarProperty Name="IdEstado" ColumnName="IdEstado" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="ActualizarEstadoPracticaSP" FunctionName="SIGEPModel.Store.ActualizarEstadoPracticaSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.ActualizarEstadoPracticaSP_Result">
+                <ScalarProperty Name="IdPractica" ColumnName="IdPractica" />
+                <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="EstudianteNombre" ColumnName="EstudianteNombre" />
+                <ScalarProperty Name="EstudianteCorreo" ColumnName="EstudianteCorreo" />
+                <ScalarProperty Name="EstadoDescripcion" ColumnName="EstadoDescripcion" />
+                <ScalarProperty Name="Comentario" ColumnName="Comentario" />
+                <ScalarProperty Name="FechaComentario" ColumnName="FechaComentario" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="InsertarComentarioPracticaSP" FunctionName="SIGEPModel.Store.InsertarComentarioPracticaSP" />
+          <FunctionImportMapping FunctionImportName="ObtenerComentariosPracticaSP" FunctionName="SIGEPModel.Store.ObtenerComentariosPracticaSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.ObtenerComentariosPracticaSP_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Fecha" ColumnName="Fecha" />
+                <ScalarProperty Name="Usuario" ColumnName="Usuario" />
+                <ScalarProperty Name="Comentario" ColumnName="Comentario" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="ObtenerVisualizacionPracticaSP" FunctionName="SIGEPModel.Store.ObtenerVisualizacionPracticaSP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="SIGEPModel.ObtenerVisualizacionPracticaSP_Result">
+                <ScalarProperty Name="IdVacante" ColumnName="IdVacante" />
+                <ScalarProperty Name="Nombre" ColumnName="Nombre" />
+                <ScalarProperty Name="EmpresaNombre" ColumnName="EmpresaNombre" />
+                <ScalarProperty Name="Requerimientos" ColumnName="Requerimientos" />
+                <ScalarProperty Name="FechaMaxAplicacion" ColumnName="FechaMaxAplicacion" />
+                <ScalarProperty Name="ModalidadNombre" ColumnName="ModalidadNombre" />
+                <ScalarProperty Name="IdUsuario" ColumnName="IdUsuario" />
+                <ScalarProperty Name="EstudianteNombre" ColumnName="EstudianteNombre" />
+                <ScalarProperty Name="EstudianteCedula" ColumnName="EstudianteCedula" />
+                <ScalarProperty Name="EstudianteEdad" ColumnName="EstudianteEdad" />
+                <ScalarProperty Name="EstudianteEspecialidad" ColumnName="EstudianteEspecialidad" />
+                <ScalarProperty Name="EstudianteCorreo" ColumnName="EstudianteCorreo" />
+                <ScalarProperty Name="ContactoEmpresaNombre" ColumnName="ContactoEmpresaNombre" />
+                <ScalarProperty Name="ContactoEmpresaEmail" ColumnName="ContactoEmpresaEmail" />
+                <ScalarProperty Name="ContactoEmpresaTelefono" ColumnName="ContactoEmpresaTelefono" />
+                <ScalarProperty Name="FechaAplicacion" ColumnName="FechaAplicacion" />
+                <ScalarProperty Name="EstadoPractica" ColumnName="EstadoPractica" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
