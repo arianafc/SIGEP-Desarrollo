@@ -1,0 +1,211 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Listado de Estudiantes";
+    var rol = Session["Rol"] != null ? Session["Rol"].ToString() : "";
+}
+
+<h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
+    @(rol == "Coordinador" ? "Estudiantes" : "Mis Estudiantes") @DateTime.Now.Year
+</h2>
+
+<div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
+    @if (rol == "Coordinador")
+    {
+        <button type="button" class="btn-cta btn-nuevo mb-0" data-bs-toggle="modal" data-bs-target="#modalRegistrarEstudiante">
+            + Registrar
+        </button>
+    }
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-filter"></i> Filtros
+        </button>
+        <div class="dropdown-menu p-3" style="min-width: 300px;">
+            <div class="mb-2">
+                <label>Estado académico</label>
+                <select id="filtroEstado" class="form-control">
+                    <option value="">Todos</option>
+                    @foreach (var estado in ViewBag.Estados as IEnumerable<dynamic>)
+                    {
+                        <option value="@estado.Descripcion">@estado.Descripcion</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label>Especialidad</label>
+                <select id="filtroEspecialidad" class="form-control">
+                    <option value="">Todas</option>
+                    @foreach (var esp in ViewBag.Especialidades as IEnumerable<dynamic>)
+                    {
+                        <option value="@esp.IdEspecialidad">@esp.Nombre</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card rounded-5 p-3">
+    <table id="tablaEstudiantes" class="display responsive nowrap w-100">
+        <thead>
+            <tr>
+                <th>Cédula</th>
+                <th>Nombre Completo</th>
+                <th>Especialidad</th>
+                <th>Teléfono</th>
+                <th>Estado Académico</th>
+                <th>Estado de Práctica</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- MODAL PERFIL -->
+<div class="modal fade" id="modalPerfil" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Perfil del Estudiante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4" id="perfilBody">
+                <!-- Se carga dinámicamente con AJAX -->
+                <div class="text-center">
+                    <span class="text-muted">Cargando datos...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ACTUALIZAR ESTADO -->
+<div class="modal fade" id="modalActualizarEstado" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Actualizar Estado Académico</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnIdUsuario" />
+                <div class="form-group">
+                    <label for="ddlNuevoEstado">Seleccione nuevo estado:</label>
+                    <select id="ddlNuevoEstado" class="form-control">
+                        @foreach (var estado in ViewBag.Estados as IEnumerable<dynamic>)
+                        {
+                            if (estado.Descripcion == "Rezagado" || estado.Descripcion == "Aprobado")
+                            {
+                                <option value="@estado.IdEstado">@estado.Descripcion</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnConfirmarActualizar">
+                    Sí, actualizar
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+    $(document).ready(function () {
+        var table = $('#tablaEstudiantes').DataTable({
+            ajax: {
+                url: '@Url.Action("GetEstudiantes", "Estudiante")',
+                dataSrc: 'data'
+            },
+            columns: [
+                { data: 'Cedula' },
+                { data: 'NombreCompleto' },
+                { data: 'EspecialidadNombre' },
+                { data: 'Telefono' },
+                {
+                    data: 'EstadoNombre',
+                    render: function (data) {
+                        return data === "Rezagado"
+                            ? `<span class="badge bg-danger">${data}</span>`
+                            : `<span class="badge bg-success">${data}</span>`;
+                    }
+                },
+                {
+                    data: 'EstadoPractica',
+                    render: function (data) {
+                        return data === "No Asignada"
+                            ? `<span class="badge bg-secondary">${data}</span>`
+                            : `<span class="badge bg-info">${data}</span>`;
+                    }
+                },
+                {
+                    data: 'IdUsuario',
+                    render: function (data, type, row) {
+                        return `
+                            <button class="btn btn-sm btn-info verPerfil" data-id="${data}">
+                                <i class="fas fa-eye"></i> Ver más
+                            </button>
+                            <button class="btn btn-sm btn-primary btn-actualizar-estado" data-id="${data}" data-estado="${row.IdEstado}">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>`;
+                    }
+                }
+            ]
+        });
+
+        // Filtros dinámicos
+        $('#filtroEstado').on('change', function () {
+            table.ajax.reload();
+        });
+
+        $('#filtroEspecialidad').on('change', function () {
+            table.ajax.reload();
+        });
+
+        // Ver perfil
+        $('#tablaEstudiantes').on('click', '.verPerfil', function () {
+            var id = $(this).data('id');
+            $('#perfilBody').html('<div class="text-center"><span class="text-muted">Cargando datos...</span></div>');
+            $.get('@Url.Action("Detalle", "Estudiante")/' + id, function (data) {
+                $('#perfilBody').html(data);
+                $('#modalPerfil').modal('show');
+            });
+        });
+
+        // Abrir modal actualizar estado
+        $(document).on("click", ".btn-actualizar-estado", function () {
+            var idUsuario = $(this).data("id");
+            var estadoActual = $(this).data("estado");
+            $("#hdnIdUsuario").val(idUsuario);
+            $("#ddlNuevoEstado").val(estadoActual);
+            $("#modalActualizarEstado").modal("show");
+        });
+
+        // Confirmar actualización
+        $("#btnConfirmarActualizar").click(function () {
+            var idUsuario = $("#hdnIdUsuario").val();
+            var nuevoEstado = $("#ddlNuevoEstado").val();
+
+            $.ajax({
+                url: '@Url.Action("ActualizarEstado", "Estudiante")',
+                type: 'POST',
+                data: { idUsuario: idUsuario, nuevoEstadoId: nuevoEstado },
+                success: function (res) {
+                    if (res.success) {
+                        $("#modalActualizarEstado").modal("hide");
+                        table.ajax.reload();
+                        Swal.fire("Éxito", res.message, "success");
+                    } else {
+                        Swal.fire("Error", res.message, "error");
+                    }
+                }
+            });
+        });
+    });
+    </script>
+}

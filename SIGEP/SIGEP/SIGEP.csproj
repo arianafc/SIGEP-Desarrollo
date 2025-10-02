@@ -128,7 +128,10 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\EmpresaController.cs" />
+    <Compile Include="Controllers\EstudianteController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PerfilController.cs" />
     <Compile Include="Controllers\PracticasController.cs" />
     <Compile Include="EF\ActualizarEstadoPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -217,6 +220,9 @@
     <Compile Include="EF\ObtenerComentariosPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\ObtenerPostulacionesEstudianteSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\ObtenerVisualizacionPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -224,6 +230,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\ProvinciasTB.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\RegistrarAutogestionPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\RolesTB.cs">
@@ -251,8 +260,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Autenticacion.cs" />
-    <Compile Include="Models\EstadoVM.cs" />
+    <Compile Include="Models\EstudianteDetalleDTO.cs" />
+    <Compile Include="Models\EstudianteDTO.cs" />
     <Compile Include="Models\FiltroSeguridad.cs" />
+    <Compile Include="Models\MisPostulacionesVM.cs" />
     <Compile Include="Models\PracticaEstudianteViewModel.cs" />
     <Compile Include="Models\VacantePracticaDTO.cs" />
     <Compile Include="Models\VacantePracticaVM.cs" />
@@ -374,6 +385,7 @@
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.ttf" />
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff" />
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff2" />
+    <Content Include="Content\Direcciones\provincias_cantones_distritos_costa_rica.json" />
     <EntityDeploy Include="EF\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
@@ -396,6 +408,8 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\perfect-scrollbar.jquery.min.js" />
     <Content Include="Scripts\popper.min.js" />
+    <Content Include="Scripts\Practicas\Autogestion.js" />
+    <Content Include="Scripts\Practicas\ScriptPracticas.js" />
     <Content Include="Scripts\script.js" />
     <Content Include="Scripts\sidebarmenu.js" />
     <Content Include="Scripts\sparkline.js" />
@@ -419,6 +433,11 @@
     <Content Include="Views\Home\Registro.cshtml" />
     <Content Include="Views\Practicas\VistaVacantesProfesor.cshtml" />
     <Content Include="Views\Practicas\VisualizacionPostulacion.cshtml" />
+    <Content Include="Views\Practicas\PostulacionesEstudiantes.cshtml" />
+    <Content Include="Views\Empresa\ListaEmpresas.cshtml" />
+    <Content Include="Views\Perfil\MiPerfil.cshtml" />
+    <Content Include="Views\Practicas\PracticasCoordinador.cshtml" />
+    <Content Include="Views\Estudiante\Estudiantes.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
