@@ -220,6 +220,9 @@
     <Compile Include="EF\ObtenerComentariosPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\ObtenerEstudiantesProfesorSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\ObtenerPostulacionesEstudianteSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -244,6 +247,12 @@
     <Compile Include="EF\SeccionesTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\sp_ObtenerDocumentosPorUsuario_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\sp_ObtenerDocumento_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\TelefonosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -260,7 +269,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Autenticacion.cs" />
+    <Compile Include="Models\DocumentoDTO.cs" />
+    <Compile Include="Models\EncargadoDTO.cs" />
     <Compile Include="Models\EstudianteDetalleDTO.cs" />
+    <Compile Include="Models\EstudianteDetalleVM.cs" />
     <Compile Include="Models\EstudianteDTO.cs" />
     <Compile Include="Models\FiltroSeguridad.cs" />
     <Compile Include="Models\MisPostulacionesVM.cs" />
@@ -438,6 +450,7 @@
     <Content Include="Views\Perfil\MiPerfil.cshtml" />
     <Content Include="Views\Practicas\PracticasCoordinador.cshtml" />
     <Content Include="Views\Estudiante\Estudiantes.cshtml" />
+    <Content Include="Views\Estudiante\_DetalleEstudiante.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

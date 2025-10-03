@@ -1,0 +1,192 @@
+﻿@model SIGEP.Models.EstudianteDetalleDTO
+@{
+    var documentos = ViewBag.Documentos as List<SIGEP.Models.DocumentoDTO>;
+    var encargados = ViewBag.Encargados as List<SIGEP.Models.EncargadoDTO>;
+    var postulaciones = ViewBag.Postulaciones as List<SIGEP.Models.PracticaEstudianteViewModel>;
+}
+
+<div class="container-fluid">
+
+    <!-- Sección: Información Personal -->
+    <h5 class="section-title mb-3">Información Personal</h5>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @Model.Nombre @Model.Apellido1 @Model.Apellido2</div>
+        <div class="col-md-6"><strong>Correo Electrónico:</strong> @Model.Correo</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Teléfono:</strong> @Model.Telefono</div>
+        <div class="col-md-6"><strong>Dirección:</strong> @Model.Direccion</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Especialidad:</strong> @Model.Especialidad</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Edad:</strong> @Model.Edad</div>
+        <div class="col-md-6"><strong>Sección:</strong> @Model.Seccion</div>
+    </div>
+
+    <hr />
+
+    <!-- Sección: Encargado -->
+    <h5 class="section-title mb-3">Información del Encargado</h5>
+    @if (encargados != null && encargados.Any())
+    {
+        foreach (var enc in encargados)
+        {
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @enc.Nombre @@enc.NombreCompleto</div>
+                <div class="col-md-6"><strong>Teléfono:</strong> @enc.Telefono</div>
+                <div class="col-md-6"><strong>Parentesco:</strong> @enc.Parentesco</div>
+                <div class="col-md-6"><strong>Residencia / Trabajo:</strong> @enc.Direccion</div>
+                <div class="col-md-6"><strong>Ocupación:</strong> @enc.Ocupacion</div>
+            </div>
+            <hr />
+        }
+    }
+    else
+    {
+        <p class="text-muted">No hay encargado registrado.</p>
+    }
+
+    <!-- Sección: Prácticas / Postulaciones -->
+    <h5 class="section-title mb-3">Prácticas / Postulaciones</h5>
+    @if (postulaciones != null && postulaciones.Any())
+    {
+        <ul class="list-group mb-3">
+            @foreach (var post in postulaciones)
+            {
+                <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                    <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { id = post.IdPractica })"
+                       class="text-decoration-none" style="color: #2D594D;">
+                        @post.Empresa
+                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        @if (post.Estado == "Aceptado")
+                        {
+                            <span class="badge badge-asignada">Aceptado</span>
+                            <button class="btn BtnDesasignarPracticaEstudiante"
+                                    data-id="@post.IdPostulacion"
+                                    style="color:#2D594D; background:none; border:none;"
+                                    title="Desasignar práctica">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        }
+                        else if (post.Estado == "En Proceso")
+                        {
+                            <span class="badge badge-no-asignada" style="background-color: darkgoldenrod; color:white">
+                                En Proceso
+                            </span>
+                            <button class="btn BtnDesasignarPracticaEstudiante"
+                                    data-id="@post.IdPostulacion"
+                                    style="color:#2D594D; background:none; border:none;"
+                                    title="Cancelar postulación">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        }
+                        else if (post.Estado == "Rechazado")
+                        {
+                            <span class="badge badge-no-asignada" style="background-color: darkred; color:white">
+                                Rechazado
+                            </span>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text-muted">No hay postulaciones registradas.</p>
+    }
+
+    <hr />
+
+    <!-- Sección: Documentos -->
+    <h5 class="section-title mb-3">Documentos</h5>
+    @if (documentos != null && documentos.Any())
+    {
+        foreach (var doc in documentos)
+        {
+            <div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                <span style="color: #2D594D;">@doc.Documento</span>
+                <div>
+                    <!-- Ver -->
+                    <a href="@Url.Action("VisualizarDocumento", "Estudiante", new { id = doc.IdDocumento })"
+                       target="_blank"
+                       style="color:#2D594D; margin-right:10px;">
+                        <i class="fas fa-eye" title="Visualizar"></i>
+                    </a>
+                    <!-- Descargar -->
+                    <a href="@Url.Action("DescargarDocumento", "Estudiante", new { id = doc.IdDocumento })"
+                       style="color:#2D594D; margin-right:10px;">
+                        <i class="fas fa-download" title="Descargar"></i>
+                    </a>
+                    <!-- Eliminar -->
+                    <button class="btn btn-link text-danger p-0 btn-eliminar-doc"
+                            data-id="@doc.IdDocumento" title="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">No hay documentos cargados.</p>
+    }
+
+</div>
+
+<script>
+$(document).ready(function () {
+    // Eliminar documento
+    $(".btn-eliminar-doc").click(function () {
+        var idDoc = $(this).data("id");
+        Swal.fire({
+            title: '¿Eliminar documento?',
+            text: "No podrás deshacer esta acción",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('@Url.Action("EliminarDocumento", "Estudiante")', { id: idDoc }, function (res) {
+                    if (res.success) {
+                        Swal.fire("Eliminado", "Documento eliminado con éxito", "success");
+                        $("#perfilBody").load('@Url.Action("Detalle", "Estudiante")/' + @Model.IdUsuario);
+                    } else {
+                        Swal.fire("Error", "No se pudo eliminar", "error");
+                    }
+                });
+            }
+        });
+    });
+
+    // Desasignar práctica
+    $(".BtnDesasignarPracticaEstudiante").click(function () {
+        var idPostulacion = $(this).data("id");
+        Swal.fire({
+            title: '¿Desea desasignar esta práctica?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, desasignar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('@Url.Action("DesasignarPractica", "Estudiante")', { id: idPostulacion }, function (res) {
+                    if (res.success) {
+                        Swal.fire("Éxito", res.message, "success");
+                        $("#perfilBody").load('@Url.Action("Detalle", "Estudiante")/' + @Model.IdUsuario);
+                    } else {
+                        Swal.fire("Error", res.message, "error");
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+
+
+

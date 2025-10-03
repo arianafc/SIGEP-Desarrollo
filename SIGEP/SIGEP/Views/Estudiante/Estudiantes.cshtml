@@ -24,9 +24,9 @@
                 <label>Estado académico</label>
                 <select id="filtroEstado" class="form-control">
                     <option value="">Todos</option>
-                    @foreach (var estado in ViewBag.Estados as IEnumerable<dynamic>)
+                    @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
                     {
-                        <option value="@estado.Descripcion">@estado.Descripcion</option>
+                        <option value="@estado.Text">@estado.Text</option>
                     }
                 </select>
             </div>
@@ -34,9 +34,9 @@
                 <label>Especialidad</label>
                 <select id="filtroEspecialidad" class="form-control">
                     <option value="">Todas</option>
-                    @foreach (var esp in ViewBag.Especialidades as IEnumerable<dynamic>)
+                    @foreach (var esp in ViewBag.Especialidades as List<SelectListItem>)
                     {
-                        <option value="@esp.IdEspecialidad">@esp.Nombre</option>
+                        <option value="@esp.Value">@esp.Text</option>
                     }
                 </select>
             </div>
@@ -69,7 +69,6 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body px-4" id="perfilBody">
-                <!-- Se carga dinámicamente con AJAX -->
                 <div class="text-center">
                     <span class="text-muted">Cargando datos...</span>
                 </div>
@@ -94,20 +93,18 @@
                 <div class="form-group">
                     <label for="ddlNuevoEstado">Seleccione nuevo estado:</label>
                     <select id="ddlNuevoEstado" class="form-control">
-                        @foreach (var estado in ViewBag.Estados as IEnumerable<dynamic>)
+                        @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
                         {
-                            if (estado.Descripcion == "Rezagado" || estado.Descripcion == "Aprobado")
+                            if (estado.Text == "Rezagado" || estado.Text == "Aprobado")
                             {
-                                <option value="@estado.IdEstado">@estado.Descripcion</option>
+                                <option value="@estado.Value">@estado.Text</option>
                             }
                         }
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="btnConfirmarActualizar">
-                    Sí, actualizar
-                </button>
+                <button type="button" class="btn btn-success" id="btnConfirmarActualizar">Sí, actualizar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
             </div>
         </div>
@@ -130,44 +127,44 @@
                 {
                     data: 'EstadoNombre',
                     render: function (data) {
-                        return data === "Rezagado"
-                            ? `<span class="badge bg-danger">${data}</span>`
-                            : `<span class="badge bg-success">${data}</span>`;
+                        if (data === "Rezagado") {
+                            return `<span class="badge badge-no-asignada">${data}</span>`;
+                        } else if (data === "Aprobado") {
+                            return `<span class="badge badge-asignada">${data}</span>`;
+                        }
+                        return `<span class="badge badge-estado-academico">${data}</span>`;
                     }
                 },
                 {
                     data: 'EstadoPractica',
                     render: function (data) {
                         return data === "No Asignada"
-                            ? `<span class="badge bg-secondary">${data}</span>`
-                            : `<span class="badge bg-info">${data}</span>`;
+                            ? `<span class="badge badge-no-asignada">${data}</span>`
+                            : `<span class="badge badge-asignada">${data}</span>`;
                     }
                 },
                 {
                     data: 'IdUsuario',
                     render: function (data, type, row) {
                         return `
-                            <button class="btn btn-sm btn-info verPerfil" data-id="${data}">
-                                <i class="fas fa-eye"></i> Ver más
+                            <button class="btn bg-transparent verPerfil" data-id="${data}" style="color:#2d594d">
+                                <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-primary btn-actualizar-estado" data-id="${data}" data-estado="${row.IdEstado}">
-                                <i class="fas fa-sync-alt"></i> Actualizar
+                            <button class="btn bg-transparent btn-actualizar-estado" data-id="${data}" data-estado="${row.IdEstado}" style="color:#2d594d">
+                                <i class="fas fa-sync-alt"></i>
                             </button>`;
                     }
                 }
+            ],
+            columnDefs: [
+                { targets: -1, orderable: false, searchable: false, width: "100px" }
             ]
         });
 
-        // Filtros dinámicos
-        $('#filtroEstado').on('change', function () {
+        $('#filtroEstado, #filtroEspecialidad').on('change', function () {
             table.ajax.reload();
         });
 
-        $('#filtroEspecialidad').on('change', function () {
-            table.ajax.reload();
-        });
-
-        // Ver perfil
         $('#tablaEstudiantes').on('click', '.verPerfil', function () {
             var id = $(this).data('id');
             $('#perfilBody').html('<div class="text-center"><span class="text-muted">Cargando datos...</span></div>');
@@ -177,7 +174,6 @@
             });
         });
 
-        // Abrir modal actualizar estado
         $(document).on("click", ".btn-actualizar-estado", function () {
             var idUsuario = $(this).data("id");
             var estadoActual = $(this).data("estado");
@@ -186,7 +182,6 @@
             $("#modalActualizarEstado").modal("show");
         });
 
-        // Confirmar actualización
         $("#btnConfirmarActualizar").click(function () {
             var idUsuario = $("#hdnIdUsuario").val();
             var nuevoEstado = $("#ddlNuevoEstado").val();

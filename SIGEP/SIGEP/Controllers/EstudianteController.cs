@@ -3,6 +3,9 @@ using SIGEP.Models;
 using SIGEP.Services;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -15,6 +18,7 @@ namespace SIGEP.Controllers
     {
         private SIGEPEntities db = new SIGEPEntities();
         Utilitarios utilitarios = new Utilitarios();
+        private readonly string _connectionString = "Server=localhost;Database=SIGEP;Integrated Security=True;TrustServerCertificate=True;";
 
         // ==============================
         // VISTA PRINCIPAL ESTUDIANTES
@@ -24,7 +28,6 @@ namespace SIGEP.Controllers
         {
             ViewBag.Especialidades = ObtenerEspecialidades();
             ViewBag.Estados = ObtenerEstados();
-
             return View();
         }
 
@@ -44,14 +47,12 @@ namespace SIGEP.Controllers
                     Cedula = u.Cedula,
                     NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
 
-                    // Teléfono desde TelefonosTB
                     Telefono = db.TelefonosTB
                                  .Where(t => t.IdUsuario == u.IdUsuario)
                                  .OrderBy(t => t.IdTelefono)
                                  .Select(t => t.Telefono)
                                  .FirstOrDefault(),
 
-                    // Especialidad desde UsuarioEspecialidadTB
                     IdEspecialidad = db.UsuarioEspecialidadTB
                                        .Where(ue => ue.IdUsuario == u.IdUsuario)
                                        .OrderByDescending(ue => ue.IdUsuarioEspecialidad)
@@ -68,7 +69,6 @@ namespace SIGEP.Controllers
                     IdEstado = u.IdEstado,
                     EstadoNombre = e != null ? e.Descripcion : "",
 
-                    // Estado de práctica desde PracticaEstudianteTB + EstadosTB
                     EstadoPractica =
                         (from p in db.PracticaEstudianteTB
                          join ep in db.EstadosTB on p.IdEstado equals ep.IdEstado
@@ -77,9 +77,7 @@ namespace SIGEP.Controllers
                          select ep.Descripcion).FirstOrDefault()
                 };
 
-            // ==============================
-            // FILTROS
-            // ==============================
+            // 🔎 Filtros
             if (!string.IsNullOrEmpty(estado))
             {
                 if (estado == "ConPractica")
@@ -93,11 +91,8 @@ namespace SIGEP.Controllers
             if (idEspecialidad > 0)
                 query = query.Where(x => x.IdEspecialidad == idEspecialidad);
 
-            // ==============================
-            // FILTRO POR ROL
-            // ==============================
+            // 🔎 Restricción si es Profesor
             var rolUsuario = Session["Rol"] != null ? Session["Rol"].ToString() : "";
-
             if (rolUsuario == "Profesor")
             {
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
@@ -109,10 +104,9 @@ namespace SIGEP.Controllers
                 if (idEspecialidadProfesor.HasValue)
                     query = query.Where(x => x.IdEspecialidad == idEspecialidadProfesor.Value);
             }
-            // Coordinador ve todos (no se filtra)
 
+            // 📌 Proyección final
             var list = query.OrderByDescending(x => x.IdUsuario).ToList();
-
             var outList = list.Select(x => new
             {
                 x.IdUsuario,
@@ -135,7 +129,6 @@ namespace SIGEP.Controllers
         [HttpGet]
         public ActionResult Detalle(int id)
         {
-            // obtenemos los datos base del usuario (dirección incluida si existe)
             var baseInfo = (from u in db.UsuariosTB
                             join d in db.DireccionesTB on u.IdDireccion equals d.IdDireccion into jd
                             from d in jd.DefaultIfEmpty()
@@ -147,46 +140,32 @@ namespace SIGEP.Controllers
                                 u.Nombre,
                                 u.Apellido1,
                                 u.Apellido2,
-                                FechaNacimiento = u.FechaNacimiento, // en tu BD es NOT NULL (DateTime)
+                                u.FechaNacimiento,
                                 DireccionExacta = d != null ? d.DireccionExacta : null
                             }).FirstOrDefault();
 
             if (baseInfo == null)
                 return HttpNotFound();
 
-            // correo -> EmailsTB (puede haber varios, tomamos el primero si existe)
-            var correo = db.EmailsTB
-                          .Where(e => e.IdUsuario == id)
-                          .Select(e => e.Email)
-                          .FirstOrDefault();
-
-            // teléfono -> TelefonosTB (tomamos el primero si existe)
-            var telefono = db.TelefonosTB
-                            .Where(t => t.IdUsuario == id)
-                            .Select(t => t.Telefono)
-                            .FirstOrDefault();
-
-            // especialidad -> UsuarioEspecialidadTB + EspecialidadesTB (última asignada)
+            var correo = db.EmailsTB.Where(e => e.IdUsuario == id).Select(e => e.Email).FirstOrDefault();
+            var telefono = db.TelefonosTB.Where(t => t.IdUsuario == id).Select(t => t.Telefono).FirstOrDefault();
             var especialidad = (from ue in db.UsuarioEspecialidadTB
                                 join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
                                 where ue.IdUsuario == id
                                 orderby ue.IdUsuarioEspecialidad descending
                                 select esp.Nombre).FirstOrDefault();
 
-            // estado de la práctica -> PracticaEstudianteTB + EstadosTB (último registro)
             var estadoPractica = (from p in db.PracticaEstudianteTB
                                   join es in db.EstadosTB on p.IdEstado equals es.IdEstado
                                   where p.IdUsuario == id
                                   orderby p.IdPractica descending
                                   select es.Descripcion).FirstOrDefault();
 
-            // calcular edad correctamente con FechaNacimiento (no es nullable según tu script)
             var hoy = DateTime.Today;
             var nacimiento = baseInfo.FechaNacimiento;
             var edad = hoy.Year - nacimiento.Year;
-            if (nacimiento > hoy.AddYears(-edad)) edad--; // corrige si aún no cumplió este año
+            if (nacimiento > hoy.AddYears(-edad)) edad--;
 
-            // Mapear a DTO fuertemente tipado
             var estudiante = new EstudianteDetalleDTO
             {
                 IdUsuario = baseInfo.IdUsuario,
@@ -194,38 +173,179 @@ namespace SIGEP.Controllers
                 Nombre = baseInfo.Nombre,
                 Apellido1 = baseInfo.Apellido1,
                 Apellido2 = baseInfo.Apellido2,
-                Edad = edad,
+                Edad = edad,                      // ahora edad tiene set
                 Correo = correo ?? string.Empty,
                 Telefono = telefono ?? string.Empty,
                 Especialidad = especialidad ?? string.Empty,
                 Direccion = baseInfo.DireccionExacta ?? string.Empty,
-                EstadoPractica = estadoPractica ?? string.Empty
+                EstadoPractica = estadoPractica ?? "No Asignada"
             };
 
-            return View(estudiante);
+            // ---- NUEVO: llenar datos usados por la vista parcial
+            ViewBag.Documentos = ObtenerDocumentosPorEstudiante(id);
+            ViewBag.Encargados = ObtenerEncargadosPorEstudiante(id);
+            ViewBag.Practicas = ObtenerPracticasPorEstudiante(id);
+
+            return PartialView("DetalleEstudiante", estudiante);
         }
 
         // ==============================
-        // MÉTODOS AUXILIARES
+        // CRUD DOCUMENTOS (SP)
         // ==============================
-        private object ObtenerEspecialidades()
+        // ==============================
+        // SUBIR DOCUMENTO
+        // ==============================
+        [HttpPost]
+        public ActionResult SubirDocumento(int idEstudiante, HttpPostedFileBase archivo)
         {
-            return db.EspecialidadesTB
-                     .Select(x => new { x.IdEspecialidad, x.Nombre })
-                     .OrderBy(x => x.Nombre)
-                     .ToList();
+            if (archivo != null && archivo.ContentLength > 0)
+            {
+                string fileName = Path.GetFileName(archivo.FileName);
+                string path = Path.Combine(@"C:\Proyectos\Uploads\Documentos\", fileName);
+
+                archivo.SaveAs(path);
+
+                db.Database.ExecuteSqlCommand(
+                    "EXEC sp_InsertarDocumento @IdUsuario, @Documento, @Tipo, @RutaArchivo",
+                    new SqlParameter("@IdUsuario", idEstudiante),
+                    new SqlParameter("@Documento", fileName),
+                    new SqlParameter("@Tipo", Path.GetExtension(fileName)),
+                    new SqlParameter("@RutaArchivo", path)
+                );
+            }
+
+            return RedirectToAction("Detalle", new { id = idEstudiante });
         }
 
-        private object ObtenerEstados()
+        // ==============================
+        // DESCARGAR DOCUMENTO
+        // ==============================
+        public FileResult DescargarDocumento(int id)
+        {
+            var doc = db.Database.SqlQuery<DocumentoDTO>(
+                "EXEC sp_ObtenerDocumento @IdDocumento",
+                new SqlParameter("@IdDocumento", id)
+            ).FirstOrDefault();
+
+            if (doc == null) throw new Exception("Documento no encontrado");
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(doc.RutaArchivo);
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, doc.Documento);
+        }
+
+        // ==============================
+        // ELIMINAR DOCUMENTO
+        // ==============================
+        [HttpPost]
+        public JsonResult EliminarDocumento(int id)
+        {
+            var doc = db.Database.SqlQuery<DocumentoDTO>(
+                "EXEC sp_ObtenerDocumento @IdDocumento",
+                new SqlParameter("@IdDocumento", id)
+            ).FirstOrDefault();
+
+            if (doc != null)
+            {
+                if (System.IO.File.Exists(doc.RutaArchivo))
+                    System.IO.File.Delete(doc.RutaArchivo);
+
+                db.Database.ExecuteSqlCommand(
+                    "EXEC sp_EliminarDocumento @IdDocumento",
+                    new SqlParameter("@IdDocumento", id)
+                );
+            }
+
+            return Json(new { success = true });
+        }
+
+        // ==============================
+        // AUXILIAR: obtener documentos usando SP
+        // ==============================
+        private List<DocumentoDTO> ObtenerDocumentosPorEstudiante(int idUsuario)
+        {
+            return db.Database.SqlQuery<DocumentoDTO>(
+                "EXEC sp_ObtenerDocumentosPorUsuario @IdUsuario",
+                new SqlParameter("@IdUsuario", idUsuario)
+            ).ToList();
+        }
+
+        private List<EncargadoDTO> ObtenerEncargadosPorEstudiante(int idUsuario)
+        {
+            return (from ee in db.EstudianteEncargadoTB
+                    join e in db.EncargadosTB on ee.IdEncargado equals e.IdEncargado
+                    where ee.IdUsuario == idUsuario
+                    select new EncargadoDTO
+                    {
+                        IdEncargado = e.IdEncargado,
+                        Nombre = e.Nombre + " " + e.Apellido1 + " " + e.Apellido2,
+                        // traemos el primer teléfono (si existe) desde TelefonosTB
+                        Telefono = (db.TelefonosTB
+                                       .Where(t => t.IdEncargado == e.IdEncargado)
+                                       .OrderBy(t => t.IdTelefono)
+                                       .Select(t => t.Telefono)
+                                       .FirstOrDefault()) ?? string.Empty
+                    }).ToList();
+        }
+
+        // ==============================
+        // PRACTICAS DEL ESTUDIANTE
+        // ==============================
+        private List<PracticaEstudianteViewModel> ObtenerPracticasPorEstudiante(int idUsuario)
+        {
+            return (from p in db.PracticaEstudianteTB
+                    join v in db.VacantesPracticasTB on p.IdVacante equals v.IdVacante
+                    join e in db.EstadosTB on p.IdEstado equals e.IdEstado
+                    join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
+                    join emp in db.EmpresasTB on v.IdEmpresa equals emp.IdEmpresa
+                    where p.IdUsuario == idUsuario
+                    orderby p.IdPractica descending
+                    select new PracticaEstudianteViewModel
+                    {
+                        IdPractica = p.IdPractica,
+                        IdVacante = v.IdVacante,
+                        IdUsuario = u.IdUsuario,
+                        FechaAplicacion = p.FechaAplicacion,
+                        IdEstado = p.IdEstado,
+
+                        // ---- Datos extendidos
+                        EstadoDescripcion = e.Descripcion,
+                        Cedula = u.Cedula,
+                        NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                        Empresa = emp.NombreEmpresa,
+                        Estado = e.Descripcion,
+                        IdPostulacion = p.IdPractica   // aquí mapeamos IdPractica como IdPostulacion
+                    }).ToList();
+        }
+
+
+        private List<SelectListItem> ObtenerEstados()
         {
             return db.EstadosTB
-                     .Select(x => new { x.IdEstado, x.Descripcion })
-                     .OrderBy(x => x.Descripcion)
+                     .OrderBy(est => est.Descripcion)
+                     .Select(est => new { est.IdEstado, est.Descripcion })
+                     .AsEnumerable()
+                     .Select(x => new SelectListItem
+                     {
+                         Value = x.IdEstado.ToString(),
+                         Text = x.Descripcion
+                     })
                      .ToList();
         }
 
+        private List<SelectListItem> ObtenerEspecialidades()
+        {
+            return db.EspecialidadesTB
+                     .OrderBy(esp => esp.Nombre)
+                     .Select(esp => new { esp.IdEspecialidad, esp.Nombre })
+                     .AsEnumerable()
+                     .Select(x => new SelectListItem
+                     {
+                         Value = x.IdEspecialidad.ToString(),
+                         Text = x.Nombre
+                     })
+                     .ToList();
+        }
 
-        //Actualizar estado
         [HttpPost]
         public JsonResult ActualizarEstado(int idUsuario, int nuevoEstadoId)
         {
@@ -245,7 +365,5 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error al actualizar: " + ex.Message });
             }
         }
-
     }
-
 }
