@@ -186,7 +186,7 @@ namespace SIGEP.Controllers
             ViewBag.Encargados = ObtenerEncargadosPorEstudiante(id);
             ViewBag.Practicas = ObtenerPracticasPorEstudiante(id);
 
-            return PartialView("DetalleEstudiante", estudiante);
+            return PartialView("_DetalleEstudiante", estudiante);
         }
 
         // ==============================
@@ -278,14 +278,16 @@ namespace SIGEP.Controllers
                     {
                         IdEncargado = e.IdEncargado,
                         Nombre = e.Nombre + " " + e.Apellido1 + " " + e.Apellido2,
-                        // traemos el primer teléfono (si existe) desde TelefonosTB
                         Telefono = (db.TelefonosTB
                                        .Where(t => t.IdEncargado == e.IdEncargado)
                                        .OrderBy(t => t.IdTelefono)
                                        .Select(t => t.Telefono)
-                                       .FirstOrDefault()) ?? string.Empty
+                                       .FirstOrDefault()) ?? string.Empty,
+                        Ocupacion = e.Ocupacion
+                        // ❌ Eliminado: Parentesco y Direccion
                     }).ToList();
         }
+
 
         // ==============================
         // PRACTICAS DEL ESTUDIANTE
@@ -321,13 +323,12 @@ namespace SIGEP.Controllers
         private List<SelectListItem> ObtenerEstados()
         {
             return db.EstadosTB
+                     .Where(est => est.Descripcion == "Rezagado" || est.Descripcion == "Aprobada")
                      .OrderBy(est => est.Descripcion)
-                     .Select(est => new { est.IdEstado, est.Descripcion })
-                     .AsEnumerable()
-                     .Select(x => new SelectListItem
+                     .Select(est => new SelectListItem
                      {
-                         Value = x.IdEstado.ToString(),
-                         Text = x.Descripcion
+                         Value = est.IdEstado.ToString(),
+                         Text = est.Descripcion
                      })
                      .ToList();
         }
@@ -355,6 +356,15 @@ namespace SIGEP.Controllers
                 if (usuario == null)
                     return Json(new { success = false, message = "Estudiante no encontrado" });
 
+                // Validar que el nuevo estado sea Rezagado o Aprobado
+                var estadosValidos = db.EstadosTB
+                    .Where(e => e.Descripcion == "Rezagado" || e.Descripcion == "Aprobada")
+                    .Select(e => e.IdEstado)
+                    .ToList();
+
+                if (!estadosValidos.Contains(nuevoEstadoId))
+                    return Json(new { success = false, message = "Solo se permite cambiar a Rezagado o Aprobado." });
+
                 usuario.IdEstado = nuevoEstadoId;
                 db.SaveChanges();
 
@@ -365,5 +375,7 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error al actualizar: " + ex.Message });
             }
         }
+
+
     }
 }

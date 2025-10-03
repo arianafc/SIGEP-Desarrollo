@@ -21,7 +21,7 @@
         </button>
         <div class="dropdown-menu p-3" style="min-width: 300px;">
             <div class="mb-2">
-                <label>Estado académico</label>
+                <label>Estado académfico</label>
                 <select id="filtroEstado" class="form-control">
                     <option value="">Todos</option>
                     @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
@@ -81,35 +81,45 @@
 </div>
 
 <!-- MODAL ACTUALIZAR ESTADO -->
-<div class="modal fade" id="modalActualizarEstado" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Actualizar Estado Académico</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="hdnIdUsuario" />
-                <div class="form-group">
-                    <label for="ddlNuevoEstado">Seleccione nuevo estado:</label>
-                    <select id="ddlNuevoEstado" class="form-control">
-                        @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
-                        {
-                            if (estado.Text == "Rezagado" || estado.Text == "Aprobado")
+<div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+                <div class="modal-header" style="background-color: #2D594D; color: white;">
+                    <h5 class="modal-title">Actualizar Estado Académico</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4">
+                    <input type="hidden" id="hdnIdUsuario" />
+                    <div class="form-group mb-3">
+                        <label for="ddlNuevoEstado">Seleccione nuevo estado:</label>
+                        <select id="ddlNuevoEstado" class="form-select OpcionesVacantes w-100" style="font-size:14px">
+                            @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
                             {
                                 <option value="@estado.Value">@estado.Text</option>
                             }
-                        }
-                    </select>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" id="btnConfirmarActualizar">Sí, actualizar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer px-4">
+                    <button type="button" class="btn CerrarModal" id="btnConfirmarActualizar">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+
+
+
+
+
+
+
+
+
+
 
 @section scripts {
     <script>
@@ -125,22 +135,49 @@
                 { data: 'EspecialidadNombre' },
                 { data: 'Telefono' },
                 {
-                    data: 'EstadoNombre',
+                    data: 'EstadoNombre',   // Estado Académico
                     render: function (data) {
-                        if (data === "Rezagado") {
-                            return `<span class="badge badge-no-asignada">${data}</span>`;
-                        } else if (data === "Aprobado") {
-                            return `<span class="badge badge-asignada">${data}</span>`;
+                        if (!data) {
+                            return `<span class="badge badge-no-asignada">Sin Estado</span>`;
                         }
-                        return `<span class="badge badge-estado-academico">${data}</span>`;
+
+                        switch (data.toLowerCase()) {
+                            case "activo":
+                                return `<span class="badge-activo">${data}</span>`;
+                            case "inactivo":
+                                return `<span class="badge-inactivo">${data}</span>`;
+                            case "aprobada":
+                            case "aprobado":
+                                return `<span class="badge-aprobado">${data}</span>`;
+                            case "rezagado":
+                                return `<span class="badge-rezagado">${data}</span>`;
+                            default:
+                                return `<span class="badge-no-asignada">${data}</span>`;
+                        }
+
                     }
                 },
                 {
                     data: 'EstadoPractica',
                     render: function (data) {
-                        return data === "No Asignada"
-                            ? `<span class="badge badge-no-asignada">${data}</span>`
-                            : `<span class="badge badge-asignada">${data}</span>`;
+                        if (!data) {
+                            return `<span class="badge badge-default">Sin práctica</span>`;
+                        }
+
+                        let clase = "";
+                        switch (data) {
+                            case "En progreso": clase = "badge-en-progreso"; break;
+                            case "Asignada": clase = "badge-asignada"; break;
+                            case "Rechazada": clase = "badge-rechazada"; break;
+                            case "En curso": clase = "badge-en-curso"; break;
+                            case "Finalizada": clase = "badge-finalizada"; break;
+                            case "Aprobada": clase = "badge-aprobada"; break;
+                            case "Retirada": clase = "badge-retirada"; break;
+                            case "No Asignada": clase = "badge-no-asignada"; break;
+                            default: clase = "badge-default"; break;
+                        }
+
+                        return `<span class="badge ${clase}">${data}</span>`;
                     }
                 },
                 {

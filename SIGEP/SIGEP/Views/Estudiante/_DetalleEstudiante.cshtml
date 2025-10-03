@@ -2,7 +2,7 @@
 @{
     var documentos = ViewBag.Documentos as List<SIGEP.Models.DocumentoDTO>;
     var encargados = ViewBag.Encargados as List<SIGEP.Models.EncargadoDTO>;
-    var postulaciones = ViewBag.Postulaciones as List<SIGEP.Models.PracticaEstudianteViewModel>;
+    var postulaciones = ViewBag.Practicas as List<SIGEP.Models.PracticaEstudianteViewModel>;
 }
 
 <div class="container-fluid">
@@ -34,10 +34,10 @@
         foreach (var enc in encargados)
         {
             <div class="row mb-2">
-                <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @enc.Nombre @@enc.NombreCompleto</div>
+                <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @enc.Nombre</div>
                 <div class="col-md-6"><strong>Teléfono:</strong> @enc.Telefono</div>
-                <div class="col-md-6"><strong>Parentesco:</strong> @enc.Parentesco</div>
-                <div class="col-md-6"><strong>Residencia / Trabajo:</strong> @enc.Direccion</div>
+                @*<div class="col-md-6"><strong>Parentesco:</strong> @enc.Parentesco</div>
+                    <div class="col-md-6"><strong>Residencia / Trabajo:</strong> @enc.Direccion</div>*@
                 <div class="col-md-6"><strong>Ocupación:</strong> @enc.Ocupacion</div>
             </div>
             <hr />
@@ -48,6 +48,7 @@
         <p class="text-muted">No hay encargado registrado.</p>
     }
 
+
     <!-- Sección: Prácticas / Postulaciones -->
     <h5 class="section-title mb-3">Prácticas / Postulaciones</h5>
     @if (postulaciones != null && postulaciones.Any())
@@ -56,38 +57,74 @@
             @foreach (var post in postulaciones)
             {
                 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
-                    <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { id = post.IdPractica })"
-                       class="text-decoration-none" style="color: #2D594D;">
-                        @post.Empresa
-                    </a>
+                    <div>
+                        <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { id = post.IdPractica })"
+                           class="text-decoration-none" style="color: #2D594D; font-weight:600;">
+                            @post.Empresa
+                        </a>
+
+                        <!-- Estado de la práctica -->
+                        @switch (post.Estado)
+                        {
+                            case "Asignada":
+                                <span class="badge badge-asignada ms-2">@post.Estado</span>
+                                break;
+
+                            case "En progreso":
+                                <span class="badge badge-no-asignada ms-2" style="background-color: darkgoldenrod; color:white">
+                                    @post.Estado
+                                </span>
+                                break;
+
+                            case "Rechazada":
+                                <span class="badge badge-no-asignada ms-2" style="background-color: darkred; color:white">
+                                    @post.Estado
+                                </span>
+                                break;
+
+                            case "En curso":
+                                <span class="badge badge-asignada ms-2" style="background-color: royalblue; color:white">
+                                    @post.Estado
+                                </span>
+                                break;
+
+                            case "Finalizada":
+                                <span class="badge badge-asignada ms-2" style="background-color: #2d594d; color:white">
+                                    @post.Estado
+                                </span>
+                                break;
+
+                            case "Aprobada":
+                                <span class="badge badge-aprobado ms-2">@post.Estado</span>
+                                break;
+
+                            case "Retirada":
+                                <span class="badge badge-no-asignada ms-2" style="background-color: gray; color:white">
+                                    @post.Estado
+                                </span>
+                                break;
+
+                            case "Rezagado":
+                                <span class="badge badge-rezagado ms-2">@post.Estado</span>
+                                break;
+
+                            default:
+                                <span class="badge badge-no-asignada ms-2">@post.Estado</span>
+                                break;
+                        }
+                    </div>
+
+                    <!-- Acciones -->
                     <div class="d-flex align-items-center gap-2">
-                        @if (post.Estado == "Aceptado")
+                        @* Solo mostrar basurero si la práctica está activa *@
+                        @if (post.Estado == "Asignada" || post.Estado == "En progreso" || post.Estado == "En curso")
                         {
-                            <span class="badge badge-asignada">Aceptado</span>
                             <button class="btn BtnDesasignarPracticaEstudiante"
                                     data-id="@post.IdPostulacion"
                                     style="color:#2D594D; background:none; border:none;"
-                                    title="Desasignar práctica">
+                                    title="Quitar postulación">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
-                        }
-                        else if (post.Estado == "En Proceso")
-                        {
-                            <span class="badge badge-no-asignada" style="background-color: darkgoldenrod; color:white">
-                                En Proceso
-                            </span>
-                            <button class="btn BtnDesasignarPracticaEstudiante"
-                                    data-id="@post.IdPostulacion"
-                                    style="color:#2D594D; background:none; border:none;"
-                                    title="Cancelar postulación">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        }
-                        else if (post.Estado == "Rechazado")
-                        {
-                            <span class="badge badge-no-asignada" style="background-color: darkred; color:white">
-                                Rechazado
-                            </span>
                         }
                     </div>
                 </li>
@@ -98,6 +135,8 @@
     {
         <p class="text-muted">No hay postulaciones registradas.</p>
     }
+
+
 
     <hr />
 
@@ -187,6 +226,4 @@ $(document).ready(function () {
     });
 });
 </script>
-
-
 
