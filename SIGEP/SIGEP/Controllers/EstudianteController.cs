@@ -30,13 +30,20 @@ namespace SIGEP.Controllers
             ViewBag.Estados = ObtenerEstados();
             return View();
         }
-
-        // ==============================
+        // ============================== 
         // LISTADO ESTUDIANTES (JSON para DataTable)
         // ==============================
         [HttpGet]
         public JsonResult GetEstudiantes(string estado = "", int idEspecialidad = 0)
         {
+            var estadosPracticaValidos = new List<string>
+    {
+        "en progreso", "asignada", "rechazada",
+        "en curso", "finalizada", "aprobada", "retirada"
+    };
+
+            var estadosAcademicosValidos = new List<string> { "Aprobada", "Rezagado" };
+
             var query =
                 from u in db.UsuariosTB
                 join e in db.EstadosTB on u.IdEstado equals e.IdEstado into je
@@ -72,26 +79,25 @@ namespace SIGEP.Controllers
                     EstadoPractica =
                         (from p in db.PracticaEstudianteTB
                          join ep in db.EstadosTB on p.IdEstado equals ep.IdEstado
-                         where p.IdUsuario == u.IdUsuario
+                         where p.IdUsuario == u.IdUsuario &&
+                            estadosPracticaValidos.Contains(ep.Descripcion.Trim().ToLower())
                          orderby p.IdPractica descending
-                         select ep.Descripcion).FirstOrDefault()
+                         select ep.Descripcion.Trim()).FirstOrDefault()
                 };
 
-            // 🔎 Filtros
+            // 🔎 Filtro por estado académico
             if (!string.IsNullOrEmpty(estado))
             {
-                if (estado == "ConPractica")
-                    query = query.Where(x => !string.IsNullOrEmpty(x.EstadoPractica));
-                else if (estado == "SinPractica")
-                    query = query.Where(x => string.IsNullOrEmpty(x.EstadoPractica));
-                else
-                    query = query.Where(x => x.EstadoNombre == estado);
+                query = query.Where(x => x.EstadoNombre.ToLower().Trim() == estado.ToLower().Trim());
             }
 
+            //filtro especialidad
             if (idEspecialidad > 0)
+            {
                 query = query.Where(x => x.IdEspecialidad == idEspecialidad);
+            }
 
-            // 🔎 Restricción si es Profesor
+            // 🔒 Restricción para profesor
             var rolUsuario = Session["Rol"] != null ? Session["Rol"].ToString() : "";
             if (rolUsuario == "Profesor")
             {
@@ -105,8 +111,8 @@ namespace SIGEP.Controllers
                     query = query.Where(x => x.IdEspecialidad == idEspecialidadProfesor.Value);
             }
 
-            // 📌 Proyección final
             var list = query.OrderByDescending(x => x.IdUsuario).ToList();
+
             var outList = list.Select(x => new
             {
                 x.IdUsuario,
@@ -116,7 +122,7 @@ namespace SIGEP.Controllers
                 x.IdEspecialidad,
                 x.EspecialidadNombre,
                 x.IdEstado,
-                x.EstadoNombre,
+                EstadoNombre = string.IsNullOrEmpty(x.EstadoNombre) ? "Sin estado" : x.EstadoNombre,
                 EstadoPractica = string.IsNullOrEmpty(x.EstadoPractica) ? "No Asignada" : x.EstadoPractica
             }).ToList();
 
@@ -129,6 +135,9 @@ namespace SIGEP.Controllers
         [HttpGet]
         public ActionResult Detalle(int id)
         {
+            // ==============================
+            // 1️⃣ Información base del estudiante
+            // ==============================
             var baseInfo = (from u in db.UsuariosTB
                             join d in db.DireccionesTB on u.IdDireccion equals d.IdDireccion into jd
                             from d in jd.DefaultIfEmpty()
@@ -147,25 +156,53 @@ namespace SIGEP.Controllers
             if (baseInfo == null)
                 return HttpNotFound();
 
-            var correo = db.EmailsTB.Where(e => e.IdUsuario == id).Select(e => e.Email).FirstOrDefault();
-            var telefono = db.TelefonosTB.Where(t => t.IdUsuario == id).Select(t => t.Telefono).FirstOrDefault();
+            // ==============================
+            // 2️⃣ Correo (el más reciente o principal)
+            // ==============================
+            var correo = db.EmailsTB
+                .Where(e => e.IdUsuario == id)
+                .OrderByDescending(e => e.IdEmail) // 👈 evita errores si hay más de un correo
+                .Select(e => e.Email)
+                .FirstOrDefault();
+
+            // ==============================
+            // 3️⃣ Teléfono (último o principal)
+            // ==============================
+            var telefono = db.TelefonosTB
+                .Where(t => t.IdUsuario == id)
+                .OrderByDescending(t => t.IdTelefono)
+                .Select(t => t.Telefono)
+                .FirstOrDefault();
+
+            // ==============================
+            // 4️⃣ Especialidad
+            // ==============================
             var especialidad = (from ue in db.UsuarioEspecialidadTB
                                 join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
                                 where ue.IdUsuario == id
                                 orderby ue.IdUsuarioEspecialidad descending
                                 select esp.Nombre).FirstOrDefault();
 
+            // ==============================
+            // 5️⃣ Estado de práctica más reciente
+            // ==============================
             var estadoPractica = (from p in db.PracticaEstudianteTB
                                   join es in db.EstadosTB on p.IdEstado equals es.IdEstado
                                   where p.IdUsuario == id
                                   orderby p.IdPractica descending
                                   select es.Descripcion).FirstOrDefault();
 
+            // ==============================
+            // 6️⃣ Calcular edad exacta
+            // ==============================
             var hoy = DateTime.Today;
             var nacimiento = baseInfo.FechaNacimiento;
             var edad = hoy.Year - nacimiento.Year;
             if (nacimiento > hoy.AddYears(-edad)) edad--;
 
+            // ==============================
+            // 7️⃣ Armar objeto DTO completo
+            // ==============================
             var estudiante = new EstudianteDetalleDTO
             {
                 IdUsuario = baseInfo.IdUsuario,
@@ -173,65 +210,105 @@ namespace SIGEP.Controllers
                 Nombre = baseInfo.Nombre,
                 Apellido1 = baseInfo.Apellido1,
                 Apellido2 = baseInfo.Apellido2,
-                Edad = edad,                      // ahora edad tiene set
+                Edad = edad,
                 Correo = correo ?? string.Empty,
                 Telefono = telefono ?? string.Empty,
                 Especialidad = especialidad ?? string.Empty,
                 Direccion = baseInfo.DireccionExacta ?? string.Empty,
-                EstadoPractica = estadoPractica ?? "No Asignada"
+                EstadoPractica = estadoPractica ?? "No Asignada",
+
+                // ==============================
+                // Cargar colecciones desde métodos auxiliares
+                // ==============================
+                Documentos = ObtenerDocumentosPorEstudiante(id),
+                Encargados = ObtenerEncargadosPorEstudiante(id),
+                Practicas = ObtenerPracticasPorEstudiante(id)
             };
 
-            // ---- NUEVO: llenar datos usados por la vista parcial
-            ViewBag.Documentos = ObtenerDocumentosPorEstudiante(id);
-            ViewBag.Encargados = ObtenerEncargadosPorEstudiante(id);
-            ViewBag.Practicas = ObtenerPracticasPorEstudiante(id);
-
+            // ==============================
+            // 8️⃣ Devolver vista parcial con el modelo completo
+            // ==============================
             return PartialView("_DetalleEstudiante", estudiante);
         }
+
+
+
 
         // ==============================
         // CRUD DOCUMENTOS (SP)
         // ==============================
         // ==============================
-        // SUBIR DOCUMENTO
         // ==============================
-        [HttpPost]
-        public ActionResult SubirDocumento(int idEstudiante, HttpPostedFileBase archivo)
-        {
-            if (archivo != null && archivo.ContentLength > 0)
-            {
-                string fileName = Path.GetFileName(archivo.FileName);
-                string path = Path.Combine(@"C:\Proyectos\Uploads\Documentos\", fileName);
-
-                archivo.SaveAs(path);
-
-                db.Database.ExecuteSqlCommand(
-                    "EXEC sp_InsertarDocumento @IdUsuario, @Documento, @Tipo, @RutaArchivo",
-                    new SqlParameter("@IdUsuario", idEstudiante),
-                    new SqlParameter("@Documento", fileName),
-                    new SqlParameter("@Tipo", Path.GetExtension(fileName)),
-                    new SqlParameter("@RutaArchivo", path)
-                );
-            }
-
-            return RedirectToAction("Detalle", new { id = idEstudiante });
-        }
-
+        // VER DOCUMENTO
         // ==============================
-        // DESCARGAR DOCUMENTO
-        // ==============================
-        public FileResult DescargarDocumento(int id)
+        public ActionResult VisualizarDocumento(int id)
         {
             var doc = db.Database.SqlQuery<DocumentoDTO>(
                 "EXEC sp_ObtenerDocumento @IdDocumento",
                 new SqlParameter("@IdDocumento", id)
             ).FirstOrDefault();
 
-            if (doc == null) throw new Exception("Documento no encontrado");
+            if (doc == null)
+                return HttpNotFound("Documento no encontrado.");
 
-            byte[] fileBytes = System.IO.File.ReadAllBytes(doc.RutaArchivo);
-            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, doc.Documento);
+            if (!System.IO.File.Exists(doc.RutaArchivo))
+                return HttpNotFound("El archivo físico no existe en el servidor.");
+
+            string contentType = MimeMapping.GetMimeMapping(doc.RutaArchivo);
+            return File(doc.RutaArchivo, contentType);
         }
+
+
+        // ==============================
+        // SUBIR DOCUMENTO
+        // ==============================
+        [HttpPost]
+        public ActionResult SubirDocumento(int idUsuario, HttpPostedFileBase archivo)
+        {
+            if (archivo != null && archivo.ContentLength > 0)
+            {
+                string carpetaDestino = Server.MapPath("~/Uploads/Documentos/");
+                if (!Directory.Exists(carpetaDestino))
+                    Directory.CreateDirectory(carpetaDestino);
+
+                string nombreArchivo = Path.GetFileName(archivo.FileName);
+                string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
+                archivo.SaveAs(rutaCompleta);
+
+                string tipo = Path.GetExtension(nombreArchivo).TrimStart('.');
+
+                db.Database.ExecuteSqlCommand(
+                    "EXEC sp_InsertarDocumento @IdUsuario, @Documento, @Tipo, @RutaArchivo",
+                    new SqlParameter("@IdUsuario", idUsuario),
+                    new SqlParameter("@Documento", nombreArchivo),
+                    new SqlParameter("@Tipo", tipo),
+                    new SqlParameter("@RutaArchivo", rutaCompleta)
+                );
+            }
+
+            return RedirectToAction("Detalles", new { id = idUsuario });
+        }
+
+        // ==============================
+        // DESCARGAR DOCUMENTO
+        // ==============================
+        public ActionResult DescargarDocumento(int id)
+        {
+            var doc = db.Database.SqlQuery<DocumentoDTO>(
+                "EXEC sp_ObtenerDocumento @IdDocumento",
+                new SqlParameter("@IdDocumento", id)
+            ).FirstOrDefault();
+
+            if (doc == null)
+                return HttpNotFound("Documento no encontrado.");
+
+            if (!System.IO.File.Exists(doc.RutaArchivo))
+                return HttpNotFound("El archivo físico no existe en el servidor.");
+
+            string contentType = MimeMapping.GetMimeMapping(doc.RutaArchivo);
+            return File(doc.RutaArchivo, contentType, doc.Documento);
+        }
+
 
         // ==============================
         // ELIMINAR DOCUMENTO
@@ -239,24 +316,38 @@ namespace SIGEP.Controllers
         [HttpPost]
         public JsonResult EliminarDocumento(int id)
         {
-            var doc = db.Database.SqlQuery<DocumentoDTO>(
-                "EXEC sp_ObtenerDocumento @IdDocumento",
-                new SqlParameter("@IdDocumento", id)
-            ).FirstOrDefault();
-
-            if (doc != null)
+            try
             {
-                if (System.IO.File.Exists(doc.RutaArchivo))
-                    System.IO.File.Delete(doc.RutaArchivo);
+                // 1️⃣ Obtener la ruta del documento
+                var doc = db.Database.SqlQuery<DocumentoDTO>(
+                    "EXEC sp_ObtenerDocumento @IdDocumento",
+                    new SqlParameter("@IdDocumento", id)
+                ).FirstOrDefault();
 
+                if (doc == null)
+                    return Json(new { success = false, message = "Documento no encontrado en la base de datos." });
+
+                // 2️⃣ Eliminar el archivo físico si existe
+                if (!string.IsNullOrEmpty(doc.RutaArchivo) && System.IO.File.Exists(doc.RutaArchivo))
+                {
+                    System.IO.File.Delete(doc.RutaArchivo);
+                }
+
+                // 3️⃣ Eliminar el registro de la base de datos
                 db.Database.ExecuteSqlCommand(
                     "EXEC sp_EliminarDocumento @IdDocumento",
                     new SqlParameter("@IdDocumento", id)
                 );
-            }
 
-            return Json(new { success = true });
+                // 4️⃣ Devolver éxito (para el Swal)
+                return Json(new { success = true, message = "Documento eliminado correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al eliminar el documento: " + ex.Message });
+            }
         }
+
 
         // ==============================
         // AUXILIAR: obtener documentos usando SP
@@ -322,8 +413,9 @@ namespace SIGEP.Controllers
 
         private List<SelectListItem> ObtenerEstados()
         {
+            // Solo traer los estados académicos válidos
             return db.EstadosTB
-                     .Where(est => est.Descripcion == "Rezagado" || est.Descripcion == "Aprobada")
+                     .Where(est => est.Descripcion == "Aprobada" || est.Descripcion == "Rezagado")
                      .OrderBy(est => est.Descripcion)
                      .Select(est => new SelectListItem
                      {
@@ -332,6 +424,7 @@ namespace SIGEP.Controllers
                      })
                      .ToList();
         }
+
 
         private List<SelectListItem> ObtenerEspecialidades()
         {
@@ -356,7 +449,6 @@ namespace SIGEP.Controllers
                 if (usuario == null)
                     return Json(new { success = false, message = "Estudiante no encontrado" });
 
-                // Validar que el nuevo estado sea Rezagado o Aprobado
                 var estadosValidos = db.EstadosTB
                     .Where(e => e.Descripcion == "Rezagado" || e.Descripcion == "Aprobada")
                     .Select(e => e.IdEstado)
@@ -375,6 +467,47 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error al actualizar: " + ex.Message });
             }
         }
+
+
+        // ==============================
+        // ACTUALIZAR ESTADO DE PRÁCTICA
+        // ==============================
+        [HttpPost]
+        public JsonResult ActualizarEstadoPractica(int idUsuario, int nuevoEstadoId)
+        {
+            try
+            {
+                // ✅ Buscar la última práctica del estudiante
+                var practica = db.PracticaEstudianteTB
+                                 .Where(p => p.IdUsuario == idUsuario)
+                                 .OrderByDescending(p => p.IdPractica)
+                                 .FirstOrDefault();
+
+                if (practica == null)
+                    return Json(new { success = false, message = "No se encontró ninguna práctica asociada al estudiante." });
+
+                // ✅ Validar que el estado pertenece a los válidos de práctica
+                var estadosValidos = db.EstadosTB
+                    .Where(e => new[] { "En progreso", "Asignada", "Rechazada", "En curso", "Finalizada", "Aprobada", "Retirada" }
+                    .Contains(e.Descripcion))
+                    .Select(e => e.IdEstado)
+                    .ToList();
+
+                if (!estadosValidos.Contains(nuevoEstadoId))
+                    return Json(new { success = false, message = "El estado seleccionado no es válido para prácticas." });
+
+                // ✅ Actualizar la práctica
+                practica.IdEstado = nuevoEstadoId;
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Estado de práctica actualizado correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al actualizar el estado de la práctica: " + ex.Message });
+            }
+        }
+
 
 
     }

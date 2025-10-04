@@ -44,8 +44,8 @@
     </div>
 </div>
 
-<div class="card rounded-5 p-3">
-    <table id="tablaEstudiantes" class="display responsive nowrap w-100">
+<div class="card rounded-5 p-3 table-responsive">
+    <table id="tablaEstudiantes" class="display nowrap w-100">
         <thead>
             <tr>
                 <th>Cédula</th>
@@ -127,6 +127,10 @@
         var table = $('#tablaEstudiantes').DataTable({
             ajax: {
                 url: '@Url.Action("GetEstudiantes", "Estudiante")',
+                data: function (d) {
+                    d.estado = $('#filtroEstado').val();
+                    d.idEspecialidad = $('#filtroEspecialidad').val();
+                },
                 dataSrc: 'data'
             },
             columns: [
@@ -135,49 +139,40 @@
                 { data: 'EspecialidadNombre' },
                 { data: 'Telefono' },
                 {
-                    data: 'EstadoNombre',   // Estado Académico
+                    data: 'EstadoNombre',
                     render: function (data) {
-                        if (!data) {
-                            return `<span class="badge badge-no-asignada">Sin Estado</span>`;
-                        }
+                        var text = (data || '').toString().trim();
+                        if (!text) return '<span class="badge badge-no-asignada">Sin Estado</span>';
 
-                        switch (data.toLowerCase()) {
-                            case "activo":
-                                return `<span class="badge-activo">${data}</span>`;
-                            case "inactivo":
-                                return `<span class="badge-inactivo">${data}</span>`;
-                            case "aprobada":
-                            case "aprobado":
-                                return `<span class="badge-aprobado">${data}</span>`;
-                            case "rezagado":
-                                return `<span class="badge-rezagado">${data}</span>`;
-                            default:
-                                return `<span class="badge-no-asignada">${data}</span>`;
-                        }
+                        var d = text.toLowerCase();
+                        if (d === 'activo') return '<span class="badge badge-activo">' + text + '</span>';
+                        if (d === 'inactivo') return '<span class="badge badge-inactivo">' + text + '</span>';
+                        if (d === 'aprobada' || d === 'aprobado') return '<span class="badge badge-aprobado">' + text + '</span>';
+                        if (d === 'rezagado') return '<span class="badge badge-rezagado">' + text + '</span>';
 
+                        return '<span class="badge badge-no-asignada">' + text + '</span>';
                     }
                 },
                 {
                     data: 'EstadoPractica',
                     render: function (data) {
-                        if (!data) {
-                            return `<span class="badge badge-default">Sin práctica</span>`;
+                        var text = (data || '').toString().trim();
+                        // tratar estados no asignados
+                        if (!text || text.toLowerCase() === 'no asignada' || text.toLowerCase() === 'sin práctica') {
+                            return '<span class="badge badge-no-asignada">No Asignada</span>';
                         }
 
-                        let clase = "";
-                        switch (data) {
-                            case "En progreso": clase = "badge-en-progreso"; break;
-                            case "Asignada": clase = "badge-asignada"; break;
-                            case "Rechazada": clase = "badge-rechazada"; break;
-                            case "En curso": clase = "badge-en-curso"; break;
-                            case "Finalizada": clase = "badge-finalizada"; break;
-                            case "Aprobada": clase = "badge-aprobada"; break;
-                            case "Retirada": clase = "badge-retirada"; break;
-                            case "No Asignada": clase = "badge-no-asignada"; break;
-                            default: clase = "badge-default"; break;
-                        }
+                        var d = text.toLowerCase();
+                        var clase = 'badge-default';
+                        if (d === 'en progreso') clase = 'badge-en-progreso';
+                        else if (d === 'asignada') clase = 'badge-asignada';
+                        else if (d === 'rechazada') clase = 'badge-rechazada';
+                        else if (d === 'en curso') clase = 'badge-en-curso';
+                        else if (d === 'finalizada') clase = 'badge-finalizada';
+                        else if (d === 'aprobada') clase = 'badge-aprobada';
+                        else if (d === 'retirada') clase = 'badge-retirada';
 
-                        return `<span class="badge ${clase}">${data}</span>`;
+                        return '<span class="badge ' + clase + '">' + text + '</span>';
                     }
                 },
                 {

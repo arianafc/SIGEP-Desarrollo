@@ -23,5 +23,9 @@ namespace SIGEP.Models
 
         public string Sexo { get; set; }
         public string Seccion { get; set; }
+
+        public List<DocumentoDTO> Documentos { get; set; }
+        public List<EncargadoDTO> Encargados { get; set; }
+        public List<PracticaEstudianteViewModel> Practicas { get; set; }
     }
 }

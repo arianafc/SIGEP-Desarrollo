@@ -309,13 +309,32 @@
     font-size: 14px;
     font-weight: bold;
 }
-.badge-aprobado,
-.badge-activo,
-.badge-inactivo,
-.badge-rezagado {
-    display: inline-block;
-    padding: 0.35em 0.65em; /* igual que Bootstrap badge */
-    border-radius: 0.25rem; /* esquinas redondeadas */
+
+.badge-en-progreso {
+    background-color: #F5B97A; /* naranja claro */
+    color: #2D594D; /* verde oscuro para contraste */
     font-size: 14px;
     font-weight: bold;
 }
+
+.badge-aprobado,
+.badge-activo,
+.badge-inactivo,
+.badge-rezagado,
+.badge-en-progreso,
+.badge-en-curso,
+.badge-finalizada,
+.badge-retirada,
+.badge-rechazada,
+.badge-aprobada,
+.badge-asignada,
+.badge-no-asignada {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 90px; /* Opcional: mantiene ancho uniforme */
+}
+

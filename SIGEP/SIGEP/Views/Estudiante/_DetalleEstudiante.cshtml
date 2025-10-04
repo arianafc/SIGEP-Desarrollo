@@ -1,13 +1,8 @@
 ﻿@model SIGEP.Models.EstudianteDetalleDTO
-@{
-    var documentos = ViewBag.Documentos as List<SIGEP.Models.DocumentoDTO>;
-    var encargados = ViewBag.Encargados as List<SIGEP.Models.EncargadoDTO>;
-    var postulaciones = ViewBag.Practicas as List<SIGEP.Models.PracticaEstudianteViewModel>;
-}
 
 <div class="container-fluid">
 
-    <!-- Sección: Información Personal -->
+    <!-- Información Personal -->
     <h5 class="section-title mb-3">Información Personal</h5>
     <div class="row mb-2">
         <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @Model.Nombre @Model.Apellido1 @Model.Apellido2</div>
@@ -19,25 +14,23 @@
     </div>
     <div class="row mb-2">
         <div class="col-md-6"><strong>Especialidad:</strong> @Model.Especialidad</div>
+        <div class="col-md-6"><strong>Sección:</strong> @Model.Seccion</div>
     </div>
     <div class="row mb-2">
         <div class="col-md-6"><strong>Edad:</strong> @Model.Edad</div>
-        <div class="col-md-6"><strong>Sección:</strong> @Model.Seccion</div>
     </div>
 
     <hr />
 
-    <!-- Sección: Encargado -->
+    <!-- Encargado -->
     <h5 class="section-title mb-3">Información del Encargado</h5>
-    @if (encargados != null && encargados.Any())
+    @if (Model.Encargados != null && Model.Encargados.Any())
     {
-        foreach (var enc in encargados)
+        foreach (var enc in Model.Encargados)
         {
             <div class="row mb-2">
                 <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @enc.Nombre</div>
                 <div class="col-md-6"><strong>Teléfono:</strong> @enc.Telefono</div>
-                @*<div class="col-md-6"><strong>Parentesco:</strong> @enc.Parentesco</div>
-                    <div class="col-md-6"><strong>Residencia / Trabajo:</strong> @enc.Direccion</div>*@
                 <div class="col-md-6"><strong>Ocupación:</strong> @enc.Ocupacion</div>
             </div>
             <hr />
@@ -48,81 +41,43 @@
         <p class="text-muted">No hay encargado registrado.</p>
     }
 
-
-    <!-- Sección: Prácticas / Postulaciones -->
+    <!-- Prácticas -->
     <h5 class="section-title mb-3">Prácticas / Postulaciones</h5>
-    @if (postulaciones != null && postulaciones.Any())
+    @if (Model.Practicas != null && Model.Practicas.Any())
     {
         <ul class="list-group mb-3">
-            @foreach (var post in postulaciones)
+            @foreach (var post in Model.Practicas)
             {
+                var estado = post.Estado?.Trim().ToLower() ?? "";
+                var clase = "badge badge-no-asignada";
+
+                {
+                    if (estado == "en progreso") { clase = "badge badge-en-progreso"; }
+                    else if (estado == "asignada") { clase = "badge badge-asignada"; }
+                    else if (estado == "rechazada") { clase = "badge badge-rechazada"; }
+                    else if (estado == "en curso") { clase = "badge badge-en-curso"; }
+                    else if (estado == "finalizada") { clase = "badge badge-finalizada"; }
+                    else if (estado == "aprobada") { clase = "badge badge-aprobada"; }
+                    else if (estado == "retirada") { clase = "badge badge-retirada"; }
+                }
+
                 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
                     <div>
                         <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { id = post.IdPractica })"
                            class="text-decoration-none" style="color: #2D594D; font-weight:600;">
                             @post.Empresa
                         </a>
-
-                        <!-- Estado de la práctica -->
-                        @switch (post.Estado)
-                        {
-                            case "Asignada":
-                                <span class="badge badge-asignada ms-2">@post.Estado</span>
-                                break;
-
-                            case "En progreso":
-                                <span class="badge badge-no-asignada ms-2" style="background-color: darkgoldenrod; color:white">
-                                    @post.Estado
-                                </span>
-                                break;
-
-                            case "Rechazada":
-                                <span class="badge badge-no-asignada ms-2" style="background-color: darkred; color:white">
-                                    @post.Estado
-                                </span>
-                                break;
-
-                            case "En curso":
-                                <span class="badge badge-asignada ms-2" style="background-color: royalblue; color:white">
-                                    @post.Estado
-                                </span>
-                                break;
-
-                            case "Finalizada":
-                                <span class="badge badge-asignada ms-2" style="background-color: #2d594d; color:white">
-                                    @post.Estado
-                                </span>
-                                break;
-
-                            case "Aprobada":
-                                <span class="badge badge-aprobado ms-2">@post.Estado</span>
-                                break;
-
-                            case "Retirada":
-                                <span class="badge badge-no-asignada ms-2" style="background-color: gray; color:white">
-                                    @post.Estado
-                                </span>
-                                break;
-
-                            case "Rezagado":
-                                <span class="badge badge-rezagado ms-2">@post.Estado</span>
-                                break;
-
-                            default:
-                                <span class="badge badge-no-asignada ms-2">@post.Estado</span>
-                                break;
-                        }
                     </div>
 
-                    <!-- Acciones -->
                     <div class="d-flex align-items-center gap-2">
-                        @* Solo mostrar basurero si la práctica está activa *@
+                        <span class="@clase">@post.Estado</span>
+
                         @if (post.Estado == "Asignada" || post.Estado == "En progreso" || post.Estado == "En curso")
                         {
-                            <button class="btn BtnDesasignarPracticaEstudiante"
+                            <button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
                                     data-id="@post.IdPostulacion"
-                                    style="color:#2D594D; background:none; border:none;"
-                                    title="Quitar postulación">
+                                    title="Quitar postulación"
+                                    style="color:#2D594D;">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         }
@@ -136,33 +91,28 @@
         <p class="text-muted">No hay postulaciones registradas.</p>
     }
 
-
-
     <hr />
 
-    <!-- Sección: Documentos -->
+    <!-- Documentos -->
     <h5 class="section-title mb-3">Documentos</h5>
-    @if (documentos != null && documentos.Any())
+    @if (Model.Documentos != null && Model.Documentos.Any())
     {
-        foreach (var doc in documentos)
+        foreach (var doc in Model.Documentos)
         {
             <div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
                 <span style="color: #2D594D;">@doc.Documento</span>
                 <div>
-                    <!-- Ver -->
                     <a href="@Url.Action("VisualizarDocumento", "Estudiante", new { id = doc.IdDocumento })"
-                       target="_blank"
-                       style="color:#2D594D; margin-right:10px;">
+                       target="_blank" style="color:#2D594D; margin-right:10px;">
                         <i class="fas fa-eye" title="Visualizar"></i>
                     </a>
-                    <!-- Descargar -->
                     <a href="@Url.Action("DescargarDocumento", "Estudiante", new { id = doc.IdDocumento })"
                        style="color:#2D594D; margin-right:10px;">
                         <i class="fas fa-download" title="Descargar"></i>
                     </a>
-                    <!-- Eliminar -->
-                    <button class="btn btn-link text-danger p-0 btn-eliminar-doc"
-                            data-id="@doc.IdDocumento" title="Eliminar">
+                    <button class="btn bg-transparent text-danger btn-eliminar-doc"
+                            data-id="@doc.IdDocumento" title="Eliminar"
+                            style="color:#2D594D;">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
@@ -178,8 +128,9 @@
 
 <script>
 $(document).ready(function () {
-    // Eliminar documento
-    $(".btn-eliminar-doc").click(function () {
+    // 🗑️ Eliminar documento
+    $(".btn-eliminar-doc").click(function (e) {
+        e.preventDefault();
         var idDoc = $(this).data("id");
         Swal.fire({
             title: '¿Eliminar documento?',
@@ -202,7 +153,7 @@ $(document).ready(function () {
         });
     });
 
-    // Desasignar práctica
+    // 🚫 Desasignar práctica
     $(".BtnDesasignarPracticaEstudiante").click(function () {
         var idPostulacion = $(this).data("id");
         Swal.fire({
@@ -215,15 +166,15 @@ $(document).ready(function () {
             if (result.isConfirmed) {
                 $.post('@Url.Action("DesasignarPractica", "Estudiante")', { id: idPostulacion }, function (res) {
                     if (res.success) {
-                        Swal.fire("Éxito", res.message, "success");
-                        $("#perfilBody").load('@Url.Action("Detalle", "Estudiante")/' + @Model.IdUsuario);
-                    } else {
-                        Swal.fire("Error", res.message, "error");
-                    }
+                        Swal.fire("Eliminado", "Documento eliminado con éxito", "success");
+                        // Elimina visualmente el documento sin recargar toda la vista
+                        $(e.target).closest('.d-flex').fadeOut(400, function () { $(this).remove(); });
+                } else {
+                    Swal.fire("Error", "No se pudo eliminar", "error");
+                }
                 });
             }
         });
     });
 });
 </script>
-
