@@ -17,7 +17,7 @@ using System.Web.Mvc;
 namespace SIGEP.Controllers
 {
     //[FiltroProfesor]
-    
+
     public class PracticasController : Controller
     {
 
@@ -1013,6 +1013,12 @@ namespace SIGEP.Controllers
                         return View(new VacantePracticaVM());
                     }
 
+                    var estadosPermitidos = new List<string> {
+                      "Pendiente de Aprobación",
+                                   "En Proceso",
+                          "Cancelada/Rechazada",
+                                   "Finalizada"};
+
                     // Mapear directamente el resultado del SP al ViewModel
                     var viewModel = new VacantePracticaVM
                     {
@@ -1042,10 +1048,14 @@ namespace SIGEP.Controllers
                         FechaAplicacion = datosPractica.FechaAplicacion,
                         EstadoPractica = datosPractica.EstadoPractica,
 
+
                         // Cargar lista de estados para el dropdown
                         ListaEstados = dbContext.EstadosTB
-                            .Select(e => new EstadoVM { IdEstado = e.IdEstado, Descripcion = e.Descripcion })
-                            .ToList()
+                            .Where(e => estadosPermitidos.Contains(e.Descripcion))
+                            .OrderBy(e => e.Descripcion)
+                            .Select(e => new EstadoVM {
+                                  IdEstado = e.IdEstado,
+                                  Descripcion = e.Descripcion}).ToList()
                     };
 
                     // Obtener comentarios con el segundo SP
@@ -1550,7 +1560,7 @@ namespace SIGEP.Controllers
         }
 
         // === Visualización de la postulación (usa SP que ya tienes) ===
-        
+
         // Helpers
 
         private int EstadoIdPorDescripcion(IEnumerable<string> descripciones)
@@ -1740,7 +1750,7 @@ namespace SIGEP.Controllers
                     {
                         IdVacante = vacante.IdVacante,
                         IdUsuario = idUsuario,
-                        FechaAplicacion = DateTime.Now, 
+                        FechaAplicacion = DateTime.Now,
                         IdEstado = estadoPendiente.IdEstado
                     };
 

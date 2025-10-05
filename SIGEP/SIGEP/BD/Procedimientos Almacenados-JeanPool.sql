@@ -103,10 +103,12 @@ BEGIN
 END
 
 -- Stored Procedure para actualizar estado de la practica
+-- Stored Procedure para actualizar estado de la practica
 CREATE OR ALTER PROCEDURE ActualizarEstadoPracticaSP
     @IdPractica INT,
     @IdEstado INT,
-    @Comentario NVARCHAR(MAX)
+    @Comentario NVARCHAR(MAX),
+    @IdUsuarioSesion INT 
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -123,10 +125,9 @@ BEGIN
         
         IF @Comentario IS NOT NULL AND LTRIM(RTRIM(@Comentario)) <> ''
         BEGIN
+            -- Usar @IdUsuarioSesion en lugar de p.IdUsuario
             INSERT INTO ComentariosPracticaTB (Comentario, Fecha, IdUsuario, IdPractica, Tipo)
-            SELECT @Comentario, GETDATE(), p.IdUsuario, p.IdPractica, 'Actualización Estado'
-            FROM PracticaEstudianteTB p
-            WHERE p.IdPractica = @IdPractica;
+            VALUES (@Comentario, GETDATE(), @IdUsuarioSesion, @IdPractica, 'Actualización Estado');
             
             -- Capturar el ID del comentario recién insertado
             SET @IdComentarioNuevo = SCOPE_IDENTITY();
@@ -247,3 +248,86 @@ BEGIN
     WHERE p.IdUsuario = @IdUsuario
     ORDER BY p.FechaAplicacion DESC
 END
+
+
+-- SP de Johnny
+CREATE OR ALTER PROCEDURE[dbo].[ObtenerEstudiantesProfesorSP]
+    @IdUsuario INT,
+    @IdVacante INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.UsuariosTB WHERE IdUsuario = @IdUsuario)
+    BEGIN
+        RAISERROR('El IdUsuario especificado no existe.', 16, 1);
+        RETURN;
+    END;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM dbo.UsuarioEspecialidadTB 
+        WHERE IdUsuario = @IdUsuario AND IdEstado = 1
+    )
+    BEGIN
+        RAISERROR('El usuario no tiene especialidades activas.', 16, 1);
+        RETURN;
+    END;
+
+    ;WITH EspecialidadesDelUsuario AS (
+        SELECT ue.IdEspecialidad
+        FROM dbo.UsuarioEspecialidadTB ue
+        WHERE ue.IdUsuario = @IdUsuario
+          AND ue.IdEstado = 1
+    )
+    SELECT
+        u.IdUsuario,
+        CONCAT(u.Nombre, ' ', u.Apellido1, ' ', u.Apellido2) AS Nombre,
+        u.Cedula,
+        CASE 
+            WHEN MAX(CASE WHEN asg.TieneAsignada = 1 THEN 1 ELSE 0 END) = 1 THEN 'Asignada'
+            WHEN COUNT(p.IdPractica) > 0 THEN 'Con Procesos Activos'
+            ELSE 'Sin Procesos Activos'
+        END AS EstadoPractica,                    -- situación global del estudiante
+        estUsuario.Descripcion AS EstadoUsuario,
+        esp.Nombre             AS Especialidad,
+        -- Relación específica con ESTA vacante:
+        CAST(CASE WHEN vac.IdPractica IS NULL THEN 0 ELSE 1 END AS bit) AS TieneRelacionEnVacante,
+        vac.EstadoVacante,
+        vac.IdPractica AS IdPracticaVacante
+    FROM dbo.UsuariosTB u
+    INNER JOIN dbo.UsuariosTB uRol
+        ON uRol.IdUsuario = u.IdUsuario AND uRol.IdRol = 1
+    INNER JOIN dbo.UsuarioEspecialidadTB ueMatch
+        ON ueMatch.IdUsuario = u.IdUsuario AND ueMatch.IdEstado = 1
+    INNER JOIN dbo.EspecialidadesTB esp
+        ON esp.IdEspecialidad = ueMatch.IdEspecialidad
+    INNER JOIN dbo.EstadosTB estUsuario
+        ON estUsuario.IdEstado = u.IdEstado
+    LEFT JOIN dbo.PracticaEstudianteTB p
+        ON p.IdUsuario = u.IdUsuario
+    OUTER APPLY (
+        SELECT TOP (1) 1 AS TieneAsignada
+        FROM dbo.PracticaEstudianteTB px
+        INNER JOIN dbo.EstadosTB esx ON esx.IdEstado = px.IdEstado
+        WHERE px.IdUsuario = u.IdUsuario
+          AND esx.Descripcion = 'Asignada'
+    ) asg
+    OUTER APPLY (
+        SELECT TOP (1) pv.IdPractica, ev.Descripcion AS EstadoVacante
+        FROM dbo.PracticaEstudianteTB pv
+        INNER JOIN dbo.EstadosTB ev ON ev.IdEstado = pv.IdEstado
+        WHERE pv.IdUsuario = u.IdUsuario
+          AND (@IdVacante IS NOT NULL AND pv.IdVacante = @IdVacante)
+        ORDER BY pv.FechaAplicacion DESC, pv.IdPractica DESC
+    ) vac
+    WHERE EXISTS (
+        SELECT 1 FROM EspecialidadesDelUsuario eu
+        WHERE eu.IdEspecialidad = ueMatch.IdEspecialidad
+    )
+    GROUP BY
+        u.IdUsuario, u.Nombre, u.Apellido1, u.Apellido2, u.Cedula,
+        estUsuario.Descripcion, esp.Nombre,
+        vac.IdPractica, vac.EstadoVacante
+    ORDER BY Nombre;
+END;
+GO
