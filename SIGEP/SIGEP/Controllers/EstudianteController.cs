@@ -132,103 +132,102 @@ namespace SIGEP.Controllers
         // ==============================
         // DETALLE DE ESTUDIANTE
         // ==============================
+
         [HttpGet]
         public ActionResult Detalle(int id)
         {
-            // ==============================
-            // 1️⃣ Información base del estudiante
-            // ==============================
-            var baseInfo = (from u in db.UsuariosTB
-                            join d in db.DireccionesTB on u.IdDireccion equals d.IdDireccion into jd
-                            from d in jd.DefaultIfEmpty()
-                            where u.IdUsuario == id
-                            select new
-                            {
-                                u.IdUsuario,
-                                u.Cedula,
-                                u.Nombre,
-                                u.Apellido1,
-                                u.Apellido2,
-                                u.FechaNacimiento,
-                                DireccionExacta = d != null ? d.DireccionExacta : null
-                            }).FirstOrDefault();
-
-            if (baseInfo == null)
-                return HttpNotFound();
-
-            // ==============================
-            // 2️⃣ Correo (el más reciente o principal)
-            // ==============================
-            var correo = db.EmailsTB
-                .Where(e => e.IdUsuario == id)
-                .OrderByDescending(e => e.IdEmail) // 👈 evita errores si hay más de un correo
-                .Select(e => e.Email)
-                .FirstOrDefault();
-
-            // ==============================
-            // 3️⃣ Teléfono (último o principal)
-            // ==============================
-            var telefono = db.TelefonosTB
-                .Where(t => t.IdUsuario == id)
-                .OrderByDescending(t => t.IdTelefono)
-                .Select(t => t.Telefono)
-                .FirstOrDefault();
-
-            // ==============================
-            // 4️⃣ Especialidad
-            // ==============================
-            var especialidad = (from ue in db.UsuarioEspecialidadTB
-                                join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
-                                where ue.IdUsuario == id
-                                orderby ue.IdUsuarioEspecialidad descending
-                                select esp.Nombre).FirstOrDefault();
-
-            // ==============================
-            // 5️⃣ Estado de práctica más reciente
-            // ==============================
-            var estadoPractica = (from p in db.PracticaEstudianteTB
-                                  join es in db.EstadosTB on p.IdEstado equals es.IdEstado
-                                  where p.IdUsuario == id
-                                  orderby p.IdPractica descending
-                                  select es.Descripcion).FirstOrDefault();
-
-            // ==============================
-            // 6️⃣ Calcular edad exacta
-            // ==============================
-            var hoy = DateTime.Today;
-            var nacimiento = baseInfo.FechaNacimiento;
-            var edad = hoy.Year - nacimiento.Year;
-            if (nacimiento > hoy.AddYears(-edad)) edad--;
-
-            // ==============================
-            // 7️⃣ Armar objeto DTO completo
-            // ==============================
-            var estudiante = new EstudianteDetalleDTO
+            try
             {
-                IdUsuario = baseInfo.IdUsuario,
-                Cedula = baseInfo.Cedula,
-                Nombre = baseInfo.Nombre,
-                Apellido1 = baseInfo.Apellido1,
-                Apellido2 = baseInfo.Apellido2,
-                Edad = edad,
-                Correo = correo ?? string.Empty,
-                Telefono = telefono ?? string.Empty,
-                Especialidad = especialidad ?? string.Empty,
-                Direccion = baseInfo.DireccionExacta ?? string.Empty,
-                EstadoPractica = estadoPractica ?? "No Asignada",
+                // LEFT JOIN a DireccionesTB y SeccionesTB para traer Seccion por nombre
+                var baseInfo = (from u in db.UsuariosTB
+                                join d in db.DireccionesTB on u.IdDireccion equals d.IdDireccion into jd
+                                from d in jd.DefaultIfEmpty() // left join direcciones
+                                join s in db.SeccionesTB on u.IdSeccion equals s.IdSeccion into js
+                                from s in js.DefaultIfEmpty() // left join secciones
+                                where u.IdUsuario == id
+                                select new
+                                {
+                                    u.IdUsuario,
+                                    u.Cedula,
+                                    u.Nombre,
+                                    u.Apellido1,
+                                    u.Apellido2,
+                                    u.FechaNacimiento,
+                                    DireccionExacta = d != null ? d.DireccionExacta : "",
+                                    Seccion = s != null ? s.Seccion : ""   // <--- AQUI traemos el nombre de la sección
+                                }).FirstOrDefault();
 
-                // ==============================
-                // Cargar colecciones desde métodos auxiliares
-                // ==============================
-                Documentos = ObtenerDocumentosPorEstudiante(id),
-                Encargados = ObtenerEncargadosPorEstudiante(id),
-                Practicas = ObtenerPracticasPorEstudiante(id)
-            };
+                if (baseInfo == null)
+                    return HttpNotFound("No se encontró el estudiante.");
 
-            // ==============================
-            // 8️⃣ Devolver vista parcial con el modelo completo
-            // ==============================
-            return PartialView("_DetalleEstudiante", estudiante);
+                var correo = db.EmailsTB
+                    .Where(e => e.IdUsuario == id)
+                    .OrderByDescending(e => e.IdEmail)
+                    .Select(e => e.Email)
+                    .FirstOrDefault() ?? "";
+
+                var telefono = db.TelefonosTB
+                    .Where(t => t.IdUsuario == id)
+                    .OrderByDescending(t => t.IdTelefono)
+                    .Select(t => t.Telefono)
+                    .FirstOrDefault() ?? "";
+
+                var especialidad = (from ue in db.UsuarioEspecialidadTB
+                                    join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
+                                    where ue.IdUsuario == id
+                                    orderby ue.IdUsuarioEspecialidad descending
+                                    select esp.Nombre).FirstOrDefault() ?? "Sin especialidad";
+
+                var estadoPractica = (from p in db.PracticaEstudianteTB
+                                      join es in db.EstadosTB on p.IdEstado equals es.IdEstado
+                                      where p.IdUsuario == id
+                                      orderby p.IdPractica descending
+                                      select es.Descripcion).FirstOrDefault() ?? "No Asignada";
+
+                // Calcular edad (si FechaNacimiento está seteada)
+                int edad = 0;
+                if (baseInfo.FechaNacimiento != default(DateTime))
+                {
+                    var nacimiento = baseInfo.FechaNacimiento;
+                    var hoy = DateTime.Today;
+                    edad = hoy.Year - nacimiento.Year;
+                    if (nacimiento > hoy.AddYears(-edad)) edad--;
+                }
+
+                // Llamadas seguras a helpers
+                var documentos = new List<DocumentoDTO>();
+                var encargados = new List<EncargadoDTO>();
+                var practicas = new List<PracticaEstudianteViewModel>();
+
+                try { documentos = ObtenerDocumentosPorEstudiante(id); } catch { }
+                try { encargados = ObtenerEncargadosPorEstudiante(id); } catch { }
+                try { practicas = ObtenerPracticasPorEstudiante(id); } catch { }
+
+                var estudiante = new EstudianteDetalleDTO
+                {
+                    IdUsuario = baseInfo.IdUsuario,
+                    Cedula = baseInfo.Cedula,
+                    Nombre = baseInfo.Nombre,
+                    Apellido1 = baseInfo.Apellido1,
+                    Apellido2 = baseInfo.Apellido2,
+                    Edad = edad,
+                    Correo = correo,
+                    Telefono = telefono,
+                    Especialidad = especialidad,
+                    Direccion = baseInfo.DireccionExacta,
+                    EstadoPractica = estadoPractica,
+                    Documentos = documentos,
+                    Encargados = encargados,
+                    Practicas = practicas,
+                    Seccion = baseInfo.Seccion ?? ""   // <--- Asignación al DTO
+                };
+
+                return PartialView("_DetalleEstudiante", estudiante);
+            }
+            catch (Exception ex)
+            {
+                return new HttpStatusCodeResult(500, "Error al cargar el perfil: " + ex.Message);
+            }
         }
 
 
@@ -286,7 +285,7 @@ namespace SIGEP.Controllers
                 );
             }
 
-            return RedirectToAction("Detalles", new { id = idUsuario });
+            return RedirectToAction("Detalle", new { id = idUsuario });
         }
 
         // ==============================
@@ -327,11 +326,11 @@ namespace SIGEP.Controllers
                 if (doc == null)
                     return Json(new { success = false, message = "Documento no encontrado en la base de datos." });
 
-                // 2️⃣ Eliminar el archivo físico si existe
-                if (!string.IsNullOrEmpty(doc.RutaArchivo) && System.IO.File.Exists(doc.RutaArchivo))
-                {
-                    System.IO.File.Delete(doc.RutaArchivo);
-                }
+                //// 2️⃣ Eliminar el archivo físico si existe
+                //if (!string.IsNullOrEmpty(doc.RutaArchivo) && System.IO.File.Exists(doc.RutaArchivo))
+                //{
+                //    System.IO.File.Delete(doc.RutaArchivo);
+                //}
 
                 // 3️⃣ Eliminar el registro de la base de datos
                 db.Database.ExecuteSqlCommand(

@@ -82,157 +82,250 @@
 
 <!-- MODAL ACTUALIZAR ESTADO -->
 <div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-                <div class="modal-header" style="background-color: #2D594D; color: white;">
-                    <h5 class="modal-title">Actualizar Estado Académico</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Actualizar Estado Académico</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4">
+                <input type="hidden" id="hdnIdUsuario" />
+                <div class="form-group mb-3">
+                    <label for="ddlNuevoEstado">Seleccione nuevo estado:</label>
+                    <select id="ddlNuevoEstado" class="form-select OpcionesVacantes w-100" style="font-size:14px">
+                        @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
+                        {
+                            <option value="@estado.Value">@estado.Text</option>
+                        }
+                    </select>
                 </div>
-                <div class="modal-body px-4">
-                    <input type="hidden" id="hdnIdUsuario" />
-                    <div class="form-group mb-3">
-                        <label for="ddlNuevoEstado">Seleccione nuevo estado:</label>
-                        <select id="ddlNuevoEstado" class="form-select OpcionesVacantes w-100" style="font-size:14px">
-                            @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
-                            {
-                                <option value="@estado.Value">@estado.Text</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer px-4">
-                    <button type="button" class="btn CerrarModal" id="btnConfirmarActualizar">
-                        <i class="fas fa-sync-alt"></i> Actualizar
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                </div>
+            </div>
+            <div class="modal-footer px-4">
+                <button type="button" class="btn CerrarModal" id="btnConfirmarActualizar">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
+</div>
 
 @section scripts {
     <script>
-    $(document).ready(function () {
-        var table = $('#tablaEstudiantes').DataTable({
-            ajax: {
-                url: '@Url.Action("GetEstudiantes", "Estudiante")',
-                data: function (d) {
-                    d.estado = $('#filtroEstado').val();
-                    d.idEspecialidad = $('#filtroEspecialidad').val();
-                },
-                dataSrc: 'data'
+$(document).ready(function () {
+    var table = $('#tablaEstudiantes').DataTable({
+        ajax: {
+            url: '@Url.Action("GetEstudiantes", "Estudiante")',
+            data: function (d) {
+                d.estado = $('#filtroEstado').val();
+                d.idEspecialidad = $('#filtroEspecialidad').val();
             },
-            columns: [
-                { data: 'Cedula' },
-                { data: 'NombreCompleto' },
-                { data: 'EspecialidadNombre' },
-                { data: 'Telefono' },
-                {
-                    data: 'EstadoNombre',
-                    render: function (data) {
-                        var text = (data || '').toString().trim();
-                        if (!text) return '<span class="badge badge-no-asignada">Sin Estado</span>';
+            dataSrc: 'data'
+        },
+        columns: [
+            { data: 'Cedula' },
+            { data: 'NombreCompleto' },
+            { data: 'EspecialidadNombre' },
+            { data: 'Telefono' },
+            {
+                data: 'EstadoNombre',
+                render: function (data) {
+                    var text = (data || '').toString().trim();
+                    if (!text) return '<span class="badge badge-no-asignada">Sin Estado</span>';
 
-                        var d = text.toLowerCase();
-                        if (d === 'activo') return '<span class="badge badge-activo">' + text + '</span>';
-                        if (d === 'inactivo') return '<span class="badge badge-inactivo">' + text + '</span>';
-                        if (d === 'aprobada' || d === 'aprobado') return '<span class="badge badge-aprobado">' + text + '</span>';
-                        if (d === 'rezagado') return '<span class="badge badge-rezagado">' + text + '</span>';
-
-                        return '<span class="badge badge-no-asignada">' + text + '</span>';
-                    }
-                },
-                {
-                    data: 'EstadoPractica',
-                    render: function (data) {
-                        var text = (data || '').toString().trim();
-                        // tratar estados no asignados
-                        if (!text || text.toLowerCase() === 'no asignada' || text.toLowerCase() === 'sin práctica') {
-                            return '<span class="badge badge-no-asignada">No Asignada</span>';
-                        }
-
-                        var d = text.toLowerCase();
-                        var clase = 'badge-default';
-                        if (d === 'en progreso') clase = 'badge-en-progreso';
-                        else if (d === 'asignada') clase = 'badge-asignada';
-                        else if (d === 'rechazada') clase = 'badge-rechazada';
-                        else if (d === 'en curso') clase = 'badge-en-curso';
-                        else if (d === 'finalizada') clase = 'badge-finalizada';
-                        else if (d === 'aprobada') clase = 'badge-aprobada';
-                        else if (d === 'retirada') clase = 'badge-retirada';
-
-                        return '<span class="badge ' + clase + '">' + text + '</span>';
-                    }
-                },
-                {
-                    data: 'IdUsuario',
-                    render: function (data, type, row) {
-                        return `
-                            <button class="btn bg-transparent verPerfil" data-id="${data}" style="color:#2d594d">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn bg-transparent btn-actualizar-estado" data-id="${data}" data-estado="${row.IdEstado}" style="color:#2d594d">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>`;
-                    }
+                    var d = text.toLowerCase();
+                    if (d === 'activo') return '<span class="badge badge-activo">' + text + '</span>';
+                    if (d === 'inactivo') return '<span class="badge badge-inactivo">' + text + '</span>';
+                    if (d === 'aprobada' || d === 'aprobado') return '<span class="badge badge-aprobado">' + text + '</span>';
+                    if (d === 'rezagado') return '<span class="badge badge-rezagado">' + text + '</span>';
+                    return '<span class="badge badge-no-asignada">' + text + '</span>';
                 }
-            ],
-            columnDefs: [
-                { targets: -1, orderable: false, searchable: false, width: "100px" }
-            ]
-        });
-
-        $('#filtroEstado, #filtroEspecialidad').on('change', function () {
-            table.ajax.reload();
-        });
-
-        $('#tablaEstudiantes').on('click', '.verPerfil', function () {
-            var id = $(this).data('id');
-            $('#perfilBody').html('<div class="text-center"><span class="text-muted">Cargando datos...</span></div>');
-            $.get('@Url.Action("Detalle", "Estudiante")/' + id, function (data) {
-                $('#perfilBody').html(data);
-                $('#modalPerfil').modal('show');
-            });
-        });
-
-        $(document).on("click", ".btn-actualizar-estado", function () {
-            var idUsuario = $(this).data("id");
-            var estadoActual = $(this).data("estado");
-            $("#hdnIdUsuario").val(idUsuario);
-            $("#ddlNuevoEstado").val(estadoActual);
-            $("#modalActualizarEstado").modal("show");
-        });
-
-        $("#btnConfirmarActualizar").click(function () {
-            var idUsuario = $("#hdnIdUsuario").val();
-            var nuevoEstado = $("#ddlNuevoEstado").val();
-
-            $.ajax({
-                url: '@Url.Action("ActualizarEstado", "Estudiante")',
-                type: 'POST',
-                data: { idUsuario: idUsuario, nuevoEstadoId: nuevoEstado },
-                success: function (res) {
-                    if (res.success) {
-                        $("#modalActualizarEstado").modal("hide");
-                        table.ajax.reload();
-                        Swal.fire("Éxito", res.message, "success");
-                    } else {
-                        Swal.fire("Error", res.message, "error");
+            },
+            {
+                data: 'EstadoPractica',
+                render: function (data) {
+                    var text = (data || '').toString().trim();
+                    if (!text || text.toLowerCase() === 'no asignada' || text.toLowerCase() === 'sin práctica') {
+                        return '<span class="badge badge-no-asignada">No Asignada</span>';
                     }
+                    var d = text.toLowerCase();
+                    var clase = 'badge-default';
+                    if (d === 'en progreso') clase = 'badge-en-progreso';
+                    else if (d === 'asignada') clase = 'badge-asignada';
+                    else if (d === 'rechazada') clase = 'badge-rechazada';
+                    else if (d === 'en curso') clase = 'badge-en-curso';
+                    else if (d === 'finalizada') clase = 'badge-finalizada';
+                    else if (d === 'aprobada') clase = 'badge-aprobada';
+                    else if (d === 'retirada') clase = 'badge-retirada';
+
+                    return '<span class="badge ' + clase + '">' + text + '</span>';
                 }
-            });
+            },
+            {
+                data: 'IdUsuario',
+                render: function (data, type, row) {
+                    return `
+                        <button class="btn bg-transparent verPerfil" data-id="${data}" style="color:#2d594d" title="Ver perfil">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-actualizar-estado" data-id="${data}" data-estado="${row.IdEstado}" style="color:#2d594d" title="Actualizar estado">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>`;
+                }
+            }
+        ],
+        columnDefs: [
+            { targets: -1, orderable: false, searchable: false, width: "100px" }
+        ]
+    });
+
+    $('#filtroEstado, #filtroEspecialidad').on('change', function () {
+        table.ajax.reload();
+    });
+
+    // Abrir modal de perfil
+    $('#tablaEstudiantes').on('click', '.verPerfil', function () {
+        const id = $(this).data('id');
+        const modalPerfilEl = document.getElementById('modalPerfil');
+        const modalPerfil = bootstrap.Modal.getOrCreateInstance(modalPerfilEl);
+
+        $('#perfilBody').html(`
+            <div class="text-center p-3">
+                <div class="spinner-border text-success" role="status"></div>
+                <p class="mt-2 text-muted">Cargando perfil...</p>
+            </div>
+        `);
+
+        $.ajax({
+            url: '@Url.Action("Detalle", "Estudiante")',
+            type: 'GET',
+            data: { id: id },
+            success: function (html) {
+                if (!html || html.trim() === "") {
+                    $('#perfilBody').html('<div class="alert alert-warning">No se pudo cargar el perfil del estudiante.</div>');
+                } else {
+                    $('#perfilBody').html(html);
+                }
+                modalPerfil.show();
+            },
+            error: function (xhr) {
+                var detail = xhr && (xhr.responseText || xhr.statusText) ? (xhr.responseText || xhr.statusText) : 'Error desconocido';
+                $('#perfilBody').html('<div class="alert alert-danger">Error al cargar el perfil.<br/><small>' + $('<div/>').text(detail).html() + '</small></div>');
+                modalPerfil.show();
+            }
         });
     });
-    </script>
+
+    // Abrir modal actualizar estado
+    $(document).on("click", ".btn-actualizar-estado", function () {
+        var idUsuario = $(this).data("id");
+        var estadoActual = $(this).data("estado");
+        $("#hdnIdUsuario").val(idUsuario);
+        $("#ddlNuevoEstado").val(estadoActual);
+        $("#modalActualizarEstado").modal("show");
+    });
+
+    // Confirmar actualizar estado
+    $("#btnConfirmarActualizar").click(function () {
+        var idUsuario = $("#hdnIdUsuario").val();
+        var nuevoEstado = $("#ddlNuevoEstado").val();
+
+        $.ajax({
+            url: '@Url.Action("ActualizarEstado", "Estudiante")',
+            type: 'POST',
+            data: { idUsuario: idUsuario, nuevoEstadoId: nuevoEstado },
+            success: function (res) {
+                if (res.success) {
+                    $("#modalActualizarEstado").modal("hide");
+                    table.ajax.reload();
+                    Swal.fire("Éxito", res.message, "success");
+                } else {
+                    Swal.fire("Error", res.message, "error");
+                }
+            },
+            error: function () {
+                Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
+            }
+        });
+    });
+});
+
+// =========================
+// Eliminar documento
+// =========================
+$(document).on("click", ".btn-eliminar-doc", function (e) {
+    e.preventDefault();
+
+    var boton = $(this);
+    var idDoc = boton.data("id");
+
+    Swal.fire({
+        title: '¿Eliminar documento?',
+        text: "No podrás deshacer esta acción",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("EliminarDocumento", "Estudiante")',
+                data: { id: idDoc },
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire({
+                            title: "Eliminado",
+                            text: "Documento eliminado con éxito",
+                            icon: "success",
+                            timer: 1000,
+                            showConfirmButton: false
+                        });
+                        boton.closest('.d-flex').fadeOut(300, function () {
+                            $(this).remove();
+                        });
+                    } else {
+                        Swal.fire("Error", res.message || "No se pudo eliminar", "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
+                }
+            });
+        }
+    });
+});
+
+// =========================
+// Desasignar práctica
+// =========================
+$(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
+    e.preventDefault();
+    var boton = $(this);
+    var idPostulacion = boton.data("id");
+
+    Swal.fire({
+        title: '¿Desea desasignar esta práctica?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, desasignar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('@Url.Action("DesasignarPractica", "Estudiante")', { id: idPostulacion }, function (res) {
+                if (res.success) {
+                    Swal.fire("Desasignado", "La práctica fue desasignada correctamente", "success");
+                    boton.closest('.d-flex').fadeOut(400, function () {
+                        $(this).remove();
+                    });
+                } else {
+                    Swal.fire("Error", res.message || "No se pudo desasignar", "error");
+                }
+            }).fail(function(){
+                Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
+            });
+        }
+    });
+});
+</script>
 }

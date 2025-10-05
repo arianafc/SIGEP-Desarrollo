@@ -47,8 +47,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DELETE FROM DocumentosTB
-    WHERE IdDocumento = @IdDocumento;
+    IF EXISTS (SELECT 1 FROM DocumentosTB WHERE IdDocumento = @IdDocumento)
+    BEGIN
+        DELETE FROM DocumentosTB
+        WHERE IdDocumento = @IdDocumento;
+    END
 END
 GO
 

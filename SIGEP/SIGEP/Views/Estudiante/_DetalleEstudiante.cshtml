@@ -5,16 +5,16 @@
     <!-- Información Personal -->
     <h5 class="section-title mb-3">Información Personal</h5>
     <div class="row mb-2">
-        <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @Model.Nombre @Model.Apellido1 @Model.Apellido2</div>
-        <div class="col-md-6"><strong>Correo Electrónico:</strong> @Model.Correo</div>
+        <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @((Model.Nombre ?? "") + " " + (Model.Apellido1 ?? "") + " " + (Model.Apellido2 ?? ""))</div>
+        <div class="col-md-6"><strong>Correo Electrónico:</strong> @(Model.Correo ?? "—")</div>
     </div>
     <div class="row mb-2">
-        <div class="col-md-6"><strong>Teléfono:</strong> @Model.Telefono</div>
-        <div class="col-md-6"><strong>Dirección:</strong> @Model.Direccion</div>
+        <div class="col-md-6"><strong>Teléfono:</strong> @(Model.Telefono ?? "—")</div>
+        <div class="col-md-6"><strong>Dirección:</strong> @(Model.Direccion ?? "—")</div>
     </div>
     <div class="row mb-2">
-        <div class="col-md-6"><strong>Especialidad:</strong> @Model.Especialidad</div>
-        <div class="col-md-6"><strong>Sección:</strong> @Model.Seccion</div>
+        <div class="col-md-6"><strong>Especialidad:</strong> @(Model.Especialidad ?? "Sin especialidad")</div>
+        <div class="col-md-6"><strong>Sección:</strong> @(Model.Seccion ?? "—")</div>
     </div>
     <div class="row mb-2">
         <div class="col-md-6"><strong>Edad:</strong> @Model.Edad</div>
@@ -29,9 +29,9 @@
         foreach (var enc in Model.Encargados)
         {
             <div class="row mb-2">
-                <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @enc.Nombre</div>
-                <div class="col-md-6"><strong>Teléfono:</strong> @enc.Telefono</div>
-                <div class="col-md-6"><strong>Ocupación:</strong> @enc.Ocupacion</div>
+                <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @(enc.Nombre ?? "—")</div>
+                <div class="col-md-6"><strong>Teléfono:</strong> @(enc.Telefono ?? "—")</div>
+                <div class="col-md-6"><strong>Ocupación:</strong> @(enc.Ocupacion ?? "—")</div>
             </div>
             <hr />
         }
@@ -48,31 +48,33 @@
         <ul class="list-group mb-3">
             @foreach (var post in Model.Practicas)
             {
-                var estado = post.Estado?.Trim().ToLower() ?? "";
-                var clase = "badge badge-no-asignada";
+                var estado = (post.Estado ?? "").Trim().ToLower();
 
-                {
-                    if (estado == "en progreso") { clase = "badge badge-en-progreso"; }
-                    else if (estado == "asignada") { clase = "badge badge-asignada"; }
-                    else if (estado == "rechazada") { clase = "badge badge-rechazada"; }
-                    else if (estado == "en curso") { clase = "badge badge-en-curso"; }
-                    else if (estado == "finalizada") { clase = "badge badge-finalizada"; }
-                    else if (estado == "aprobada") { clase = "badge badge-aprobada"; }
-                    else if (estado == "retirada") { clase = "badge badge-retirada"; }
-                }
+                // 🔧 Aquí estaba el error: NO uses '@{ ... }' dentro del foreach.
+                var clase = "badge badge-no-asignada";
+                if (estado == "en progreso") { clase = "badge badge-en-progreso"; }
+                else if (estado == "asignada") { clase = "badge badge-asignada"; }
+                else if (estado == "rechazada") { clase = "badge badge-rechazada"; }
+                else if (estado == "en curso") { clase = "badge badge-en-curso"; }
+                else if (estado == "finalizada") { clase = "badge badge-finalizada"; }
+                else if (estado == "aprobada") { clase = "badge badge-aprobada"; }
+                else if (estado == "retirada") { clase = "badge badge-retirada"; }
 
                 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
                     <div>
                         <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { id = post.IdPractica })"
                            class="text-decoration-none" style="color: #2D594D; font-weight:600;">
-                            @post.Empresa
+                            @(post.Empresa ?? "—")
                         </a>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="@clase">@post.Estado</span>
+                        <span class="@clase">@((post.Estado ?? "No Asignada"))</span>
 
-                        @if (post.Estado == "Asignada" || post.Estado == "En progreso" || post.Estado == "En curso")
+                        @if (!string.IsNullOrEmpty(post.Estado) &&
+                             (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
+                           || post.Estado.Equals("En progreso", StringComparison.OrdinalIgnoreCase)
+                           || post.Estado.Equals("En curso", StringComparison.OrdinalIgnoreCase)))
                         {
                             <button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
                                     data-id="@post.IdPostulacion"
@@ -100,7 +102,7 @@
         foreach (var doc in Model.Documentos)
         {
             <div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
-                <span style="color: #2D594D;">@doc.Documento</span>
+                <span style="color: #2D594D;">@(doc.Documento ?? "—")</span>
                 <div>
                     <a href="@Url.Action("VisualizarDocumento", "Estudiante", new { id = doc.IdDocumento })"
                        target="_blank" style="color:#2D594D; margin-right:10px;">
@@ -125,56 +127,3 @@
     }
 
 </div>
-
-<script>
-$(document).ready(function () {
-    // 🗑️ Eliminar documento
-    $(".btn-eliminar-doc").click(function (e) {
-        e.preventDefault();
-        var idDoc = $(this).data("id");
-        Swal.fire({
-            title: '¿Eliminar documento?',
-            text: "No podrás deshacer esta acción",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post('@Url.Action("EliminarDocumento", "Estudiante")', { id: idDoc }, function (res) {
-                    if (res.success) {
-                        Swal.fire("Eliminado", "Documento eliminado con éxito", "success");
-                        $("#perfilBody").load('@Url.Action("Detalle", "Estudiante")/' + @Model.IdUsuario);
-                    } else {
-                        Swal.fire("Error", "No se pudo eliminar", "error");
-                    }
-                });
-            }
-        });
-    });
-
-    // 🚫 Desasignar práctica
-    $(".BtnDesasignarPracticaEstudiante").click(function () {
-        var idPostulacion = $(this).data("id");
-        Swal.fire({
-            title: '¿Desea desasignar esta práctica?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, desasignar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.post('@Url.Action("DesasignarPractica", "Estudiante")', { id: idPostulacion }, function (res) {
-                    if (res.success) {
-                        Swal.fire("Eliminado", "Documento eliminado con éxito", "success");
-                        // Elimina visualmente el documento sin recargar toda la vista
-                        $(e.target).closest('.d-flex').fadeOut(400, function () { $(this).remove(); });
-                } else {
-                    Swal.fire("Error", "No se pudo eliminar", "error");
-                }
-                });
-            }
-        });
-    });
-});
-</script>
