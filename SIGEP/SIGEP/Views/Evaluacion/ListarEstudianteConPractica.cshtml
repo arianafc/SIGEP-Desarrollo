@@ -1,0 +1,262 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Evaluaciones";
+    var rol = Session["rol"] != null ? Convert.ToInt32(Session["rol"]) : 0;
+}
+
+<!-- Campo oculto para el rol (usado en JavaScript) -->
+<input type="hidden" id="rolUsuario" value="@rol" />
+
+<h2 class="vacantes-titulo titulo-principal d-flex justify-content-between align-items-center">
+    Evaluaciones @DateTime.Now.Year
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-filter"></i>
+        </button>
+        <div class="dropdown-menu p-3" style="min-width: 300px;">
+            <div class="mb-2">
+                <label class="Filtros">Estado académico</label>
+                <select id="filtroEstadoAcademico" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="Aprobado">Aprobado</option>
+                    <option value="Rezagado">Rezagado</option>
+                </select>
+            </div>
+            <div>
+                <label>Especialidad</label>
+                <input type="text" id="filtroEspecialidad" class="form-control" placeholder="Filtrar por especialidad" />
+            </div>
+        </div>
+    </div>
+</h2>
+
+<div class="card rounded-5 p-3">
+    <table id="miTabla" class="display responsive nowrap w-100">
+        <thead>
+            <tr>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Teléfono</th>
+                <th>Práctica asignada</th>
+                <th>Estado Académico</th>
+                <th>Nota Final</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se cargarán dinámicamente con AJAX -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal para editar nota -->
+<div class="modal fade" id="modalNota" tabindex="-1" aria-labelledby="modalNotaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header rounded-top-4" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title" id="modalNotaLabel">
+                    <i class="fas fa-clipboard-list me-2"></i> Asignar Notas
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <p class="mb-1 text-muted">Estudiante:</p>
+                            <h5 id="nombreEstudianteNota" class="fw-semibold"></h5>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="inputNota1" class="form-label fw-bold">Nota 1 (0 - 100)</label>
+                            <input type="number" class="form-control form-control-lg" id="inputNota1" min="0" max="100" step="0.01" placeholder="Ej. 85.5" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="inputNota2" class="form-label fw-bold">Nota 2 (0 - 100)</label>
+                            <input type="number" class="form-control form-control-lg" id="inputNota2" min="0" max="100" step="0.01" placeholder="Ej. 90.0" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="inputNotaFinal" class="form-label fw-bold">Nota Final (Promedio)</label>
+                            <input type="number" class="form-control form-control-lg" id="inputNotaFinal" readonly style="background-color: #e9ecef;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnGuardarNota" class="btn CerrarModal">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+                <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Comentarios -->
+<div class="modal fade" id="modalComentarios" tabindex="-1" aria-labelledby="modalComentariosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header rounded-top-4" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title" id="modalComentariosLabel">
+                    Comentarios del Tutor
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p><strong>Nombre:</strong> <span id="nombreEstudiante"></span></p>
+                <p><strong>Cédula:</strong> <span id="cedulaEstudiante"></span></p>
+                <p><strong>Práctica Asignada:</strong> <span id="practicaAsignada"></span></p>
+
+                <hr>
+
+                <h6>Comentarios anteriores</h6>
+                <ul id="comentariosAnteriores" class="list-group mb-3">
+                    <!-- Comentarios dinámicos -->
+                </ul>
+
+                <div class="mb-3">
+                    <label for="nuevoComentario" class="form-label">Nuevo Comentario</label>
+                    <textarea class="form-control" id="nuevoComentario" rows="3" placeholder="Escriba el comentario aquí..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="btnGuardarComentario" class="btn CerrarModal">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+                <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Perfil del Estudiante -->
+<div class="modal fade" id="modalPerfil" tabindex="-1" aria-labelledby="modalPerfilLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Perfil del Estudiante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body px-4">
+                @if (rol == 4)
+                {
+                    <div class="row top-buttons mb-4 action-buttons">
+                        <div class="col-md-6">
+                            <button data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
+                                <i class="fas fa-folder-open me-2"></i> Subir Documentos
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- Sección: Información Personal -->
+                <div class="mb-4">
+                    <h5 class="section-title">Información Personal</h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Nombre y Apellidos</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Correo Electrónico</label>
+                            <input type="email" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Teléfono</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Dirección</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Sexo</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Especialidad</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Edad</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Sección</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Retroalimentación -->
+                <div class="mb-4">
+                    <h5 class="section-title">Retroalimentaciones</h5>
+                    <div class="row">
+                        <div id="retroalimentacionComentarios" class="col-md-12 form-group mb-3">
+                            <!-- Se cargan dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Práctica -->
+                <div class="mb-4">
+                    <h5 class="section-title">Información de la práctica</h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Nombre de la empresa</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                        <div class="col-md-6 form-group mb-3">
+                            <label>Teléfono de Contacto</label>
+                            <input type="text" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Subir Documento -->
+<div class="modal fade" id="modalSubirDocumento" tabindex="-1" aria-labelledby="modalSubirDocumentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header rounded-top-4" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title" id="modalSubirDocumentoLabel">
+                    <i class="fas fa-upload me-2"></i> Subir Documento de Evaluación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="inputArchivo" class="form-label fw-semibold">Seleccione un archivo (.xls, .xlsx, .pdf)</label>
+                    <input class="form-control" type="file" id="inputArchivo" accept=".xls,.xlsx,.pdf">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnSubirArchivo" class="btn CerrarModal">
+                    <i class="fas fa-cloud-upload-alt me-1"></i> Guardar
+                </button>
+                <button class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/Scripts/Evaluacion/Evaluacion.js"></script>
+}
