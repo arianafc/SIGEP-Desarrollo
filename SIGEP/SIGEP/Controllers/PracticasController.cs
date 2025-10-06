@@ -16,7 +16,8 @@ using System.Web.Mvc;
 
 namespace SIGEP.Controllers
 {
-    //[FiltroProfesor]
+    [FiltroSesion]
+    [FiltroUsuarioAdmin]
 
     public class PracticasController : Controller
     {
@@ -356,6 +357,69 @@ namespace SIGEP.Controllers
         // ==============================
         // ELIMINAR VACANTE (POST)
         // ==============================
+        //[HttpPost]
+        //public JsonResult Eliminar(int id)
+        //{
+        //    try
+        //    {
+        //        using (var db = new SIGEPEntities())
+        //        {
+        //            var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
+        //            if (vacante == null)
+        //            {
+        //                return Json(new { ok = false, message = "La vacante no existe." });
+        //            }
+
+        //            // Validar si tiene estudiantes asignados en PracticaEstudianteTB
+        //            bool tieneAsignados = db.PracticaEstudianteTB.Any(pe => pe.IdVacante == id);
+        //            if (tieneAsignados)
+        //            {
+        //                return Json(new { ok = false, message = "No se puede eliminar: vacante tiene estudiantes asignados." });
+        //            }
+
+        //            // Buscar estado "Inactivo"
+        //            var estadoInactivo = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Inactivo");
+        //            if (estadoInactivo == null)
+        //            {
+        //                return Json(new { ok = false, message = "No existe el estado 'Inactivo' en la tabla EstadosTB." });
+        //            }
+
+        //            // Guardar estado anterior para auditoría
+        //            var estadoAnterior = vacante.IdEstado;
+
+        //            // Cambiar a estado inactivo
+        //            vacante.IdEstado = estadoInactivo.IdEstado;
+        //            db.SaveChanges();
+
+        //            // Validar sesión antes de registrar auditoría
+        //            var idUsuarioSesion = Session["IdUsuario"] as int?;
+        //            if (idUsuarioSesion != null)
+        //            {
+        //                db.AuditoriaGlobalTB.Add(new AuditoriaGlobalTB
+        //                {
+        //                    IdUsuario = idUsuarioSesion.Value,
+        //                    TablaAfectada = "VacantesPracticasTB",
+        //                    IdRegistro = vacante.IdVacante,
+        //                    Accion = "Eliminar (Inactivar)",
+        //                    CampoAfectado = "IdEstado",
+        //                    DatosAnteriores = estadoAnterior.ToString(),
+        //                    DatosNuevos = estadoInactivo.IdEstado.ToString()
+        //                });
+
+        //                db.SaveChanges();
+        //            }
+
+        //            return Json(new { ok = true, message = "Vacante eliminada (marcada como Inactivo) correctamente." });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { ok = false, message = "Error al eliminar: " + ex.Message });
+        //    }
+        //}
+
+        //hya que porbar este nuevo metodo con lo de eliminar vacantes filtrando estuidnates a ver si tienen  practica canlada o rechazada
+
         [HttpPost]
         public JsonResult Eliminar(int id)
         {
@@ -365,32 +429,40 @@ namespace SIGEP.Controllers
                 {
                     var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
                     if (vacante == null)
-                    {
                         return Json(new { ok = false, message = "La vacante no existe." });
-                    }
 
-                    // Validar si tiene estudiantes asignados en PracticaEstudianteTB
-                    bool tieneAsignados = db.PracticaEstudianteTB.Any(pe => pe.IdVacante == id);
-                    if (tieneAsignados)
+                    // Estados que permiten eliminar la vacante si son los únicos presentes
+                    var estadosPermitenEliminar = new[] { "Rechazada", "Retirada" };
+
+                    // Ids de esos estados ( case-insensitive / trim )
+                    var idsPermitenEliminar = db.EstadosTB
+                        .Where(e => estadosPermitenEliminar.Contains(e.Descripcion.Trim()))
+                        .Select(e => e.IdEstado)
+                        .ToList();
+
+                    // ¿Hay alguna relación con estado distinto a Rechazada/Retirada?
+                    bool tieneRelacionBloqueante = db.PracticaEstudianteTB
+                        .Any(pe => pe.IdVacante == id && !idsPermitenEliminar.Contains(pe.IdEstado));
+
+                    if (tieneRelacionBloqueante)
                     {
-                        return Json(new { ok = false, message = "No se puede eliminar: vacante tiene estudiantes asignados." });
+                        return Json(new
+                        {
+                            ok = false,
+                            message = "No se puede eliminar: la vacante tiene estudiantes con estado activo (distinto de Rechazada o Retirada)."
+                        });
                     }
 
                     // Buscar estado "Inactivo"
                     var estadoInactivo = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Inactivo");
                     if (estadoInactivo == null)
-                    {
                         return Json(new { ok = false, message = "No existe el estado 'Inactivo' en la tabla EstadosTB." });
-                    }
 
-                    // Guardar estado anterior para auditoría
                     var estadoAnterior = vacante.IdEstado;
-
-                    // Cambiar a estado inactivo
                     vacante.IdEstado = estadoInactivo.IdEstado;
                     db.SaveChanges();
 
-                    // Validar sesión antes de registrar auditoría
+                    // Auditoría (si hay sesión)
                     var idUsuarioSesion = Session["IdUsuario"] as int?;
                     if (idUsuarioSesion != null)
                     {
@@ -404,7 +476,6 @@ namespace SIGEP.Controllers
                             DatosAnteriores = estadoAnterior.ToString(),
                             DatosNuevos = estadoInactivo.IdEstado.ToString()
                         });
-
                         db.SaveChanges();
                     }
 
@@ -416,7 +487,6 @@ namespace SIGEP.Controllers
                 return Json(new { ok = false, message = "Error al eliminar: " + ex.Message });
             }
         }
-
 
 
 

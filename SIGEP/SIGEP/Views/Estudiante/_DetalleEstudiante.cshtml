@@ -1,5 +1,9 @@
 ﻿@model SIGEP.Models.EstudianteDetalleDTO
 
+@{
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+}
+
 <div class="container-fluid">
 
     <!-- Información Personal -->
@@ -48,41 +52,50 @@
         <ul class="list-group mb-3">
             @foreach (var post in Model.Practicas)
             {
-                var estado = (post.Estado ?? "").Trim().ToLower();
+                var estadoRaw = (post.Estado ?? "").Trim();
+                var estado = estadoRaw.ToLower();
 
-                // 🔧 Aquí estaba el error: NO uses '@{ ... }' dentro del foreach.
+                // clase del badge
                 var clase = "badge badge-no-asignada";
                 if (estado == "en progreso") { clase = "badge badge-en-progreso"; }
                 else if (estado == "asignada") { clase = "badge badge-asignada"; }
                 else if (estado == "rechazada") { clase = "badge badge-rechazada"; }
                 else if (estado == "en curso") { clase = "badge badge-en-curso"; }
                 else if (estado == "finalizada") { clase = "badge badge-finalizada"; }
-                else if (estado == "aprobada") { clase = "badge badge-aprobada"; }
+                else if (estado == "aprobada" || estado == "aprobado") { clase = "badge badge-aprobada"; }
                 else if (estado == "retirada") { clase = "badge badge-retirada"; }
 
                 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
                     <div>
-                        <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { id = post.IdPractica })"
-                           class="text-decoration-none" style="color: #2D594D; font-weight:600;">
+                        <!-- Redirige a Practicas/VisualizacionPostulacion con idVacante + idUsuario -->
+                        <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { idVacante = post.IdVacante, idUsuario = post.IdUsuario })"
+                           class="text-decoration-none"
+                           style="color: #2D594D; font-weight:600;">
                             @(post.Empresa ?? "—")
                         </a>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="@clase">@((post.Estado ?? "No Asignada"))</span>
+                        <span class="@clase">@((estadoRaw == "" ? "No Asignada" : estadoRaw))</span>
 
-                        @if (!string.IsNullOrEmpty(post.Estado) &&
-                             (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
-                           || post.Estado.Equals("En progreso", StringComparison.OrdinalIgnoreCase)
-                           || post.Estado.Equals("En curso", StringComparison.OrdinalIgnoreCase)))
+                        @* Mostrar basurero en Asignada / En progreso / En curso / Aprobada *@
+                        @if (idRol == 2 /* Profesor */ &&
+                        !string.IsNullOrEmpty(post.Estado) &&
+                        (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
+                        || post.Estado.Equals("En progreso", StringComparison.OrdinalIgnoreCase)
+                        || post.Estado.Equals("En curso", StringComparison.OrdinalIgnoreCase)
+                        || post.Estado.Equals("Aprobada", StringComparison.OrdinalIgnoreCase)))
                         {
                             <button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
-                                    data-id="@post.IdPostulacion"
+                                    data-idpractica="@post.IdPostulacion"
+                                    data-idvacante="@post.IdVacante"
+                                    data-idusuario="@post.IdUsuario"
                                     title="Quitar postulación"
                                     style="color:#2D594D;">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         }
+
                     </div>
                 </li>
             }
@@ -92,6 +105,7 @@
     {
         <p class="text-muted">No hay postulaciones registradas.</p>
     }
+
 
     <hr />
 
