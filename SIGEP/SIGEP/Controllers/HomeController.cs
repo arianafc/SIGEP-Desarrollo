@@ -35,6 +35,12 @@ namespace SIGEP.Controllers
                     var resultado = dbContext.LoginSP(Usuario.Cedula, Usuario.Contrasenna).FirstOrDefault();
                     if (resultado != null)
                     {
+                       
+                        if(resultado.IdEstado != 1)
+                        {
+                            return Json(new { success = false, message = "Su cuenta está inactiva. Por favor, contacte al administrador." });
+                        } 
+                            // Establecer variables de sesión
                         Session["IdRol"] = resultado.IdRol;
                         Session["Nombre"] = resultado.Nombre;
                         Session["Apellido1"] = resultado.Apellido1;
