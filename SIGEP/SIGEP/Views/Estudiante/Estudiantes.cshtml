@@ -1,20 +1,17 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Listado de Estudiantes";
-    var rol = Session["Rol"] != null ? Session["Rol"].ToString() : "";
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, 2=Prof, 3=Coord, 4=Egr
 }
 
+
 <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
-    @(rol == "Coordinador" ? "Estudiantes" : "Mis Estudiantes") @DateTime.Now.Year
+    @(idRol == 3 ? "Estudiantes" : idRol == 2 ? "Mis Estudiantes" : "Estudiantes") @DateTime.Now.Year
 </h2>
 
+
 <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
-    @if (rol == "Coordinador")
-    {
-        <button type="button" class="btn-cta btn-nuevo mb-0" data-bs-toggle="modal" data-bs-target="#modalRegistrarEstudiante">
-            + Registrar
-        </button>
-    }
+   
     <div class="dropdown">
         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="fas fa-filter"></i> Filtros
@@ -27,8 +24,10 @@
                     @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
                     {
                         <option value="@estado.Text">@estado.Text</option>
+                        @* Si filtras por Id, usa Value; si por texto (como tu controller), usa Text *@
                     }
                 </select>
+
             </div>
             <div>
                 <label>Especialidad</label>
@@ -113,6 +112,41 @@
 @section scripts {
     <script>
 $(document).ready(function () {
+   // === Guard: redirigir SOLO si realmente vino el Login ===
+function redirSiLogin(res, xhr) {
+    try {
+        // Solo analizamos si la respuesta es HTML en string
+        if (typeof res !== 'string') return false;
+
+        // Marcadores confiables de tu pantalla de Login:
+        // - formulario con id="formLogin" (ajústalo si tu login usa otro id)
+        // - acción al Login de Home
+        // - texto "Iniciar Sesión" (con/sin tilde)
+        var urlLogin = '@Url.Action("Login","Home")';
+        var looksLikeLogin =
+            res.indexOf('id="formLogin"') >= 0 ||
+            res.indexOf('action="' + urlLogin + '"') >= 0 ||
+            /Iniciar sesi[óo]n/i.test(res);
+
+        // Señal fuerte adicional: documento completo con DOCTYPE + palabra "login"
+        var isFullDoc = res.indexOf('<!DOCTYPE html') >= 0 && /login/i.test(res);
+
+        if (looksLikeLogin || isFullDoc) {
+            window.location.href = urlLogin;
+            return true;
+        }
+    } catch (e) {}
+    return false;
+}
+
+
+
+    // Rol desde sesión como entero: 1=Estudiante, 2=Profesor, 3=Coordinador, 4=Egresado
+    var rol = @idRol; // 1=Est, 2=Prof, 3=Coord, 4=Egr
+
+    // ===============================
+    // DataTable PRINCIPAL
+    // ===============================
     var table = $('#tablaEstudiantes').DataTable({
         ajax: {
             url: '@Url.Action("GetEstudiantes", "Estudiante")',
@@ -132,7 +166,6 @@ $(document).ready(function () {
                 render: function (data) {
                     var text = (data || '').toString().trim();
                     if (!text) return '<span class="badge badge-no-asignada">Sin Estado</span>';
-
                     var d = text.toLowerCase();
                     if (d === 'activo') return '<span class="badge badge-activo">' + text + '</span>';
                     if (d === 'inactivo') return '<span class="badge badge-inactivo">' + text + '</span>';
@@ -148,29 +181,39 @@ $(document).ready(function () {
                     if (!text || text.toLowerCase() === 'no asignada' || text.toLowerCase() === 'sin práctica') {
                         return '<span class="badge badge-no-asignada">No Asignada</span>';
                     }
-                    var d = text.toLowerCase();
+                    var d = text
+                        .toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+
                     var clase = 'badge-default';
                     if (d === 'en progreso') clase = 'badge-en-progreso';
                     else if (d === 'asignada') clase = 'badge-asignada';
                     else if (d === 'rechazada') clase = 'badge-rechazada';
                     else if (d === 'en curso') clase = 'badge-en-curso';
                     else if (d === 'finalizada') clase = 'badge-finalizada';
-                    else if (d === 'aprobada') clase = 'badge-aprobada';
+                    else if (d === 'aprobada' || d === 'aprobado') clase = 'badge-aprobada';
                     else if (d === 'retirada') clase = 'badge-retirada';
 
                     return '<span class="badge ' + clase + '">' + text + '</span>';
                 }
             },
             {
+                // === Acciones: "Ver perfil" para todos; "Actualizar estado" solo Profesor(2)/Coordinador(3)
                 data: 'IdUsuario',
                 render: function (data, type, row) {
-                    return `
+                    var html = `
                         <button class="btn bg-transparent verPerfil" data-id="${data}" style="color:#2d594d" title="Ver perfil">
                             <i class="fas fa-eye"></i>
-                        </button>
+                        </button>`;
+                    if (rol === 2 || rol === 3) {
+                        html += `
                         <button class="btn bg-transparent btn-actualizar-estado" data-id="${data}" data-estado="${row.IdEstado}" style="color:#2d594d" title="Actualizar estado">
                             <i class="fas fa-sync-alt"></i>
                         </button>`;
+                    }
+                    return html;
                 }
             }
         ],
@@ -179,11 +222,14 @@ $(document).ready(function () {
         ]
     });
 
+    // Filtros
     $('#filtroEstado, #filtroEspecialidad').on('change', function () {
         table.ajax.reload();
     });
 
-    // Abrir modal de perfil
+    // ===============================
+    // Abrir modal de perfil (con guard de sesión)
+    // ===============================
     $('#tablaEstudiantes').on('click', '.verPerfil', function () {
         const id = $(this).data('id');
         const modalPerfilEl = document.getElementById('modalPerfil');
@@ -200,7 +246,8 @@ $(document).ready(function () {
             url: '@Url.Action("Detalle", "Estudiante")',
             type: 'GET',
             data: { id: id },
-            success: function (html) {
+            success: function (html, _status, xhr) {
+                if (redirSiLogin(html, xhr)) return;
                 if (!html || html.trim() === "") {
                     $('#perfilBody').html('<div class="alert alert-warning">No se pudo cargar el perfil del estudiante.</div>');
                 } else {
@@ -216,7 +263,9 @@ $(document).ready(function () {
         });
     });
 
-    // Abrir modal actualizar estado
+    // ===============================
+    // Modal actualizar estado (solo visible si rol 2/3, pero dejamos el handler por si acaso)
+    // ===============================
     $(document).on("click", ".btn-actualizar-estado", function () {
         var idUsuario = $(this).data("id");
         var estadoActual = $(this).data("estado");
@@ -225,7 +274,6 @@ $(document).ready(function () {
         $("#modalActualizarEstado").modal("show");
     });
 
-    // Confirmar actualizar estado
     $("#btnConfirmarActualizar").click(function () {
         var idUsuario = $("#hdnIdUsuario").val();
         var nuevoEstado = $("#ddlNuevoEstado").val();
@@ -234,7 +282,8 @@ $(document).ready(function () {
             url: '@Url.Action("ActualizarEstado", "Estudiante")',
             type: 'POST',
             data: { idUsuario: idUsuario, nuevoEstadoId: nuevoEstado },
-            success: function (res) {
+            success: function (res, _status, xhr) {
+                if (redirSiLogin(res, xhr)) return;
                 if (res.success) {
                     $("#modalActualizarEstado").modal("hide");
                     table.ajax.reload();
@@ -248,84 +297,90 @@ $(document).ready(function () {
             }
         });
     });
-});
 
-// =========================
-// Eliminar documento
-// =========================
-$(document).on("click", ".btn-eliminar-doc", function (e) {
-    e.preventDefault();
+    // ===============================
+    // Eliminar documento (usa guard por si la sesión expiró)
+    // ===============================
+    $(document).on("click", ".btn-eliminar-doc", function (e) {
+        e.preventDefault();
+        var boton = $(this);
+        var idDoc = boton.data("id");
 
-    var boton = $(this);
-    var idDoc = boton.data("id");
-
-    Swal.fire({
-        title: '¿Eliminar documento?',
-        text: "No podrás deshacer esta acción",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("EliminarDocumento", "Estudiante")',
-                data: { id: idDoc },
-                success: function (res) {
-                    if (res.success) {
-                        Swal.fire({
-                            title: "Eliminado",
-                            text: "Documento eliminado con éxito",
-                            icon: "success",
-                            timer: 1000,
-                            showConfirmButton: false
-                        });
-                        boton.closest('.d-flex').fadeOut(300, function () {
-                            $(this).remove();
-                        });
-                    } else {
-                        Swal.fire("Error", res.message || "No se pudo eliminar", "error");
+        Swal.fire({
+            title: '¿Eliminar documento?',
+            text: "No podrás deshacer esta acción",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("EliminarDocumento", "Estudiante")',
+                    data: { id: idDoc },
+                    success: function (res, _status, xhr) {
+                        if (redirSiLogin(res, xhr)) return;
+                        if (res.success) {
+                            Swal.fire({
+                                title: "Eliminado",
+                                text: "Documento eliminado con éxito",
+                                icon: "success",
+                                timer: 1000,
+                                showConfirmButton: false
+                            });
+                            boton.closest('.d-flex').fadeOut(300, function () { $(this).remove(); });
+                        } else {
+                            Swal.fire("Error", res.message || "No se pudo eliminar", "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
                     }
-                },
-                error: function () {
+                });
+            }
+        });
+    });
+
+    // ===============================
+    // Desasignar práctica (el botón se muestra en el _DetalleEstudiante; aquí solo el handler)
+    // ===============================
+    $(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
+        e.preventDefault();
+        var boton = $(this);
+        var idPractica = boton.data("idpractica");
+
+        Swal.fire({
+            title: '¿Desea desasignar esta práctica?',
+            text: 'El estado se cambiará a "Retirada".',
+            icon: 'warning',
+            input: 'textarea',
+            inputLabel: 'Comentario (opcional)',
+            inputPlaceholder: 'Escribe un comentario...',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, desasignar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('@Url.Action("DesasignarPractica", "Practicas")',
+                    { idPractica: idPractica, comentario: result.value || '' })
+                .done(function (res, status, xhr) {
+                    if (redirSiLogin(res, xhr)) return;
+                    if (res.ok) {
+                        Swal.fire("Desasignado", res.msg || "La práctica fue desasignada correctamente", "success");
+                    } else {
+                        Swal.fire("Error", res.msg || "No se pudo desasignar", "error");
+                    }
+                })
+                .fail(function () {
                     Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
-                }
-            });
-        }
+                });
+            }
+        });
     });
-});
 
-// =========================
-// Desasignar práctica
-// =========================
-$(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
-    e.preventDefault();
-    var boton = $(this);
-    var idPostulacion = boton.data("id");
-
-    Swal.fire({
-        title: '¿Desea desasignar esta práctica?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, desasignar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.post('@Url.Action("DesasignarPractica", "Estudiante")', { id: idPostulacion }, function (res) {
-                if (res.success) {
-                    Swal.fire("Desasignado", "La práctica fue desasignada correctamente", "success");
-                    boton.closest('.d-flex').fadeOut(400, function () {
-                        $(this).remove();
-                    });
-                } else {
-                    Swal.fire("Error", res.message || "No se pudo desasignar", "error");
-                }
-            }).fail(function(){
-                Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
-            });
-        }
-    });
 });
-</script>
+    </script>
 }
+
+

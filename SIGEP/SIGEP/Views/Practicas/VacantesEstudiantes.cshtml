@@ -1,16 +1,23 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Vacantes - Prácticas";
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, 2=Prof, 3=Coord, 4=Egr
 }
+
 
 <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
     Vacantes @DateTime.Now.Year
 </h2>
 
 <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
-    <button type="button" class="btn-cta btn-nuevo mb-0" data-bs-toggle="modal" data-bs-target="#modalCrearVacante">
-        + Registrar
-    </button>
+    @if (idRol == 3)
+    {
+        <button type="button" class="btn-cta btn-nuevo mb-0" data-bs-toggle="modal" data-bs-target="#modalCrearVacante">
+            + Registrar
+        </button>
+    }
+
+
     <div class="dropdown">
         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="fas fa-filter"></i>
@@ -352,6 +359,21 @@
     <script>
 $(function () {
 
+    // === Inyecta el rol de sesión como entero (1=Est, 2=Prof, 3=Coord, 4=Egr)
+    const ROL = @idRol;
+
+    // === Guard para redirigir si la sesión expiró y el server responde HTML del login
+    function redirSiLogin(res, xhr) {
+        try {
+            var ct = (xhr && xhr.getResponseHeader && xhr.getResponseHeader('content-type')) || '';
+            if ((typeof res === 'string' && res.indexOf('<!DOCTYPE html') >= 0) || (ct && ct.indexOf('text/html') >= 0)) {
+                window.location.href = '@Url.Action("Login","Home")';
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+
     // ===============================
     // DataTable PRINCIPAL
     // ===============================
@@ -385,26 +407,38 @@ $(function () {
                 data: 'IdVacante',
                 orderable: false,
                 render: function (data, type, row) {
-                    return `
-                        <button class="btn bg-transparent btn-asignar" data-id="${data}" title="Asignar" style="color:#2d594d">
-                            <i class="fas fa-user-plus"></i>
-                        </button>
+                    var acc = `
                         <button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d">
                             <i class="fas fa-eye"></i>
-                        </button>
+                        </button>`;
+
+                    // Asignar: Profesor (2) y Coordinador (3)
+                    if (ROL === 2 || ROL === 3) {
+                        acc += `
+                        <button class="btn bg-transparent btn-asignar" data-id="${data}" title="Asignar" style="color:#2d594d">
+                            <i class="fas fa-user-plus"></i>
+                        </button>`;
+                    }
+
+                    // Editar/Eliminar: solo Coordinador (3)
+                    if (ROL === 3) {
+                        acc += `
                         <button class="btn bg-transparent btn-editar" data-id="${data}" title="Editar" style="color:#2d594d">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                         <button class="btn bg-transparent btn-eliminar" data-id="${data}" title="Eliminar" style="color:#2d594d">
                             <i class="fas fa-trash"></i>
-                        </button>
-                    `;
+                        </button>`;
+                    }
+                    return acc;
                 }
             }
         ]
     });
 
+    // ===============================
     // Filtros
+    // ===============================
     $('#filtroPractica, #filtroEspecialidad, #filtroModalidad').on('change', function () {
         tabla.ajax.reload();
     });
@@ -422,7 +456,8 @@ $(function () {
             type: 'POST',
             data: $form.serialize(),
             dataType: 'json',
-            success: function (res) {
+            success: function (res, status, xhr) {
+                if (redirSiLogin(res, xhr)) return;
                 if (res.ok) {
                     Swal.fire('Éxito', res.message, 'success');
                     $('#modalCrearVacante').modal('hide');
@@ -437,33 +472,26 @@ $(function () {
         });
     });
 
-    // Ubicación empresa (crear / editar)
+    // Ubicación empresa (crear)
     $('#IdEmpresa').on('change', function () {
         var idEmpresa = $(this).val();
         if (idEmpresa) {
             $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
-                { idEmpresa }, function (res) {
+                { idEmpresa }, function (res, status, xhr) {
+                    if (redirSiLogin(res, xhr)) return;
                     $('#ubicacionEmpresa').val(res.ok ? res.ubicacion : '');
                 }).fail(function(){ $('#ubicacionEmpresa').val(''); });
         } else { $('#ubicacionEmpresa').val(''); }
     });
 
-    $('#edit-IdEmpresa').on('change', function () {
-        var idEmpresa = $(this).val();
-        if (idEmpresa) {
-            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
-                { idEmpresa }, function (res) {
-                    $('#edit-Ubicacion').val(res.ok ? res.ubicacion : '');
-                }).fail(function(){ $('#edit-Ubicacion').val(''); });
-        } else { $('#edit-Ubicacion').val(''); }
-    });
-
     // ===============================
-    // EDITAR
+    // EDITAR (cargar datos y actualizar)
     // ===============================
     $('#miTabla').on('click', '.btn-editar', function () {
         var id = $(this).data('id');
-        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res) {
+        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res, status, xhr) {
+            if (redirSiLogin(res, xhr)) return;
+
             if (res.ok && res.data) {
                 var d = res.data;
                 $('#edit-IdVacante').val(d.IdVacante);
@@ -484,6 +512,18 @@ $(function () {
         });
     });
 
+    // Ubicación empresa (editar)
+    $('#edit-IdEmpresa').on('change', function () {
+        var idEmpresa = $(this).val();
+        if (idEmpresa) {
+            $.getJSON('@Url.Action("GetUbicacionEmpresa", "Practicas")',
+                { idEmpresa }, function (res, status, xhr) {
+                    if (redirSiLogin(res, xhr)) return;
+                    $('#edit-Ubicacion').val(res.ok ? res.ubicacion : '');
+                }).fail(function(){ $('#edit-Ubicacion').val(''); });
+        } else { $('#edit-Ubicacion').val(''); }
+    });
+
     $('#btnActualizarVacante').on('click', function (e) {
         e.preventDefault();
         var $form = $('#formEditarVacante');
@@ -493,7 +533,8 @@ $(function () {
             url: '@Url.Action("Editar", "Practicas")',
             type: 'POST',
             data: $form.serialize(),
-            success: function (res) {
+            success: function (res, status, xhr) {
+                if (redirSiLogin(res, xhr)) return;
                 if (res.ok) {
                     Swal.fire('Éxito', res.message, 'success');
                     $('#modalEditarVacante').modal('hide');
@@ -519,7 +560,8 @@ $(function () {
             confirmButtonText: 'Sí, eliminar'
         }).then((result) => {
             if (result.isConfirmed) {
-                $.post('@Url.Action("Eliminar", "Practicas")', { id }, function (res) {
+                $.post('@Url.Action("Eliminar", "Practicas")', { id }, function (res, status, xhr) {
+                    if (redirSiLogin(res, xhr)) return;
                     if (res.ok) {
                         Swal.fire('Eliminado', res.message, 'success');
                         tabla.ajax.reload();
@@ -536,7 +578,9 @@ $(function () {
     // ===============================
     $('#miTabla').on('click', '.btn-visualizar', function () {
         var id = $(this).data('id');
-        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res) {
+        $.get('@Url.Action("Detalle", "Practicas")', { id }, function (res, status, xhr) {
+            if (redirSiLogin(res, xhr)) return;
+
             if (res.ok && res.data) {
                 var d = res.data;
                 $('#vis-Nombre').val(d.Nombre);
@@ -551,7 +595,9 @@ $(function () {
                 $('#vis-FechaCierre').val(d.FechaCierre ? d.FechaCierre.split('T')[0] : '');
                 $('#modalVisualizarVacante').modal('show');
 
-                $.get('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: d.IdVacante }, function (res2) {
+                $.get('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: d.IdVacante }, function (res2, status2, xhr2) {
+                    if (redirSiLogin(res2, xhr2)) return;
+
                     var $lista = $('#listaPostulaciones');
                     $lista.empty();
                     if (res2.ok && res2.data && res2.data.length > 0) {
@@ -570,7 +616,7 @@ $(function () {
     });
 
     // ===============================
-    // ASIGNAR (mismo comportamiento que VistaVacantesProfesor)
+    // ASIGNAR (carga de estudiantes + handlers)
     // ===============================
     function escapeHtml(text){ if(!text&&text!==0) return ''; return $('<div>').text(text).html(); }
     function badgeEstado(estado) {
@@ -592,10 +638,11 @@ $(function () {
         }
         var $tbody = $('#miTablaAsignar tbody').empty();
 
-        // Usa la misma acción que el profesor
-        $.getJSON('@Url.Action("ObtenerEstudiantesAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
+        $.getJSON('@Url.Action("ObtenerEstudiantesAsignar", "Practicas")', { idVacante: idVacante }, function (res, status, xhr) {
+            if (redirSiLogin(res, xhr)) return;
+
             if (!res || !res.ok) {
-                Swal.fire('Error', res && res.message || 'No se pudo cargar estudiantes', 'error');
+                Swal.fire('Error', (res && res.message) || 'No se pudo cargar estudiantes', 'error');
                 return;
             }
 
@@ -615,7 +662,7 @@ $(function () {
                         btn = `<button class="btn btn-sm btn-outline-success btn-reactivar-estudiante" data-idusuario="${e.IdUsuario}">Reactivar</button>`;
                     } else if (!['rechazada','aprobada','finalizada'].includes(est)) {
                         btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante" data-idusuario="${e.IdUsuario}">Retirar</button>`;
-                    } // finales -> sin botón
+                    }
 
                     $tbody.append(`
                         <tr>
@@ -647,47 +694,56 @@ $(function () {
         });
     });
 
+    // Asignar estudiante
     $('#miTablaAsignar').on('click', '.btn-asignar-estudiante', function () {
         var idUsuario = $(this).data('idusuario');
         var idVacante = $('#modalAsignar').data('idVacante');
 
-        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp, status, xhr) {
+            if (redirSiLogin(resp, xhr)) return;
+
             if (resp && resp.ok) {
                 Swal.fire('Éxito', resp.message || 'Asignado a "En proceso".', 'success');
-                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
-                $('#miTabla').DataTable().ajax.reload(null, false);
+                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click'); // recarga modal
+                $('#miTabla').DataTable().ajax.reload(null, false); // refresca tabla sin perder página
             } else {
-                Swal.fire('Error', resp && resp.message || 'No se pudo asignar.', 'error');
+                Swal.fire('Error', (resp && resp.message) || 'No se pudo asignar.', 'error');
             }
         });
     });
 
+    // Retirar estudiante
     $('#miTablaAsignar').on('click', '.btn-retirar-estudiante', function () {
         var idUsuario = $(this).data('idusuario');
         var idVacante = $('#modalAsignar').data('idVacante');
 
-        $.post('@Url.Action("RetirarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+        $.post('@Url.Action("RetirarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp, status, xhr) {
+            if (redirSiLogin(resp, xhr)) return;
+
             if (resp && resp.ok) {
                 Swal.fire('Listo', resp.message || 'Marcado como Retirada.', 'success');
                 $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
                 $('#miTabla').DataTable().ajax.reload(null, false);
             } else {
-                Swal.fire('Error', resp && resp.message || 'No se pudo retirar.', 'error');
+                Swal.fire('Error', (resp && resp.message) || 'No se pudo retirar.', 'error');
             }
         });
     });
 
+    // Reactivar (vuelve a asignar)
     $('#miTablaAsignar').on('click', '.btn-reactivar-estudiante', function () {
         var idUsuario = $(this).data('idusuario');
         var idVacante = $('#modalAsignar').data('idVacante');
 
-        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
+        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp, status, xhr) {
+            if (redirSiLogin(resp, xhr)) return;
+
             if (resp && resp.ok) {
                 Swal.fire('Listo', resp.message || 'Reactivado a "En proceso".', 'success');
                 $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
                 $('#miTabla').DataTable().ajax.reload(null, false);
             } else {
-                Swal.fire('Error', resp && resp.message || 'No se pudo reactivar.', 'error');
+                Swal.fire('Error', (resp && resp.message) || 'No se pudo reactivar.', 'error');
             }
         });
     });
