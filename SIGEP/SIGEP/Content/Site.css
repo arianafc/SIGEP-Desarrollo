@@ -317,6 +317,19 @@
     font-weight: bold;
 }
 
+/* Archivado (10) */
+.badge-archivado {
+    background-color: #e2e3e5; /* gris medio */
+    color: #383d41;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    min-width: 90px;
+}
+
+
 /* En curso */
 .badge-en-curso {
     background-color: #d1ecf1; /* celeste suave */
@@ -370,7 +383,8 @@
 .badge-rechazada,
 .badge-aprobada,
 .badge-asignada,
-.badge-no-asignada {
+.badge-no-asignada
+.badge-archivado {
     display: inline-block;
     padding: 0.35em 0.65em;
     border-radius: 0.25rem;
