@@ -383,7 +383,7 @@
 .badge-rechazada,
 .badge-aprobada,
 .badge-asignada,
-.badge-no-asignada
+.badge-no-asignada,
 .badge-archivado {
     display: inline-block;
     padding: 0.35em 0.65em;

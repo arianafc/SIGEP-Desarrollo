@@ -17,7 +17,7 @@ using System.Web.Mvc;
 namespace SIGEP.Controllers
 {
     [FiltroSesion]
-    [FiltroUsuarioAdmin]
+    //[FiltroUsuarioAdmin]
 
     public class PracticasController : Controller
     {
@@ -29,14 +29,13 @@ namespace SIGEP.Controllers
         // VISTA PRINCIPAL VACANTES
         // ==============================
         [HttpGet]
-        //[FiltroSesion]
-        //[FiltroUsuarioAdmin]
         public ActionResult VacantesEstudiantes()
         {
             ViewBag.Especialidades = ObtenerEspecialidades();
             ViewBag.Modalidades = ObtenerModalidades();
             ViewBag.Empresas = ObtenerEmpresas();
             ViewBag.Estados = ObtenerEstados();
+            ViewBag.Estados = ObtenerEstadosVacante();
 
             return View();
         }
@@ -45,7 +44,7 @@ namespace SIGEP.Controllers
         // LISTADO VACANTES (JSON para DataTable)
         // ==============================
         [HttpGet]
-        public JsonResult GetVacantes(string estado = "", int idEspecialidad = 0, int idModalidad = 0)
+        public JsonResult GetVacantes(int? idEstado = null, int idEspecialidad = 0, int idModalidad = 0)
         {
             using (var db = new SIGEPEntities())
             {
@@ -82,8 +81,8 @@ namespace SIGEP.Controllers
                                 EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
                             };
 
-                if (!string.IsNullOrEmpty(estado))
-                    query = query.Where(x => x.EstadoNombre == estado);
+                if (idEstado.HasValue && idEstado.Value > 0)
+                    query = query.Where(x => x.IdEstado == idEstado.Value);
 
                 if (idEspecialidad > 0)
                     query = query.Where(x => x.IdEspecialidad == idEspecialidad);
@@ -116,6 +115,7 @@ namespace SIGEP.Controllers
                 return Json(new { data = outList }, JsonRequestBehavior.AllowGet);
             }
         }
+
         // ==============================
         // CREAR VACANTE (POST)
         // ==============================
@@ -131,7 +131,6 @@ namespace SIGEP.Controllers
                 return Json(new { ok = false, message = "Debe completar todos los campos obligatorios (Nombre, Empresa, Requisitos, Cupos >= 1)" });
             }
 
-            // 🔹 Validación de fechas
             if (model.FechaMaxAplicacion.HasValue && model.FechaCierre.HasValue)
             {
                 if (model.FechaMaxAplicacion.Value > model.FechaCierre.Value)
@@ -232,7 +231,7 @@ namespace SIGEP.Controllers
                              Ubicacion = dir != null ? dir.DireccionExacta : "",
                              EmpresaIdForContact = e != null ? (int?)e.IdEmpresa : null
                          })
-                         .AsEnumerable() // 🔹 de aquí en adelante ya es LINQ to Objects
+                         .AsEnumerable()
                          .Select(x => new
                          {
                              x.IdVacante,
@@ -257,7 +256,6 @@ namespace SIGEP.Controllers
                              x.EstadoNombre,
                              x.Ubicacion,
 
-                             // 🔹 Ahora sí, en memoria puedo armar las listas
                              Emails = x.EmpresaIdForContact.HasValue
                                  ? db.EmailsTB.Where(em => em.IdEmpresa == x.EmpresaIdForContact.Value)
                                               .Select(em => em.Email)
@@ -276,8 +274,6 @@ namespace SIGEP.Controllers
             }
         }
 
-
-
         // ==============================
         // EDITAR VACANTE (POST)
         // ==============================
@@ -293,7 +289,6 @@ namespace SIGEP.Controllers
                 return Json(new { ok = false, message = "Debe completar todos los campos obligatorios (Nombre, Empresa, Requisitos, Cupos >= 1)" });
             }
 
-            // 🔹 Validación de fechas
             if (model.FechaMaxAplicacion.HasValue && model.FechaCierre.HasValue)
             {
                 if (model.FechaMaxAplicacion.Value > model.FechaCierre.Value)
@@ -322,7 +317,6 @@ namespace SIGEP.Controllers
 
                     db.SaveChanges();
 
-                    // Reemplazar especialidad
                     var existentes = db.EspecialidadesVacantesTB.Where(x => x.IdVacante == vacante.IdVacante).ToList();
                     if (existentes.Any())
                         db.EspecialidadesVacantesTB.RemoveRange(existentes);
@@ -349,73 +343,6 @@ namespace SIGEP.Controllers
             }
         }
 
-
-
-        // ==============================
-        // ELIMINAR VACANTE (POST)
-        // ==============================
-        //[HttpPost]
-        //public JsonResult Eliminar(int id)
-        //{
-        //    try
-        //    {
-        //        using (var db = new SIGEPEntities())
-        //        {
-        //            var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
-        //            if (vacante == null)
-        //            {
-        //                return Json(new { ok = false, message = "La vacante no existe." });
-        //            }
-
-        //            // Validar si tiene estudiantes asignados en PracticaEstudianteTB
-        //            bool tieneAsignados = db.PracticaEstudianteTB.Any(pe => pe.IdVacante == id);
-        //            if (tieneAsignados)
-        //            {
-        //                return Json(new { ok = false, message = "No se puede eliminar: vacante tiene estudiantes asignados." });
-        //            }
-
-        //            // Buscar estado "Inactivo"
-        //            var estadoInactivo = db.EstadosTB.FirstOrDefault(e => e.Descripcion == "Inactivo");
-        //            if (estadoInactivo == null)
-        //            {
-        //                return Json(new { ok = false, message = "No existe el estado 'Inactivo' en la tabla EstadosTB." });
-        //            }
-
-        //            // Guardar estado anterior para auditoría
-        //            var estadoAnterior = vacante.IdEstado;
-
-        //            // Cambiar a estado inactivo
-        //            vacante.IdEstado = estadoInactivo.IdEstado;
-        //            db.SaveChanges();
-
-        //            // Validar sesión antes de registrar auditoría
-        //            var idUsuarioSesion = Session["IdUsuario"] as int?;
-        //            if (idUsuarioSesion != null)
-        //            {
-        //                db.AuditoriaGlobalTB.Add(new AuditoriaGlobalTB
-        //                {
-        //                    IdUsuario = idUsuarioSesion.Value,
-        //                    TablaAfectada = "VacantesPracticasTB",
-        //                    IdRegistro = vacante.IdVacante,
-        //                    Accion = "Eliminar (Inactivar)",
-        //                    CampoAfectado = "IdEstado",
-        //                    DatosAnteriores = estadoAnterior.ToString(),
-        //                    DatosNuevos = estadoInactivo.IdEstado.ToString()
-        //                });
-
-        //                db.SaveChanges();
-        //            }
-
-        //            return Json(new { ok = true, message = "Vacante eliminada (marcada como Inactivo) correctamente." });
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { ok = false, message = "Error al eliminar: " + ex.Message });
-        //    }
-        //}
-
-        //hya que porbar este nuevo metodo con lo de eliminar vacantes filtrando estuidnates a ver si tienen  practica canlada o rechazada
         [HttpPost]
         public JsonResult Eliminar(int id)
         {
@@ -426,17 +353,12 @@ namespace SIGEP.Controllers
                     var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
                     if (vacante == null)
                         return Json(new { ok = false, message = "La vacante no existe." });
+                    var estadosActivosProceso = new int[] { 3, 5, 6, 11 }; 
+                    var estadosPermitenArchivarSolo = new int[] { 4, 7 }; 
+                    int idArchivado = 10; 
 
-                    // Definición de estados (por Id) según tu catálogo
-                    var estadosActivosProceso = new int[] { 3, 5, 6, 11 }; // En proceso de Aplicación, Asignada, Aprobada, En Curso
-                    var estadosPermitenArchivarSolo = new int[] { 4, 7 };  // Rechazada, Retirada
-                    int idArchivado = 10; // Archivado
-
-                    // ¿Hay procesos activos?
                     bool hayActivos = db.PracticaEstudianteTB
                         .Any(pe => pe.IdVacante == id && estadosActivosProceso.Contains(pe.IdEstado));
-
-                    // ¿Solo hay Rechazada/Retirada (o ninguna relación)?
                     var estadosRelacion = db.PracticaEstudianteTB
                         .Where(pe => pe.IdVacante == id)
                         .Select(pe => pe.IdEstado)
@@ -448,29 +370,26 @@ namespace SIGEP.Controllers
 
                     if (hayActivos && !soloRechRet)
                     {
-                        // CAMBIO: mensaje y semántica
                         return Json(new
                         {
                             ok = false,
                             message = "No es posible desactivar la práctica: existen estudiantes con procesos activos."
                         });
                     }
-
-                    // Archivar postulaciones NO activas
                     var postulacionesNoActivas = db.PracticaEstudianteTB
                         .Where(pe => pe.IdVacante == id && !estadosActivosProceso.Contains(pe.IdEstado))
                         .ToList();
 
                     foreach (var p in postulacionesNoActivas)
                     {
-                        p.IdEstado = idArchivado;                  // CAMBIO: pasa a Archivado
+                        p.IdEstado = idArchivado;                  
                         p.FechaAplicacion = DateTime.Now;
                     }
 
-                    // Archivar la vacante
-                    vacante.IdEstado = idArchivado;                // CAMBIO: vacante archivada
+                  
+                    vacante.IdEstado = idArchivado;              
 
-                    // (opcional) Auditoría si usas tu tabla
+             
                     var idUsuarioSesion = Session["IdUsuario"] as int?;
                     if (idUsuarioSesion != null)
                     {
@@ -481,14 +400,13 @@ namespace SIGEP.Controllers
                             IdRegistro = vacante.IdVacante,
                             Accion = "Archivar (Desactivar práctica)",
                             CampoAfectado = "IdEstado",
-                            DatosAnteriores = vacante.IdEstado.ToString(), // ojo: si quieres el anterior, guárdalo antes
+                            DatosAnteriores = vacante.IdEstado.ToString(), 
                             DatosNuevos = idArchivado.ToString()
                         });
                     }
 
                     db.SaveChanges();
 
-                    // CAMBIO: mensaje de éxito
                     return Json(new { ok = true, message = "Práctica desactivada (archivada) correctamente." });
                 }
             }
@@ -529,19 +447,13 @@ namespace SIGEP.Controllers
        
 
 
-        //Tomar el IdVacante que llega al método.Buscar las especialidades ligadas a esa vacante(EspecialidadesVacantesTB).
-        //Buscar estudiantes(UsuariosTB.IdRol = 1) que tengan esas mismas especialidades(UsuarioEspecialidadTB).
-        //Excluir los que ya tengan una práctica asignada(PracticaEstudianteTB).
-
         [HttpGet]
         public JsonResult ObtenerEstudiantesAsignar(int idVacante)
         {
             using (var db = new SIGEPEntities())
             {
-                // IDs de estados "activos" en cualquier vacante
-                int[] estadosActivos = { 3, 5, 6, 12, 7 }; // En progreso, Asignada, Aprobada, Pendiente de Aprobación
+                int[] estadosActivos = { 3, 5, 6, 12, 7 };
 
-                // Solo usuarios con rol "Estudiante" + LEFT JOIN a especialidades activas
                 var estudiantes = (
                     from u in db.UsuariosTB
                     join r in db.RolesTB on u.IdRol equals r.IdRol
@@ -558,12 +470,10 @@ namespace SIGEP.Controllers
                         IdUsuario = g.Key.IdUsuario,
                         NombreCompleto = g.Key.Nombre + " " + g.Key.Apellido1 + " " + g.Key.Apellido2,
                         Cedula = g.Key.Cedula,
-                        // Usa "Nombre" si es tu columna; cambia a Descripcion si aplica en tu esquema
                         Especialidad = g.Select(x => x.esp != null ? x.esp.Nombre : "").FirstOrDefault()
                     }
                 ).ToList();
 
-                // Armar respuesta con relación en ESTA vacante y estado a mostrar
                 var data = estudiantes.Select(e =>
                 {
                     var rel = db.PracticaEstudianteTB
@@ -602,21 +512,21 @@ namespace SIGEP.Controllers
         {
             try
             {
-                // 1) Especialidades requeridas por la vacante
+             
                 var especialidadesDeLaVacante = db.EspecialidadesVacantesTB
                     .Where(ev => ev.IdVacante == idVacante)
                     .Select(ev => ev.IdEspecialidad)
                     .ToList();
 
-                // 2) Estudiantes activos con esas especialidades
+              
                 var baseEstudiantes = (
                     from u in db.UsuariosTB
                     join ue in db.UsuarioEspecialidadTB on u.IdUsuario equals ue.IdUsuario
                     join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
                     where
-                        u.IdRol == 1                 // Estudiante
-                        && u.IdEstado == 1           // Activo (o el estado que uses como "activo")
-                        && ue.IdEstado == 1          // Relación usuario-especialidad activa
+                        u.IdRol == 1               
+                        && u.IdEstado == 1           
+                        && ue.IdEstado == 1        
                         && especialidadesDeLaVacante.Contains(ue.IdEspecialidad)
                     select new
                     {
@@ -631,9 +541,6 @@ namespace SIGEP.Controllers
 
                 var idsEstudiantes = baseEstudiantes.Select(x => x.IdUsuario).ToList();
 
-                // 3) Estados (globales y por vacante) usando PracticaEstudianteTB + EstadosTB
-                //    - Global: si tiene alguna 'Asignada' en cualquier vacante
-                //    - Por vacante: si ya tiene relación con ESTA vacante y en qué estado
                 var practicasEstudiantes = (
                     from p in db.PracticaEstudianteTB
                     join e in db.EstadosTB on p.IdEstado equals e.IdEstado
@@ -647,7 +554,6 @@ namespace SIGEP.Controllers
                     }
                 ).ToList();
 
-                // Precalcular “Asignada” global por estudiante
                 var asignadaGlobal = practicasEstudiantes
                     .GroupBy(x => x.IdUsuario)
                     .ToDictionary(
@@ -655,18 +561,18 @@ namespace SIGEP.Controllers
                         g => g.Any(r => r.Estado == "Asignada" || r.Estado == "Asignado")
                     );
 
-                // Relación específica con ESTA vacante
+             
                 var porEstaVacante = practicasEstudiantes
                     .Where(x => x.IdVacante == idVacante)
                     .GroupBy(x => x.IdUsuario)
                     .ToDictionary(
                         g => g.Key,
                         g => g
-                            .OrderByDescending(r => r.IdPractica) // por si hay histórico
+                            .OrderByDescending(r => r.IdPractica) 
                             .First()
                     );
 
-                // 4) Proyección final al shape esperado por tu DataTable del modal
+               
                 var data = baseEstudiantes.Select(e => new
                 {
                     IdEstudiante = e.IdUsuario,
@@ -674,10 +580,9 @@ namespace SIGEP.Controllers
                     e.Cedula,
                     e.Especialidad,
 
-                    // Badge “Práctica Asignada” (global) vs “Sin Práctica Asignada”
+                  
                     Asignada = asignadaGlobal.TryGetValue(e.IdUsuario, out var tieneAsignada) && tieneAsignada,
 
-                    // Estado concreto en ESTA vacante (si ya tuvo o tiene proceso)
                     TieneRelacionEnVacante = porEstaVacante.ContainsKey(e.IdUsuario),
                     EstadoVacante = porEstaVacante.ContainsKey(e.IdUsuario) ? porEstaVacante[e.IdUsuario].Estado : null,
                     IdPracticaVacante = porEstaVacante.ContainsKey(e.IdUsuario) ? (int?)porEstaVacante[e.IdUsuario].IdPractica : null
@@ -695,8 +600,6 @@ namespace SIGEP.Controllers
 
 
 
-
-
         // ==============================
         // ASIGNAR ESTUDIANTE A VACANTE 
         [HttpPost]
@@ -704,8 +607,8 @@ namespace SIGEP.Controllers
         {
             using (var db = new SIGEPEntities())
             {
-                // CAMBIO: usar IdEstado = 3 ("En proceso de Aplicación")
-                var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == 3); // 3 = En proceso de Aplicación
+              
+                var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == 3); 
                 if (estado == null)
                     return Json(new { ok = false, message = "No existe el estado con Id=3 (En proceso de Aplicación)." },
                                 JsonRequestBehavior.AllowGet);
@@ -774,7 +677,7 @@ namespace SIGEP.Controllers
         {
             using (var db = new SIGEPEntities())
             {
-                // 🔹 Buscar estado "Retirada"
+               
                 var estadoRetirada = db.EstadosTB
                     .FirstOrDefault(e => e.Descripcion == "Retirada");
 
@@ -787,13 +690,13 @@ namespace SIGEP.Controllers
 
                 if (existente != null)
                 {
-                    // 🔹 Actualiza a "Retirada"
+                    
                     existente.IdEstado = estadoRetirada.IdEstado;
                     existente.FechaAplicacion = DateTime.Now;
                 }
                 else
                 {
-                    // 🔹 Si no existía, lo crea directamente en "Retirada"
+                    
                     db.PracticaEstudianteTB.Add(new PracticaEstudianteTB
                     {
                         IdVacante = idVacante,
@@ -900,6 +803,24 @@ namespace SIGEP.Controllers
             }
         }
 
+        private List<SelectListItem> ObtenerEstadosVacante()
+        {
+            using (var db = new SIGEPEntities())
+            {
+                var estados = db.EstadosTB
+                    .Where(s => s.Descripcion == "Activo" || s.Descripcion == "Archivado")
+                    .OrderBy(s => s.Descripcion)
+                    .Select(s => new SelectListItem
+                    {
+                        Value = s.IdEstado.ToString(),
+                        Text = s.Descripcion
+                    })
+                    .ToList();
+
+                return estados;
+            }
+        }
+
         // ==============================
         // get ubicacion de empresa por idEmpresa
         // ==============================
@@ -929,7 +850,6 @@ namespace SIGEP.Controllers
                     .Include("EstadosTB")
                     .ToList();
 
-                // Usuarios
                 var usuarios = db.UsuariosTB
                     .Select(u => new SelectListItem
                     {
@@ -938,18 +858,15 @@ namespace SIGEP.Controllers
                     }).ToList();
                 ViewBag.Usuarios = usuarios;
 
-                // Estados
-                var estados = db.EstadosTB
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.IdEstado.ToString(),
-                        Text = e.Descripcion.ToString()
-                    }).ToList();
-                ViewBag.Estados = estados;
+                // 🔽 ESTOS TRES SON CLAVE PARA LOS FILTROS
+                ViewBag.Modalidades = ObtenerModalidades();        // <-- faltaba
+                ViewBag.Especialidades = ObtenerEspecialidades();  // <-- por si activas el filtro luego
+                ViewBag.Estados = ObtenerEstadosVacante();         // <-- SOLO Activo / Archivado (igual que estudiantes)
 
                 return View(vacantes);
             }
         }
+
 
         [HttpGet]
         public ActionResult VisualizacionPostulacion(int idVacante, int idUsuario)
@@ -958,7 +875,7 @@ namespace SIGEP.Controllers
             {
                 using (var dbContext = new SIGEPEntities())
                 {
-                    // Obtener datos principales con el SP
+                   
                     var datosPractica = dbContext.ObtenerVisualizacionPracticaSP(idVacante, idUsuario).FirstOrDefault();
 
                     if (datosPractica == null)
@@ -973,10 +890,8 @@ namespace SIGEP.Controllers
                           "Cancelada/Rechazada",
                                    "Finalizada"};
 
-                    // Mapear directamente el resultado del SP al ViewModel
                     var viewModel = new VacantePracticaVM
                     {
-                        // Datos de la Vacante
                         IdVacante = datosPractica.IdVacante,
                         Nombre = datosPractica.Nombre,
                         EmpresaNombre = datosPractica.EmpresaNombre,
@@ -984,7 +899,6 @@ namespace SIGEP.Controllers
                         FechaMaxAplicacion = datosPractica.FechaMaxAplicacion,
                         ModalidadNombre = datosPractica.ModalidadNombre,
 
-                        // Datos del Estudiante
                         IdUsuario = datosPractica.IdUsuario,
                         EstudianteNombre = datosPractica.EstudianteNombre,
                         EstudianteCedula = datosPractica.EstudianteCedula,
@@ -992,18 +906,16 @@ namespace SIGEP.Controllers
                         EstudianteEdad = datosPractica.EstudianteEdad,
                         EstudianteEspecialidad = datosPractica.EstudianteEspecialidad,
 
-                        // Datos de Contacto
+                       
                         ContactoEmpresaNombre = datosPractica.ContactoEmpresaNombre,
                         ContactoEmpresaEmail = datosPractica.ContactoEmpresaEmail,
                         ContactoEmpresaTelefono = datosPractica.ContactoEmpresaTelefono,
 
-                        // Datos de la Práctica - AGREGADO IdPractica
                         IdPractica = datosPractica.IdPractica,
                         FechaAplicacion = datosPractica.FechaAplicacion,
                         EstadoPractica = datosPractica.EstadoPractica,
 
 
-                        // Cargar lista de estados para el dropdown
                         ListaEstados = dbContext.EstadosTB
                             .Where(e => estadosPermitidos.Contains(e.Descripcion))
                             .OrderBy(e => e.Descripcion)
@@ -1012,7 +924,6 @@ namespace SIGEP.Controllers
                                   Descripcion = e.Descripcion}).ToList()
                     };
 
-                    // Obtener comentarios con el segundo SP
                     var comentarios = dbContext.ObtenerComentariosPracticaSP(idVacante, idUsuario)
                         .Select(c => new ComentarioVM
                         {
@@ -1053,10 +964,10 @@ namespace SIGEP.Controllers
 
                 using (var dbContext = new SIGEPEntities())
                 {
-                    // Ejecutar el SP
+                   
                     var resultado = dbContext.InsertarComentarioPracticaSP(idVacante, idUsuario, comentario, idUsuarioComentario).FirstOrDefault();
 
-                    // Verificar si se insertó al menos una fila
+                    
                     if (resultado > 0)
                     {
                         return Json(new { success = true, message = "Comentario agregado correctamente" });
@@ -1085,14 +996,14 @@ namespace SIGEP.Controllers
 
                 using (var dbContext = new SIGEPEntities())
                 {
-                    // Ejecutar SP para actualizar estado
+                    
                     int idUsuarioSesion = Convert.ToInt32(Session["IdUsuario"]);
 
                     var resultado = dbContext.ActualizarEstadoPracticaSP(
                         idPractica,
                         idEstado,
                         comentario,
-                        idUsuarioSesion  // Agregar este parámetro
+                        idUsuarioSesion  
                     ).FirstOrDefault();
 
                     if (resultado == null)
@@ -1100,7 +1011,6 @@ namespace SIGEP.Controllers
                         return Json(new { success = false, message = "No se encontró la práctica." });
                     }
 
-                    // Crear el correo HTML usando tu formato existente
                     if (!string.IsNullOrEmpty(resultado.EstudianteCorreo))
                     {
                         try
@@ -1238,77 +1148,127 @@ namespace SIGEP.Controllers
             return View(); // buscará Views/Practicas/PracticasCoordinador.cshtml
         }
 
-
         [HttpGet]
-        public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0)
+        public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0, int idEspecialidad = 0)
         {
             using (var db = new SIGEPEntities())
             {
-                // 1️⃣ Validar sesión de profesor
                 if (Session["IdUsuario"] == null)
-                {
-                    return Json(new { ok = false, mensaje = "Sesión expirada o no hay profesor logueado." }, JsonRequestBehavior.AllowGet);
-                }
+                    return Json(new { ok = false, message = "Sesión expirada." }, JsonRequestBehavior.AllowGet);
 
                 int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
 
-                // 2️⃣ Obtener especialidades del profesor
-                var especialidadesProfesor = db.UsuarioEspecialidadTB
-                    .Where(ue => ue.IdUsuario == idProfesor && ue.IdEstado == 1)
-                    .Select(ue => ue.IdEspecialidad)
-                    .ToList();
-
-                if (!especialidadesProfesor.Any())
+                // 1) Especialidad(es) del profesor
+                List<int> especialidadesProfesor = new List<int>();
+                if (Session["IdEspecialidad"] != null)
                 {
-                    return Json(new { ok = false, mensaje = "El profesor no tiene especialidades registradas." }, JsonRequestBehavior.AllowGet);
+                    especialidadesProfesor.Add(Convert.ToInt32(Session["IdEspecialidad"]));
+                }
+                else
+                {
+                    especialidadesProfesor = db.UsuarioEspecialidadTB
+                        .Where(ue => ue.IdUsuario == idProfesor && ue.IdEstado == 1)
+                        .Select(ue => ue.IdEspecialidad)
+                        .ToList();
                 }
 
-                // 3️⃣ Vacantes filtradas solo por las especialidades del profesor
-                var query = from v in db.VacantesPracticasTB
-                            join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
-                            from e in je.DefaultIfEmpty()
-                            join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
-                            from d in jd.DefaultIfEmpty()
-                            join es in db.EstadosTB on v.IdEstado equals es.IdEstado into jes
-                            from es in jes.DefaultIfEmpty()
-                            join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante into jev
-                            from ev in jev.DefaultIfEmpty()
-                            join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad into jsp
-                            from sp in jsp.DefaultIfEmpty()
-                            join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
-                            from m in jm.DefaultIfEmpty()
-                            where especialidadesProfesor.Contains(ev.IdEspecialidad) // 🔹 filtro por especialidad del profesor
-                            select new VacantePracticaDTO
-                            {
-                                IdVacante = v.IdVacante,
-                                Nombre = v.Nombre,
-                                IdEmpresa = v.IdEmpresa,
-                                EmpresaNombre = e != null ? e.NombreEmpresa : "",
-                                Requerimientos = v.Requerimientos,
-                                FechaMaxAplicacion = v.FechaMaxAplicacion,
-                                NumCupos = v.NumCupos ?? 0,
-                                FechaCierre = v.FechaCierre,
-                                IdModalidad = v.IdModalidad ?? 0,
-                                ModalidadNombre = m != null ? m.Descripcion : "",
-                                Descripcion = v.Descripcion,
-                                IdEspecialidad = ev != null ? ev.IdEspecialidad : 0,
-                                EspecialidadNombre = sp != null ? sp.Nombre : "",
-                                IdEstado = v.IdEstado,
-                                EstadoNombre = es != null ? es.Descripcion : "",
-                                EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante)
-                            };
+                if (!especialidadesProfesor.Any())
+                    return Json(new { ok = true, data = new object[0] }, JsonRequestBehavior.AllowGet);
 
-                if (!string.IsNullOrEmpty(estado))
-                    query = query.Where(x => x.EstadoNombre == estado);
+                string estadoNorm = (estado ?? "").Trim().ToLower();
+                string autog = "autogestionada";
+
+                // 2) Query base (con todos los joins originales)
+                var q =
+                    from v in db.VacantesPracticasTB
+
+                    join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
+                    from e in je.DefaultIfEmpty()
+
+                    join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
+                    from d in jd.DefaultIfEmpty()
+
+                    join es in db.EstadosTB on v.IdEstado equals es.IdEstado
+
+                    join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante
+                    join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad
+
+                    join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
+                    from m in jm.DefaultIfEmpty()
+
+                    where especialidadesProfesor.Contains(ev.IdEspecialidad)
+                    select new
+                    {
+                        v.IdVacante,
+                        v.Nombre,
+                        v.IdEmpresa,
+                        EmpresaNombre = e != null ? e.NombreEmpresa : "",
+                        v.Requerimientos,
+                        v.FechaMaxAplicacion,
+                        v.NumCupos,
+                        v.FechaCierre,
+                        v.Descripcion,
+                        IdModalidad = v.IdModalidad ?? 0,
+                        ModalidadNombre = m != null ? m.Descripcion : "",
+                        IdEspecialidad = ev.IdEspecialidad,
+                        EspecialidadNombre = sp != null ? sp.Nombre : "",
+                        v.IdEstado,
+                        EstadoNombre = es != null ? es.Descripcion : "",
+
+                        // (join Direcciones conservado; agrega aquí si quieres exponer campos de d)
+                        // DireccionExacta = d != null ? d.DireccionExacta : "",
+
+                        EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante),
+
+                        TipoVacante = v.Tipo
+                    };
+
+                // 3) Excluir Autogestionadas (compatibles con EF)
+                q = q.Where(x =>
+                    ((x.EstadoNombre ?? "").ToLower() != autog) &&
+                    ((x.TipoVacante ?? "").ToLower() != autog)
+                );
+
+                // 4) Filtros de UI (compatibles con EF)
+                if (!string.IsNullOrEmpty(estadoNorm))
+                    q = q.Where(x => (x.EstadoNombre ?? "").ToLower() == estadoNorm);
 
                 if (idModalidad > 0)
-                    query = query.Where(x => x.IdModalidad == idModalidad);
+                    q = q.Where(x => x.IdModalidad == idModalidad);
 
-                var list = query.OrderByDescending(x => x.IdVacante).ToList();
+                if (idEspecialidad > 0)
+                    q = q.Where(x => x.IdEspecialidad == idEspecialidad);
 
-                return Json(new { ok = true, data = list }, JsonRequestBehavior.AllowGet);
+                // 5) Materializar + fechas ISO
+                var list = q
+                    .OrderByDescending(x => x.IdVacante)
+                    .ToList();
+
+                var data = list.Select(x => new
+                {
+                    x.IdVacante,
+                    x.Nombre,
+                    x.IdEmpresa,
+                    x.EmpresaNombre,
+                    x.Requerimientos,
+                    FechaMaxAplicacion = x.FechaMaxAplicacion.HasValue ? x.FechaMaxAplicacion.Value.ToString("o") : null,
+                    NumCupos = x.NumCupos ?? 0,
+                    FechaCierre = x.FechaCierre.HasValue ? x.FechaCierre.Value.ToString("o") : null,
+                    x.Descripcion,
+                    x.IdModalidad,
+                    x.ModalidadNombre,
+                    x.IdEspecialidad,
+                    x.EspecialidadNombre,
+                    x.IdEstado,
+                    x.EstadoNombre,
+                    x.EstudiantesPostulados
+                    // DireccionExacta = x.DireccionExacta  // si decides exponerla
+                });
+
+                return Json(new { ok = true, data }, JsonRequestBehavior.AllowGet);
             }
         }
+
 
         [HttpGet]
         public ActionResult MiPractica()

@@ -434,6 +434,8 @@
     <Content Include="Scripts\popper.min.js" />
     <Content Include="Scripts\Practicas\Autogestion.js" />
     <Content Include="Scripts\Practicas\ScriptPracticas.js" />
+    <Content Include="Scripts\Practicas\VacantesEstudiantes.js" />
+    <Content Include="Scripts\Practicas\VistaVacantesProfesor.js" />
     <Content Include="Scripts\script.js" />
     <Content Include="Scripts\sidebarmenu.js" />
     <Content Include="Scripts\sparkline.js" />
@@ -468,6 +470,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Content\estilos\DataTable\" />
     <Folder Include="Content\estilos\Documentos\" />
+    <Folder Include="Scripts\Estudiantes\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
