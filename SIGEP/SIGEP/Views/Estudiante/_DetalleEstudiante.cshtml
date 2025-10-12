@@ -1,6 +1,9 @@
 ﻿@model SIGEP.Models.EstudianteDetalleDTO
+@using System.Text
+@using System.Text.RegularExpressions
 
 @{
+    // Roles: 1=Estudiante, 2=Coordinador, 3=Profesor, 4=Egresado
     var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
 }
 
@@ -52,22 +55,32 @@
         <ul class="list-group mb-3">
             @foreach (var post in Model.Practicas)
             {
+                // C# PLANO (sin "@{}") porque ya estamos dentro del bloque del foreach
                 var estadoRaw = (post.Estado ?? "").Trim();
-                var estado = estadoRaw.ToLower();
+                var estadoNorm = Regex
+                    .Replace(
+                        (estadoRaw.ToLowerInvariant()).Normalize(NormalizationForm.FormD),
+                        "\\p{IsCombiningDiacriticalMarks}+",
+                        string.Empty
+                    )
+                    .Replace("  ", " ")
+                    .Trim();
 
-                // clase del badge
                 var clase = "badge badge-no-asignada";
-                if (estado == "en progreso") { clase = "badge badge-en-progreso"; }
-                else if (estado == "asignada") { clase = "badge badge-asignada"; }
-                else if (estado == "rechazada") { clase = "badge badge-rechazada"; }
-                else if (estado == "en curso") { clase = "badge badge-en-curso"; }
-                else if (estado == "finalizada") { clase = "badge badge-finalizada"; }
-                else if (estado == "aprobada" || estado == "aprobado") { clase = "badge badge-aprobada"; }
-                else if (estado == "retirada") { clase = "badge badge-retirada"; }
+
+                if (estadoNorm == "en proceso de aplicacion") { clase = "badge badge-en-progreso"; }
+                else if (estadoNorm == "rechazada") { clase = "badge badge-rechazada"; }
+                else if (estadoNorm == "asignada") { clase = "badge badge-asignada"; }
+                else if (estadoNorm == "aprobada" || estadoNorm == "aprobado") { clase = "badge badge-aprobada"; }
+                else if (estadoNorm == "retirada") { clase = "badge badge-retirada"; }
+                else if (estadoNorm == "finalizada") { clase = "badge badge-finalizada"; }
+                else if (estadoNorm == "rezagado") { clase = "badge badge-rezagado"; }
+                else if (estadoNorm == "archivado") { clase = "badge badge-archivado"; }
+                else if (estadoNorm == "en curso") { clase = "badge badge-en-curso"; }
+                else if (estadoNorm == "en progreso") { clase = "badge badge-en-progreso"; } // compatibilidad
 
                 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
                     <div>
-                        <!-- Redirige a Practicas/VisualizacionPostulacion con idVacante + idUsuario -->
                         <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { idVacante = post.IdVacante, idUsuario = post.IdUsuario })"
                            class="text-decoration-none"
                            style="color: #2D594D; font-weight:600;">
@@ -76,15 +89,16 @@
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <span class="@clase">@((estadoRaw == "" ? "No Asignada" : estadoRaw))</span>
+                        <span class="@clase">@((string.IsNullOrWhiteSpace(post.Estado) ? "No Asignada" : post.Estado))</span>
 
-                        @* Mostrar basurero en Asignada / En progreso / En curso / Aprobada *@
-                        @if (idRol == 2 /* Profesor */ &&
-                        !string.IsNullOrEmpty(post.Estado) &&
-                        (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
-                        || post.Estado.Equals("En progreso", StringComparison.OrdinalIgnoreCase)
-                        || post.Estado.Equals("En curso", StringComparison.OrdinalIgnoreCase)
-                        || post.Estado.Equals("Aprobada", StringComparison.OrdinalIgnoreCase)))
+                        @* Botón de desasignar visible para Profesor (rol 3) en estados permitidos *@
+                        @if (idRol == 3
+                            && !string.IsNullOrEmpty(post.Estado)
+                            && (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
+                                || post.Estado.Equals("En proceso de Aplicación", StringComparison.OrdinalIgnoreCase)
+                                || post.Estado.Equals("En curso", StringComparison.OrdinalIgnoreCase)
+                                || post.Estado.Equals("Aprobada", StringComparison.OrdinalIgnoreCase)
+                                || post.Estado.Equals("En progreso", StringComparison.OrdinalIgnoreCase)))
                         {
                             <button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
                                     data-idpractica="@post.IdPostulacion"
@@ -95,7 +109,6 @@
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         }
-
                     </div>
                 </li>
             }
@@ -105,7 +118,6 @@
     {
         <p class="text-muted">No hay postulaciones registradas.</p>
     }
-
 
     <hr />
 

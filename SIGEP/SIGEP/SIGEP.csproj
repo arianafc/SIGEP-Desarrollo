@@ -128,6 +128,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\EgresadosController.cs" />
     <Compile Include="Controllers\EmpresaController.cs" />
     <Compile Include="Controllers\EstudianteController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -419,6 +420,8 @@
     </Content>
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\DataTable\dataTables.js" />
+    <Content Include="Scripts\Egresados\ListaEgresados.js" />
+    <Content Include="Scripts\Estudiantes\ListaEstudiantes.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
     <Content Include="Scripts\jquery-3.7.0.slim.js" />
@@ -465,12 +468,12 @@
     <Content Include="Views\Practicas\PracticasCoordinador.cshtml" />
     <Content Include="Views\Estudiante\Estudiantes.cshtml" />
     <Content Include="Views\Estudiante\_DetalleEstudiante.cshtml" />
+    <Content Include="Views\Egresados\ListaEgresados.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\estilos\DataTable\" />
     <Folder Include="Content\estilos\Documentos\" />
-    <Folder Include="Scripts\Estudiantes\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
