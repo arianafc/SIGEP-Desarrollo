@@ -1,4 +1,4 @@
-﻿@model Autenticacion
+﻿@model UsuarioModel
 @{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
 }
@@ -6,7 +6,10 @@
     var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
     var usuario = Session["IdUsuario"] != null ? Convert.ToInt32(Session["IdUsuario"]) : 0;
     var NombreCompleto = $"{Session["Nombre"] ?? ""} {Session["Apellido1"] ?? ""}";
+ var encargado = Model.ListaEncargados?.FirstOrDefault();
+    
 }
+
 @section Styles {
     <style>
 
@@ -113,24 +116,68 @@
             </div>
             <div class="col-md-6 form-group">
                 <label>Correo Electrónico</label>
-                @Html.TextBoxFor(m => m.Correo, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.CorreoPersonal, new { @class = "form-control" })
             </div>
             <div class="col-md-6 form-group">
                 <label>Correo Electrónico MEP</label>
-                @Html.TextBoxFor(m => m.Correo, new { @class = "form-control" }) <!--FALTA VALIDAR QUE TENGA MEP-->
+                @Html.TextBoxFor(m => m.CorreoMEP, new { @class = "form-control" })
             </div>
             <div class="col-md-6 form-group">
-                <label>Dirección</label>
-                <input type="text" class="form-control" value="San José, Costa Rica" required />
-            </div>
-            <div class="col-md-6 form-group">
-                <label>Sexo</label>
-                <input type="text" class="form-control" value="Masculino" required />
+                <label>Sexo / Género</label>
+                @Html.DropDownListFor(m => m.Sexo,
+                    new SelectList(
+                        new[]
+                        {
+                            new { Value = "", Text = "Seleccione..." },
+                            new { Value = "Masculino", Text = "Masculino" },
+                            new { Value = "Femenino", Text = "Femenino" },
+                            new { Value = "No binario", Text = "No binario" },
+                            new { Value = "Otro", Text = "Otro" },
+                            new { Value = "Prefiero no decirlo", Text = "Prefiero no decirlo" }
+                        },
+                        "Value", "Text",
+                        Model.Sexo
+                    ),
+                    new { @class = "form-control" }
+                )
             </div>
             <div class="col-md-6 form-group">
                 <label>Nacionalidad</label>
-                <input type="text" class="form-control" value="Costarricense" required />
+                @Html.TextBoxFor(m => m.Nacionalidad, new { @class = "form-control" })
             </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Provincia <span class="text-danger">*</span></label>
+                <select class="form-control" id="provincia" name="provincia" onchange="cargarCantones()" required>
+                    <option value="">Seleccione una provincia</option>
+                    <option value="San José">San José</option>
+                    <option value="Alajuela">Alajuela</option>
+                    <option value="Cartago">Cartago</option>
+                    <option value="Heredia">Heredia</option>
+                    <option value="Guanacaste">Guanacaste</option>
+                    <option value="Puntarenas">Puntarenas</option>
+                    <option value="Limón">Limón</option>
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Cantón <span class="text-danger">*</span></label>
+                <select class="form-control" id="canton" name="canton" onchange="cargarDistritos()" required>
+                    <option value="">Seleccione un cantón</option>
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Distrito <span class="text-danger">*</span></label>
+                <select class="form-control" id="distrito" name="distrito" required>
+                    <option value="">Seleccione un distrito</option>
+                </select>
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
+                @Html.TextBoxFor(m => m.DireccionExacta, new { @class = "form-control" })
+            </div>
+
         </div>
 
         <div class="action-buttons mt-3 mb-4">
@@ -163,143 +210,221 @@
                 </button>
             </div>
         }
-        <div class="row" id="info-personal">
+    <div class="row" id="info-personal">
 
 
-            @if (rol == 1 || rol == 4)
+        @if (rol == 1 || rol == 4)
+        {
+            <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
+            <div class="row">
+                @if (rol == 1)
+                {
+                    <div class=" form-group">
+                        <label>Especialidad</label>
+                        @Html.TextBoxFor(m => m.NombreEspecialidad, new { @class = "form-control" })
+                    </div>
+                }
+                @if (rol == 4)
+                {
+                    <div class="col-md-6 form-group">
+                        <label>Carrera</label>
+                        <input type="email" class="form-control" value="xxxxxxxxx" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Año De Graduación</label>
+                        <input type="text" class="form-control" value="2022" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Título</label>
+                        <input type="email" class="form-control" value="xxxxxx" />
+                    </div>
+
+                }
+            </div>
+
+            <div class="action-buttons mt-3 mb-4">
+                <button type="button" id="btnActualizarAcademica">
+                    <i class="fas fa-edit me-2"></i> Actualizar Información Académica
+                </button>
+            </div>
+        }
+        @if (rol == 1)
+        {
+            <!-- CONTACTO EMERGENCIA -->
+            <h5 class="section-title">ENCARGADOS</h5>
+            if (encargado != null)
             {
-                <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
-                <div class="row">
-                    @if (rol == 1)
-                    {
-                        <div class="col-md-6 form-group">
-                            <label>Especialidad</label>
-                            <input type="text" class="form-control" value="Ejecutivo Para Centros de Servicio" />
-                        </div>
-                    }
-                    @if (rol == 4)
-                    {
-                        <div class="col-md-6 form-group">
-                            <label>Carrera</label>
-                            <input type="email" class="form-control" value="xxxxxxxxx" />
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Año De Graduación</label>
-                            <input type="text" class="form-control" value="2022" />
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Título</label>
-                            <input type="email" class="form-control" value="xxxxxx" />
-                        </div>
-
-                    }
-                </div>
-
-                <div class="action-buttons mt-3 mb-4">
-                    <button type="button" id="btnActualizarAcademica">
-                        <i class="fas fa-edit me-2"></i> Actualizar Información Académica
-                    </button>
-                </div>
-            }
-            @if (rol == 1)
-            {
-                <!-- CONTACTO EMERGENCIA -->
-                <h5 class="section-title">ENCARGADOS</h5>
-                <div class="row">
+                <div class="row mb-3 p-3 rounded">
                     <div class="col-md-6 form-group">
                         <label>Cédula</label>
-                        <input type="text" class="form-control" value="1-1035-0212" />
+                        <input type="text" class="form-control" value="@encargado.Cedula" readonly />
                     </div>
+
                     <div class="col-md-6 form-group">
                         <label>Nombre y Apellidos</label>
-                        <input type="text" class="form-control" value="Carlos Fallas" />
+                        <input type="text" class="form-control" value="@encargado.Nombre" readonly />
                     </div>
+
                     <div class="col-md-6 form-group">
                         <label>Teléfono</label>
-                        <input type="text" class="form-control" value="8899-1122" />
+                        <input type="text" class="form-control" value="@encargado.Telefono" readonly />
                     </div>
+
                     <div class="col-md-6 form-group">
                         <label>Parentesco</label>
-                        <input type="text" class="form-control" value="Padre" />
+                        <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
                     </div>
+
                     <div class="col-md-6 form-group">
                         <label>Residencia o Trabajo</label>
-                        <input type="text" class="form-control" value="Cartago, CR" />
+                        <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
                     </div>
+
                     <div class="col-md-6 form-group">
                         <label>Ocupación</label>
-                        <input type="text" class="form-control" value="Ingeniero Civil" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="action-buttons mt-3 col-md-6 form-group">
-                        <button type="button" id="btnActualizarEncargado">
-                            <i class="fas fa-edit me-2"></i> Actualizar Encargado
-                        </button>
+                        <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
                     </div>
 
-                    <div class="action-buttons mt-3 col-md-6 form-group">
-                        <button type="button" id="btnEliminarEncargado">
-                            <i class="fas fa-trash-alt me-2"></i> Eliminar Encargado
-                        </button>
-                    </div>
-                </div>
-                <div class="action-buttons mt-3">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
-                        <i class="fas fa-plus me-2"></i> Agregar Encargado
-                    </button>
+           
                 </div>
             }
-            @if (rol == 4)
+            else
             {
-                <h5 class="section-title">INFORMACIÓN LABORAL</h5>
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label>Empresa</label>
-                        <input type="text" class="form-control" value="BOSCH" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Puesto</label>
-                        <input type="text" class="form-control" value="Payroll Analyst" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Correo Electrónico Laboral</label>
-                        <input type="email" class="form-control" value="johnny@bosch.com" />
-                    </div>
-                </div>
-
-                <div class="action-buttons mt-3 mb-4">
-                    <button type="button" id="btnActualizarLaboral">
-                        <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
-                    </button>
-                </div>
+                <p class="text-muted">No hay encargado registrado.</p>
             }
-            @if (rol == 1)
-            {
-                <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
-                <div class="row">
-                    <div class="col-md-6 form-group">
-                        <label>Padécimientos</label>
-                        <input type="text" class="form-control" value="Asma" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Medicamentos</label>
-                        <input type="text" class="form-control" value="N/A" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Alergías</label>
-                        <input type="email" class="form-control" value="Tomate" />
-                    </div>
-                </div>
 
-                <div class="action-buttons mt-3 mb-4">
-                    <button type="button" id="btnActualizarMedica">
-                        <i class="fas fa-edit me-2"></i> Actualizar Información Médica
-                    </button>
-                </div>
-            }
+    <div class="row">
+        <div class="action-buttons mt-3 col-md-6 form-group">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
+                <i class="fas fa-plus me-2"></i> Agregar Encargado
+            </button>
+        </div>
+        <div class="action-buttons mt-3 col-md-6 form-group">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
+                <i class="fas fa-eye me-2"></i> Ver Encargados
+            </button>
         </div>
     </div>
+          
+        }
+        @if (rol == 4)
+        {
+            <h5 class="section-title">INFORMACIÓN LABORAL</h5>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Empresa</label>
+                    <input type="text" class="form-control" value="BOSCH" />
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Puesto</label>
+                    <input type="text" class="form-control" value="Payroll Analyst" />
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Correo Electrónico Laboral</label>
+                    <input type="email" class="form-control" value="johnny@bosch.com" />
+                </div>
+            </div>
+
+            <div class="action-buttons mt-3 mb-4">
+                <button type="button" id="btnActualizarLaboral">
+                    <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
+                </button>
+            </div>
+        }
+        @if (rol == 1)
+        {
+            <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Padecimientos</label>
+                    @Html.TextBoxFor(m => m.Padecimiento, new { @class = "form-control" })
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Medicamentos</label>
+                    @Html.TextBoxFor(m => m.Tratamiento, new { @class = "form-control" })
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Alergías</label>
+                    @Html.TextBoxFor(m => m.Alergia, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="action-buttons mt-3 mb-4">
+                <button type="button" id="btnActualizarMedica">
+                    <i class="fas fa-edit me-2"></i> Actualizar Información Médica
+                </button>
+            </div>
+        }
+    </div>
+    </div>
+
+
+    <!--Modal para ver encargados-->
+
+
+    <div class="modal fade" id="modalVerEncargados" tabindex="-1" aria-labelledby="modalVerEncargadosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+                <!-- Header -->
+                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <h5 class="modal-title text-white" id="modalVerEncargadosLabel">Lista de Encargados</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    @if (Model.ListaEncargados != null && Model.ListaEncargados.Any())
+                    {
+                        <table class="table table-hover align-middle">
+                            <thead class="table-success text-center">
+                                <tr>
+                                    <th>Cédula</th>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Parentesco</th>
+                                    <th>Ocupación</th>
+                                    <th>Lugar de Trabajo</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                @foreach (var encargados in Model.ListaEncargados)
+                                {
+                                    <tr>
+                                        <td>@encargados.Cedula</td>
+                                        <td>@encargados.Nombre</td>
+                                        <td>@encargados.Telefono</td>
+                                        <td>@encargados.Parentesco</td>
+                                        <td>@encargados.Ocupacion</td>
+                                        <td>@encargados.LugarTrabajo</td>
+                                        <td>
+                                            <button type="button" class="btn btn-warning btn-sm me-2" onclick="editarEncargado(@encargado.IdEncargado)">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarEncargado(@encargado.IdEncargado)">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No hay encargados registrados.</p>
+                    }
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+s
 
 
     <!-- Modal para Agregar Encargado -->
@@ -434,106 +559,8 @@
 </div>
 
 @section scripts {
-    <script>
-        $(function () {
-            var Contrasenna = $('#ContrasennaNueva');
-            var ConfirmarContrasenna = $('#ConfirmarContrasenna');
-            var BtnActualizar = $('#BtnActualizarContrasenna');
-            var Form = $('#CambiarContrasennaForm');
+    <script src="~/Scripts/Practicas/Autogestion.js"></script>
+    <script src="~/Scripts/Perfil/Perfil.js"></script>
 
-            function validarContrasenna() {
-                let pass = Contrasenna.val().trim();
-                let confirm = ConfirmarContrasenna.val().trim();
-
-                if (pass.length < 8) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Contraseña muy corta',
-                        text: 'La contraseña debe tener al menos 8 caracteres.',
-                        confirmButtonColor: '#8CA653'
-                    });
-                    return false;
-                }
-
-                if (pass !== confirm) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Las contraseñas no coinciden',
-                        text: 'Por favor, verifique que ambas contraseñas sean iguales.',
-                        confirmButtonColor: '#8CA653'
-                    });
-                    return false;
-                }
-
-                return true;
-            }
-
-            Form.on("submit", function (e) {
-                if (!validarContrasenna()) {
-                    e.preventDefault(); // evita que se mande si no pasa validación
-                    return false;
-                }
-            });
-        });
-
-
-        // Validación de info personal
-        document.getElementById("btnActualizarInfo")?.addEventListener("click", function () {
-            const campos = document.querySelectorAll('#info-personal input');
-            let incompletos = false;
-
-            campos.forEach(input => {
-                if (input.value.trim() === "") {
-                    incompletos = true;
-                }
-            });
-
-            if (incompletos) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Campos incompletos',
-                    text: 'Por favor complete todos los campos obligatorios',
-                    confirmButtonColor: '#8CA653'
-                });
-            } else {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Información actualizada correctamente',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-            }
-        });
-
-        // Reutilizable éxito
-        function mostrarSuccessMensaje() {
-            Swal.fire({
-                icon: 'success',
-                title: 'Información guardada correctamente',
-                showConfirmButton: false,
-                timer: 2000
-            });
-        }
-
-        ["btnActualizarAcademica", "btnActualizarEncargado", "btnActualizarLaboral", "btnActualizarMedica", "btnSubirDoc"].forEach(id => {
-            document.getElementById(id)?.addEventListener("click", mostrarSuccessMensaje);
-        });
-
-        // Reutilizable warning
-        function mostrarWarningMensaje() {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Ha ocurrido un error',
-                showConfirmButton: false,
-                timer: 2000
-            });
-        }
-
-        ["btnEliminarEncargado", "btnEliminarFile", "btnDescargarFile", "btnVerFile", "btnGuardarEncargado"].forEach(id => {
-            document.getElementById(id)?.addEventListener("click", mostrarWarningMensaje);
-        });
-    </script>
-    
-    
-    }
+}
 

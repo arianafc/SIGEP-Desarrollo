@@ -25,7 +25,7 @@ namespace SIGEP.Controllers
         #region Login
 
         [HttpPost]
-        public ActionResult Login(Autenticacion Usuario)
+        public ActionResult Login(UsuarioModel Usuario)
 
         {
             try
@@ -83,7 +83,7 @@ namespace SIGEP.Controllers
             {
                 using (var dbContext = new SIGEPEntities())
                 {
-                    var Datos = new Autenticacion();
+                    var Datos = new UsuarioModel();
 
                     Datos.ListaEspecialidades = dbContext.EspecialidadesTB
                     .Where(e => e.IdEstado == 1)
@@ -106,7 +106,7 @@ namespace SIGEP.Controllers
 
 
         [HttpPost]
-        public ActionResult Registro(Autenticacion Usuario)
+        public ActionResult Registro(UsuarioModel Usuario)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace SIGEP.Controllers
                         Usuario.Nombre,
                         Usuario.Apellido1,
                         Usuario.Apellido2,
-                        Usuario.Correo,
+                        Usuario.CorreoPersonal,
                         Usuario.Especialidad,
                         Usuario.FechaNacimiento,
                         Usuario.Seccion,
@@ -169,7 +169,7 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-        public ActionResult RecuperarAcceso(Autenticacion usuario)
+        public ActionResult RecuperarAcceso(UsuarioModel usuario)
         {
             using (var dbContext = new SIGEPEntities())
             {

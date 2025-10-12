@@ -16,9 +16,13 @@ namespace SIGEP.Controllers
         {
             try
             {
-                var Usuario = new Autenticacion();
+                var Usuario = new UsuarioModel();
                 using (var dbContext = new SIGEPEntities())
                 {
+
+
+
+
                     var cedula = Session["Cedula"]?.ToString();
                     if (string.IsNullOrEmpty(cedula))
                     {
@@ -27,7 +31,25 @@ namespace SIGEP.Controllers
                     }
 
                     var usuarioData = dbContext.UsuariosTB.FirstOrDefault(u => u.Cedula == cedula);
-                    var usuarioCorreo = dbContext.EmailsTB.FirstOrDefault(e => e.IdUsuario == usuarioData.IdUsuario);
+                    var usuarioCorreos = dbContext.EmailsTB
+    .Where(e => e.IdUsuario == usuarioData.IdUsuario)
+    .ToList();
+                    var usuarioSeccion = dbContext.SeccionesTB.FirstOrDefault(s => s.IdSeccion == usuarioData.IdSeccion);
+                    var usuarioEspecialidad = dbContext.UsuarioEspecialidadTB.FirstOrDefault(es => es.IdUsuario == usuarioData.IdUsuario);
+                    var especialidad = dbContext.EspecialidadesTB.FirstOrDefault(es => es.IdEspecialidad == usuarioEspecialidad.IdEspecialidad);
+                    var InfoMedica = dbContext.InformacionMedicaTB.FirstOrDefault(im => im.IdUsuario == usuarioData.IdUsuario);
+                    var direccion = dbContext.DireccionesTB.FirstOrDefault(d => d.IdDireccion == usuarioData.IdDireccion);
+                    // Correo institucional (MEP)
+                    var usuarioCorreoMEP = usuarioCorreos
+                        .FirstOrDefault(e => e.Email.ToLower().Contains("@mep.go.cr"));
+
+                    // Correo personal 
+                    var usuarioCorreoPersonal = usuarioCorreos
+                        .FirstOrDefault(e => !e.Email.ToLower().Contains("@mep.go.cr"));
+
+                    var Encargados = dbContext.ObtenerEncargadosUsuarioSP(usuarioData.IdUsuario).ToList();
+
+
 
                     if (usuarioData != null)
                     {
@@ -43,11 +65,32 @@ namespace SIGEP.Controllers
                         Usuario.IdDireccion = usuarioData.IdDireccion ?? 0;
                         Usuario.IdRol = usuarioData.IdRol;
                         Usuario.IdEstado = usuarioData.IdEstado;
-                        Usuario.Correo = usuarioCorreo?.Email ?? "";
-
+                        Usuario.CorreoPersonal = usuarioCorreoPersonal?.Email ?? "";
+                        Usuario.CorreoMEP = usuarioCorreoMEP?.Email ?? "";
+                        Usuario.NombreEspecialidad = especialidad.Nombre;
+                        Usuario.NombreSeccion = usuarioSeccion?.Seccion;
+                        Usuario.Padecimiento = InfoMedica?.Padecimiento ?? "N/A";
+                        Usuario.Alergia = InfoMedica?.Alergia ?? "N/A";
+                        Usuario.Tratamiento = InfoMedica?.Tratamiento ?? "N/A";
+                        Usuario.Nacionalidad = usuarioData.Nacionalidad ?? "N/A";
+                        Usuario.Sexo = usuarioData.Sexo ?? "N/A";
+                        Usuario.DireccionExacta = direccion?.DireccionExacta ?? "N/A";
                         // Cargar listas para dropdowns
                         Usuario.ListaSecciones = dbContext.SeccionesTB.ToList();
                         Usuario.ListaEspecialidades = dbContext.EspecialidadesTB.ToList();
+                       Usuario.ListaEncargados = Encargados.Select(enc => new EncargadoDTO
+                        {
+                            IdEncargado = enc.IdEncargado,
+                            Nombre = enc.Nombre,
+                            Telefono = enc.Telefono,
+                            Parentesco = enc.Parentesco,
+                            LugarTrabajo = enc.LugarTrabajo,
+                            Ocupacion = enc.Ocupacion,
+                            Correo = enc.Correo,
+                            Cedula = enc.Cedula,
+                            FechaRegistro = enc.FechaRegistro,
+                            IdEstado = enc.IdEstado
+                        }).ToList();
                     }
 
                     return View(Usuario);
@@ -62,7 +105,7 @@ namespace SIGEP.Controllers
 
 
         [HttpPost]
-        public ActionResult CambiarContrasenna(Autenticacion usuario)
+        public ActionResult CambiarContrasenna(UsuarioModel usuario)
         {
            try
             {

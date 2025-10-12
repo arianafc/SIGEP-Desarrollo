@@ -148,3 +148,22 @@ BEGIN
 END;
 GO
 
+CREATE OR ALTER PROCEDURE ObtenerEncargadosUsuarioSP
+@IdUsuario int
+AS
+BEGIN
+SELECT 
+    E.IdEncargado, E.Cedula, E.Nombre, E.Apellido1, E.Apellido2, 
+    E.FechaRegistro, E.Ocupacion, E.LugarTrabajo, E.IdEstado,
+    EE.Parentesco,
+    (SELECT TOP 1 T.Telefono 
+     FROM TelefonosTB T 
+     WHERE T.IdEncargado = E.IdEncargado) AS Telefono, (SELECT TOP 1 C.Email 
+     FROM EmailsTB C
+     WHERE C.IdEncargado = E.IdEncargado) AS Correo
+FROM EncargadosTB E
+INNER JOIN EstudianteEncargadoTB EE 
+    ON E.IdEncargado = EE.IdEncargado
+WHERE EE.IdUsuario = @IdUsuario;
+
+END;
