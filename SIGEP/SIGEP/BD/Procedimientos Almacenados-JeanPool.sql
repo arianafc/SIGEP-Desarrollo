@@ -103,7 +103,6 @@ BEGIN
 END
 
 -- Stored Procedure para actualizar estado de la practica
--- Stored Procedure para actualizar estado de la practica
 CREATE OR ALTER PROCEDURE ActualizarEstadoPracticaSP
     @IdPractica INT,
     @IdEstado INT,

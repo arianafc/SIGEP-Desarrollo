@@ -885,9 +885,9 @@ namespace SIGEP.Controllers
                     }
 
                     var estadosPermitidos = new List<string> {
-                      "Pendiente de Aprobación",
-                                   "En Proceso",
-                          "Cancelada/Rechazada",
+                                   "Asignada",
+                                   "Aprobada",
+                                   "En Curso",
                                    "Finalizada"};
 
                     var viewModel = new VacantePracticaVM
@@ -1284,8 +1284,18 @@ namespace SIGEP.Controllers
 
             using (var dbContext = new SIGEPEntities())
             {
+                // Lista de nombres de estados permitidos
+                var estadosPermitidos = new List<string> { "Asignada", "Aprobada", "Finalizada", "En Curso" };
+
                 var practica = dbContext.PracticaEstudianteTB
                     .Where(p => p.IdUsuario == idUsuario)
+                    .Join(dbContext.EstadosTB,
+                          p => p.IdEstado,
+                          e => e.IdEstado,
+                          (p, e) => new { Practica = p, Estado = e })
+                    .Where(x => estadosPermitidos.Contains(x.Estado.Descripcion))
+                    .OrderByDescending(x => x.Practica.FechaAplicacion)
+                    .Select(x => x.Practica)
                     .FirstOrDefault();
 
                 if (practica == null)
