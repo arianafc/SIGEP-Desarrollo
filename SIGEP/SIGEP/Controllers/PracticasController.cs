@@ -884,6 +884,8 @@ namespace SIGEP.Controllers
                         return View(new VacantePracticaVM());
                     }
 
+                    var notas = dbContext.NotasEstudiantesTB.FirstOrDefault(n => n.IdUsuario == idUsuario);
+
                     var estadosPermitidos = new List<string> {
                                    "Asignada",
                                    "Aprobada",
@@ -914,6 +916,10 @@ namespace SIGEP.Controllers
                         IdPractica = datosPractica.IdPractica,
                         FechaAplicacion = datosPractica.FechaAplicacion,
                         EstadoPractica = datosPractica.EstadoPractica,
+
+                        Nota1 = notas?.Nota1,
+                        Nota2 = notas?.Nota2,
+                        NotaFinal = notas?.NotaFinal,
 
 
                         ListaEstados = dbContext.EstadosTB

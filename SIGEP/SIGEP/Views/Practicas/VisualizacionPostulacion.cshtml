@@ -208,15 +208,23 @@ else
             </div>
 
             <!-- evaluaciones -->
-            @if (rol == 2 || rol == 3)
-            {
-                <div class="mt-4">
-                    <h4 style="color: #2D594D; font-weight: 600;">Evaluaciones</h4>
-                    <div class="alert alert-warning mt-2" role="alert" style="background-color: #FFF3CD; color: #856404; border: 1px solid #FFEEBA;">
-                        Aún no cuenta con ninguna evaluación.
+            <div class="mb-4">
+                <h5 class="section-title">Evaluación y Notas</h5>
+                <div class="row">
+                    <div class="col-md-4 form-group mb-3">
+                        <label>Nota 1</label>
+                        <input type="text" class="form-control" value="@(Model.Nota1?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-4 form-group mb-3">
+                        <label>Nota 2</label>
+                        <input type="text" class="form-control" value="@(Model.Nota2?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-4 form-group mb-3">
+                        <label>Nota Final (Promedio)</label>
+                        <input type="text" class="form-control" value="@(Model.NotaFinal?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #e3f2fd; font-weight: bold;">
                     </div>
                 </div>
-            }
+            </div>
 
             <!--MODAL PARA ACTUALIZAR ESTADO-->
             <div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-labelledby="modalActualizarEstadoLabel" aria-hidden="true">

@@ -364,7 +364,7 @@ BEGIN
         AND u.IdEstado = 1 -- Activos
         AND p.IdEstado IN (
             SELECT IdEstado FROM EstadosTB 
-            WHERE Descripcion IN ('Asignada', 'En Proceso', 'Aprobado')
+            WHERE Descripcion IN ('Asignada', 'En Curso', 'Aprobada','Finalizada')
         )
     ORDER BY u.Nombre, u.Apellido1;
 END
