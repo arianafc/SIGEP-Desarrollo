@@ -30,72 +30,64 @@ namespace SIGEP.Controllers
             ViewBag.Estados = ObtenerEstados();
             return View();
         }
-
-        // ============================== 
+        // ==============================
         // LISTADO ESTUDIANTES (JSON para DataTable)
         // ==============================
         [HttpGet]
         public JsonResult GetEstudiantes(string estado = "", int idEspecialidad = 0)
         {
             var estadosPracticaValidos = new List<string>
-            {
-                "en progreso", "asignada", "rechazada",
-                "en curso", "finalizada", "aprobada", "retirada"
-            };
+    {
+        "en progreso", "asignada", "rechazada",
+        "en curso", "finalizada", "aprobada", "retirada"
+    };
 
             var query =
-     from u in db.UsuariosTB
-     join e in db.EstadosTB on u.IdEstado equals e.IdEstado into je
-     from e in je.DefaultIfEmpty()
-     where u.IdRol == 1 // <-- SOLO ESTUDIANTES
-     select new EstudianteDTO
-     {
-         IdUsuario = u.IdUsuario,
-         Cedula = u.Cedula,
-         NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
-         Telefono = db.TelefonosTB.Where(t => t.IdUsuario == u.IdUsuario)
-                                  .OrderBy(t => t.IdTelefono)
-                                  .Select(t => t.Telefono)
-                                  .FirstOrDefault(),
-         IdEspecialidad = db.UsuarioEspecialidadTB.Where(ue => ue.IdUsuario == u.IdUsuario)
-                               .OrderByDescending(ue => ue.IdUsuarioEspecialidad)
-                               .Select(ue => ue.IdEspecialidad)
-                               .FirstOrDefault(),
-         EspecialidadNombre =
-             (from ue in db.UsuarioEspecialidadTB
-              join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
-              where ue.IdUsuario == u.IdUsuario
-              orderby ue.IdUsuarioEspecialidad descending
-              select esp.Nombre).FirstOrDefault(),
-         IdEstado = u.IdEstado,
-         EstadoNombre = e != null ? e.Descripcion : "",
-         EstadoPractica =
-             (from p in db.PracticaEstudianteTB
-              join ep in db.EstadosTB on p.IdEstado equals ep.IdEstado
-              where p.IdUsuario == u.IdUsuario
-              orderby p.IdPractica descending
-              select ep.Descripcion.Trim()).FirstOrDefault()
-     };
+                from u in db.UsuariosTB
+                join e in db.EstadosTB on u.IdEstado equals e.IdEstado into je
+                from e in je.DefaultIfEmpty()
+                where u.IdRol == 1 // <-- SOLO ESTUDIANTES
+                select new EstudianteDTO
+                {
+                    IdUsuario = u.IdUsuario,
+                    Cedula = u.Cedula,
+                    NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                    Telefono = db.TelefonosTB.Where(t => t.IdUsuario == u.IdUsuario)
+                                             .OrderBy(t => t.IdTelefono)
+                                             .Select(t => t.Telefono)
+                                             .FirstOrDefault(),
+                    IdEspecialidad = db.UsuarioEspecialidadTB.Where(ue => ue.IdUsuario == u.IdUsuario)
+                                          .OrderByDescending(ue => ue.IdUsuarioEspecialidad)
+                                          .Select(ue => ue.IdEspecialidad)
+                                          .FirstOrDefault(),
+                    EspecialidadNombre =
+                        (from ue in db.UsuarioEspecialidadTB
+                         join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
+                         where ue.IdUsuario == u.IdUsuario
+                         orderby ue.IdUsuarioEspecialidad descending
+                         select esp.Nombre).FirstOrDefault(),
+                    IdEstado = u.IdEstado,
+                    EstadoNombre = e != null ? e.Descripcion : "",
+                    EstadoPractica =
+                        (from p in db.PracticaEstudianteTB
+                         join ep in db.EstadosTB on p.IdEstado equals ep.IdEstado
+                         where p.IdUsuario == u.IdUsuario
+                         orderby p.IdPractica descending
+                         select ep.Descripcion.Trim()).FirstOrDefault()
+                };
 
-
-            // filtro estado académico (texto)
-            if (!string.IsNullOrEmpty(estado))
+            // Filtro por estado académico (texto)
+            if (!string.IsNullOrWhiteSpace(estado))
             {
                 var estadoNorm = estado.Trim().ToLower();
                 query = query.Where(x => (x.EstadoNombre ?? "").Trim().ToLower() == estadoNorm);
             }
 
-            // filtro especialidad
-            if (idEspecialidad > 0)
-            {
-                query = query.Where(x => x.IdEspecialidad == idEspecialidad);
-            }
-
-            // restricción para profesor
+            // Rol desde sesión: 1=Estudiante, 2=Coordinador, 3=Profesor, 4=Egresado
             int idRol = 0;
             if (Session["IdRol"] != null) int.TryParse(Session["IdRol"].ToString(), out idRol);
 
-            if (idRol == 2) // Profesor
+            if (idRol == 3) // Profesor: SIEMPRE filtra por SU especialidad. Ignora idEspecialidad del cliente.
             {
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
                 int? idEspecialidadProfesor = db.UsuarioEspecialidadTB
@@ -107,9 +99,14 @@ namespace SIGEP.Controllers
                 if (idEspecialidadProfesor.HasValue)
                     query = query.Where(x => x.IdEspecialidad == idEspecialidadProfesor.Value);
             }
-
-
-
+            else
+            {
+                // Coordinador (2) u otros: aplicar el filtro de UI si viene
+                if (idEspecialidad > 0)
+                {
+                    query = query.Where(x => x.IdEspecialidad == idEspecialidad);
+                }
+            }
 
             var list = query.OrderByDescending(x => x.IdUsuario).ToList();
 
@@ -128,6 +125,8 @@ namespace SIGEP.Controllers
 
             return Json(new { data = outList }, JsonRequestBehavior.AllowGet);
         }
+
+
 
         // ==============================
         // DETALLE DE ESTUDIANTE
@@ -443,7 +442,7 @@ namespace SIGEP.Controllers
                     return Json(new { success = false, message = "No se encontró ninguna práctica asociada al estudiante." });
 
                 var estadosValidos = db.EstadosTB
-                    .Where(e => new[] { "En progreso", "Asignada", "Rechazada", "En curso", "Finalizada", "Aprobada", "Retirada" }
+                    .Where(e => new[] { "En proceso de Aplicacion", "Asignada", "Rechazada", "En curso", "Finalizada", "Aprobada", "Retirada", "Archivado" }
                     .Contains(e.Descripcion))
                     .Select(e => e.IdEstado)
                     .ToList();
