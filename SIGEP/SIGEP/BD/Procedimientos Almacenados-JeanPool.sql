@@ -103,7 +103,6 @@ BEGIN
 END
 
 -- Stored Procedure para actualizar estado de la practica
--- Stored Procedure para actualizar estado de la practica
 CREATE OR ALTER PROCEDURE ActualizarEstadoPracticaSP
     @IdPractica INT,
     @IdEstado INT,
@@ -202,9 +201,9 @@ BEGIN
                 1, 'Híbrido', @DescripcionTareas, 'Autogestionada', 1);
         SET @IdVacante = SCOPE_IDENTITY();
         
-        -- 5. Crear práctica con estado "Pendiente de Aprobación" (asumiendo IdEstado = 5)
+        -- 5. Crear práctica con estado "Pendiente de Aprobación"
         INSERT INTO PracticaEstudianteTB (IdVacante, IdUsuario, FechaAplicacion, IdEstado)
-        VALUES (@IdVacante, @IdUsuario, GETDATE(), 5); -- Estado pendiente de aprobación
+        VALUES (@IdVacante, @IdUsuario, GETDATE(), 12); -- Estado pendiente de aprobación
         SET @IdPractica = SCOPE_IDENTITY();
         
         -- 6. Agregar comentario inicial
@@ -365,7 +364,7 @@ BEGIN
         AND u.IdEstado = 1 -- Activos
         AND p.IdEstado IN (
             SELECT IdEstado FROM EstadosTB 
-            WHERE Descripcion IN ('Asignada', 'En Proceso', 'Aprobado')
+            WHERE Descripcion IN ('Asignada', 'En Curso', 'Aprobada','Finalizada')
         )
     ORDER BY u.Nombre, u.Apellido1;
 END

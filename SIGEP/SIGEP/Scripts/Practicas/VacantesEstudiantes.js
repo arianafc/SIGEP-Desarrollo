@@ -79,25 +79,31 @@
                     orderable: false,
                     render: function (data, type, row) {
                         var inactivaOArchivado = (row.EstadoNombre === "Inactivo" || row.EstadoNombre === "Archivado");
+
+                        // NUEVO: Verificar si es autogestionada
+                        var esAutogestionada = (row.Nombre && row.Nombre.indexOf('Práctica Autogestionada') >= 0);
+
                         var dis = inactivaOArchivado ? 'disabled aria-disabled="true"' : '';
                         var muted = inactivaOArchivado ? 'opacity:0.35; cursor:not-allowed;' : '';
 
                         var acc = `<button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d">
-                        <i class="fas fa-eye"></i>
-                      </button>`;
+            <i class="fas fa-eye"></i>
+        </button>`;
 
-                        if (CFG.rol === 2 || CFG.rol === 3) {
+                        // Mostrar botón Asignar SOLO si NO es autogestionada
+                        if ((CFG.rol === 2 || CFG.rol === 3) && !esAutogestionada) {
                             acc += `<button class="btn bg-transparent btn-asignar" data-id="${data}" title="${inactivaOArchivado ? 'Acción deshabilitada por estado' : 'Asignar'}" style="color:#2d594d; ${muted}" ${dis}>
-                        <i class="fas fa-user-plus"></i>
-                      </button>`;
+                <i class="fas fa-user-plus"></i>
+            </button>`;
                         }
+
                         if (CFG.rol === 2) {
                             acc += `<button class="btn bg-transparent btn-editar" data-id="${data}" title="${inactivaOArchivado ? 'Acción deshabilitada por estado' : 'Editar'}" style="color:#2d594d; ${muted}" ${dis}>
-                        <i class="fas fa-sync-alt"></i>
-                      </button>
-                      <button class="btn bg-transparent btn-eliminar" data-id="${data}" title="Archivar" style="color:#2d594d; ${muted}" ${dis}>
-                        <i class="fas fa-archive"></i>
-                      </button>`;
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn bg-transparent btn-eliminar" data-id="${data}" title="Archivar" style="color:#2d594d; ${muted}" ${dis}>
+                <i class="fas fa-archive"></i>
+            </button>`;
                         }
                         return acc;
                     }

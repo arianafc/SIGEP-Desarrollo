@@ -52,6 +52,9 @@ namespace SIGEP.Models
         public DateTime? FechaUltimoComentario { get; set; }
 
         public List<ComentarioVM> Comentarios { get; set; } = new List<ComentarioVM>();
+        public decimal? Nota1 { get; set; }
+        public decimal? Nota2 { get; set; }
+        public decimal? NotaFinal { get; set; }
     }
 
     public class ComentarioVM

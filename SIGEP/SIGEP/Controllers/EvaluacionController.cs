@@ -168,37 +168,67 @@ namespace SIGEP.Controllers
 
                 int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
 
+                // Validaciones
+                if (nota1 < 0 || nota1 > 100)
+                {
+                    return Json(new { success = false, message = "La Nota 1 debe estar entre 0 y 100" });
+                }
+
+                if (nota2 < 0 || nota2 > 100)
+                {
+                    return Json(new { success = false, message = "La Nota 2 debe estar entre 0 y 100" });
+                }
+
                 using (var dbContext = new SIGEPEntities())
                 {
-                    var resultado = dbContext.GuardarNotaEstudianteSP(
-                        idUsuario,
-                        nota1,
-                        nota2,
-                        notaFinal,
-                        idProfesor
-                    ).FirstOrDefault();
+                    // Verificar si ya existe un registro de notas
+                    var notaExistente = dbContext.NotasEstudiantesTB.FirstOrDefault(n => n.IdUsuario == idUsuario);
 
-                    if (resultado != null && resultado.Exito == 1)
+                    if (notaExistente != null)
                     {
-                        return Json(new
-                        {
-                            success = true,
-                            message = "Nota registrada correctamente"
-                        });
+                        // Actualizar notas existentes
+                        notaExistente.Nota1 = nota1;
+                        notaExistente.Nota2 = nota2;
+                        notaExistente.NotaFinal = notaFinal;
+                        notaExistente.FechaActualizacion = DateTime.Now;
+                        notaExistente.IdProfesor = idProfesor;
                     }
                     else
                     {
-                        return Json(new
+                        // Insertar nuevas notas
+                        var nuevaNota = new NotasEstudiantesTB
                         {
-                            success = false,
-                            message = resultado?.Mensaje ?? "Error al guardar la nota"
-                        });
+                            IdUsuario = idUsuario,
+                            Nota1 = nota1,
+                            Nota2 = nota2,
+                            NotaFinal = notaFinal,
+                            FechaRegistro = DateTime.Now,
+                            IdProfesor = idProfesor
+                        };
+                        dbContext.NotasEstudiantesTB.Add(nuevaNota);
                     }
+
+                    dbContext.SaveChanges();
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Nota registrada correctamente"
+                    });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error: " + ex.Message });
+                // Log del error
+                System.Diagnostics.Debug.WriteLine($"Error en GuardarNota: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Error al guardar la nota: " + ex.Message
+                });
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Evaluaciones";
-    var rol = Session["rol"] != null ? Convert.ToInt32(Session["rol"]) : 0;
+    var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
 }
 
 <!-- Campo oculto para el rol (usado en JavaScript) -->
@@ -146,7 +146,7 @@
             </div>
 
             <div class="modal-body px-4">
-                @if (rol == 4)
+                @if (rol == 3)
                 {
                     <div class="row top-buttons mb-4 action-buttons">
                         <div class="col-md-6">

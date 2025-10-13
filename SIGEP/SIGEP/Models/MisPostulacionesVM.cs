@@ -37,5 +37,7 @@ namespace SIGEP.Models
         public string DescripcionTareas { get; set; }
         public string Duracion { get; set; }
         public int IdModalidad { get; set; }
+        public int especialidadEstudiante { get; set; }
+        
     }
 }
