@@ -148,13 +148,13 @@
             <div class="modal-body px-4">
                 @if (rol == 3)
                 {
-                    <div class="row top-buttons mb-4 action-buttons">
-                        <div class="col-md-6">
-                            <button data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
-                                <i class="fas fa-folder-open me-2"></i> Subir Documentos
-                            </button>
-                        </div>
+                <div class="row top-buttons mb-4 action-buttons">
+                    <div class="col-md-6">
+                        <button data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
+                            <i class="fas fa-folder-open me-2"></i> Subir Documentos
+                        </button>
                     </div>
+                </div>
                 }
 
                 <!-- Sección: Información Personal -->
@@ -218,6 +218,18 @@
                             <label>Teléfono de Contacto</label>
                             <input type="text" class="form-control" readonly>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Evaluaciones -->
+            <div class="mb-4">
+                <h5 class="section-title">Evaluaciones</h5>
+                <div id="evaluacionesContainer" class="row">
+                    <div class="col-12">
+                        <p class="text-muted text-center">
+                            <i class="bi bi-info-circle"></i> Cargando documentos...
+                        </p>
                     </div>
                 </div>
             </div>

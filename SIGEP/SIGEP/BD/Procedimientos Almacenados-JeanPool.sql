@@ -490,6 +490,24 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE [dbo].[ObtenerDocumentosEvaluacionSP]
+    @IdUsuario INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        IdDocumento,
+        Documento,
+        Tipo,
+        RutaArchivo,
+        FechaSubida,
+        LOWER(RIGHT(Documento, CHARINDEX('.', REVERSE(Documento)))) AS Extension
+    FROM DocumentosTB
+    WHERE IdUsuario = @IdUsuario 
+        AND Tipo = 'Evaluación'
+    ORDER BY FechaSubida DESC;
+END
 
 -- Crear tabla para almacenar las notas de los estudiantes
 CREATE TABLE [dbo].[NotasEstudiantesTB](

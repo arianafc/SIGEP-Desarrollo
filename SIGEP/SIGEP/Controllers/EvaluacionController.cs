@@ -348,6 +348,116 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
+
+        [HttpGet]
+        public JsonResult ObtenerDocumentosEvaluacion(int idUsuario)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documentos = dbContext.ObtenerDocumentosEvaluacionSP(idUsuario).ToList();
+
+                    var resultado = documentos.Select(d => new
+                    {
+                        IdDocumento = d.IdDocumento,
+                        Nombre = d.Documento,
+                        RutaArchivo = d.RutaArchivo,
+                        FechaSubida = d.FechaSubida.ToString("dd/MM/yyyy HH:mm"),
+                        Extension = d.Extension ?? System.IO.Path.GetExtension(d.Documento)
+                    }).ToList();
+
+                    return Json(new { success = true, documentos = resultado }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult DescargarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
+
+                    if (documento == null)
+                    {
+                        return HttpNotFound("Documento no encontrado");
+                    }
+
+                    var filePath = Server.MapPath(documento.RutaArchivo);
+
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        return HttpNotFound("Archivo no encontrado en el servidor");
+                    }
+
+                    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                    var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
+
+                    string contentType = "application/octet-stream";
+                    if (extension == ".pdf")
+                        contentType = "application/pdf";
+                    else if (extension == ".xlsx")
+                        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    else if (extension == ".xls")
+                        contentType = "application/vnd.ms-excel";
+
+                    return File(fileBytes, contentType, documento.Documento);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error al descargar: " + ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult VisualizarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
+
+                    if (documento == null)
+                    {
+                        return HttpNotFound("Documento no encontrado");
+                    }
+
+                    var filePath = Server.MapPath(documento.RutaArchivo);
+
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        return HttpNotFound("Archivo no encontrado");
+                    }
+
+                    var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
+
+                    // Solo permitir visualización de PDFs en el navegador
+                    if (extension == ".pdf")
+                    {
+                        var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                        return File(fileBytes, "application/pdf");
+                    }
+                    else
+                    {
+                        // Para Excel, forzar descarga
+                        return DescargarDocumento(idDocumento);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error: " + ex.Message);
+            }
+        }
     }
 }
 
