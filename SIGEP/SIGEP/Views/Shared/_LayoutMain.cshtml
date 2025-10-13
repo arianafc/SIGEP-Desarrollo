@@ -213,7 +213,7 @@
                         @if (rol == 2)
                         {
                             <li class="sidebar-item">
-                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("GestionAdministracion", "AdministracionGeneral")">
+                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("AdministracionGeneral", "AdministracionGeneral")">
                                     <i class="ti-id-badge"></i>
                                     <span class="hide-menu">Administración General</span>
                                 </a>
@@ -306,7 +306,7 @@
           });
       </text>
   }
-
+    GestionAdministracion
   @if (TempData["SwalSuccess"] != null)
   {
       <text>
