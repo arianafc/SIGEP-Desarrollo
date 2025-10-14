@@ -210,159 +210,159 @@
                 </button>
             </div>
         }
-    <div class="row" id="info-personal">
+        <div class="row" id="info-personal">
 
 
-        @if (rol == 1 || rol == 4)
-        {
-            <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
-            <div class="row">
-                @if (rol == 1)
-                {
-                    <div class=" form-group">
-                        <label>Especialidad</label>
-                        @Html.TextBoxFor(m => m.NombreEspecialidad, new { @class = "form-control" })
-                    </div>
-                }
-                @if (rol == 4)
-                {
-                    <div class="col-md-6 form-group">
-                        <label>Carrera</label>
-                        <input type="email" class="form-control" value="xxxxxxxxx" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Año De Graduación</label>
-                        <input type="text" class="form-control" value="2022" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Título</label>
-                        <input type="email" class="form-control" value="xxxxxx" />
-                    </div>
-
-                }
-            </div>
-
-            <div class="action-buttons mt-3 mb-4">
-                <button type="button" id="btnActualizarAcademica">
-                    <i class="fas fa-edit me-2"></i> Actualizar Información Académica
-                </button>
-            </div>
-        }
-        @if (rol == 1)
-        {
-            <!-- CONTACTO EMERGENCIA -->
-            <h5 class="section-title">ENCARGADOS</h5>
-            if (encargado != null)
+            @if (rol == 1 || rol == 4)
             {
-                <div class="row mb-3 p-3 rounded">
-                    <div class="col-md-6 form-group">
-                        <label>Cédula</label>
-                        <input type="text" class="form-control" value="@encargado.Cedula" readonly />
-                    </div>
+                <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
+                <div class="row">
+                    @if (rol == 1)
+                    {
+                        <div class=" form-group">
+                            <label>Especialidad</label>
+                            @Html.TextBoxFor(m => m.NombreEspecialidad, new { @class = "form-control" })
+                        </div>
+                    }
+                    @if (rol == 4)
+                    {
+                        <div class="col-md-6 form-group">
+                            <label>Carrera</label>
+                            <input type="email" class="form-control" value="xxxxxxxxx" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Año De Graduación</label>
+                            <input type="text" class="form-control" value="2022" />
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Título</label>
+                            <input type="email" class="form-control" value="xxxxxx" />
+                        </div>
 
-                    <div class="col-md-6 form-group">
-                        <label>Nombre y Apellidos</label>
-                        <input type="text" class="form-control" value="@encargado.Nombre" readonly />
-                    </div>
+                    }
+                </div>
 
-                    <div class="col-md-6 form-group">
-                        <label>Teléfono</label>
-                        <input type="text" class="form-control" value="@encargado.Telefono" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Parentesco</label>
-                        <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Residencia o Trabajo</label>
-                        <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Ocupación</label>
-                        <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
-                    </div>
-
-           
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="button" id="btnActualizarAcademica">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Académica
+                    </button>
                 </div>
             }
-            else
+            @if (rol == 1)
             {
-                <p class="text-muted">No hay encargado registrado.</p>
+                <!-- CONTACTO EMERGENCIA -->
+                <h5 class="section-title">ENCARGADOS</h5>
+                if (encargado != null)
+                {
+                    <div class="row mb-3 p-3 rounded">
+                        <div class="col-md-6 form-group">
+                            <label>Cédula</label>
+                            <input type="text" class="form-control" value="@encargado.Cedula" readonly />
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Nombre y Apellidos</label>
+                            <input type="text" class="form-control" value="@encargado.Nombre" readonly />
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Teléfono</label>
+                            <input type="text" class="form-control" value="@encargado.Telefono" readonly />
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Parentesco</label>
+                            <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Residencia o Trabajo</label>
+                            <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>Ocupación</label>
+                            <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
+                        </div>
+
+
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No hay encargado registrado.</p>
+                }
+
+                <div class="row">
+                    <div class="action-buttons mt-3 col-md-6 form-group">
+                        <button type="button" class="btn btn-primary" id="BtnVerEncargadosModal" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
+                            <i class="fas fa-plus me-2"></i> Agregar Encargado
+                        </button>
+                    </div>
+                    <div class="action-buttons mt-3 col-md-6 form-group">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
+                            <i class="fas fa-eye me-2"></i> Ver Encargados
+                        </button>
+                    </div>
+                </div>
+
             }
+            @if (rol == 4)
+            {
+                <h5 class="section-title">INFORMACIÓN LABORAL</h5>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Empresa</label>
+                        <input type="text" class="form-control" value="BOSCH" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Puesto</label>
+                        <input type="text" class="form-control" value="Payroll Analyst" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Correo Electrónico Laboral</label>
+                        <input type="email" class="form-control" value="johnny@bosch.com" />
+                    </div>
+                </div>
 
-    <div class="row">
-        <div class="action-buttons mt-3 col-md-6 form-group">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
-                <i class="fas fa-plus me-2"></i> Agregar Encargado
-            </button>
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="button" id="btnActualizarLaboral">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
+                    </button>
+                </div>
+            }
+            @if (rol == 1)
+            {
+                <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Padecimientos</label>
+                        @Html.TextBoxFor(m => m.Padecimiento, new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Medicamentos</label>
+                        @Html.TextBoxFor(m => m.Tratamiento, new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Alergías</label>
+                        @Html.TextBoxFor(m => m.Alergia, new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="button" id="btnActualizarMedica">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Médica
+                    </button>
+                </div>
+            }
         </div>
-        <div class="action-buttons mt-3 col-md-6 form-group">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
-                <i class="fas fa-eye me-2"></i> Ver Encargados
-            </button>
-        </div>
-    </div>
-          
-        }
-        @if (rol == 4)
-        {
-            <h5 class="section-title">INFORMACIÓN LABORAL</h5>
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label>Empresa</label>
-                    <input type="text" class="form-control" value="BOSCH" />
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Puesto</label>
-                    <input type="text" class="form-control" value="Payroll Analyst" />
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Correo Electrónico Laboral</label>
-                    <input type="email" class="form-control" value="johnny@bosch.com" />
-                </div>
-            </div>
-
-            <div class="action-buttons mt-3 mb-4">
-                <button type="button" id="btnActualizarLaboral">
-                    <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
-                </button>
-            </div>
-        }
-        @if (rol == 1)
-        {
-            <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label>Padecimientos</label>
-                    @Html.TextBoxFor(m => m.Padecimiento, new { @class = "form-control" })
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Medicamentos</label>
-                    @Html.TextBoxFor(m => m.Tratamiento, new { @class = "form-control" })
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Alergías</label>
-                    @Html.TextBoxFor(m => m.Alergia, new { @class = "form-control" })
-                </div>
-            </div>
-
-            <div class="action-buttons mt-3 mb-4">
-                <button type="button" id="btnActualizarMedica">
-                    <i class="fas fa-edit me-2"></i> Actualizar Información Médica
-                </button>
-            </div>
-        }
-    </div>
     </div>
 
 
     <!--Modal para ver encargados-->
 
 
-    <div class="modal fade" id="modalVerEncargados" tabindex="-1" aria-labelledby="modalVerEncargadosLabel" aria-hidden="true">
+    <div class="modal fade" id="modalVerEncargados" tabindex="-1" aria-labelledby="modalVerEncargadosLabel"  aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
 
@@ -399,7 +399,7 @@
                                         <td>@encargados.Ocupacion</td>
                                         <td>@encargados.LugarTrabajo</td>
                                         <td>
-                                            <button type="button" class="btn btn-warning btn-sm me-2" onclick="editarEncargado(@encargado.IdEncargado)">
+                                            <button type="button" class="btn btn-warning btn-sm me-2"onclick="editarEncargado(@encargado.IdEncargado)">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button type="button" class="btn btn-danger btn-sm" onclick="eliminarEncargado(@encargado.IdEncargado)">
@@ -424,7 +424,7 @@
             </div>
         </div>
     </div>
-s
+    s
 
 
     <!-- Modal para Agregar Encargado -->
@@ -478,6 +478,74 @@ s
             </div>
         </div>
     </div>
+
+
+    <!-- Modal para Editar Encargado -->
+    <div class="modal fade" id="modalEditarEncargado" tabindex="-1" aria-labelledby="modalEditarEncargadoLabel" >
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+                <!-- Header -->
+                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <h5 class="modal-title text-white" id="modalEditarEncargadoLabel">Editar Encargado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <form id="formEditarEncargado">
+                        <input type="hidden" id="IdEncargado" name="IdEncargado" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Cédula</label>
+                                <input type="text" class="form-control" id="CedulaEditar" name="Cedula" placeholder="Ej. 1-1035-0212">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Nombre</label>
+                                <input type="text" class="form-control" id="NombreEditar" name="Nombre" placeholder="Ej. Juan Pérez">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Primer Apellido</label>
+                                <input type="text" class="form-control" id="Apellido1Editar" name="Apellido1" placeholder="Ej. Juan Pérez">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Segundo Apellido</label>
+                                <input type="text" class="form-control" id="Apellido2Editar" name="SegundoApellido" placeholder="Ej. Juan Pérez">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Teléfono</label>
+                                <input type="text" class="form-control" id="TelefonoEditar" name="Telefono" placeholder="Ej. 8888-9999">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Parentesco</label>
+                                <input type="text" class="form-control" id="ParentescoEditar" name="Parentesco" placeholder="Ej. Madre, Tío, etc.">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Residencia o Trabajo</label>
+                                <input type="text" class="form-control" id="LugarTrabajoEditar" name="LugarTrabajo" placeholder="Ej. Cartago, CR">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Ocupación</label>
+                                <input type="text" class="form-control" id="OcupacionEditar" name="Ocupacion" placeholder="Ej. Ingeniero Civil">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold" style="color: #2D594D;">Correo</label>
+                                <input type="email" class="form-control" id="CorreoEditar" name="Correo" placeholder="Ej. correo@gmail.com">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnActualizarEncargado" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- Modal para Subir Documento -->

@@ -135,5 +135,114 @@ namespace SIGEP.Controllers
 
             return RedirectToAction("MiPerfil");
         }
+
+
+        [HttpPost]
+
+        public ActionResult ActualizarEncargado(int IdEncargado, string Nombre, string Apellido1, string Apellido2, string Telefono, string Parentesco, string LugarTrabajo, string Ocupacion, string Correo, string Cedula)
+        {
+            try
+            {
+
+                var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var accion = 1;
+                    var result = dbContext.AccionesEncargadoSP(accion, IdEncargado, Nombre, Telefono, Parentesco, LugarTrabajo, Ocupacion, Correo, Cedula, Apellido1, Apellido2, IdUsuario);
+                  int? affectedRows = result.FirstOrDefault();
+                    if (affectedRows > 0)
+                    {
+                        return Json(new { success = true, mensaje = "Encargado actualizado exitosamente." });
+                       
+                    }
+                    else
+                    {
+                        return Json(new { success = false, mensaje = "No se pudo actualizar el encargado, intente de nuevo." });
+                       
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["SwalError"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("MiPerfil");
+        }
+
+
+        [HttpPost]
+
+        public ActionResult EliminarEncargado(int IdEncargado)
+        {
+            try
+            {
+
+                var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var accion = 2;
+                    var result = dbContext.AccionesEncargadoSP(accion, IdEncargado, "", "", "", "", "", "", "", "", "", IdUsuario);
+                    int? affectedRows = result.FirstOrDefault();
+                    if (affectedRows > 0)
+                    {
+                        return Json(new { success = true, mensaje = "Encargado desactivado exitosamente." });
+
+                    }
+                    else
+                    {
+                        return Json(new { success = false, mensaje = "No se pudo desactivar el encargado, intente de nuevo." });
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["SwalError"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("MiPerfil");
+        }
+        
+
+        [HttpGet]
+        public JsonResult ObtenerEncargadoPorId(int idEncargado)
+        {
+            try
+            {
+                var idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var db = new SIGEPEntities())
+                {
+                    // Llama al SP
+                    var encargados = db.ObtenerEncargadosUsuarioSP(idUsuario).ToList();
+
+                    // Busca el encargado específico
+                    var encargado = encargados
+                        .Where(e => e.IdEncargado == idEncargado)
+                        .Select(e => new
+                        {
+                            e.IdEncargado,
+                            e.Cedula,
+                            e.Nombre,
+                            e.Apellido1,
+                            e.Apellido2,
+                            e.Telefono,
+                            e.Parentesco,
+                            e.LugarTrabajo,
+                            e.Ocupacion,
+                            e.Correo
+                        })
+                        .FirstOrDefault();
+
+                    return Json(encargado, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = true, mensaje = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
     }
 }
