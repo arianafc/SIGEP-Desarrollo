@@ -16,5 +16,6 @@ namespace SIGEP.Models
         public int IdEstado { get; set; }
         public string EstadoNombre { get; set; }
         public string EstadoPractica { get; set; }
+        public bool EstadoAcademico { get; set; }
     }
 }

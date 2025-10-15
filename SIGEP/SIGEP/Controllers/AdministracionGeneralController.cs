@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Web.Mvc;
 using SIGEP.EF;
-using SIGEP.Web.Filters;
 
 namespace SIGEP.Web.Controllers
 {
