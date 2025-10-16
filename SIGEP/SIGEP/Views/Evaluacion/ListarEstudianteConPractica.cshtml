@@ -148,13 +148,13 @@
             <div class="modal-body px-4">
                 @if (rol == 3)
                 {
-                <div class="row top-buttons mb-4 action-buttons">
-                    <div class="col-md-6">
-                        <button data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
-                            <i class="fas fa-folder-open me-2"></i> Subir Documentos
-                        </button>
+                    <div class="row top-buttons mb-4 action-buttons">
+                        <div class="col-md-6">
+                            <button data-bs-toggle="modal" data-bs-target="#modalSubirDocumento">
+                                <i class="fas fa-folder-open me-2"></i> Subir Documentos
+                            </button>
+                        </div>
                     </div>
-                </div>
                 }
 
                 <!-- Sección: Información Personal -->
@@ -220,16 +220,19 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Sección: Evaluaciones -->
-            <div class="mb-4">
-                <h5 class="section-title">Evaluaciones</h5>
-                <div id="evaluacionesContainer" class="row">
-                    <div class="col-12">
-                        <p class="text-muted text-center">
-                            <i class="bi bi-info-circle"></i> Cargando documentos...
-                        </p>
+                <!-- Sección: Evaluaciones -->
+                <div class="mb-4">
+                    <h5 class="section-title">Evaluaciones</h5>
+                    <div class="row">
+                        <div id="evaluacionesContainer" class="col-md-12" style="max-height: 400px; overflow-y: auto;">
+                            <div class="text-center py-4" style="background-color: #f8f9fa; border-radius: 8px;">
+                                <div class="spinner-border text-secondary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="text-muted mt-2 mb-0">Cargando documentos...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

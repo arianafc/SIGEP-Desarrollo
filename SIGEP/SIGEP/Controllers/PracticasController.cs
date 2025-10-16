@@ -887,7 +887,13 @@ namespace SIGEP.Controllers
                     var notas = dbContext.NotasEstudiantesTB.FirstOrDefault(n => n.IdUsuario == idUsuario);
 
                     var estadosPermitidos = new List<string> {
+                                   "En Proceso de Aplicacion",
+                                   "Rechazada",
                                    "Asignada",
+                                   "Aprobada",
+                                   "Retirada",
+                                   "Rezagado",
+                                   "Archivado",
                                    "Aprobada",
                                    "En Curso",
                                    "Finalizada"};

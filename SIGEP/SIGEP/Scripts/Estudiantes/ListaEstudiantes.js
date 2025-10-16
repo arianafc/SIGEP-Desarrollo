@@ -69,18 +69,18 @@
                 { data: 'EspecialidadNombre' },
                 { data: 'Telefono' },
                 {
-                    data: 'EstadoNombre',
+                    data: 'EstadoAcademico',
                     render: function (data) {
-                        var text = (data || '').toString().trim();
-                        if (!text) return '<span class="badge badge-no-asignada">Sin Estado</span>';
-                        var d = text.toLowerCase();
-                        if (d === 'activo') return '<span class="badge badge-activo">' + text + '</span>';
-                        if (d === 'inactivo') return '<span class="badge badge-inactivo">' + text + '</span>';
-                        if (d === 'aprobada' || d === 'aprobado') return '<span class="badge badge-aprobado">' + text + '</span>';
-                        if (d === 'rezagado') return '<span class="badge badge-rezagado">' + text + '</span>';
-                        return '<span class="badge badge-no-asignada">' + text + '</span>';
+                        if (data === true) {
+                            return '<span class="badge badge-aprobado">Aprobado</span>';
+                        } else if (data === false) {
+                            return '<span class="badge badge-rezagado">Rezagado</span>';
+                        } else {
+                            return '<span class="badge badge-no-asignada">Sin Estado</span>';
+                        }
                     }
                 },
+
                 {
                     data: 'EstadoPractica',
                     render: function (data) {

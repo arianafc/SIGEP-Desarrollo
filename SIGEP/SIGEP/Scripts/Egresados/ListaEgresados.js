@@ -8,83 +8,59 @@
 });
 
 function inicializarTabla() {
-    $("#tblEgresados").DataTable({
-        dom: 'Bfrtip',
+    $("#miTabla").DataTable({
+        dom: '<"d-flex justify-content-between mb-2"Bf>rt<"d-flex justify-content-between mt-3"lip>',
         buttons: [
             {
                 extend: 'excelHtml5',
-                text: '<i class="fa fa-file-excel"></i> Exportar Excel',
-                className: 'btn btn-success btn-sm'
+                text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
+                className: 'btn btn-verde-personalizado btn-sm'
             },
             {
                 extend: 'pdfHtml5',
-                text: '<i class="fa fa-file-pdf"></i> Exportar PDF',
-                className: 'btn btn-danger btn-sm',
+                text: '<i class="fas fa-file-pdf"></i> Exportar a PDF',
+                className: 'btn btn-verde-personalizado btn-sm',
                 orientation: 'landscape',
                 pageSize: 'A4'
             },
             {
                 extend: 'print',
-                text: '<i class="fa fa-print"></i> Imprimir',
-                className: 'btn btn-primary btn-sm'
+                text: '<i class="fas fa-print"></i> Imprimir',
+                className: 'btn btn-verde-personalizado btn-sm'
             }
         ],
         responsive: true,
         destroy: true,
+        autoWidth: false,
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
         columns: [
             { data: 'NombreCompleto' },
             { data: 'Generacion' },
             { data: 'Especialidad' },
             { data: 'Correo' },
-            { data: 'Telefono' },
-            {
-                data: 'IdUsuario',
-                className: 'text-center',
-                render: function (data) {
-                    return `
-                        <button class='btn btn-info btn-sm' onclick='verDetalle(${data})'>
-                            <i class='fa fa-eye'></i> Ver Detalle
-                        </button>`;
-                }
-            }
+            { data: 'Telefono' }
         ]
     });
 }
 
 function cargarEgresados() {
-    var especialidad = $("#ddlEspecialidad").val();
-    var anio = $("#ddlAnio").val();
+    var idEspecialidad = $("#ddlEspecialidad").val() || 0;
+    var anio = $("#ddlAnio").val() || 0;
 
     $.ajax({
-        url: '/Egresado/ObtenerEgresados',
+        url: '/Egresados/ObtenerEgresados',
         type: 'GET',
-        data: { especialidadId: especialidad, anio: anio },
+        data: { idEspecialidad: idEspecialidad, anio: anio },
         success: function (data) {
-            var table = $("#tblEgresados").DataTable();
+            var table = $("#miTabla").DataTable();
             table.clear();
             table.rows.add(data);
             table.draw();
         },
         error: function () {
-            alert("Error al cargar los datos de los egresados.");
-        }
-    });
-}
-
-function verDetalle(id) {
-    $.ajax({
-        url: '/Egresado/Detalle',
-        type: 'GET',
-        data: { id: id },
-        success: function (html) {
-            $("#detalleContenido").html(html);
-            $("#modalDetalleEgresado").modal("show");
-        },
-        error: function () {
-            alert("No se pudo cargar el detalle del egresado.");
+            Swal.fire('Error', 'No se pudieron cargar los datos de egresados.', 'error');
         }
     });
 }

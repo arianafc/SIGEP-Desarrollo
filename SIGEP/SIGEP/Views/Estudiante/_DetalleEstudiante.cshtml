@@ -92,7 +92,7 @@
                         <span class="@clase">@((string.IsNullOrWhiteSpace(post.Estado) ? "No Asignada" : post.Estado))</span>
 
                         @* Botón de desasignar visible para Profesor (rol 3) en estados permitidos *@
-                        @if (idRol == 3
+                        @if ((idRol == 2 || idRol == 3)
                             && !string.IsNullOrEmpty(post.Estado)
                             && (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
                                 || post.Estado.Equals("En proceso de Aplicación", StringComparison.OrdinalIgnoreCase)
