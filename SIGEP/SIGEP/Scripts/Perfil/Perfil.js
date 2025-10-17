@@ -3,54 +3,42 @@
     var ConfirmarContrasenna = $('#ConfirmarContrasenna');
     var BtnActualizar = $('#BtnActualizarContrasenna');
     var Form = $('#CambiarContrasennaForm');
-    var BtnAgregar = $('#BtnGuardarEncargado');
 
-    $('#BtnGuardarEncargado').on('click', function () {
-        // Captura de datos del formulario
+    // ===================== AGREGAR ENCARGADO =====================
+    $('#btnGuardarEncargado').on('click', function () {
         var data = {
-            cedula: $("#CedulaNuevoEncargado").val().trim(),
-            nombre: $('#NombreNuevoEncargado').val().trim(),
-            apellido1: $('#Apellido1NuevoEncargado').val().trim(),
-            apellido2: $('#Apellido2NuevoEncargado').val().trim(),
-            telefono: $('#TelefonoNuevoEncargado').val().trim(),
-            correo: $('#CorreoNuevoEncargado').val().trim(),
-            parentesco: $('#ParentescoNuevoEncargado').val().trim(),
-            ocupacion: $('#OcupacionNuevoEncargado').val().trim(),
-            lugarTrabajo: $('#ResidenciaNuevoEncargado').val().trim()
+            cedula: $("#CedulaNuevoEncargado").val(),
+            nombre: $('#NombreNuevoEncargado').val(),
+            apellido1: $('#Apellido1NuevoEncargado').val(),
+            apellido2: $('#Apellido2NuevoEncargado').val(),
+            telefono: $('#TelefonoNuevoEncargado').val(),
+            correo: $('#CorreoNuevoEncargado').val(),
+            parentesco: $('#ParentescoNuevoEncargado').val(),
+            ocupacion: $('#OcupacionNuevoEncargado').val(),
+            lugarTrabajo: $('#ResidenciaNuevoEncargado').val()
         };
 
-       
         $.ajax({
             url: '/Perfil/AgregarEncargado',
             type: 'POST',
             data: data,
             success: function (response) {
                 if (response.success) {
-                    TempData["SwalSuccess"] = response.mostrarSuccessMensaje;
+                    Swal.fire('Éxito', response.mensaje, 'success')
+                        .then(() => window.location.href = '/Perfil/MiPerfil');
                 } else {
-                    TempData["SwalError"] = response.mostrarSuccessMensaje;
+                    Swal.fire('Error', response.mensaje, 'error');
                 }
             },
-            error: function (xhr, status, error) {
-                // Aquí puedes manejar errores
-                console.error('Error al agregar encargado:', error);
+            error: function (error) {
+                Swal.fire('Error', 'Error al agregar encargado: ' + error, 'error');
             }
         });
     });
 
-
-
- 
-
-    $('#modalEditarEncargado').on('hidden.bs.modal', function () {
-        $('.modal-backdrop').remove();
-        $('body').removeClass('modal-open');
-     
-    });
-
+    // ===================== ACTUALIZAR ENCARGADO =====================
     $('#btnActualizarEncargado').click(function () {
         var data = {
-            
             IdEncargado: $('#IdEncargado').val(),
             Nombre: $('#NombreEditar').val(),
             Apellido1: $('#Apellido1Editar').val(),
@@ -64,20 +52,15 @@
         };
 
         $.ajax({
-            url: '/Perfil/ActualizarEncargado', 
+            url: '/Perfil/ActualizarEncargado',
             type: 'POST',
             data: data,
             success: function (response) {
                 if (response.success) {
                     $('#modalEditarEncargado').modal('hide');
-
                     Swal.fire('Éxito', response.mensaje, 'success')
-                        .then(() => {
-                          
-                            window.location.href = '/Perfil/MiPerfil';
-                        });
+                        .then(() => window.location.href = '/Perfil/MiPerfil');
                 } else {
-                 
                     Swal.fire('Error', response.mensaje, 'error');
                 }
             },
@@ -87,6 +70,7 @@
         });
     });
 
+    // ===================== VALIDAR CONTRASEÑA =====================
     function validarContrasenna() {
         let pass = Contrasenna.val().trim();
         let confirm = ConfirmarContrasenna.val().trim();
@@ -116,69 +100,76 @@
 
     Form.on("submit", function (e) {
         if (!validarContrasenna()) {
-            e.preventDefault(); // evita que se mande si no pasa validación
+            e.preventDefault();
             return false;
         }
     });
-});
 
+    // ===================== VALIDACIÓN DE INFO PERSONAL =====================
+    document.getElementById("btnActualizarInfo")?.addEventListener("click", function () {
+        const campos = document.querySelectorAll('#info-personal input');
+        let incompletos = false;
 
-// Validación de info personal
-document.getElementById("btnActualizarInfo")?.addEventListener("click", function () {
-    const campos = document.querySelectorAll('#info-personal input');
-    let incompletos = false;
+        campos.forEach(input => {
+            if (input.value.trim() === "") {
+                incompletos = true;
+            }
+        });
 
-    campos.forEach(input => {
-        if (input.value.trim() === "") {
-            incompletos = true;
+        if (incompletos) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor complete todos los campos obligatorios',
+                confirmButtonColor: '#8CA653'
+            });
+        } else {
+            Swal.fire({
+                icon: 'success',
+                title: 'Información actualizada correctamente',
+                showConfirmButton: false,
+                timer: 2000
+            });
         }
     });
 
-    if (incompletos) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Campos incompletos',
-            text: 'Por favor complete todos los campos obligatorios',
-            confirmButtonColor: '#8CA653'
-        });
-    } else {
+    // ===================== MENSAJES REUTILIZABLES =====================
+    function mostrarSuccessMensaje() {
         Swal.fire({
             icon: 'success',
-            title: 'Información actualizada correctamente',
+            title: 'Información guardada correctamente',
             showConfirmButton: false,
             timer: 2000
         });
     }
-});
 
-// Reutilizable éxito
-function mostrarSuccessMensaje() {
-    Swal.fire({
-        icon: 'success',
-        title: 'Información guardada correctamente',
-        showConfirmButton: false,
-        timer: 2000
+    ["btnActualizarAcademica", "btnActualizarEncargado", "btnActualizarLaboral", "btnActualizarMedica", "btnSubirDoc"]
+        .forEach(id => document.getElementById(id)?.addEventListener("click", mostrarSuccessMensaje));
+
+    function mostrarWarningMensaje() {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Ha ocurrido un error',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    }
+
+    ["btnEliminarEncargado", "btnEliminarFile", "btnDescargarFile", "btnVerFile", "btnGuardarEncargado"]
+        .forEach(id => document.getElementById(id)?.addEventListener("click", mostrarWarningMensaje));
+
+    // ===================== EDITAR ENCARGADO =====================
+   
+
+    // ===================== ELIMINAR ENCARGADO =====================
+  
+
+    // ===================== LIMPIAR MODAL =====================
+    $('#modalEditarEncargado').on('hidden.bs.modal', function () {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
     });
-}
-
-["btnActualizarAcademica", "btnActualizarEncargado", "btnActualizarLaboral", "btnActualizarMedica", "btnSubirDoc"].forEach(id => {
-    document.getElementById(id)?.addEventListener("click", mostrarSuccessMensaje);
 });
-
-
-function mostrarWarningMensaje() {
-    Swal.fire({
-        icon: 'warning',
-        title: 'Ha ocurrido un error',
-        showConfirmButton: false,
-        timer: 2000
-    });
-}
-
-["btnEliminarEncargado", "btnEliminarFile", "btnDescargarFile", "btnVerFile", "btnGuardarEncargado"].forEach(id => {
-    document.getElementById(id)?.addEventListener("click", mostrarWarningMensaje);
-});
-
 function editarEncargado(idEncargado) {
     $.ajax({
         url: '/Perfil/ObtenerEncargadoPorId',
@@ -208,37 +199,22 @@ function editarEncargado(idEncargado) {
     });
 }
 
-
-
-
-
 function eliminarEncargado(idEncargado) {
     if (confirm("¿Seguro que desea eliminar este encargado?")) {
-        var data = {
-
-            IdEncargado: $('#IdEncargado').val(),
-          
-        };
-
         $.ajax({
             url: '/Perfil/EliminarEncargado',
             type: 'POST',
-            data: data,
+            data: { IdEncargado: idEncargado },
             success: function (response) {
                 if (response.success) {
-                    
                     Swal.fire('Éxito', response.mensaje, 'success')
-                        .then(() => {
-
-                            window.location.href = '/Perfil/MiPerfil';
-                        });
+                        .then(() => window.location.href = '/Perfil/MiPerfil');
                 } else {
-
                     Swal.fire('Error', response.mensaje, 'error');
                 }
             },
             error: function () {
-                Swal.fire('Error', 'No se pudo actualizar el encargado.', 'error');
+                Swal.fire('Error', 'No se pudo eliminar el encargado.', 'error');
             }
         });
     }
