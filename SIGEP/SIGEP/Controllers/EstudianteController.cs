@@ -1,4 +1,4 @@
-﻿using SIGEP.EF;
+using SIGEP.EF;
 using SIGEP.Models;
 using SIGEP.Services;
 using System;
@@ -67,7 +67,7 @@ namespace SIGEP.Controllers
                          orderby ue.IdUsuarioEspecialidad descending
                          select esp.Nombre).FirstOrDefault(),
                     IdEstado = u.IdEstado,
-                    EstadoAcademico = u.EstadoAcademico,
+                    EstadoAcademico = (bool)u.EstadoAcademico,
                     EstadoNombre = e != null ? e.Descripcion : "",
                     EstadoPractica =
                         (from p in db.PracticaEstudianteTB
@@ -129,7 +129,9 @@ namespace SIGEP.Controllers
                 x.EspecialidadNombre,
                 x.IdEstado,
                 EstadoAcademico = x.EstadoAcademico,
+
                 EstadoNombre = x.EstadoAcademico ? "Aprobada" : "Rezagado",
+
                 EstadoPractica = string.IsNullOrWhiteSpace(x.EstadoPractica)
         ? "Sin proceso activo"
         : x.EstadoPractica
@@ -436,7 +438,7 @@ namespace SIGEP.Controllers
 
                 db.SaveChanges();
 
-                return Json(new { success = true, message = $"Estado académico actualizado a {(usuario.EstadoAcademico ? "Aprobado" : "Rezagado")} correctamente." });
+                return Json(new { success = true, message = $"Estado académico actualizado a {((bool)usuario.EstadoAcademico ? "Aprobado" : "Rezagado")} correctamente." });
             }
             catch (Exception ex)
             {

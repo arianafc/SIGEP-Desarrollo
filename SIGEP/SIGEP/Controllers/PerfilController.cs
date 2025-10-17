@@ -170,6 +170,39 @@ namespace SIGEP.Controllers
             return RedirectToAction("MiPerfil");
         }
 
+        [HttpPost]
+
+        public ActionResult AgregarEncargado(string nombre, string apellido1, string apellido2, string telefono, string parentesco, string lugarTrabajo, string ocupacion, string correo, string cedula)
+        {
+            try
+            {
+
+                var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var accion = 3;
+                    var result = dbContext.AccionesEncargadoSP(accion, null, nombre, telefono, parentesco, lugarTrabajo, ocupacion, correo, cedula, apellido1, apellido2, IdUsuario);
+                    int? affectedRows = result.FirstOrDefault();
+                    if (affectedRows > 0)
+                    {
+                        return Json(new { success = true, mensaje = "Encargado agregado exitosamente." });
+
+                    }
+                    else
+                    {
+                        return Json(new { success = false, mensaje = "No se pudo agregar el encargado, intente de nuevo." });
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["SwalError"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("MiPerfil");
+        }
+
 
         [HttpPost]
 
@@ -219,21 +252,22 @@ namespace SIGEP.Controllers
 
                     // Busca el encargado específico
                     var encargado = encargados
-                        .Where(e => e.IdEncargado == idEncargado)
-                        .Select(e => new
-                        {
-                            e.IdEncargado,
-                            e.Cedula,
-                            e.Nombre,
-                            e.Apellido1,
-                            e.Apellido2,
-                            e.Telefono,
-                            e.Parentesco,
-                            e.LugarTrabajo,
-                            e.Ocupacion,
-                            e.Correo
-                        })
-                        .FirstOrDefault();
+     .Where(e => e.IdEncargado == idEncargado && e.IdEstado == 1)
+     .Select(e => new
+     {
+         e.IdEncargado,
+         e.Cedula,
+         e.Nombre,
+         e.Apellido1,
+         e.Apellido2,
+         e.Telefono,
+         e.Parentesco,
+         e.LugarTrabajo,
+         e.Ocupacion,
+         e.Correo
+     })
+     .FirstOrDefault();
+
 
                     return Json(encargado, JsonRequestBehavior.AllowGet);
                 }
