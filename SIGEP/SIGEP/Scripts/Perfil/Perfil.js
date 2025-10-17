@@ -3,6 +3,52 @@
     var ConfirmarContrasenna = $('#ConfirmarContrasenna');
     var BtnActualizar = $('#BtnActualizarContrasenna');
     var Form = $('#CambiarContrasennaForm');
+ 
+
+    $('#modalEditarEncargado').on('hidden.bs.modal', function () {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+     
+    });
+
+    $('#btnActualizarEncargado').click(function () {
+        var data = {
+            
+            IdEncargado: $('#IdEncargado').val(),
+            Nombre: $('#NombreEditar').val(),
+            Apellido1: $('#Apellido1Editar').val(),
+            Apellido2: $('#Apellido2Editar').val(),
+            Telefono: $('#TelefonoEditar').val(),
+            Parentesco: $('#ParentescoEditar').val(),
+            LugarTrabajo: $('#LugarTrabajoEditar').val(),
+            Ocupacion: $('#OcupacionEditar').val(),
+            Correo: $('#CorreoEditar').val(),
+            Cedula: $('#CedulaEditar').val()
+        };
+
+        $.ajax({
+            url: '/Perfil/ActualizarEncargado', 
+            type: 'POST',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    $('#modalEditarEncargado').modal('hide');
+
+                    Swal.fire('Éxito', response.mensaje, 'success')
+                        .then(() => {
+                          
+                            window.location.href = '/Perfil/MiPerfil';
+                        });
+                } else {
+                 
+                    Swal.fire('Error', response.mensaje, 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'No se pudo actualizar el encargado.', 'error');
+            }
+        });
+    });
 
     function validarContrasenna() {
         let pass = Contrasenna.val().trim();
@@ -82,7 +128,7 @@ function mostrarSuccessMensaje() {
     document.getElementById(id)?.addEventListener("click", mostrarSuccessMensaje);
 });
 
-// Reutilizable warning
+
 function mostrarWarningMensaje() {
     Swal.fire({
         icon: 'warning',
@@ -97,13 +143,66 @@ function mostrarWarningMensaje() {
 });
 
 function editarEncargado(idEncargado) {
-   
-    console.log("Editar encargado:", idEncargado);
+    $.ajax({
+        url: '/Perfil/ObtenerEncargadoPorId',
+        type: 'GET',
+        data: { idEncargado: idEncargado },
+        success: function (data) {
+            if (data && !data.error) {
+                $('#IdEncargado').val(data.IdEncargado);
+                $('#CedulaEditar').val(data.Cedula);
+                $('#NombreEditar').val(data.Nombre);
+                $('#Apellido1Editar').val(data.Apellido1);
+                $('#Apellido2Editar').val(data.Apellido2);
+                $('#TelefonoEditar').val(data.Telefono);
+                $('#ParentescoEditar').val(data.Parentesco);
+                $('#LugarTrabajoEditar').val(data.LugarTrabajo);
+                $('#OcupacionEditar').val(data.Ocupacion);
+                $('#CorreoEditar').val(data.Correo);
+                $('#modalEditarEncargado').modal('show');
+                $('#modalVerEncargados').hide();
+            } else {
+                Swal.fire('Error', data.mensaje || 'No se pudo obtener la información del encargado.', 'error');
+            }
+        },
+        error: function () {
+            Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+        }
+    });
 }
+
+
+
+
 
 function eliminarEncargado(idEncargado) {
     if (confirm("¿Seguro que desea eliminar este encargado?")) {
-        
-        console.log("Encargado eliminado:", idEncargado);
+        var data = {
+
+            IdEncargado: $('#IdEncargado').val(),
+          
+        };
+
+        $.ajax({
+            url: '/Perfil/EliminarEncargado',
+            type: 'POST',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    
+                    Swal.fire('Éxito', response.mensaje, 'success')
+                        .then(() => {
+
+                            window.location.href = '/Perfil/MiPerfil';
+                        });
+                } else {
+
+                    Swal.fire('Error', response.mensaje, 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'No se pudo actualizar el encargado.', 'error');
+            }
+        });
     }
 }
