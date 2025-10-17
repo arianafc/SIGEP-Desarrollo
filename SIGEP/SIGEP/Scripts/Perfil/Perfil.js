@@ -3,6 +3,42 @@
     var ConfirmarContrasenna = $('#ConfirmarContrasenna');
     var BtnActualizar = $('#BtnActualizarContrasenna');
     var Form = $('#CambiarContrasennaForm');
+    var BtnAgregar = $('#BtnGuardarEncargado');
+
+    $('#BtnGuardarEncargado').on('click', function () {
+        // Captura de datos del formulario
+        var data = {
+            cedula: $("#CedulaNuevoEncargado").val().trim(),
+            nombre: $('#NombreNuevoEncargado').val().trim(),
+            apellido1: $('#Apellido1NuevoEncargado').val().trim(),
+            apellido2: $('#Apellido2NuevoEncargado').val().trim(),
+            telefono: $('#TelefonoNuevoEncargado').val().trim(),
+            correo: $('#CorreoNuevoEncargado').val().trim(),
+            parentesco: $('#ParentescoNuevoEncargado').val().trim(),
+            ocupacion: $('#OcupacionNuevoEncargado').val().trim(),
+            lugarTrabajo: $('#ResidenciaNuevoEncargado').val().trim()
+        };
+
+       
+        $.ajax({
+            url: '/Perfil/AgregarEncargado',
+            type: 'POST',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    TempData["SwalSuccess"] = response.mostrarSuccessMensaje;
+                } else {
+                    TempData["SwalError"] = response.mostrarSuccessMensaje;
+                }
+            },
+            error: function (xhr, status, error) {
+                // Aquí puedes manejar errores
+                console.error('Error al agregar encargado:', error);
+            }
+        });
+    });
+
+
 
     function validarContrasenna() {
         let pass = Contrasenna.val().trim();

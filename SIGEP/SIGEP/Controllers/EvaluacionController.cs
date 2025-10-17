@@ -157,7 +157,7 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-        public JsonResult GuardarNota(int idUsuario, decimal nota1, decimal nota2, decimal notaFinal)
+        public JsonResult GuardarNota(int idUsuario, decimal? nota1, decimal? nota2, decimal? notaFinal)
         {
             try
             {
@@ -168,13 +168,19 @@ namespace SIGEP.Controllers
 
                 int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
 
-                // Validaciones
-                if (nota1 < 0 || nota1 > 100)
+                // Validar que al menos una nota esté ingresada
+                if (nota1 == null && nota2 == null)
+                {
+                    return Json(new { success = false, message = "Debe ingresar al menos una nota" });
+                }
+
+                // Validaciones de rango solo para notas que no son null
+                if (nota1 != null && (nota1 < 0 || nota1 > 100))
                 {
                     return Json(new { success = false, message = "La Nota 1 debe estar entre 0 y 100" });
                 }
 
-                if (nota2 < 0 || nota2 > 100)
+                if (nota2 != null && (nota2 < 0 || nota2 > 100))
                 {
                     return Json(new { success = false, message = "La Nota 2 debe estar entre 0 y 100" });
                 }
@@ -186,10 +192,27 @@ namespace SIGEP.Controllers
 
                     if (notaExistente != null)
                     {
-                        // Actualizar notas existentes
-                        notaExistente.Nota1 = nota1;
-                        notaExistente.Nota2 = nota2;
-                        notaExistente.NotaFinal = notaFinal;
+                        // Actualizar solo las notas que se enviaron
+                        if (nota1 != null)
+                        {
+                            notaExistente.Nota1 = nota1;
+                        }
+
+                        if (nota2 != null)
+                        {
+                            notaExistente.Nota2 = nota2;
+                        }
+
+                        // Calcular nota final solo si ambas notas existen
+                        if (notaExistente.Nota1 != null && notaExistente.Nota2 != null)
+                        {
+                            notaExistente.NotaFinal = (notaExistente.Nota1 + notaExistente.Nota2) / 2;
+                        }
+                        else
+                        {
+                            notaExistente.NotaFinal = null;
+                        }
+
                         notaExistente.FechaActualizacion = DateTime.Now;
                         notaExistente.IdProfesor = idProfesor;
                     }
@@ -210,16 +233,29 @@ namespace SIGEP.Controllers
 
                     dbContext.SaveChanges();
 
+                    string mensaje = "Nota registrada correctamente";
+                    if (nota1 != null && nota2 != null)
+                    {
+                        mensaje = "Notas registradas correctamente. Nota final calculada.";
+                    }
+                    else if (nota1 != null)
+                    {
+                        mensaje = "Nota 1 registrada correctamente. Ingrese Nota 2 para calcular la nota final.";
+                    }
+                    else if (nota2 != null)
+                    {
+                        mensaje = "Nota 2 registrada correctamente. Ingrese Nota 1 para calcular la nota final.";
+                    }
+
                     return Json(new
                     {
                         success = true,
-                        message = "Nota registrada correctamente"
+                        message = mensaje
                     });
                 }
             }
             catch (Exception ex)
             {
-                // Log del error
                 System.Diagnostics.Debug.WriteLine($"Error en GuardarNota: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
@@ -312,36 +348,49 @@ namespace SIGEP.Controllers
                     return Json(new { success = false, message = "Solo se permiten archivos .xls, .xlsx o .pdf" });
                 }
 
-                // Guardar archivo
-                var fileName = $"{DateTime.Now:yyyyMMddHHmmss}_{archivo.FileName}";
-                var path = System.IO.Path.Combine(Server.MapPath("~/Content/Documentos/Evaluaciones"), fileName);
-
-                // Crear directorio si no existe
-                var directory = System.IO.Path.GetDirectoryName(path);
-                if (!System.IO.Directory.Exists(directory))
-                {
-                    System.IO.Directory.CreateDirectory(directory);
-                }
-
-                archivo.SaveAs(path);
-
-                // Guardar registro en BD
                 using (var dbContext = new SIGEPEntities())
                 {
+                    // Obtener cédula del estudiante
+                    var estudiante = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idUsuario);
+                    if (estudiante == null)
+                    {
+                        return Json(new { success = false, message = "Estudiante no encontrado" });
+                    }
+
+                    string cedulaEstudiante = estudiante.Cedula;
+
+                    // Crear directorio en C:\sigep si no existe
+                    string directorioBase = @"C:\sigep\Evaluaciones";
+                    if (!System.IO.Directory.Exists(directorioBase))
+                    {
+                        System.IO.Directory.CreateDirectory(directorioBase);
+                    }
+
+                    // Generar nombre del archivo con cédula (sin fecha/hora)
+                    string nombreOriginal = System.IO.Path.GetFileNameWithoutExtension(archivo.FileName);
+                    string nombreArchivo = $"{cedulaEstudiante}_{nombreOriginal}{extension}";
+
+                    // Ruta completa del archivo
+                    string rutaCompleta = System.IO.Path.Combine(directorioBase, nombreArchivo);
+
+                    // Si el archivo ya existe, se sobrescribe
+                    archivo.SaveAs(rutaCompleta);
+
+                    // Guardar registro en BD con la ruta del archivo
                     var documento = new DocumentosTB
                     {
-                        Documento = archivo.FileName,
+                        Documento = archivo.FileName, // Nombre original para mostrar
                         Tipo = "Evaluación",
-                        RutaArchivo = $"/Content/Documentos/Evaluaciones/{fileName}",
+                        RutaArchivo = rutaCompleta,
                         FechaSubida = DateTime.Now,
                         IdUsuario = idUsuario
                     };
 
                     dbContext.DocumentosTB.Add(documento);
                     dbContext.SaveChanges();
-                }
 
-                return Json(new { success = true, message = "Documento subido correctamente" });
+                    return Json(new { success = true, message = "Documento subido correctamente" });
+                }
             }
             catch (Exception ex)
             {
@@ -390,7 +439,8 @@ namespace SIGEP.Controllers
                         return HttpNotFound("Documento no encontrado");
                     }
 
-                    var filePath = Server.MapPath(documento.RutaArchivo);
+                    // Ya tenemos la ruta física completa, no usar Server.MapPath
+                    var filePath = documento.RutaArchivo;
 
                     if (!System.IO.File.Exists(filePath))
                     {
@@ -431,7 +481,8 @@ namespace SIGEP.Controllers
                         return HttpNotFound("Documento no encontrado");
                     }
 
-                    var filePath = Server.MapPath(documento.RutaArchivo);
+                    // Ya tenemos la ruta física completa
+                    var filePath = documento.RutaArchivo;
 
                     if (!System.IO.File.Exists(filePath))
                     {
