@@ -15,6 +15,15 @@ namespace SIGEP.Controllers
         [HttpGet]
         public ActionResult ListaEgresados()
         {
+            // Obtener el rol de sesión
+            var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+
+            // Validar: solo Coordinador (rol 2) puede acceder
+            if (idRol != 2)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
             ViewBag.Especialidades = db.EspecialidadesTB
                 .OrderBy(e => e.Nombre)
                 .Select(e => new SelectListItem
@@ -36,7 +45,6 @@ namespace SIGEP.Controllers
 
             return View();
         }
-
         [HttpGet]
         public JsonResult ObtenerEgresados(int idEspecialidad = 0, int anio = 0)
         {
@@ -49,22 +57,46 @@ namespace SIGEP.Controllers
                         select new
                         {
                             u.IdUsuario,
-                            NombreCompleto = (u.Nombre ?? "") + " " + (u.Apellido1 ?? "") + " " + (u.Apellido2 ?? ""),
-                            Generacion = u.FechaEgreso.HasValue ? u.FechaEgreso.Value.Year.ToString() : "N/A",
+                            u.Nombre,
+                            u.Apellido1,
+                            u.Apellido2,
+                            u.FechaEgreso,
                             Especialidad = esp != null ? esp.Nombre : "Sin especialidad",
+                            IdEspecialidad = ue != null ? ue.IdEspecialidad : 0,
                             Correo = db.EmailsTB.Where(e => e.IdUsuario == u.IdUsuario).Select(e => e.Email).FirstOrDefault(),
                             Telefono = db.TelefonosTB.Where(t => t.IdUsuario == u.IdUsuario).Select(t => t.Telefono).FirstOrDefault()
                         };
 
+            // 🔹 Filtrar por especialidad
             if (idEspecialidad > 0)
-                query = query.Where(x => db.UsuarioEspecialidadTB.Any(u => u.IdUsuario == x.IdUsuario && u.IdEspecialidad == idEspecialidad));
+            {
+                query = query.Where(x => x.IdEspecialidad == idEspecialidad);
+            }
 
+            // 🔹 Filtrar por año de egreso
             if (anio > 0)
-                query = query.Where(x => x.Generacion == anio.ToString());
+            {
+                query = query.Where(x => x.FechaEgreso.HasValue && x.FechaEgreso.Value.Year == anio);
+            }
 
-            var lista = query.ToList();
+            // 🔹 Proyectar resultado final
+            var lista = query
+                .AsEnumerable() // ejecutar antes de manipular datos calculados
+                .Select(x => new
+                {
+                    NombreCompleto = $"{x.Nombre} {x.Apellido1} {x.Apellido2}",
+                    Generacion = x.FechaEgreso.HasValue ? x.FechaEgreso.Value.Year.ToString() : "N/A",
+                    x.Especialidad,
+                    x.Correo,
+                    x.Telefono
+                })
+                .ToList();
 
             return Json(lista, JsonRequestBehavior.AllowGet);
         }
+
+      
+
+
     }
 }

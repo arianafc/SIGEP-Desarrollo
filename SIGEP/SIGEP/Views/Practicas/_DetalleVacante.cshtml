@@ -1,0 +1,78 @@
+﻿@model dynamic
+@{
+    var postulaciones = ViewBag.Postulaciones as List<dynamic>;
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+}
+
+<div class="container-fluid px-3">
+    <h5 class="fw-bold text-success mb-3">Información de la Vacante</h5>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label>Nombre</label>
+            <input type="text" class="form-control" value="@Model.Nombre" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Empresa</label>
+            <input type="text" class="form-control" value="@Model.EmpresaNombre" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Especialidad</label>
+            <input type="text" class="form-control" value="@Model.EspecialidadNombre" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Modalidad</label>
+            <input type="text" class="form-control" value="@Model.ModalidadNombre" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Cupos</label>
+            <input type="text" class="form-control" value="@Model.NumCupos" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Estado</label>
+            <input type="text" class="form-control" value="@Model.EstadoNombre" readonly />
+        </div>
+        <div class="col-12">
+            <label>Descripción</label>
+            <textarea class="form-control" rows="3" readonly>@Model.Descripcion</textarea>
+        </div>
+    </div>
+
+    <hr />
+    <h5 class="fw-bold text-success mb-3">Postulaciones</h5>
+
+    <ul class="list-group" id="listaPostulaciones">
+        @if (postulaciones != null && postulaciones.Count > 0)
+        {
+            foreach (var p in postulaciones)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>@p.NombreCompleto</strong><br />
+                        <small class="text-muted">@p.Cedula</small>
+                    </div>
+                    <div>
+                        <span class="badge bg-secondary">@p.EstadoDescripcion</span>
+                        @if ((idRol == 2 || idRol == 3) &&
+                            (p.EstadoDescripcion.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
+                            || p.EstadoDescripcion.Equals("En Proceso de Aplicacion", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            <button class="btn btn-outline-danger btn-sm BtnDesasignarPracticaEstudiante"
+                                    data-idpractica="@p.IdPractica"
+                                    data-idusuario="@p.IdUsuario"
+                                    data-idvacante="@p.IdVacante">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        }
+                    </div>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item text-muted text-center">No hay postulaciones registradas</li>
+        }
+    </ul>
+</div>
+
+

@@ -77,11 +77,19 @@ namespace SIGEP.Controllers
                          select ep.Descripcion.Trim()).FirstOrDefault()
                 };
 
-            // Filtro por estado académico (texto)
+            // Filtro por estado académico (texto del combo)
             if (!string.IsNullOrWhiteSpace(estado))
             {
-                var estadoNorm = estado.Trim().ToLower();
-                query = query.Where(x => (x.EstadoNombre ?? "").Trim().ToLower() == estadoNorm);
+                var estadoNorm = estado.Trim().ToLowerInvariant();
+
+                if (estadoNorm == "aprobada")
+                {
+                    query = query.Where(x => x.EstadoAcademico == true);
+                }
+                else if (estadoNorm == "rezagado")
+                {
+                    query = query.Where(x => x.EstadoAcademico == false);
+                }
             }
 
             // Rol desde sesión: 1=Estudiante, 2=Coordinador, 3=Profesor, 4=Egresado
@@ -121,7 +129,7 @@ namespace SIGEP.Controllers
                 x.EspecialidadNombre,
                 x.IdEstado,
                 EstadoAcademico = x.EstadoAcademico,
-                EstadoNombre = x.EstadoAcademico ? "Aprobado" : "Rezagado",
+                EstadoNombre = x.EstadoAcademico ? "Aprobada" : "Rezagado",
                 EstadoPractica = string.IsNullOrWhiteSpace(x.EstadoPractica)
         ? "Sin proceso activo"
         : x.EstadoPractica

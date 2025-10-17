@@ -72,7 +72,7 @@
                     data: 'EstadoAcademico',
                     render: function (data) {
                         if (data === true) {
-                            return '<span class="badge badge-aprobado">Aprobado</span>';
+                            return '<span class="badge badge-aprobado">Aprobada</span>';
                         } else if (data === false) {
                             return '<span class="badge badge-rezagado">Rezagado</span>';
                         } else {

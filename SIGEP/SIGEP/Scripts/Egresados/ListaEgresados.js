@@ -2,7 +2,8 @@
     inicializarTabla();
     cargarEgresados();
 
-    $("#btnBuscar").click(function () {
+    // Filtrado automático (sin botón)
+    $("#ddlEspecialidad, #ddlAnio").on('change', function () {
         cargarEgresados();
     });
 });
@@ -49,18 +50,32 @@ function cargarEgresados() {
     var idEspecialidad = $("#ddlEspecialidad").val() || 0;
     var anio = $("#ddlAnio").val() || 0;
 
+    var tabla = $("#miTabla").DataTable();
+    tabla.clear().draw();
+
     $.ajax({
         url: '/Egresados/ObtenerEgresados',
         type: 'GET',
         data: { idEspecialidad: idEspecialidad, anio: anio },
+        beforeSend: function () {
+            $("#miTabla tbody").html(
+                '<tr><td colspan="5" class="text-center text-muted">Cargando datos...</td></tr>'
+            );
+        },
         success: function (data) {
-            var table = $("#miTabla").DataTable();
-            table.clear();
-            table.rows.add(data);
-            table.draw();
+            tabla.clear();
+            if (data && data.length > 0) {
+                tabla.rows.add(data);
+            } else {
+                $("#miTabla tbody").html(
+                    '<tr><td colspan="5" class="text-center text-muted">No se encontraron resultados.</td></tr>'
+                );
+            }
+            tabla.draw();
         },
         error: function () {
             Swal.fire('Error', 'No se pudieron cargar los datos de egresados.', 'error');
         }
     });
 }
+

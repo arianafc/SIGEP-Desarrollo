@@ -19,6 +19,21 @@ namespace SIGEP.Controllers
         {
             try
             {
+
+                // 🔹 Validar sesión
+                if (Session["IdRol"] == null)
+                {
+                    return RedirectToAction("Index", "Home"); // No hay sesión → login
+                }
+
+                int idRol = Convert.ToInt32(Session["IdRol"]);
+
+                // 🔹 Solo los egresados (IdRol = 4) pueden acceder
+                if (idRol != 4)
+                {
+                    return RedirectToAction("Login", "Home"); // No autorizado → login
+                }
+
                 // Lista de áreas profesionales
                 ViewBag.Areas = db.BolsaEmpleoTB
                     .Where(a => a.AreaAfin != null && a.AreaAfin != "")
