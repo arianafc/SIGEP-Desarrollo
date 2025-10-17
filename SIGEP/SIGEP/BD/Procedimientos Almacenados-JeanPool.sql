@@ -222,7 +222,7 @@ BEGIN
 END
 
 -- SP para obtener postulaciones del estudiante
-CREATE OR ALTER PROCEDURE [dbo].[ObtenerPostulacionesEstudianteSP]
+ALTER PROCEDURE [dbo].[ObtenerPostulacionesEstudianteSP]
     @IdUsuario INT
 AS
 BEGIN
@@ -231,7 +231,7 @@ BEGIN
     SELECT 
         p.IdPractica,
         v.IdVacante,
-        p.IdUsuario,  -- Agregar IdUsuario
+        p.IdUsuario,
         v.Nombre as NombreVacante,
         e.NombreEmpresa,
         est.Descripcion as EstadoPractica,
@@ -239,11 +239,19 @@ BEGIN
         CASE 
             WHEN v.Tipo = 'Autogestionada' THEN CAST(1 AS BIT)
             ELSE CAST(0 AS BIT)
-        END as EsAutogestionada  -- Agregar EsAutogestionada
+        END as EsAutogestionada,
+        CASE 
+            WHEN est.Descripcion IN ('En Curso', 'Aprobada', 'Finalizada', 'Rezagada') THEN CAST(1 AS BIT)
+            ELSE CAST(0 AS BIT)
+        END as MostrarNotas,
+        n.Nota1,
+        n.Nota2,
+        n.NotaFinal
     FROM PracticaEstudianteTB p
     INNER JOIN VacantesPracticasTB v ON p.IdVacante = v.IdVacante
     INNER JOIN EmpresasTB e ON v.IdEmpresa = e.IdEmpresa
     INNER JOIN EstadosTB est ON p.IdEstado = est.IdEstado
+    LEFT JOIN NotasEstudiantesTB n ON p.IdUsuario = n.IdUsuario
     WHERE p.IdUsuario = @IdUsuario
     ORDER BY p.FechaAplicacion DESC
 END
@@ -364,7 +372,7 @@ BEGIN
         AND u.IdEstado = 1 -- Activos
         AND p.IdEstado IN (
             SELECT IdEstado FROM EstadosTB 
-            WHERE Descripcion IN ('Asignada', 'En Curso', 'Aprobada','Finalizada')
+            WHERE Descripcion IN ('En Curso')
         )
     ORDER BY u.Nombre, u.Apellido1;
 END
@@ -430,7 +438,7 @@ END
 GO
 
 -- SP para obtener notas del estudiante
-CREATE OR ALTER PROCEDURE ObtenerNotasEstudianteSP
+ALTER PROCEDURE [dbo].[ObtenerNotasEstudianteSP]
     @IdUsuario INT
 AS
 BEGIN
@@ -443,7 +451,6 @@ BEGIN
     FROM NotasEstudiantesTB
     WHERE IdUsuario = @IdUsuario;
 END
-GO
 
 -- SP para guardar/actualizar notas del estudiante
 CREATE OR ALTER PROCEDURE GuardarNotaEstudianteSP
@@ -490,6 +497,24 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE [dbo].[ObtenerDocumentosEvaluacionSP]
+    @IdUsuario INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        IdDocumento,
+        Documento,
+        Tipo,
+        RutaArchivo,
+        FechaSubida,
+        LOWER(RIGHT(Documento, CHARINDEX('.', REVERSE(Documento)))) AS Extension
+    FROM DocumentosTB
+    WHERE IdUsuario = @IdUsuario 
+        AND Tipo = 'Evaluación'
+    ORDER BY FechaSubida DESC;
+END
 
 -- Crear tabla para almacenar las notas de los estudiantes
 CREATE TABLE [dbo].[NotasEstudiantesTB](

@@ -69,18 +69,18 @@
                 { data: 'EspecialidadNombre' },
                 { data: 'Telefono' },
                 {
-                    data: 'EstadoNombre',
+                    data: 'EstadoAcademico',
                     render: function (data) {
-                        var text = (data || '').toString().trim();
-                        if (!text) return '<span class="badge badge-no-asignada">Sin Estado</span>';
-                        var d = text.toLowerCase();
-                        if (d === 'activo') return '<span class="badge badge-activo">' + text + '</span>';
-                        if (d === 'inactivo') return '<span class="badge badge-inactivo">' + text + '</span>';
-                        if (d === 'aprobada' || d === 'aprobado') return '<span class="badge badge-aprobado">' + text + '</span>';
-                        if (d === 'rezagado') return '<span class="badge badge-rezagado">' + text + '</span>';
-                        return '<span class="badge badge-no-asignada">' + text + '</span>';
+                        if (data === true) {
+                            return '<span class="badge badge-aprobado">Aprobado</span>';
+                        } else if (data === false) {
+                            return '<span class="badge badge-rezagado">Rezagado</span>';
+                        } else {
+                            return '<span class="badge badge-no-asignada">Sin Estado</span>';
+                        }
                     }
                 },
+
                 {
                     data: 'EstadoPractica',
                     render: function (data) {
@@ -236,12 +236,22 @@
         });
 
         // ===============================
-        // Desasignar práctica
+        // Desasignar práctica (corregido)
         // ===============================
         $(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
             e.preventDefault();
-            var boton = $(this);
-            var idPractica = boton.data("idpractica");
+
+            const boton = $(this);
+            const idPractica = boton.data("idpractica");
+            const idUsuario = boton.data("idusuario");
+
+            // Obtener instancia del modal actual
+            const modalPerfil = bootstrap.Modal.getInstance(document.getElementById("modalPerfil"));
+
+            // 🔧 1. Desactivar el focus trap de Bootstrap 5.3 (para poder escribir en SweetAlert)
+            if (modalPerfil && modalPerfil._focustrap) {
+                modalPerfil._focustrap.deactivate();
+            }
 
             Swal.fire({
                 title: '¿Desea desasignar esta práctica?',
@@ -252,25 +262,86 @@
                 inputPlaceholder: 'Escribe un comentario...',
                 showCancelButton: true,
                 confirmButtonText: 'Sí, desasignar',
-                cancelButtonText: 'Cancelar'
+                cancelButtonText: 'Cancelar',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    // 🔹 Asegurar que el textarea esté editable
+                    const textarea = Swal.getInput();
+                    if (textarea) {
+                        textarea.removeAttribute("readonly");
+                        textarea.removeAttribute("disabled");
+                        textarea.focus();
+                        setTimeout(() => textarea.focus(), 100);
+                    }
+                },
+                didClose: () => {
+                    // 🔹 Restaurar focus trap al cerrar SweetAlert
+                    if (modalPerfil && modalPerfil._focustrap) {
+                        modalPerfil._focustrap.activate();
+                    }
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.post(CFG.urls.desasignarPractica,
-                        { idPractica: idPractica, comentario: result.value || '' })
-                        .done(function (res, status, xhr) {
+                    // 🔹 Enviar datos al backend
+                    $.ajax({
+                        url: CFG.urls.desasignarPractica,
+                        type: 'POST',
+                        data: {
+                            idPractica: idPractica,
+                            comentario: result.value || ''
+                        },
+                        success: function (res, status, xhr) {
                             if (redirSiLogin(res, xhr)) return;
+
                             if (res.ok) {
-                                Swal.fire("Desasignado", res.msg || "La práctica fue desasignada correctamente", "success");
+                                Swal.fire({
+                                    title: "Desasignado",
+                                    text: res.msg || "La práctica fue desasignada correctamente",
+                                    icon: "success",
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    // ✅ Recargar la vista del modal con datos actualizados
+                                    $.ajax({
+                                        url: CFG.urls.detalle,
+                                        type: 'GET',
+                                        data: { id: idUsuario },
+                                        success: function (html) {
+                                            if (html && html.trim() !== "") {
+                                                $("#perfilBody").html(html);
+                                            }
+                                        }
+                                    });
+
+                                    // ✅ Refrescar la tabla principal sin cerrar el modal
+                                    if (typeof table !== "undefined") {
+                                        table.ajax.reload(null, false);
+                                    }
+                                });
                             } else {
                                 Swal.fire("Error", res.msg || "No se pudo desasignar", "error");
                             }
-                        })
-                        .fail(function () {
+                        },
+                        error: function () {
                             Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
-                        });
+                        }
+                    });
+                } else {
+                    // 🔁 Restaurar focus trap si el usuario cancela
+                    if (modalPerfil && modalPerfil._focustrap) {
+                        modalPerfil._focustrap.activate();
+                    }
                 }
             });
         });
+
+      
+
+
+
+
+
+
 
     });
 })(jQuery);

@@ -139,6 +139,9 @@ function cargarPerfilEstudiante(idUsuario) {
         success: function (data) {
             if (data.success) {
                 llenarModalPerfil(data.perfil);
+
+                $('#btnSubirArchivo').data('idusuario', idUsuario);
+
                 $('#modalPerfil').modal('show');
             } else {
                 Swal.fire('Error', data.message, 'error');
@@ -151,31 +154,32 @@ function cargarPerfilEstudiante(idUsuario) {
 }
 
 // Función para llenar el modal de perfil
+// Función para llenar el modal de perfil
 function llenarModalPerfil(perfil) {
-    console.log('Datos recibidos:', perfil); // Para debug
+    console.log('Datos recibidos:', perfil);
 
-    // Información Personal - usar selectores más específicos
+    // Información Personal
     var inputs = $('#modalPerfil .modal-body input[readonly]');
 
     // Primera fila
-    $(inputs[0]).val(perfil.NombreCompleto || '');        // Nombre y Apellidos
-    $(inputs[1]).val(perfil.Correo || '');                // Correo Electrónico
+    $(inputs[0]).val(perfil.NombreCompleto || '');
+    $(inputs[1]).val(perfil.Correo || '');
 
     // Segunda fila
-    $(inputs[2]).val(perfil.Telefono || '');              // Teléfono
-    $(inputs[3]).val(perfil.Direccion || '');             // Dirección
+    $(inputs[2]).val(perfil.Telefono || '');
+    $(inputs[3]).val(perfil.Direccion || '');
 
     // Tercera fila
-    $(inputs[4]).val(perfil.Sexo || '');                  // Sexo
-    $(inputs[5]).val(perfil.Especialidad || '');          // Especialidad
+    $(inputs[4]).val(perfil.Sexo || '');
+    $(inputs[5]).val(perfil.Especialidad || '');
 
     // Cuarta fila
-    $(inputs[6]).val(perfil.Edad ? perfil.Edad + ' años' : ''); // Edad
-    $(inputs[7]).val(perfil.Seccion || '');               // Sección
+    $(inputs[6]).val(perfil.Edad ? perfil.Edad + ' años' : '');
+    $(inputs[7]).val(perfil.Seccion || '');
 
     // Información de la práctica
-    $(inputs[8]).val(perfil.NombreEmpresa || '');         // Nombre de la empresa
-    $(inputs[9]).val(perfil.TelefonoEmpresa || '');       // Teléfono de Contacto
+    $(inputs[8]).val(perfil.NombreEmpresa || '');
+    $(inputs[9]).val(perfil.TelefonoEmpresa || '');
 
     // Retroalimentaciones
     var contenedor = $('#retroalimentacionComentarios').empty();
@@ -196,6 +200,134 @@ function llenarModalPerfil(perfil) {
     } else {
         contenedor.html(`<p class="text-muted"><i class="bi bi-info-circle"></i> Sin comentarios registrados.</p>`);
     }
+}
+
+// Función para cargar perfil del estudiante
+function cargarPerfilEstudiante(idUsuario) {
+    $.ajax({
+        url: '/Evaluacion/ObtenerPerfilEstudiante',
+        type: 'GET',
+        data: { idUsuario: idUsuario },
+        success: function (data) {
+            if (data.success) {
+                llenarModalPerfil(data.perfil);
+                $('#btnSubirArchivo').data('idusuario', idUsuario);
+
+                // Cargar documentos de evaluación
+                cargarDocumentosEvaluacion(idUsuario);
+
+                $('#modalPerfil').modal('show');
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        },
+        error: function () {
+            Swal.fire('Error', 'No se pudo cargar el perfil del estudiante', 'error');
+        }
+    });
+}
+
+// Función para cargar documentos de evaluación
+function cargarDocumentosEvaluacion(idUsuario) {
+    $.ajax({
+        url: '/Evaluacion/ObtenerDocumentosEvaluacion',
+        type: 'GET',
+        data: { idUsuario: idUsuario },
+        success: function (response) {
+            var container = $('#evaluacionesContainer').empty();
+
+            if (response.success && response.documentos && response.documentos.length > 0) {
+                response.documentos.forEach(function (doc) {
+                    var icono = obtenerIconoDocumento(doc.Extension);
+                    var fechaFormateada = doc.FechaSubida;
+
+                    var docHtml = `
+                        <div class="mb-3">
+                            <div class="documento-item d-flex align-items-center justify-content-between p-3" 
+                                 style="background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #2D594D;">
+                                <div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
+                                    <i class="${icono} me-3" style="font-size: 1.8rem; color: #2D594D; flex-shrink: 0;"></i>
+                                    <div style="min-width: 0; flex: 1;">
+                                        <div class="fw-semibold text-truncate" style="color: #2D594D;">${doc.Nombre}</div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar3"></i> ${fechaFormateada}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 ms-3" style="flex-shrink: 0;">
+                                    ${doc.Extension.toLowerCase() === '.pdf' ?
+                            `<button class="btn btn-sm" 
+                                                style="background-color: transparent; color: #2D594D; border: 1px solid #2D594D;" 
+                                                onclick="visualizarDocumento(${doc.IdDocumento})"
+                                                title="Vista previa">
+                                            <i class="fas fa-eye"></i>
+                                        </button>` : ''}
+                                    <button class="btn btn-sm" 
+                                            style="background-color: transparent; color: #2D594D; border: 1px solid #2D594D;" 
+                                            onclick="descargarDocumento(${doc.IdDocumento})"
+                                            title="Descargar">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.append(docHtml);
+                });
+            } else {
+                container.html(`
+                    <div class="text-center py-4" style="background-color: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                        <i class="bi bi-folder-x" style="font-size: 3rem; color: #6c757d;"></i>
+                        <p class="text-muted mt-2 mb-0">No hay documentos de evaluación cargados.</p>
+                    </div>
+                `);
+            }
+        },
+        error: function () {
+            $('#evaluacionesContainer').html(`
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error al cargar los documentos.
+                </div>
+            `);
+        }
+    });
+}
+
+// Función para obtener el ícono según la extensión
+function obtenerIconoDocumento(extension) {
+    switch (extension.toLowerCase()) {
+        case '.pdf':
+            return 'fas fa-file-pdf';
+        case '.xlsx':
+        case '.xls':
+            return 'fas fa-file-excel';
+        default:
+            return 'fas fa-file';
+    }
+}
+
+// Función para formatear fecha
+function formatearFecha(fecha) {
+    var date = new Date(fecha);
+    var dia = String(date.getDate()).padStart(2, '0');
+    var mes = String(date.getMonth() + 1).padStart(2, '0');
+    var anio = date.getFullYear();
+    var horas = String(date.getHours()).padStart(2, '0');
+    var minutos = String(date.getMinutes()).padStart(2, '0');
+
+    return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
+}
+
+// Función para visualizar documento (solo PDFs)
+function visualizarDocumento(idDocumento) {
+    var url = '/Evaluacion/VisualizarDocumento?idDocumento=' + idDocumento;
+    window.open(url, '_blank');
+}
+
+// Función para descargar documento
+function descargarDocumento(idDocumento) {
+    window.location.href = '/Evaluacion/DescargarDocumento?idDocumento=' + idDocumento;
 }
 
 // Función para abrir modal de comentarios
@@ -234,37 +366,20 @@ function abrirModalComentarios(idUsuario, nombre, cedula, practica) {
     });
 }
 
-// Función para abrir modal de nota
-function abrirModalNota(idUsuario, nombre) {
-    $('#nombreEstudianteNota').text(nombre);
-    $('#btnGuardarNota').data('idusuario', idUsuario);
-
-    // Cargar notas actuales
-    $.ajax({
-        url: '/Evaluacion/ObtenerNotas',
-        type: 'GET',
-        data: { idUsuario: idUsuario },
-        success: function (data) {
-            $('#inputNota1').val(data.Nota1 || '');
-            $('#inputNota2').val(data.Nota2 || '');
-            calcularNotaFinal();
-            $('#modalNota').modal('show');
-        },
-        error: function () {
-            $('#inputNota1').val('');
-            $('#inputNota2').val('');
-            $('#inputNotaFinal').val('');
-            $('#modalNota').modal('show');
-        }
-    });
-}
-
 // Función para calcular nota final automáticamente
 function calcularNotaFinal() {
-    var nota1 = parseFloat($('#inputNota1').val()) || 0;
-    var nota2 = parseFloat($('#inputNota2').val()) || 0;
-    var notaFinal = (nota1 + nota2) / 2;
-    $('#inputNotaFinal').val(notaFinal.toFixed(2));
+    var nota1 = $('#inputNota1').val();
+    var nota2 = $('#inputNota2').val();
+
+    // Solo calcular si ambas notas tienen valor (incluyendo cero)
+    if (nota1 !== '' && nota2 !== '') {
+        var n1 = parseFloat(nota1);
+        var n2 = parseFloat(nota2);
+        var notaFinal = (n1 + n2) / 2;
+        $('#inputNotaFinal').val(notaFinal.toFixed(2));
+    } else {
+        $('#inputNotaFinal').val('');
+    }
 }
 
 // Event listeners para calcular nota automáticamente
@@ -275,20 +390,35 @@ $(document).on('input', '#inputNota1, #inputNota2', function () {
 // Función para guardar nota
 function guardarNota() {
     var idUsuario = $('#btnGuardarNota').data('idusuario');
-    var nota1 = parseFloat($('#inputNota1').val());
-    var nota2 = parseFloat($('#inputNota2').val());
+    var nota1Input = $('#inputNota1').val();
+    var nota2Input = $('#inputNota2').val();
 
-    if (isNaN(nota1) || nota1 < 0 || nota1 > 100) {
+    // Validar que al menos una nota esté ingresada
+    if (nota1Input === '' && nota2Input === '') {
+        Swal.fire('Advertencia', 'Debe ingresar al menos una nota', 'warning');
+        return;
+    }
+
+    // Convertir a valores numéricos o null
+    var nota1 = nota1Input !== '' ? parseFloat(nota1Input) : null;
+    var nota2 = nota2Input !== '' ? parseFloat(nota2Input) : null;
+
+    // Validar rangos solo si la nota fue ingresada
+    if (nota1 !== null && (nota1 < 0 || nota1 > 100)) {
         Swal.fire('Advertencia', 'La Nota 1 debe estar entre 0 y 100', 'warning');
         return;
     }
 
-    if (isNaN(nota2) || nota2 < 0 || nota2 > 100) {
+    if (nota2 !== null && (nota2 < 0 || nota2 > 100)) {
         Swal.fire('Advertencia', 'La Nota 2 debe estar entre 0 y 100', 'warning');
         return;
     }
 
-    var notaFinal = (nota1 + nota2) / 2;
+    // Calcular nota final solo si ambas notas existen
+    var notaFinal = null;
+    if (nota1 !== null && nota2 !== null) {
+        notaFinal = (nota1 + nota2) / 2;
+    }
 
     $.ajax({
         url: '/Evaluacion/GuardarNota',
@@ -317,6 +447,43 @@ function guardarNota() {
         },
         error: function () {
             Swal.fire('Error', 'No se pudo guardar la nota', 'error');
+        }
+    });
+}
+
+// Función para abrir modal de nota
+function abrirModalNota(idUsuario, nombre) {
+    $('#nombreEstudianteNota').text(nombre);
+    $('#btnGuardarNota').data('idusuario', idUsuario);
+
+    // Cargar notas actuales
+    $.ajax({
+        url: '/Evaluacion/ObtenerNotas',
+        type: 'GET',
+        data: { idUsuario: idUsuario },
+        success: function (data) {
+            // Mostrar nota1 (incluso si es 0)
+            if (data.Nota1 !== null && data.Nota1 !== undefined) {
+                $('#inputNota1').val(data.Nota1);
+            } else {
+                $('#inputNota1').val('');
+            }
+
+            // Mostrar nota2 (incluso si es 0)
+            if (data.Nota2 !== null && data.Nota2 !== undefined) {
+                $('#inputNota2').val(data.Nota2);
+            } else {
+                $('#inputNota2').val('');
+            }
+
+            calcularNotaFinal();
+            $('#modalNota').modal('show');
+        },
+        error: function () {
+            $('#inputNota1').val('');
+            $('#inputNota2').val('');
+            $('#inputNotaFinal').val('');
+            $('#modalNota').modal('show');
         }
     });
 }
@@ -409,7 +576,10 @@ function subirDocumento() {
                     showConfirmButton: false
                 });
                 input.value = '';
-                // Recargar lista de documentos si es necesario
+                $('#modalSubirDocumento').modal('hide');
+
+                // Recargar lista de documentos
+                cargarDocumentosEvaluacion(idUsuario);
             } else {
                 Swal.fire('Error', response.message, 'error');
             }

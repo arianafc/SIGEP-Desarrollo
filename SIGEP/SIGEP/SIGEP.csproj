@@ -128,12 +128,15 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AdministracionGeneralController.cs" />
     <Compile Include="Controllers\EgresadosController.cs" />
     <Compile Include="Controllers\EmpresaController.cs" />
     <Compile Include="Controllers\EstudianteController.cs" />
+    <Compile Include="Controllers\EvaluacionController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PerfilController.cs" />
     <Compile Include="Controllers\PracticasController.cs" />
+    <Compile Include="Controllers\VacantesController.cs" />
     <Compile Include="EF\ActualizarEstadoPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -227,6 +230,12 @@
     <Compile Include="EF\ObtenerComentariosPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\ObtenerDocumentosEvaluacionSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerEncargadosUsuarioSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\ObtenerEstudiantesParaEvaluacionSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -290,6 +299,7 @@
     <Compile Include="Models\FiltroSeguridad.cs" />
     <Compile Include="Models\MisPostulacionesVM.cs" />
     <Compile Include="Models\PracticaEstudianteViewModel.cs" />
+    <Compile Include="Models\UsuarioModel.cs" />
     <Compile Include="Models\VacantePracticaDTO.cs" />
     <Compile Include="Models\VacantePracticaVM.cs" />
     <Compile Include="Models\VacanteViewModel.cs" />
@@ -365,6 +375,7 @@
     <Content Include="Images\logo-light-text.png" />
     <Content Include="Images\logo-text.png" />
     <Content Include="Images\logoSIGEP.png" />
+    <Content Include="Scripts\administracion-general.js" />
     <Content Include="Scripts\app-style-switcher.js" />
     <Content Include="Scripts\app.init.js" />
     <Content Include="Scripts\app.min.js" />
@@ -422,6 +433,7 @@
     <Content Include="Scripts\DataTable\dataTables.js" />
     <Content Include="Scripts\Egresados\ListaEgresados.js" />
     <Content Include="Scripts\Estudiantes\ListaEstudiantes.js" />
+    <Content Include="Scripts\Evaluacion\Evaluacion.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
     <Content Include="Scripts\jquery-3.7.0.slim.js" />
@@ -434,6 +446,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\perfect-scrollbar.jquery.min.js" />
+    <Content Include="Scripts\Perfil\Perfil.js" />
     <Content Include="Scripts\popper.min.js" />
     <Content Include="Scripts\Practicas\Autogestion.js" />
     <Content Include="Scripts\Practicas\ScriptPracticas.js" />
@@ -442,6 +455,7 @@
     <Content Include="Scripts\script.js" />
     <Content Include="Scripts\sidebarmenu.js" />
     <Content Include="Scripts\sparkline.js" />
+    <Content Include="Scripts\Vacantes\VistaVacantesEgresado.js" />
     <Content Include="Scripts\validaciones.js" />
     <Content Include="Scripts\waves.js" />
     <Content Include="Web.config" />
@@ -469,6 +483,9 @@
     <Content Include="Views\Estudiante\Estudiantes.cshtml" />
     <Content Include="Views\Estudiante\_DetalleEstudiante.cshtml" />
     <Content Include="Views\Egresados\ListaEgresados.cshtml" />
+    <Content Include="Views\AdministracionGeneral\AdministracionGeneral.cshtml" />
+    <Content Include="Views\Evaluacion\ListarEstudianteConPractica.cshtml" />
+    <Content Include="Views\Vacantes\ListaVacantesEgresado.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

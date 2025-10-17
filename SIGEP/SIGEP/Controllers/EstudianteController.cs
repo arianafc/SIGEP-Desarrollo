@@ -67,6 +67,7 @@ namespace SIGEP.Controllers
                          orderby ue.IdUsuarioEspecialidad descending
                          select esp.Nombre).FirstOrDefault(),
                     IdEstado = u.IdEstado,
+                    EstadoAcademico = u.EstadoAcademico,
                     EstadoNombre = e != null ? e.Descripcion : "",
                     EstadoPractica =
                         (from p in db.PracticaEstudianteTB
@@ -119,9 +120,13 @@ namespace SIGEP.Controllers
                 x.IdEspecialidad,
                 x.EspecialidadNombre,
                 x.IdEstado,
-                EstadoNombre = string.IsNullOrEmpty(x.EstadoNombre) ? "Sin estado" : x.EstadoNombre,
-                EstadoPractica = string.IsNullOrEmpty(x.EstadoPractica) ? "No Asignada" : x.EstadoPractica
+                EstadoAcademico = x.EstadoAcademico,
+                EstadoNombre = x.EstadoAcademico ? "Aprobado" : "Rezagado",
+                EstadoPractica = string.IsNullOrWhiteSpace(x.EstadoPractica)
+        ? "Sin proceso activo"
+        : x.EstadoPractica
             }).ToList();
+
 
             return Json(new { data = outList }, JsonRequestBehavior.AllowGet);
         }
@@ -406,24 +411,31 @@ namespace SIGEP.Controllers
                 if (usuario == null)
                     return Json(new { success = false, message = "Estudiante no encontrado" });
 
-                var estadosValidos = db.EstadosTB
-                    .Where(e => e.Descripcion == "Rezagado" || e.Descripcion == "Aprobada")
-                    .Select(e => e.IdEstado)
-                    .ToList();
+                // Buscar descripción del estado seleccionado
+                var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == nuevoEstadoId);
+                if (estado == null)
+                    return Json(new { success = false, message = "Estado no válido" });
 
-                if (!estadosValidos.Contains(nuevoEstadoId))
+                var desc = (estado.Descripcion ?? "").Trim().ToLowerInvariant();
+
+                // Solo permitimos “Aprobada” o “Rezagado”
+                if (desc != "aprobada" && desc != "rezagado")
                     return Json(new { success = false, message = "Solo se permite cambiar a Rezagado o Aprobado." });
 
+                // Actualiza IdEstado y el booleano
                 usuario.IdEstado = nuevoEstadoId;
+                usuario.EstadoAcademico = (desc == "aprobada");
+
                 db.SaveChanges();
 
-                return Json(new { success = true, message = "Estado actualizado correctamente" });
+                return Json(new { success = true, message = $"Estado académico actualizado a {(usuario.EstadoAcademico ? "Aprobado" : "Rezagado")} correctamente." });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Error al actualizar: " + ex.Message });
             }
         }
+
 
         // ==============================
         // ACTUALIZAR ESTADO DE PRÁCTICA

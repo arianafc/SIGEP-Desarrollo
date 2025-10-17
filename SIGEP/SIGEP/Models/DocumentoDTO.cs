@@ -13,5 +13,6 @@ namespace SIGEP.Models
         public string RutaArchivo { get; set; }
         public DateTime FechaSubida { get; set; }
         public int IdUsuario { get; set; }
+        public string Extension { get; set; }
     }
 }
