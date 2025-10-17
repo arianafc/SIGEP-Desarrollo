@@ -122,7 +122,9 @@ namespace SIGEP.Controllers
                 x.IdEstado,
                 EstadoAcademico = x.EstadoAcademico,
                 EstadoNombre = x.EstadoAcademico ? "Aprobado" : "Rezagado",
-                EstadoPractica = string.IsNullOrEmpty(x.EstadoPractica) ? "No Asignada" : x.EstadoPractica
+                EstadoPractica = string.IsNullOrWhiteSpace(x.EstadoPractica)
+        ? "Sin proceso activo"
+        : x.EstadoPractica
             }).ToList();
 
 

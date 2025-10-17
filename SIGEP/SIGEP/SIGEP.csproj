@@ -136,6 +136,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PerfilController.cs" />
     <Compile Include="Controllers\PracticasController.cs" />
+    <Compile Include="Controllers\VacantesController.cs" />
     <Compile Include="EF\ActualizarEstadoPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -454,6 +455,7 @@
     <Content Include="Scripts\script.js" />
     <Content Include="Scripts\sidebarmenu.js" />
     <Content Include="Scripts\sparkline.js" />
+    <Content Include="Scripts\Vacantes\VistaVacantesEgresado.js" />
     <Content Include="Scripts\validaciones.js" />
     <Content Include="Scripts\waves.js" />
     <Content Include="Web.config" />
@@ -483,6 +485,7 @@
     <Content Include="Views\Egresados\ListaEgresados.cshtml" />
     <Content Include="Views\AdministracionGeneral\AdministracionGeneral.cshtml" />
     <Content Include="Views\Evaluacion\ListarEstudianteConPractica.cshtml" />
+    <Content Include="Views\Vacantes\ListaVacantesEgresado.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

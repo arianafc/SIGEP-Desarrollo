@@ -95,16 +95,13 @@
                         @if ((idRol == 2 || idRol == 3)
                             && !string.IsNullOrEmpty(post.Estado)
                             && (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
-                                || post.Estado.Equals("En proceso de Aplicación", StringComparison.OrdinalIgnoreCase)
-                                || post.Estado.Equals("En curso", StringComparison.OrdinalIgnoreCase)
-                                || post.Estado.Equals("Aprobada", StringComparison.OrdinalIgnoreCase)
-                                || post.Estado.Equals("En progreso", StringComparison.OrdinalIgnoreCase)))
+                                || post.Estado.Equals("En proceso de Aplicacion", StringComparison.OrdinalIgnoreCase)))
                         {
                             <button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
                                     data-idpractica="@post.IdPostulacion"
                                     data-idvacante="@post.IdVacante"
                                     data-idusuario="@post.IdUsuario"
-                                    title="Quitar postulación"
+                                    title="Desasignar práctica"
                                     style="color:#2D594D;">
                                 <i class="fas fa-trash-alt"></i>
                             </button>

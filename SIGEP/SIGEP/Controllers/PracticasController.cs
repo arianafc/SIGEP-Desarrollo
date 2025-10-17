@@ -343,6 +343,78 @@ namespace SIGEP.Controllers
             }
         }
 
+        //[HttpPost]
+        //public JsonResult Eliminar(int id)
+        //{
+        //    try
+        //    {
+        //        using (var db = new SIGEPEntities())
+        //        {
+        //            var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
+        //            if (vacante == null)
+        //                return Json(new { ok = false, message = "La vacante no existe." });
+        //            var estadosActivosProceso = new int[] { 3, 5, 6, 11 };
+        //            var estadosPermitenArchivarSolo = new int[] { 4, 7 };
+        //            int idArchivado = 10;
+
+        //            bool hayActivos = db.PracticaEstudianteTB
+        //                .Any(pe => pe.IdVacante == id && estadosActivosProceso.Contains(pe.IdEstado));
+        //            var estadosRelacion = db.PracticaEstudianteTB
+        //                .Where(pe => pe.IdVacante == id)
+        //                .Select(pe => pe.IdEstado)
+        //                .Distinct()
+        //                .ToList();
+
+        //            bool soloRechRet = estadosRelacion.Count == 0
+        //                || estadosRelacion.All(s => estadosPermitenArchivarSolo.Contains(s));
+
+        //            if (hayActivos && !soloRechRet)
+        //            {
+        //                return Json(new
+        //                {
+        //                    ok = false,
+        //                    message = "No es posible desactivar la práctica: existen estudiantes con procesos activos."
+        //                });
+        //            }
+        //            var postulacionesNoActivas = db.PracticaEstudianteTB
+        //                .Where(pe => pe.IdVacante == id && !estadosActivosProceso.Contains(pe.IdEstado))
+        //                .ToList();
+
+        //            foreach (var p in postulacionesNoActivas)
+        //            {
+        //                p.IdEstado = idArchivado;
+        //                p.FechaAplicacion = DateTime.Now;
+        //            }
+
+
+        //            vacante.IdEstado = idArchivado;
+
+
+        //            var idUsuarioSesion = Session["IdUsuario"] as int?;
+        //            if (idUsuarioSesion != null)
+        //            {
+        //                db.AuditoriaGlobalTB.Add(new AuditoriaGlobalTB
+        //                {
+        //                    IdUsuario = idUsuarioSesion.Value,
+        //                    TablaAfectada = "VacantesPracticasTB",
+        //                    IdRegistro = vacante.IdVacante,
+        //                    Accion = "Archivar (Desactivar práctica)",
+        //                    CampoAfectado = "IdEstado",
+        //                    DatosAnteriores = vacante.IdEstado.ToString(),
+        //                    DatosNuevos = idArchivado.ToString()
+        //                });
+        //            }
+
+        //            db.SaveChanges();
+
+        //            return Json(new { ok = true, message = "Práctica desactivada (archivada) correctamente." });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { ok = false, message = "Error al desactivar la práctica: " + ex.Message });
+        //    }
+        //}
         [HttpPost]
         public JsonResult Eliminar(int id)
         {
@@ -353,43 +425,71 @@ namespace SIGEP.Controllers
                     var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
                     if (vacante == null)
                         return Json(new { ok = false, message = "La vacante no existe." });
-                    var estadosActivosProceso = new int[] { 3, 5, 6, 11 };
-                    var estadosPermitenArchivarSolo = new int[] { 4, 7 };
-                    int idArchivado = 10;
 
-                    bool hayActivos = db.PracticaEstudianteTB
-                        .Any(pe => pe.IdVacante == id && estadosActivosProceso.Contains(pe.IdEstado));
-                    var estadosRelacion = db.PracticaEstudianteTB
+                    // ==========================================
+                    // DEFINICIÓN DE ESTADOS
+                    // ==========================================
+                    int idArchivado = 10; // Estado "Archivado"
+
+                    // Estados que representan procesos activos
+                    var estadosActivos = new int[] { 3, 5, 6, 11, 12 }; // Ejemplo: En proceso, Asignada, En curso, etc.
+
+                    // Estados que permiten archivar si todos los estudiantes están así
+                    var estadosFinalizados = new int[] { 8, 9 }; // Ejemplo: Finalizada (8), Rezagada (9)
+                    var estadosRechRet = new int[] { 4, 7 };     // Ejemplo: Rechazada (4), Retirada (7)
+
+                    // ==========================================
+                    // VALIDACIONES
+                    // ==========================================
+                    var relaciones = db.PracticaEstudianteTB
                         .Where(pe => pe.IdVacante == id)
                         .Select(pe => pe.IdEstado)
-                        .Distinct()
                         .ToList();
 
-                    bool soloRechRet = estadosRelacion.Count == 0
-                        || estadosRelacion.All(s => estadosPermitenArchivarSolo.Contains(s));
+                    // Caso 1: No hay estudiantes asociados
+                    if (relaciones.Count == 0)
+                    {
+                        vacante.IdEstado = idArchivado;
+                        db.SaveChanges();
+                        return Json(new { ok = true, message = "Vacante archivada correctamente (sin estudiantes asociados)." });
+                    }
 
-                    if (hayActivos && !soloRechRet)
+                    // Caso 2: Si hay estudiantes, verificar si todos están en estados que permiten archivar
+                    bool todosFinalizados =
+                        relaciones.All(s => estadosFinalizados.Contains(s) || estadosRechRet.Contains(s));
+
+                    bool hayActivos = relaciones.Any(s => estadosActivos.Contains(s));
+
+                    if (hayActivos)
                     {
                         return Json(new
                         {
                             ok = false,
-                            message = "No es posible desactivar la práctica: existen estudiantes con procesos activos."
+                            message = "No se puede archivar: existen estudiantes con procesos activos."
                         });
                     }
-                    var postulacionesNoActivas = db.PracticaEstudianteTB
-                        .Where(pe => pe.IdVacante == id && !estadosActivosProceso.Contains(pe.IdEstado))
-                        .ToList();
 
-                    foreach (var p in postulacionesNoActivas)
+                    if (!todosFinalizados)
                     {
-                        p.IdEstado = idArchivado;
-                        p.FechaAplicacion = DateTime.Now;
+                        return Json(new
+                        {
+                            ok = false,
+                            message = "No se puede archivar: algunos estudiantes no están en estado finalizado, rezagado, rechazada o retirada."
+                        });
                     }
 
+                    // ==========================================
+                    // SI PASA VALIDACIÓN → ARCHIVAR
+                    // ==========================================
+                    foreach (var pe in db.PracticaEstudianteTB.Where(p => p.IdVacante == id))
+                    {
+                        pe.IdEstado = idArchivado;
+                        pe.FechaAplicacion = DateTime.Now;
+                    }
 
                     vacante.IdEstado = idArchivado;
 
-
+                    // AUDITORÍA
                     var idUsuarioSesion = Session["IdUsuario"] as int?;
                     if (idUsuarioSesion != null)
                     {
@@ -401,20 +501,21 @@ namespace SIGEP.Controllers
                             Accion = "Archivar (Desactivar práctica)",
                             CampoAfectado = "IdEstado",
                             DatosAnteriores = vacante.IdEstado.ToString(),
-                            DatosNuevos = idArchivado.ToString()
+                            DatosNuevos = idArchivado.ToString(),
                         });
                     }
 
                     db.SaveChanges();
 
-                    return Json(new { ok = true, message = "Práctica desactivada (archivada) correctamente." });
+                    return Json(new { ok = true, message = "Vacante archivada correctamente." });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { ok = false, message = "Error al desactivar la práctica: " + ex.Message });
+                return Json(new { ok = false, message = "Error al archivar la vacante: " + ex.Message });
             }
         }
+
 
 
 
@@ -602,39 +703,114 @@ namespace SIGEP.Controllers
 
         // ==============================
         // ASIGNAR ESTUDIANTE A VACANTE 
+        //[HttpPost]
+        //public JsonResult AsignarEstudiante(int idVacante, int idUsuario)
+        //{
+        //    using (var db = new SIGEPEntities())
+        //    {
+
+        //        var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == 3);
+        //        if (estado == null)
+        //            return Json(new { ok = false, message = "No existe el estado con Id=3 (En proceso de Aplicación)." },
+        //                        JsonRequestBehavior.AllowGet);
+
+        //        var existente = db.PracticaEstudianteTB
+        //            .FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
+
+        //        if (existente != null)
+        //        {
+        //            existente.IdEstado = estado.IdEstado;
+        //            existente.FechaAplicacion = DateTime.Now;
+        //        }
+        //        else
+        //        {
+        //            db.PracticaEstudianteTB.Add(new PracticaEstudianteTB
+        //            {
+        //                IdVacante = idVacante,
+        //                IdUsuario = idUsuario,
+        //                IdEstado = estado.IdEstado,
+        //                FechaAplicacion = DateTime.Now
+        //            });
+        //        }
+
+        //        db.SaveChanges();
+        //        return Json(new { ok = true, message = "Estudiante asignado en estado 'En proceso de Aplicación'." },
+        //                    JsonRequestBehavior.AllowGet);
+        //    }
+        //}
+
         [HttpPost]
         public JsonResult AsignarEstudiante(int idVacante, int idUsuario)
         {
             using (var db = new SIGEPEntities())
             {
-
-                var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == 3);
-                if (estado == null)
-                    return Json(new { ok = false, message = "No existe el estado con Id=3 (En proceso de Aplicación)." },
-                                JsonRequestBehavior.AllowGet);
-
-                var existente = db.PracticaEstudianteTB
-                    .FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
-
-                if (existente != null)
+                try
                 {
-                    existente.IdEstado = estado.IdEstado;
-                    existente.FechaAplicacion = DateTime.Now;
-                }
-                else
-                {
-                    db.PracticaEstudianteTB.Add(new PracticaEstudianteTB
+                    // 🔹 Estados que bloquean nuevas asignaciones
+                    var estadosBloqueo = new List<string>
+            {
+                "Asignada",
+                "En Curso",
+                "Finalizada",
+                "Rezagado"
+            };
+
+                    // Buscar si el estudiante ya tiene alguna práctica activa con esos estados
+                    var practicaExistente = (from p in db.PracticaEstudianteTB
+                                             join e in db.EstadosTB on p.IdEstado equals e.IdEstado
+                                             where p.IdUsuario == idUsuario &&
+                                                   estadosBloqueo.Contains(e.Descripcion)
+                                             select new
+                                             {
+                                                 p.IdPractica,
+                                                 p.IdVacante,
+                                                 Estado = e.Descripcion
+                                             }).FirstOrDefault();
+
+                    if (practicaExistente != null)
                     {
-                        IdVacante = idVacante,
-                        IdUsuario = idUsuario,
-                        IdEstado = estado.IdEstado,
-                        FechaAplicacion = DateTime.Now
-                    });
-                }
+                        return Json(new
+                        {
+                            ok = false,
+                            message = $"⚠️ El estudiante ya tiene una práctica '{practicaExistente.Estado}' y no puede ser asignado a otra vacante."
+                        },
+                        JsonRequestBehavior.AllowGet);
+                    }
 
-                db.SaveChanges();
-                return Json(new { ok = true, message = "Estudiante asignado en estado 'En proceso de Aplicación'." },
-                            JsonRequestBehavior.AllowGet);
+                    // Si no tiene prácticas activas, proceder con la asignación
+                    var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == 3);
+                    if (estado == null)
+                        return Json(new { ok = false, message = "No existe el estado con Id=3 (En proceso de Aplicación)." },
+                                    JsonRequestBehavior.AllowGet);
+
+                    var existente = db.PracticaEstudianteTB
+                        .FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
+
+                    if (existente != null)
+                    {
+                        existente.IdEstado = estado.IdEstado;
+                        existente.FechaAplicacion = DateTime.Now;
+                    }
+                    else
+                    {
+                        db.PracticaEstudianteTB.Add(new PracticaEstudianteTB
+                        {
+                            IdVacante = idVacante,
+                            IdUsuario = idUsuario,
+                            IdEstado = estado.IdEstado,
+                            FechaAplicacion = DateTime.Now
+                        });
+                    }
+
+                    db.SaveChanges();
+
+                    return Json(new { ok = true, message = "✅ Estudiante asignado en estado 'En proceso de Aplicación'." },
+                                JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { ok = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+                }
             }
         }
 
@@ -719,30 +895,74 @@ namespace SIGEP.Controllers
         [HttpPost]
         public JsonResult DesasignarEstudiante(int idUsuario, int idVacante)
         {
-            using (var db = new SIGEPEntities())
+            try
             {
-                var practica = db.PracticaEstudianteTB
-                    .FirstOrDefault(p => p.IdUsuario == idUsuario && p.IdVacante == idVacante);
+                if (Session["IdRol"] == null)
+                    return Json(new { ok = false, mensaje = "Sesión expirada. Por favor inicie sesión nuevamente." }, JsonRequestBehavior.AllowGet);
 
-                if (practica == null)
+                int rol = Convert.ToInt32(Session["IdRol"]);
+                // Solo Profesor (3) o Coordinador (2) pueden desasignar
+                if (rol != 2 && rol != 3)
+                    return Json(new { ok = false, mensaje = "No tiene permisos para desasignar estudiantes." }, JsonRequestBehavior.AllowGet);
+
+                using (var db = new SIGEPEntities())
                 {
-                    return Json(new { ok = false, mensaje = "No se encontró la práctica del estudiante." }, JsonRequestBehavior.AllowGet);
+                    var practica = db.PracticaEstudianteTB
+                        .Include("EstadosTB")
+                        .FirstOrDefault(p => p.IdUsuario == idUsuario && p.IdVacante == idVacante);
+
+                    if (practica == null)
+                        return Json(new { ok = false, mensaje = "No se encontró la práctica del estudiante." }, JsonRequestBehavior.AllowGet);
+
+                    string estadoActual = practica.EstadosTB?.Descripcion?.Trim().ToLower() ?? "";
+
+                    // Solo se permite desasignar si la práctica está "En proceso de Aplicación" o "Asignada"
+                    if (estadoActual != "en proceso de aplicacion" && estadoActual != "asignada")
+                    {
+                        return Json(new
+                        {
+                            ok = false,
+                            mensaje = $"No se puede desasignar una práctica en estado '{estadoActual}'. Solo 'En proceso de Aplicación' o 'Asignada'."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    // Buscar el estado 'Retirada'
+                    var estadoRetirada = db.EstadosTB.FirstOrDefault(e => e.Descripcion.Trim().ToLower() == "retirada");
+                    if (estadoRetirada == null)
+                        return Json(new { ok = false, mensaje = "No existe el estado 'Retirada' en la BD." }, JsonRequestBehavior.AllowGet);
+
+                    // Actualizar estado
+                    practica.IdEstado = estadoRetirada.IdEstado;
+                    practica.FechaAplicacion = DateTime.Now;
+                    db.SaveChanges();
+
+                    // Registrar auditoría (ajustada a tus columnas reales)
+                    if (Session["IdUsuario"] != null)
+                    {
+                        int idUsuarioSesion = Convert.ToInt32(Session["IdUsuario"]);
+                        db.AuditoriaGlobalTB.Add(new AuditoriaGlobalTB
+                        {
+                            IdUsuario = idUsuarioSesion,
+                            TablaAfectada = "PracticaEstudianteTB",
+                            IdRegistro = practica.IdPractica,
+                            Accion = "Desasignar Estudiante",
+                            CampoAfectado = "IdEstado",
+                            DatosAnteriores = estadoActual,
+                            DatosNuevos = "retirada"
+                        });
+                        db.SaveChanges();
+                    }
+
+                    return Json(new { ok = true, mensaje = "Estudiante desasignado correctamente (estado: Retirada)." }, JsonRequestBehavior.AllowGet);
                 }
-
-                var estadoSinPractica = db.EstadosTB
-                    .FirstOrDefault(e => e.Descripcion == "Retirada");
-
-                if (estadoSinPractica == null)
-                {
-                    return Json(new { ok = false, mensaje = "No existe el estado 'Retirada' en la BD." }, JsonRequestBehavior.AllowGet);
-                }
-
-                practica.IdEstado = estadoSinPractica.IdEstado;
-                db.SaveChanges();
-
-                return Json(new { ok = true, mensaje = "Estudiante desasignado correctamente." }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, mensaje = "Error al desasignar: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+
+
 
         // ==============================
         // MÉTODOS PRIVADOS PARA DROPDOWNS
@@ -1444,28 +1664,101 @@ namespace SIGEP.Controllers
         }
 
         // === Desasignar/retirar práctica (usa SP de actualización de estado) ===
+        //[HttpPost]
+        //public JsonResult DesasignarPractica(int idPractica, string comentario)
+        //{
+        //    try
+        //    {
+        //        // Buscar estado "Retirada" o "Cancelada" (usa el que exista en EstadosTB)
+        //        int idEstado = EstadoIdPorDescripcion(new[] { "Retirada", "Cancelada" });
+
+        //        db.Database.ExecuteSqlCommand(
+        //            "EXEC dbo.ActualizarEstadoPracticaSP @IdPractica, @IdEstado, @Comentario",
+        //            new SqlParameter("@IdPractica", idPractica),
+        //            new SqlParameter("@IdEstado", idEstado),
+        //            new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
+        //        );
+
+        //        return Json(new { ok = true, msg = "Práctica desasignada correctamente." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { ok = false, msg = ex.Message });
+        //    }
+        //}
         [HttpPost]
         public JsonResult DesasignarPractica(int idPractica, string comentario)
         {
             try
             {
-                // Buscar estado "Retirada" o "Cancelada" (usa el que exista en EstadosTB)
-                int idEstado = EstadoIdPorDescripcion(new[] { "Retirada", "Cancelada" });
+                if (Session["IdRol"] == null)
+                    return Json(new { ok = false, msg = "Sesión expirada. Inicie sesión nuevamente." });
 
-                db.Database.ExecuteSqlCommand(
-                    "EXEC dbo.ActualizarEstadoPracticaSP @IdPractica, @IdEstado, @Comentario",
-                    new SqlParameter("@IdPractica", idPractica),
-                    new SqlParameter("@IdEstado", idEstado),
-                    new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
-                );
+                int rol = Convert.ToInt32(Session["IdRol"]);
+                if (rol != 2 && rol != 3)
+                    return Json(new { ok = false, msg = "No tiene permisos para desasignar estudiantes." });
 
-                return Json(new { ok = true, msg = "Práctica desasignada correctamente." });
+                int idUsuarioSesion = Session["IdUsuario"] != null
+                    ? Convert.ToInt32(Session["IdUsuario"])
+                    : 0;
+
+                using (var db = new SIGEPEntities())
+                {
+                    var practica = db.PracticaEstudianteTB
+                        .Include("EstadosTB")
+                        .FirstOrDefault(p => p.IdPractica == idPractica);
+
+                    if (practica == null)
+                        return Json(new { ok = false, msg = "No se encontró la práctica del estudiante." });
+
+                    string estadoActual = practica.EstadosTB?.Descripcion?.Trim().ToLower() ?? "";
+
+                    // Validar estado actual
+                    if (estadoActual != "asignada" && estadoActual != "en proceso de aplicacion")
+                    {
+                        return Json(new
+                        {
+                            ok = false,
+                            msg = $"No se puede desasignar una práctica en estado '{estadoActual}'. Solo 'Asignada' o 'En proceso de aplicación'."
+                        });
+                    }
+
+                    // Buscar estado Retirada
+                    int idEstado = EstadoIdPorDescripcion(new[] { "Retirada" });
+
+                    // ✅ Ejecutar SP con el nuevo parámetro @IdUsuarioSesion
+                    db.Database.ExecuteSqlCommand(
+                        "EXEC dbo.ActualizarEstadoPracticaSP @IdPractica, @IdEstado, @Comentario, @IdUsuarioSesion",
+                        new SqlParameter("@IdPractica", idPractica),
+                        new SqlParameter("@IdEstado", idEstado),
+                        new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+                        new SqlParameter("@IdUsuarioSesion", idUsuarioSesion)
+                    );
+
+                    // Registrar auditoría
+                    db.AuditoriaGlobalTB.Add(new AuditoriaGlobalTB
+                    {
+                        IdUsuario = idUsuarioSesion,
+                        TablaAfectada = "PracticaEstudianteTB",
+                        IdRegistro = practica.IdPractica,
+                        Accion = "Desasignar (Retirada)",
+                        CampoAfectado = "IdEstado",
+                        DatosAnteriores = estadoActual,
+                        DatosNuevos = "retirada"
+                    });
+                    db.SaveChanges();
+
+                    return Json(new { ok = true, msg = "Estudiante desasignado correctamente (estado: Retirada)." });
+                }
             }
             catch (Exception ex)
             {
-                return Json(new { ok = false, msg = ex.Message });
+                return Json(new { ok = false, msg = "Error al desasignar: " + ex.Message });
             }
         }
+
+
+
 
         // === Cambiar estado académico del usuario (actualiza UsuariosTB.IdEstado) ===
         [HttpPost]

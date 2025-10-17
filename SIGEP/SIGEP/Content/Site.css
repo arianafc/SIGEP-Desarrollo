@@ -394,3 +394,14 @@
     min-width: 90px; /* Opcional: mantiene ancho uniforme */
 }
 
+.vacantes-egresado,
+.vacantes-egresado .vacante-card,
+.vacantes-egresado .vacante-card * {
+    color: #000 !important;
+}
+
+    .vacantes-egresado .modal-content,
+    .vacantes-egresado .modal-body,
+    .vacantes-egresado .modal-body * {
+        color: #000 !important;
+    }
