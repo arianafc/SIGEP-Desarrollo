@@ -486,7 +486,6 @@
     <Content Include="Views\AdministracionGeneral\AdministracionGeneral.cshtml" />
     <Content Include="Views\Evaluacion\ListarEstudianteConPractica.cshtml" />
     <Content Include="Views\Vacantes\ListaVacantesEgresado.cshtml" />
-    <Content Include="Views\Practicas\_DetalleVacante.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

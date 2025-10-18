@@ -1,4 +1,4 @@
-﻿﻿@{
+﻿@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Vacantes - Prácticas";
     var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, , 2=Coord, 3=Prof 4=Egr
@@ -320,9 +320,9 @@
 
                 <!-- LISTADO DE POSTULACIONES -->
                 <div class="mb-4">
-                    <h5 class="section-title">Aplicaciones</h5>
-                    <ul class="list-group" id="listaPostulaciones"></ul>
-                    <span id="mensajeSinAsignados" class="text-muted" style="display:none;">Ningún estudiante asignado aún</span>
+                    <h5 class="section-title mb-3">Postulaciones</h5>
+                    <ul id="listaPostulaciones" class="list-group mb-3"></ul>
+                    <p id="mensajeSinPostulaciones" class="text-muted">No hay postulaciones registradas.</p>
                 </div>
             </div>
         </div>
@@ -358,25 +358,25 @@
     </div>
 </div>
 
-@section scripts {
+@section Scripts {
     <script>
-    window.VacantesCfg = {
-      urls: {
-        getVacantes: '@Url.Action("GetVacantes", "Practicas")',
-        login: '@Url.Action("Login","Home")',
-        detalle: '@Url.Action("Detalle","Practicas")',
-        getUbicacionEmpresa: '@Url.Action("GetUbicacionEmpresa","Practicas")',
-        crear: '@Url.Action("Crear","Practicas")',
-        editar: '@Url.Action("Editar","Practicas")',
-        eliminar: '@Url.Action("Eliminar","Practicas")',
-        obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones","Practicas")',
-        asignarEstudiante: '@Url.Action("AsignarEstudiante","Practicas")',
-        retirarEstudiante: '@Url.Action("RetirarEstudiante","Practicas")',
-        obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar","Practicas")',
-        visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion","Practicas")'
-      },
-      rol: @idRol
-    };
+        window.VacantesCfg = {
+            urls: {
+                getVacantes: '@Url.Action("GetVacantes", "Practicas")',
+                login: '@Url.Action("Login", "Home")',
+                detalle: '@Url.Action("Detalle", "Practicas")',
+                getUbicacionEmpresa: '@Url.Action("GetUbicacionEmpresa", "Practicas")',
+                crear: '@Url.Action("Crear", "Practicas")',
+                editar: '@Url.Action("Editar", "Practicas")',
+                eliminar: '@Url.Action("Eliminar", "Practicas")',
+                obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones", "Practicas")',
+                asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
+                desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
+                obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar", "Practicas")',
+                visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion", "Practicas")'
+            },
+            rol: @idRol
+        };
     </script>
-    <script src="~/Scripts/Practicas/VacantesEstudiantes.js?v=@DateTime.Now.Ticks"></script>
+    <script src="~/Scripts/Practicas/VacantesEstudiantes.js"></script>
 }
