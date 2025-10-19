@@ -23,11 +23,11 @@ namespace SIGEP.Models
         public int IdRol { get; set; }
         public int IdEstado { get; set; }
 
+        public string Telefono { get; set; }
         public string CorreoPersonal { get; set; }
         public string CorreoMEP { get; set; }
 
-        public int Especialidad { get; set; }    
-        public int Seccion { get; set; } 
+        public int IdEspecialidad { get; set; }    
 
         public string NombreEspecialidad { get; set; }
 
@@ -44,10 +44,20 @@ namespace SIGEP.Models
         public string Nacionalidad { get; set; }
 
         public string Sexo { get; set; }
-
+        
+        //ATRIBUTOS DIRECCION
         public string DireccionExacta { get; set; }
+
+        public string provincia { get; set; }
+        public string canton { get; set; }
+        public string distrito { get; set; }
+
+
+
 
         public List<string> EmailsUsuario { get; set; }
         public List<EncargadoDTO> ListaEncargados { get; set; }
+
+        public List<EncargadoDTO> ListaEncargadoMostrar { get; set; }
     }
 }
