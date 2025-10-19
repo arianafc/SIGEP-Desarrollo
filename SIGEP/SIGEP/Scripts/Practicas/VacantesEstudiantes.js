@@ -231,26 +231,35 @@
                             const mostrarBoton = ['en proceso de aplicacion', 'asignada'].includes(estado.toLowerCase());
                             const btnDes = mostrarBoton
                                 ? `<button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
-                            data-idvacante="${p.IdVacante}" data-idusuario="${p.IdUsuario}"
-                            title="Desasignar práctica" style="color:#2D594D;">
-                            <i class="fas fa-trash-alt"></i>
-                           </button>`
+                 data-idpractica="${p.IdPostulacion}" data-idusuario="${p.IdUsuario}"
+                 title="Desasignar práctica" style="color:#2D594D;">
+                 <i class="fas fa-trash-alt"></i>
+               </button>`
                                 : '';
 
                             $lista.append(`
-                        <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
-                            <div>
-                                <a href="${CFG.urls.visualizacionPostulacion}?idPostulacion=${p.IdPostulacion}"
-                                   class="text-decoration-none fw-bold" style="color:#2d594d;">
-                                   ${escapeHtml(p.NombreCompleto)}
-                                </a>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">${badge}${btnDes}</div>
-                        </li>`);
+<li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+  <div>
+    <a href="#" class="link-postulacion text-decoration-none fw-bold" 
+       data-idpostulacion="${p.IdPostulacion}" style="color:#2d594d;">
+       ${escapeHtml(p.NombreCompleto)}
+    </a>
+  </div>
+  <div class="d-flex align-items-center gap-2">${badge}${btnDes}</div>
+</li>`);
                         });
                     }
                 });
             });
+        });
+
+        // 🔹 Redirigir correctamente a la vista de la postulación
+        $(document).on('click', '.link-postulacion', function (e) {
+            e.preventDefault();
+            const idPostulacion = $(this).data('idpostulacion');
+            if (idPostulacion) {
+                window.location.href = CFG.urls.visualizacionPostulacion + '?idPostulacion=' + idPostulacion;
+            }
         });
 
         // =====================================================
@@ -328,35 +337,90 @@
             });
         });
 
-        // Desasignar / Retirar
-        $(document).on('click', '.BtnDesasignarPracticaEstudiante, .btn-retirar-estudiante', function () {
-            const idUsuario = $(this).data('idusuario');
-            const idVacante = $(this).data('idvacante') || $('#modalAsignar').data('idVacante');
-            if (!idUsuario || !idVacante) return Swal.fire('Error', 'Datos inválidos.', 'error');
+        // =====================================================
+        // 🔹 Desasignar práctica (igual que en ListaEstudiantes.js)
+        // =====================================================
+        $(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
+            e.preventDefault();
+
+            const boton = $(this);
+            const idPractica = boton.data("idpractica");
+            const idUsuario = boton.data("idusuario");
+
+            if (!idPractica) {
+                Swal.fire('Error', 'Datos inválidos (falta idPractica).', 'error');
+                return;
+            }
+
+            const modalVisual = document.getElementById("modalVisualizarVacante");
+            const modalAsig = document.getElementById("modalAsignar");
+            const modalActivo =
+                (modalVisual && bootstrap.Modal.getOrCreateInstance(modalVisual)) ||
+                (modalAsig && bootstrap.Modal.getOrCreateInstance(modalAsig));
+
+            if (modalActivo && modalActivo._focustrap)
+                modalActivo._focustrap.deactivate();
 
             Swal.fire({
                 title: '¿Deseas desasignar esta práctica?',
-                text: 'El estado cambiará a "Retirada".',
+                text: 'El estado se cambiará a "Retirada".',
                 icon: 'warning',
                 input: 'textarea',
                 inputLabel: 'Comentario (opcional)',
+                inputPlaceholder: 'Escribe un comentario...',
                 showCancelButton: true,
                 confirmButtonText: 'Sí, desasignar',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2d594d'
+                allowOutsideClick: false,
+                didOpen: () => {
+                    const textarea = Swal.getInput();
+                    if (textarea) {
+                        textarea.removeAttribute("readonly");
+                        textarea.removeAttribute("disabled");
+                        textarea.focus();
+                        setTimeout(() => textarea.focus(), 100);
+                    }
+                },
+                didClose: () => {
+                    if (modalActivo && modalActivo._focustrap)
+                        modalActivo._focustrap.activate();
+                }
             }).then(result => {
-                if (!result.isConfirmed) return;
-                $.post(CFG.urls.desasignarPractica, { idUsuario, idVacante, comentario: result.value || '' })
-                    .done(res => {
+                if (!result.isConfirmed) {
+                    if (modalActivo && modalActivo._focustrap)
+                        modalActivo._focustrap.activate();
+                    return;
+                }
+
+                $.ajax({
+                    url: CFG.urls.desasignarPractica,
+                    type: 'POST',
+                    data: { idPractica: idPractica, comentario: result.value || '' },
+                    success: function (res, status, xhr) {
+                        if (redirSiLogin(res, xhr)) return;
+
                         if (res.ok) {
-                            Swal.fire('Listo', res.message, 'success');
-                            $('#modalAsignar, #modalVisualizarVacante').modal('hide');
-                            tabla.ajax.reload(null, false);
-                        } else Swal.fire('Error', res.message, 'error');
-                    })
-                    .fail(() => Swal.fire('Error', 'Ocurrió un problema al retirar.', 'error'));
+                            Swal.fire({
+                                title: "Desasignado",
+                                text: res.msg || "La práctica fue retirada correctamente.",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                $('#modalVisualizarVacante, #modalAsignar').modal('hide');
+                                tabla.ajax.reload(null, false);
+                            });
+                        } else {
+                            Swal.fire("Error", res.msg || "No se pudo desasignar", "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
+                    }
+                });
             });
         });
+
 
 
         // =====================================================

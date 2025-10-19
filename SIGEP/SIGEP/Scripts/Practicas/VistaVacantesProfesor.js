@@ -148,15 +148,167 @@
                     var nombreLink = `<a href="${url}" class="text-decoration-none" style="color:#2d594d; font-weight:600;">${escapeHtml(p.NombreCompleto)}</a>`;
                     var badge = badgeEstado(estado);
 
+                    // Solo permitir desasignar si el estudiante está en proceso / asignado / en curso
+                    var estadoLower = estado.toLowerCase();
+                    var mostrarBoton = ['asignada', 'en curso', 'en proceso de aplicacion'].includes(estadoLower);
+
+                    var botonDesasignar = mostrarBoton
+                        ? `<button class="btn bg-transparent btn-desasignar-estudiante" 
+                data-idusuario="${p.IdUsuario}" 
+                data-idvacante="${idVacante}" 
+                title="Desasignar estudiante" 
+                style="color:#2d594d">
+          <i class="fas fa-trash-alt"></i>
+       </button>`
+                        : '';
+
                     $lista.append(`
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>${nombreLink}</span>
-              <span>${badge}</span>
-            </li>
-          `);
+        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+            <div class="col-12 col-md-6 mb-2 mb-md-0">${nombreLink}</div>
+            <div class="col-auto d-flex align-items-center gap-2">
+                ${badge}
+                ${botonDesasignar}
+            </div>
+        </li>
+    `);
                 });
             });
         }
+
+        // Reemplaza tu handler por este (mantiene focus trap y UX igual a Estudiantes)
+        $(document).on("click", ".btn-desasignar-estudiante", function (e) {
+            e.preventDefault();
+
+            const boton = $(this);
+            const idVacante = boton.data("idvacante");
+            const idUsuario = boton.data("idusuario");
+            const modalVisualizarEl = document.getElementById("modalVisualizar");
+            const modalVisualizar = bootstrap.Modal.getInstance(modalVisualizarEl);
+
+            // Desactivar focus trap para que SweetAlert acepte input
+            if (modalVisualizar && modalVisualizar._focustrap) {
+                modalVisualizar._focustrap.deactivate();
+            }
+
+            Swal.fire({
+                title: '¿Desea desasignar este estudiante?',
+                text: 'El estado se cambiará a "Retirada".',
+                icon: 'warning',
+                input: 'textarea',
+                inputLabel: 'Comentario (opcional)',
+                inputPlaceholder: 'Escribe un comentario...',
+                inputAttributes: { 'aria-label': 'Comentario (opcional)' },
+                showCancelButton: true,
+                confirmButtonText: 'Sí, desasignar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: "#2D594D",
+                cancelButtonColor: "#6c757d",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    const textarea = Swal.getInput();
+                    if (textarea) {
+                        textarea.removeAttribute("readonly");
+                        textarea.removeAttribute("disabled");
+                        setTimeout(() => textarea.focus(), 100);
+                    }
+                },
+                didClose: () => {
+                    if (modalVisualizar && modalVisualizar._focustrap) {
+                        modalVisualizar._focustrap.activate();
+                    }
+                }
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    // Si cancela, reactivar focus trap y no hacer nada
+                    if (modalVisualizar && modalVisualizar._focustrap) {
+                        modalVisualizar._focustrap.activate();
+                    }
+                    return;
+                }
+
+                const comentario = (result.value || '').trim();
+
+                // Helper: ejecutar retiro (llamada única a RetirarEstudiante)
+                function ejecutarRetiro() {
+                    $.post(cfg.urls.retirarEstudiante, {
+                        idVacante: idVacante,
+                        idUsuario: idUsuario
+                    })
+                        .done(function (resp) {
+                            if (resp && resp.ok) {
+                                Swal.fire({
+                                    title: "Desasignado",
+                                    text: resp.message || "El estudiante fue desasignado correctamente.",
+                                    icon: "success",
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    // Recargar postulaciones y vacantes
+                                    cargarPostulaciones(idVacante);
+                                    filtrarVacantes();
+
+                                    // Opcional: recargar detalle completo con comentarios
+                                    $.get(cfg.urls.detalle, { id: idVacante })
+                                        .done(function (html) {
+                                            if (html && html.trim()) {
+                                                $("#modalVisualizar .modal-body").html(html);
+                                            }
+                                        });
+                                });
+                            } else {
+                                Swal.fire("Error", (resp && resp.message) || "No se pudo desasignar.", "error");
+                            }
+                        })
+                        .fail(function (xhr) {
+                            console.error("Error al llamar RetirarEstudiante:", xhr.responseText || xhr.statusText);
+                            Swal.fire("Error", "Ocurrió un error al procesar la solicitud.", "error");
+                        })
+                        .always(function () {
+                            if (modalVisualizar && modalVisualizar._focustrap) {
+                                modalVisualizar._focustrap.activate();
+                            }
+                        });
+                }
+
+                // Si hay comentario, primero guardarlo con AgregarComentario y luego retirar
+                if (comentario) {
+                    $.post(cfg.urls.agregarComentario, {
+                        idVacante: idVacante,
+                        idUsuario: idUsuario,
+                        comentario: comentario
+                    })
+                        .done(function (res) {
+                            if (res && res.success) {
+                                // comentario guardado ok -> proceder a retirar
+                                ejecutarRetiro();
+                            } else {
+                                // No se pudo guardar comentario — mostrar error y NO retirar
+                                Swal.fire("Error", (res && res.message) || "No se pudo guardar el comentario.", "error")
+                                    .then(() => {
+                                        if (modalVisualizar && modalVisualizar._focustrap) {
+                                            modalVisualizar._focustrap.activate();
+                                        }
+                                    });
+                            }
+                        })
+                        .fail(function (xhr) {
+                            console.error("Error al agregar comentario:", xhr.responseText || xhr.statusText);
+                            Swal.fire("Error", "No se pudo guardar el comentario.", "error")
+                                .then(() => {
+                                    if (modalVisualizar && modalVisualizar._focustrap) {
+                                        modalVisualizar._focustrap.activate();
+                                    }
+                                });
+                        });
+                } else {
+                    // Sin comentario, solo retirar
+                    ejecutarRetiro();
+                }
+            });
+        });
+
+
+
 
         // ========= Modal Asignar (igual) =========
         var tablaAsignar = $('#tablaAsignar').DataTable({
