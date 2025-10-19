@@ -117,9 +117,9 @@ namespace SIGEP.Controllers
                         Usuario.Apellido1,
                         Usuario.Apellido2,
                         Usuario.CorreoPersonal,
-                        Usuario.Especialidad,
+                        Usuario.IdEspecialidad,
                         Usuario.FechaNacimiento,
-                        Usuario.Seccion,
+                        Usuario.IdSeccion,
                         Usuario.Contrasenna,
                         Usuario.Cedula
                     ).FirstOrDefault();

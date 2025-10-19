@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI;
 
 namespace SIGEP.Controllers
 {
@@ -32,7 +33,7 @@ namespace SIGEP.Controllers
 
                     var usuarioData = dbContext.UsuariosTB.FirstOrDefault(u => u.Cedula == cedula);
                     var usuarioCorreos = dbContext.EmailsTB
-    .Where(e => e.IdUsuario == usuarioData.IdUsuario)
+             .Where(e => e.IdUsuario == usuarioData.IdUsuario)
     .ToList();
                     var usuarioSeccion = dbContext.SeccionesTB.FirstOrDefault(s => s.IdSeccion == usuarioData.IdSeccion);
                     var usuarioEspecialidad = dbContext.UsuarioEspecialidadTB.FirstOrDefault(es => es.IdUsuario == usuarioData.IdUsuario);
@@ -47,12 +48,35 @@ namespace SIGEP.Controllers
                     var usuarioCorreoPersonal = usuarioCorreos
                         .FirstOrDefault(e => !e.Email.ToLower().Contains("@mep.go.cr"));
 
+                    var EncargadoMostrar = dbContext.ObtenerEncargadosUsuarioSP(usuarioData.IdUsuario).ToList().Where(ee => ee.IdEstado == 1);
                     var Encargados = dbContext.ObtenerEncargadosUsuarioSP(usuarioData.IdUsuario).ToList();
 
-
+                    
 
                     if (usuarioData != null)
                     {
+                       if (direccion != null )
+                        {
+                            // Obtener el distrito
+                            var distritoEntity = dbContext.DistritosTB.FirstOrDefault(d => d.IdDistrito == direccion.IdDistrito);
+                            Usuario.distrito = distritoEntity?.Nombre ?? "";
+
+                            // Obtener el cantón asociado al distrito
+                            var cantonEntity = distritoEntity != null
+                                ? dbContext.CantonesTB.FirstOrDefault(c => c.IdCanton == distritoEntity.IdCanton)
+                                : null;
+                            Usuario.canton = cantonEntity?.Nombre ?? "";
+
+                            // Obtener la provincia asociada al cantón
+                            var provinciaEntity = cantonEntity != null
+                                ? dbContext.ProvinciasTB.FirstOrDefault(p => p.IdProvincia == cantonEntity.IdProvincia)
+                                : null;
+                            Usuario.provincia = provinciaEntity?.Nombre ?? "";
+                            Usuario.canton = cantonEntity?.Nombre ?? "";
+                            Usuario.distrito = distritoEntity?.Nombre ?? "";
+                        }
+
+
                         Usuario.IdUsuario = usuarioData.IdUsuario;
                         Usuario.Cedula = usuarioData.Cedula;
                         Usuario.Nombre = usuarioData.Nombre;
@@ -68,17 +92,32 @@ namespace SIGEP.Controllers
                         Usuario.CorreoPersonal = usuarioCorreoPersonal?.Email ?? "";
                         Usuario.CorreoMEP = usuarioCorreoMEP?.Email ?? "";
                         Usuario.NombreEspecialidad = especialidad.Nombre;
+                        Usuario.IdEspecialidad = especialidad.IdEspecialidad;
+                        Usuario.Telefono = dbContext.TelefonosTB.FirstOrDefault(t => t.IdUsuario == usuarioData.IdUsuario)?.Telefono ?? "";
                         Usuario.NombreSeccion = usuarioSeccion?.Seccion;
-                        Usuario.Padecimiento = InfoMedica?.Padecimiento ?? "N/A";
-                        Usuario.Alergia = InfoMedica?.Alergia ?? "N/A";
-                        Usuario.Tratamiento = InfoMedica?.Tratamiento ?? "N/A";
-                        Usuario.Nacionalidad = usuarioData.Nacionalidad ?? "N/A";
-                        Usuario.Sexo = usuarioData.Sexo ?? "N/A";
-                        Usuario.DireccionExacta = direccion?.DireccionExacta ?? "N/A";
+                        Usuario.Padecimiento = InfoMedica?.Padecimiento ?? "";
+                        Usuario.Alergia = InfoMedica?.Alergia ?? "";
+                        Usuario.Tratamiento = InfoMedica?.Tratamiento ?? "";
+                        Usuario.Nacionalidad = usuarioData.Nacionalidad ?? "";
+                        Usuario.Sexo = usuarioData.Sexo ?? "";
+                        Usuario.DireccionExacta = direccion?.DireccionExacta ?? "";
                         // Cargar listas para dropdowns
                         Usuario.ListaSecciones = dbContext.SeccionesTB.ToList();
                         Usuario.ListaEspecialidades = dbContext.EspecialidadesTB.ToList();
                        Usuario.ListaEncargados = Encargados.Select(enc => new EncargadoDTO
+                        {
+                            IdEncargado = enc.IdEncargado,
+                            Nombre = enc.Nombre,
+                            Telefono = enc.Telefono,
+                            Parentesco = enc.Parentesco,
+                            LugarTrabajo = enc.LugarTrabajo,
+                            Ocupacion = enc.Ocupacion,
+                            Correo = enc.Correo,
+                            Cedula = enc.Cedula,
+                            FechaRegistro = enc.FechaRegistro,
+                            IdEstado = enc.IdEstado
+                        }).ToList();
+                        Usuario.ListaEncargadoMostrar = EncargadoMostrar.Select(enc => new EncargadoDTO
                         {
                             IdEncargado = enc.IdEncargado,
                             Nombre = enc.Nombre,
@@ -102,6 +141,128 @@ namespace SIGEP.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
+
+        [HttpPost]
+        public ActionResult ActualizarPerfil(UsuarioModel usuario)
+        {
+            var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+            using (var dbContext = new SIGEPEntities())
+            {
+                var usuarioToUpdate = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == IdUsuario);
+                if (usuarioToUpdate != null)
+                {
+                    // ===============================
+                    // Validar cédula
+                    // ===============================
+                    if (usuarioToUpdate.Cedula != usuario.Cedula)
+                    {
+                        var cedulaExistente = dbContext.UsuariosTB
+                            .FirstOrDefault(u => u.Cedula == usuario.Cedula && u.IdUsuario != IdUsuario);
+                        if (cedulaExistente != null)
+                        {
+                            TempData["SwalError"] = "La cédula ya está en uso por otro usuario.";
+                            return Redirect("MiPerfil");
+                        }
+                        usuarioToUpdate.Cedula = usuario.Cedula;
+                    }
+
+                    // ===============================
+                    // Actualizaciones básicas
+                    // ===============================
+                    usuarioToUpdate.Nombre = usuario.Nombre;
+                    usuarioToUpdate.Apellido1 = usuario.Apellido1;
+                    usuarioToUpdate.Apellido2 = usuario.Apellido2;
+                    usuarioToUpdate.FechaNacimiento = usuario.FechaNacimiento;
+                    usuarioToUpdate.Nacionalidad = usuario.Nacionalidad;
+                    usuarioToUpdate.Sexo = usuario.Sexo;
+
+                    // ===============================
+                    // Correos
+                    // ===============================
+                    var correoPersonal = dbContext.EmailsTB
+                        .FirstOrDefault(e => e.IdUsuario == IdUsuario && !e.Email.ToLower().Contains("@mep.go.cr"));
+                    if (correoPersonal != null)
+                        correoPersonal.Email = usuario.CorreoPersonal;
+                    else if (!string.IsNullOrEmpty(usuario.CorreoPersonal))
+                        dbContext.EmailsTB.Add(new EmailsTB { IdUsuario = IdUsuario, Email = usuario.CorreoPersonal });
+
+                    var correoMEP = dbContext.EmailsTB
+                        .FirstOrDefault(e => e.IdUsuario == IdUsuario && e.Email.ToLower().Contains("@mep.go.cr"));
+                    if (correoMEP != null)
+                        correoMEP.Email = usuario.CorreoMEP;
+                    else if (!string.IsNullOrEmpty(usuario.CorreoMEP))
+                        dbContext.EmailsTB.Add(new EmailsTB { IdUsuario = IdUsuario, Email = usuario.CorreoMEP });
+
+                    // ===============================
+                    // Teléfono
+                    // ===============================
+                    var telefono = dbContext.TelefonosTB.FirstOrDefault(t => t.IdUsuario == IdUsuario);
+                    if (telefono != null)
+                        telefono.Telefono = usuario.Telefono;
+                    else if (!string.IsNullOrEmpty(usuario.Telefono))
+                        dbContext.TelefonosTB.Add(new TelefonosTB { IdUsuario = IdUsuario, Telefono = usuario.Telefono });
+
+                    // ===============================
+                    // Provincias / Cantones / Distritos
+                    // ===============================
+                    var provincia = dbContext.ProvinciasTB.FirstOrDefault(p => p.Nombre == usuario.provincia)
+                                    ?? dbContext.ProvinciasTB.Add(new ProvinciasTB { Nombre = usuario.provincia });
+                    dbContext.SaveChanges();
+
+                    var canton = dbContext.CantonesTB
+                        .FirstOrDefault(c => c.Nombre == usuario.canton && c.IdProvincia == provincia.IdProvincia)
+                        ?? dbContext.CantonesTB.Add(new CantonesTB { Nombre = usuario.canton, IdProvincia = provincia.IdProvincia });
+                    dbContext.SaveChanges();
+
+                    var distrito = dbContext.DistritosTB
+                        .FirstOrDefault(d => d.Nombre == usuario.distrito && d.IdCanton == canton.IdCanton)
+                        ?? dbContext.DistritosTB.Add(new DistritosTB { Nombre = usuario.distrito, IdCanton = canton.IdCanton });
+                    dbContext.SaveChanges();
+
+                    // ===============================
+                    // Dirección del usuario
+                    // ===============================
+                    DireccionesTB direccion;
+                    if (usuarioToUpdate.IdDireccion != null)
+                    {
+                        // Actualizar dirección existente
+                        direccion = dbContext.DireccionesTB.FirstOrDefault(d => d.IdDireccion == usuarioToUpdate.IdDireccion);
+                        if (direccion != null)
+                        {
+                            direccion.IdDistrito = distrito.IdDistrito;
+                            direccion.DireccionExacta = usuario.DireccionExacta;
+                        }
+                    }
+                    else
+                    {
+                        // Insertar nueva dirección
+                        direccion = new DireccionesTB
+                        {
+                            IdDistrito = distrito.IdDistrito,
+                            DireccionExacta = usuario.DireccionExacta,
+                            IdEstado = 1
+                        };
+                        dbContext.DireccionesTB.Add(direccion);
+                        dbContext.SaveChanges();
+
+                        // Asignar IdDireccion al usuario
+                        usuarioToUpdate.IdDireccion = direccion.IdDireccion;
+                    }
+
+                    dbContext.SaveChanges();
+                    TempData["SwalSuccess"] = "Perfil actualizado exitosamente.";
+                }
+                else
+                {
+                    TempData["SwalError"] = "Usuario no encontrado.";
+                }
+
+                return Redirect("MiPerfil");
+            }
+        }
+
+
 
 
         [HttpPost]
@@ -136,38 +297,97 @@ namespace SIGEP.Controllers
             return RedirectToAction("MiPerfil");
         }
 
-
         [HttpPost]
-
-        public ActionResult ActualizarEncargado(int IdEncargado, string Nombre, string Apellido1, string Apellido2, string Telefono, string Parentesco, string LugarTrabajo, string Ocupacion, string Correo, string Cedula)
+        public ActionResult ActualizarEncargado(
+            int IdEncargado, string Nombre, string Apellido1, string Apellido2,
+            string Telefono, string Parentesco, string LugarTrabajo,
+            string Ocupacion, string Correo, string Cedula)
         {
             try
             {
-
                 var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-                using (var dbContext = new SIGEPEntities())
+                using (var db = new SIGEPEntities())
                 {
-                    var accion = 1;
-                    var result = dbContext.AccionesEncargadoSP(accion, IdEncargado, Nombre, Telefono, Parentesco, LugarTrabajo, Ocupacion, Correo, Cedula, Apellido1, Apellido2, IdUsuario);
-                  int? affectedRows = result.FirstOrDefault();
-                    if (affectedRows > 0)
+                    // 1 Validar si la cédula pertenece a un estudiante activo
+                    var esEstudiante = (from u in db.UsuariosTB
+                                        join r in db.RolesTB on u.IdRol equals r.IdRol
+                                        where u.Cedula == Cedula && r.Descripcion == "Estudiante" && u.IdEstado == 1
+                                        select u).Any();
+
+                    if (esEstudiante)
                     {
-                        return Json(new { success = true, mensaje = "Encargado actualizado exitosamente." });
-                       
+                        return Json(new
+                        {
+                            success = false,
+                            mensaje = "La cédula ingresada pertenece a un estudiante activo de la institución."
+                        });
                     }
+
+                    // 2️ Validar si la cédula ya pertenece a otro encargado
+                    var duplicado = db.EncargadosTB
+                        .FirstOrDefault(e => e.Cedula == Cedula && e.IdEncargado != IdEncargado);
+
+                    if (duplicado != null)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            mensaje = "La cédula ya pertenece a otro encargado. Revise los registros existentes."
+                        });
+                    }
+
+                    // 3️ Buscar encargado actual
+                    var encargado = db.EncargadosTB.FirstOrDefault(e => e.IdEncargado == IdEncargado);
+                    if (encargado == null)
+                    {
+                        return Json(new { success = false, mensaje = "No se encontró el encargado." });
+                    }
+
+                    // 4️ Actualizar datos básicos
+
+                    var parentescoExistente = db.EstudianteEncargadoTB.FirstOrDefault(ee => ee.IdEncargado == IdEncargado && ee.IdUsuario == IdUsuario);
+
+                    parentescoExistente.Parentesco = Parentesco;
+                    encargado.Cedula = Cedula;
+                    encargado.Nombre = Nombre;
+                    encargado.Apellido1 = Apellido1;
+                    encargado.Apellido2 = Apellido2;
+                    encargado.Ocupacion = Ocupacion;
+                    encargado.LugarTrabajo = LugarTrabajo;
+                    db.SaveChanges();
+
+                    // 5️ Actualizar teléfono
+                    var telefonoExistente = db.TelefonosTB.FirstOrDefault(t => t.IdEncargado == IdEncargado);
+                    if (telefonoExistente != null)
+                        telefonoExistente.Telefono = Telefono;
                     else
+                        db.TelefonosTB.Add(new TelefonosTB { Telefono = Telefono, IdEncargado = IdEncargado });
+
+                    // 6️ Actualizar correo
+                    var correoExistente = db.EmailsTB.FirstOrDefault(c => c.IdEncargado == IdEncargado);
+                    if (correoExistente != null)
+                        correoExistente.Email = Correo;
+                    else
+                        db.EmailsTB.Add(new EmailsTB { Email = Correo, IdEncargado = IdEncargado });
+
+                    db.SaveChanges();
+
+                    return Json(new
                     {
-                        return Json(new { success = false, mensaje = "No se pudo actualizar el encargado, intente de nuevo." });
-                       
-                    }
+                        success = true,
+                        mensaje = "Encargado actualizado exitosamente."
+                    });
                 }
             }
             catch (Exception ex)
             {
-                TempData["SwalError"] = "Error: " + ex.Message;
+                return Json(new
+                {
+                    success = false,
+                    mensaje = "Error interno: " + ex.Message
+                });
             }
-            return RedirectToAction("MiPerfil");
         }
 
         [HttpPost]
@@ -236,7 +456,42 @@ namespace SIGEP.Controllers
             }
             return RedirectToAction("MiPerfil");
         }
-        
+
+
+        [HttpPost]
+
+        public ActionResult ActivarEncargado(int IdEncargado)
+        {
+            try
+            {
+
+                var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var accion = 4;
+                    var result = dbContext.AccionesEncargadoSP(accion, IdEncargado, "", "", "", "", "", "", "", "", "", IdUsuario);
+                    int? affectedRows = result.FirstOrDefault();
+                    if (affectedRows > 0)
+                    {
+                        return Json(new { success = true, mensaje = "Encargado activado exitosamente." });
+
+                    }
+                    else
+                    {
+                        return Json(new { success = false, mensaje = "No se pudo activar el encargado, intente de nuevo." });
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["SwalError"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("MiPerfil");
+        }
+
+
 
         [HttpGet]
         public JsonResult ObtenerEncargadoPorId(int idEncargado)
@@ -275,6 +530,58 @@ namespace SIGEP.Controllers
             catch (Exception ex)
             {
                 return Json(new { error = true, mensaje = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        [HttpGet]
+        public JsonResult ObtenerEncargadoPorCedula(string Cedula)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var resultado = dbContext.EncargadosTB
+                        .FirstOrDefault(e => e.Cedula == Cedula && e.IdEstado == 1);
+
+                    if (resultado == null)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            mensaje = "No se encontró ningún encargado activo con esa cédula."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    var encargado = new EncargadoDTO
+                    {
+                        IdEncargado = resultado.IdEncargado,
+                        Cedula = resultado.Cedula,
+                        Nombre = resultado.Nombre,
+                        Apellido1 = resultado.Apellido1,
+                        Apellido2 = resultado.Apellido2,
+                        Ocupacion = resultado.Ocupacion,
+                        LugarTrabajo = resultado.LugarTrabajo,
+                        Correo = dbContext.EmailsTB
+                                    .FirstOrDefault(em => em.IdEncargado == resultado.IdEncargado)?.Email,
+                        Telefono = dbContext.TelefonosTB
+                                    .FirstOrDefault(t => t.IdEncargado == resultado.IdEncargado)?.Telefono
+                    };
+
+                    return Json(new
+                    {
+                        success = true,
+                        data = encargado
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    mensaje = "Error interno: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
             }
         }
 
