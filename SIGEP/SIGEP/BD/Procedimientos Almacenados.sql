@@ -172,10 +172,14 @@ END;
 
 USE [SIGEP]
 GO
+
+/****** Object:  StoredProcedure [dbo].[AccionesEncargadoSP]    Script Date: 10/19/2025 11:56:35 PM ******/
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 ALTER PROCEDURE [dbo].[AccionesEncargadoSP]
     @Accion INT,
@@ -198,34 +202,13 @@ BEGIN
     DECLARE @IdDuplicado INT;
     DECLARE @IdEncargadoExistente INT;
 
-    -- ========================================
-    -- Validación si la cédula pertenece a un estudiante activo
-    -- ========================================
-    SELECT @EsEstudiante = COUNT(*)
-    FROM UsuariosTB U
-    INNER JOIN RolesTB R ON U.IdRol = R.IdRol
-    WHERE U.Cedula = @Cedula AND R.Descripcion = 'Estudiante' AND U.IdEstado = 1;
-
-    IF (@EsEstudiante > 0)
-    BEGIN
-        SELECT 'La cédula ingresada pertenece a un estudiante activo de la institución' AS Result;
-        RETURN;
-    END
 
     -- ========================================
     -- 1️ ACTUALIZAR ENCARGADO
     -- ========================================
     IF (@Accion = 1)
     BEGIN
-        SELECT @IdDuplicado = IdEncargado
-        FROM EncargadosTB
-        WHERE Cedula = @Cedula AND IdEncargado <> @IdEncargado;
-
-        IF (@IdDuplicado IS NOT NULL)
-        BEGIN
-            SELECT 'La cédula ya pertenece a otro encargado. Puede agregarlo como nuevo o editar el registro correcto.' AS Result;
-            RETURN;
-        END
+      
 
         -- Actualizar datos del encargado
         UPDATE EncargadosTB
@@ -344,3 +327,5 @@ BEGIN
     END
 END
 GO
+
+

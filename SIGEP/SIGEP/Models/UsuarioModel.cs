@@ -59,5 +59,19 @@ namespace SIGEP.Models
         public List<EncargadoDTO> ListaEncargados { get; set; }
 
         public List<EncargadoDTO> ListaEncargadoMostrar { get; set; }
+
+
+        //ATRIBUTO INFO ACADEMICA
+
+        public string Carrera { get; set; }
+        public int AnnoGraduacion { get; set; }
+        public string TituloObtenido { get; set; }
+
+
+        //ATRIBUTO INFO LABORAL
+
+        public string EmpresaActual{ get; set; }
+
+        public string PuestoActual { get; set; }
     }
 }

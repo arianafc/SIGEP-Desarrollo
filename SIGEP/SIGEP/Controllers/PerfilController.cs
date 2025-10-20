@@ -18,120 +18,175 @@ namespace SIGEP.Controllers
             try
             {
                 var Usuario = new UsuarioModel();
+
                 using (var dbContext = new SIGEPEntities())
                 {
-
-
-
-
+                    // ===============================
+                    // VALIDAR SESIÓN
+                    // ===============================
                     var cedula = Session["Cedula"]?.ToString();
+                    var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
                     if (string.IsNullOrEmpty(cedula))
                     {
                         TempData["SwalError"] = "La sesión expiró. Vuelva a iniciar sesión.";
                         return RedirectToAction("Login", "Home");
                     }
 
-                    var usuarioData = dbContext.UsuariosTB.FirstOrDefault(u => u.Cedula == cedula);
-                    var usuarioCorreos = dbContext.EmailsTB
-             .Where(e => e.IdUsuario == usuarioData.IdUsuario)
-    .ToList();
-                    var usuarioSeccion = dbContext.SeccionesTB.FirstOrDefault(s => s.IdSeccion == usuarioData.IdSeccion);
-                    var usuarioEspecialidad = dbContext.UsuarioEspecialidadTB.FirstOrDefault(es => es.IdUsuario == usuarioData.IdUsuario);
-                    var especialidad = dbContext.EspecialidadesTB.FirstOrDefault(es => es.IdEspecialidad == usuarioEspecialidad.IdEspecialidad);
-                    var InfoMedica = dbContext.InformacionMedicaTB.FirstOrDefault(im => im.IdUsuario == usuarioData.IdUsuario);
-                    var direccion = dbContext.DireccionesTB.FirstOrDefault(d => d.IdDireccion == usuarioData.IdDireccion);
-                    // Correo institucional (MEP)
-                    var usuarioCorreoMEP = usuarioCorreos
-                        .FirstOrDefault(e => e.Email.ToLower().Contains("@mep.go.cr"));
+                    // ===============================
+                    // OBTENER DATOS PRINCIPALES DEL USUARIO
+                    // ===============================
+                    var usuarioData = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == IdUsuario);
 
-                    // Correo personal 
-                    var usuarioCorreoPersonal = usuarioCorreos
-                        .FirstOrDefault(e => !e.Email.ToLower().Contains("@mep.go.cr"));
-
-                    var EncargadoMostrar = dbContext.ObtenerEncargadosUsuarioSP(usuarioData.IdUsuario).ToList().Where(ee => ee.IdEstado == 1);
-                    var Encargados = dbContext.ObtenerEncargadosUsuarioSP(usuarioData.IdUsuario).ToList();
-
-                    
-
-                    if (usuarioData != null)
+                    if (usuarioData == null)
                     {
-                       if (direccion != null )
-                        {
-                            // Obtener el distrito
-                            var distritoEntity = dbContext.DistritosTB.FirstOrDefault(d => d.IdDistrito == direccion.IdDistrito);
-                            Usuario.distrito = distritoEntity?.Nombre ?? "";
-
-                            // Obtener el cantón asociado al distrito
-                            var cantonEntity = distritoEntity != null
-                                ? dbContext.CantonesTB.FirstOrDefault(c => c.IdCanton == distritoEntity.IdCanton)
-                                : null;
-                            Usuario.canton = cantonEntity?.Nombre ?? "";
-
-                            // Obtener la provincia asociada al cantón
-                            var provinciaEntity = cantonEntity != null
-                                ? dbContext.ProvinciasTB.FirstOrDefault(p => p.IdProvincia == cantonEntity.IdProvincia)
-                                : null;
-                            Usuario.provincia = provinciaEntity?.Nombre ?? "";
-                            Usuario.canton = cantonEntity?.Nombre ?? "";
-                            Usuario.distrito = distritoEntity?.Nombre ?? "";
-                        }
-
-
-                        Usuario.IdUsuario = usuarioData.IdUsuario;
-                        Usuario.Cedula = usuarioData.Cedula;
-                        Usuario.Nombre = usuarioData.Nombre;
-                        Usuario.Apellido1 = usuarioData.Apellido1;
-                        Usuario.Apellido2 = usuarioData.Apellido2;
-                        Usuario.FechaNacimiento = usuarioData.FechaNacimiento;
-                        Usuario.FechaRegistro = usuarioData.FechaRegistro;
-                        Usuario.FechaEgreso = usuarioData.FechaEgreso ?? null;
-                        Usuario.IdSeccion = usuarioData.IdSeccion ?? 0;
-                        Usuario.IdDireccion = usuarioData.IdDireccion ?? 0;
-                        Usuario.IdRol = usuarioData.IdRol;
-                        Usuario.IdEstado = usuarioData.IdEstado;
-                        Usuario.CorreoPersonal = usuarioCorreoPersonal?.Email ?? "";
-                        Usuario.CorreoMEP = usuarioCorreoMEP?.Email ?? "";
-                        Usuario.NombreEspecialidad = especialidad.Nombre;
-                        Usuario.IdEspecialidad = especialidad.IdEspecialidad;
-                        Usuario.Telefono = dbContext.TelefonosTB.FirstOrDefault(t => t.IdUsuario == usuarioData.IdUsuario)?.Telefono ?? "";
-                        Usuario.NombreSeccion = usuarioSeccion?.Seccion;
-                        Usuario.Padecimiento = InfoMedica?.Padecimiento ?? "";
-                        Usuario.Alergia = InfoMedica?.Alergia ?? "";
-                        Usuario.Tratamiento = InfoMedica?.Tratamiento ?? "";
-                        Usuario.Nacionalidad = usuarioData.Nacionalidad ?? "";
-                        Usuario.Sexo = usuarioData.Sexo ?? "";
-                        Usuario.DireccionExacta = direccion?.DireccionExacta ?? "";
-                        // Cargar listas para dropdowns
-                        Usuario.ListaSecciones = dbContext.SeccionesTB.ToList();
-                        Usuario.ListaEspecialidades = dbContext.EspecialidadesTB.ToList();
-                       Usuario.ListaEncargados = Encargados.Select(enc => new EncargadoDTO
-                        {
-                            IdEncargado = enc.IdEncargado,
-                            Nombre = enc.Nombre,
-                            Telefono = enc.Telefono,
-                            Parentesco = enc.Parentesco,
-                            LugarTrabajo = enc.LugarTrabajo,
-                            Ocupacion = enc.Ocupacion,
-                            Correo = enc.Correo,
-                            Cedula = enc.Cedula,
-                            FechaRegistro = enc.FechaRegistro,
-                            IdEstado = enc.IdEstado
-                        }).ToList();
-                        Usuario.ListaEncargadoMostrar = EncargadoMostrar.Select(enc => new EncargadoDTO
-                        {
-                            IdEncargado = enc.IdEncargado,
-                            Nombre = enc.Nombre,
-                            Telefono = enc.Telefono,
-                            Parentesco = enc.Parentesco,
-                            LugarTrabajo = enc.LugarTrabajo,
-                            Ocupacion = enc.Ocupacion,
-                            Correo = enc.Correo,
-                            Cedula = enc.Cedula,
-                            FechaRegistro = enc.FechaRegistro,
-                            IdEstado = enc.IdEstado
-                        }).ToList();
+                        TempData["SwalError"] = "No se encontró información del usuario.";
+                        return RedirectToAction("Index", "Home");
                     }
 
+                    // ===============================
+                    // DATOS RELACIONADOS
+                    // ===============================
+                    var usuarioCorreos = dbContext.EmailsTB.Where(e => e.IdUsuario == IdUsuario).ToList();
+                    var usuarioSeccion = dbContext.SeccionesTB.FirstOrDefault(s => s.IdSeccion == usuarioData.IdSeccion);
+                    var usuarioEspecialidad = dbContext.UsuarioEspecialidadTB.FirstOrDefault(es => es.IdUsuario == usuarioData.IdUsuario);
+                    var especialidad = usuarioEspecialidad != null
+                        ? dbContext.EspecialidadesTB.FirstOrDefault(es => es.IdEspecialidad == usuarioEspecialidad.IdEspecialidad)
+                        : null;
+                    var InfoMedica = dbContext.InformacionMedicaTB.FirstOrDefault(im => im.IdUsuario == usuarioData.IdUsuario);
+                    var direccion = dbContext.DireccionesTB.FirstOrDefault(d => d.IdDireccion == usuarioData.IdDireccion);
+                    var InfoAcademica = dbContext.FormacionAcademicaTB.FirstOrDefault(u => u.IdUsuario == usuarioData.IdUsuario);
+                    var InfoLaboral = dbContext.InformacionLaboralTB.FirstOrDefault(u => u.IdUsuario == usuarioData.IdUsuario);
+                    // ===============================
+                    // CORREOS
+                    // ===============================
+                    var usuarioCorreoMEP = usuarioCorreos.FirstOrDefault(e => e.Email.ToLower().Contains("@mep.go.cr"));
+                    var usuarioCorreoPersonal = usuarioCorreos.FirstOrDefault(e => !e.Email.ToLower().Contains("@mep.go.cr"));
+
+                    // ===============================
+                    // ENCARGADOS
+                    // ===============================
+                    var Encargados = dbContext.ObtenerEncargadosUsuarioSP(usuarioData.IdUsuario).ToList();
+                    var EncargadoMostrar = Encargados.Where(ee => ee.IdEstado == 1).ToList();
+
+                    // ===============================
+                    // DIRECCIÓN COMPLETA (provincia, cantón, distrito)
+                    // ===============================
+                    if (direccion != null)
+                    {
+                        var distritoEntity = dbContext.DistritosTB.FirstOrDefault(d => d.IdDistrito == direccion.IdDistrito);
+                        Usuario.distrito = distritoEntity?.Nombre ?? "";
+
+                        var cantonEntity = distritoEntity != null
+                            ? dbContext.CantonesTB.FirstOrDefault(c => c.IdCanton == distritoEntity.IdCanton)
+                            : null;
+                        Usuario.canton = cantonEntity?.Nombre ?? "";
+
+                        var provinciaEntity = cantonEntity != null
+                            ? dbContext.ProvinciasTB.FirstOrDefault(p => p.IdProvincia == cantonEntity.IdProvincia)
+                            : null;
+                        Usuario.provincia = provinciaEntity?.Nombre ?? "";
+                        Usuario.DireccionExacta = direccion.DireccionExacta ?? "";
+                    }
+
+                    // ===============================
+                    // INFORMACIÓN GENERAL DEL USUARIO
+                    // ===============================
+                    Usuario.IdUsuario = usuarioData.IdUsuario;
+                    Usuario.Cedula = usuarioData.Cedula;
+                    Usuario.Nombre = usuarioData.Nombre;
+                    Usuario.Apellido1 = usuarioData.Apellido1;
+                    Usuario.Apellido2 = usuarioData.Apellido2;
+                    Usuario.FechaNacimiento = usuarioData.FechaNacimiento;
+                    Usuario.FechaRegistro = usuarioData.FechaRegistro;
+                    Usuario.FechaEgreso = usuarioData.FechaEgreso;
+                    Usuario.IdSeccion = usuarioData.IdSeccion ?? 0;
+                    Usuario.IdDireccion = usuarioData.IdDireccion ?? 0;
+                    Usuario.IdRol = usuarioData.IdRol;
+                    Usuario.IdEstado = usuarioData.IdEstado;
+                    Usuario.Nacionalidad = usuarioData.Nacionalidad ?? "";
+                    Usuario.Sexo = usuarioData.Sexo ?? "";
+
+                    // ===============================
+                    // CORREOS
+                    // ===============================
+                    Usuario.CorreoMEP = usuarioCorreoMEP?.Email ?? "";
+                    Usuario.CorreoPersonal = usuarioCorreoPersonal?.Email ?? "";
+
+                    // ===============================
+                    // SECCIÓN
+                    // ===============================
+                    Usuario.NombreSeccion = usuarioSeccion?.Seccion ?? "";
+
+                    // ===============================
+                    // ESPECIALIDAD
+                    // ===============================
+                    Usuario.NombreEspecialidad = especialidad?.Nombre ?? "";
+                    Usuario.IdEspecialidad = especialidad?.IdEspecialidad ?? 0;
+
+                    // ===============================
+                    // INFORMACIÓN MÉDICA
+                    // ===============================
+                    Usuario.Padecimiento = InfoMedica?.Padecimiento ?? "";
+                    Usuario.Alergia = InfoMedica?.Alergia ?? "";
+                    Usuario.Tratamiento = InfoMedica?.Tratamiento ?? "";
+
+                    // ===============================
+                    // INFORMACIÓN ACADÉMICA
+                    // ===============================
+                    Usuario.Carrera = InfoAcademica?.Carrera ?? "";
+                    Usuario.TituloObtenido = InfoAcademica?.Titulo ?? "";
+                    Usuario.AnnoGraduacion = InfoAcademica?.AnnoGraduacion ?? 0; // tipo INT
+
+                    // ===============================
+                    // INFORMACIÓN ACADÉMICA
+                    // ===============================
+                    Usuario.EmpresaActual = InfoLaboral?.EmpresaActual ?? "";
+                    Usuario.PuestoActual = InfoLaboral?.PuestoActual ?? "";
+
+                    // ===============================
+                    // TELÉFONO
+                    // ===============================
+                    Usuario.Telefono = dbContext.TelefonosTB
+                        .FirstOrDefault(t => t.IdUsuario == usuarioData.IdUsuario)?.Telefono ?? "";
+
+                    // ===============================
+                    // LISTAS PARA DROPDOWNS Y ENCARGADOS
+                    // ===============================
+                    Usuario.ListaSecciones = dbContext.SeccionesTB.ToList();
+                    Usuario.ListaEspecialidades = dbContext.EspecialidadesTB.ToList();
+
+                    Usuario.ListaEncargados = Encargados.Select(enc => new EncargadoDTO
+                    {
+                        IdEncargado = enc.IdEncargado,
+                        Nombre = enc.Nombre,
+                        Telefono = enc.Telefono,
+                        Parentesco = enc.Parentesco,
+                        LugarTrabajo = enc.LugarTrabajo,
+                        Ocupacion = enc.Ocupacion,
+                        Correo = enc.Correo,
+                        Cedula = enc.Cedula,
+                        FechaRegistro = enc.FechaRegistro,
+                        IdEstado = enc.IdEstado
+                    }).ToList();
+
+                    Usuario.ListaEncargadoMostrar = EncargadoMostrar.Select(enc => new EncargadoDTO
+                    {
+                        IdEncargado = enc.IdEncargado,
+                        Nombre = enc.Nombre,
+                        Telefono = enc.Telefono,
+                        Parentesco = enc.Parentesco,
+                        LugarTrabajo = enc.LugarTrabajo,
+                        Ocupacion = enc.Ocupacion,
+                        Correo = enc.Correo,
+                        Cedula = enc.Cedula,
+                        FechaRegistro = enc.FechaRegistro,
+                        IdEstado = enc.IdEstado
+                    }).ToList();
+
+                    // ===============================
+                    // DEVOLVER A LA VISTA
+                    // ===============================
                     return View(Usuario);
                 }
             }
@@ -142,11 +197,12 @@ namespace SIGEP.Controllers
             }
         }
 
+
         [HttpPost]
         public ActionResult ActualizarPerfil(UsuarioModel usuario)
         {
             var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
-
+            var IdRol = Convert.ToInt32(Session["IdRol"]);
             using (var dbContext = new SIGEPEntities())
             {
                 var usuarioToUpdate = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == IdUsuario);
@@ -159,12 +215,20 @@ namespace SIGEP.Controllers
                     {
                         var cedulaExistente = dbContext.UsuariosTB
                             .FirstOrDefault(u => u.Cedula == usuario.Cedula && u.IdUsuario != IdUsuario);
+
                         if (cedulaExistente != null)
                         {
                             TempData["SwalError"] = "La cédula ya está en uso por otro usuario.";
                             return Redirect("MiPerfil");
                         }
+                        else if (IdRol == 1)
+                        {
+                            var EsEncargado = dbContext.EncargadosTB.FirstOrDefault(u => u.Cedula == usuario.Cedula);
+                            TempData["SwalError"] = "Error: La cédula indicada se encuentra asociada a un encargado";
+                            return Redirect("MiPerfil");
+                        }
                         usuarioToUpdate.Cedula = usuario.Cedula;
+                        Session["cedula"] = usuario.Cedula;
                     }
 
                     // ===============================
@@ -186,13 +250,16 @@ namespace SIGEP.Controllers
                         correoPersonal.Email = usuario.CorreoPersonal;
                     else if (!string.IsNullOrEmpty(usuario.CorreoPersonal))
                         dbContext.EmailsTB.Add(new EmailsTB { IdUsuario = IdUsuario, Email = usuario.CorreoPersonal });
+                    if (IdRol != 4)
+                    {
+                        var correoMEP = dbContext.EmailsTB
+                       .FirstOrDefault(e => e.IdUsuario == IdUsuario && e.Email.ToLower().Contains("@mep.go.cr"));
+                        if (correoMEP != null)
+                            correoMEP.Email = usuario.CorreoMEP;
+                        else if (!string.IsNullOrEmpty(usuario.CorreoMEP))
+                            dbContext.EmailsTB.Add(new EmailsTB { IdUsuario = IdUsuario, Email = usuario.CorreoMEP });
+                    }
 
-                    var correoMEP = dbContext.EmailsTB
-                        .FirstOrDefault(e => e.IdUsuario == IdUsuario && e.Email.ToLower().Contains("@mep.go.cr"));
-                    if (correoMEP != null)
-                        correoMEP.Email = usuario.CorreoMEP;
-                    else if (!string.IsNullOrEmpty(usuario.CorreoMEP))
-                        dbContext.EmailsTB.Add(new EmailsTB { IdUsuario = IdUsuario, Email = usuario.CorreoMEP });
 
                     // ===============================
                     // Teléfono
@@ -263,32 +330,34 @@ namespace SIGEP.Controllers
         }
 
 
-
-
         [HttpPost]
         public ActionResult CambiarContrasenna(UsuarioModel usuario)
         {
-           try
+            try
             {
                 if (usuario.Contrasenna == usuario.NuevaContrasenna)
                 {
-                    using (var dbContext = new SIGEPEntities()) { 
-                       var cedula = Session["Cedula"].ToString();
-                       var result = dbContext.CambiarContrasennaSP(cedula, usuario.Contrasenna);
+                    using (var dbContext = new SIGEPEntities())
+                    {
+                        var cedula = Session["Cedula"].ToString();
+                        var result = dbContext.CambiarContrasennaSP(cedula, usuario.Contrasenna);
                         if (result != 0)
                         {
                             TempData["SwalSuccess"] = "Contraseña actualizada exitosamente.";
-                        } else
+                        }
+                        else
                         {
                             TempData["SwalError"] = "No se pudo cambiar la contraseña, intente de nuevo.";
                         }
 
                     }
-                } else
-                {
-                            TempData["SwalError"] = "La nueva contraseña no coincide con la confirmación. Intente de nuevo.";
                 }
-            } catch (Exception ex)
+                else
+                {
+                    TempData["SwalError"] = "La nueva contraseña no coincide con la confirmación. Intente de nuevo.";
+                }
+            }
+            catch (Exception ex)
             {
                 TempData["SwalError"] = "Error: " + ex.Message;
             }
@@ -404,8 +473,10 @@ namespace SIGEP.Controllers
                     var accion = 3;
                     var result = dbContext.AccionesEncargadoSP(accion, null, nombre, telefono, parentesco, lugarTrabajo, ocupacion, correo, cedula, apellido1, apellido2, IdUsuario);
                     int? affectedRows = result.FirstOrDefault();
+
                     if (affectedRows > 0)
                     {
+
                         return Json(new { success = true, mensaje = "Encargado agregado exitosamente." });
 
                     }
@@ -438,7 +509,9 @@ namespace SIGEP.Controllers
                     var accion = 2;
                     var result = dbContext.AccionesEncargadoSP(accion, IdEncargado, "", "", "", "", "", "", "", "", "", IdUsuario);
                     int? affectedRows = result.FirstOrDefault();
+
                     if (affectedRows > 0)
+
                     {
                         return Json(new { success = true, mensaje = "Encargado desactivado exitosamente." });
 
@@ -472,6 +545,7 @@ namespace SIGEP.Controllers
                     var accion = 4;
                     var result = dbContext.AccionesEncargadoSP(accion, IdEncargado, "", "", "", "", "", "", "", "", "", IdUsuario);
                     int? affectedRows = result.FirstOrDefault();
+
                     if (affectedRows > 0)
                     {
                         return Json(new { success = true, mensaje = "Encargado activado exitosamente." });
@@ -585,5 +659,341 @@ namespace SIGEP.Controllers
             }
         }
 
+
+        [HttpPost]
+
+        public ActionResult ActualizarInformacionMedica(UsuarioModel usuario)
+        {
+            try
+            {
+                var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var infoMedica = dbContext.InformacionMedicaTB.FirstOrDefault(im => im.IdUsuario == IdUsuario);
+                    if (infoMedica != null)
+                    {
+                        infoMedica.Padecimiento = usuario.Padecimiento;
+                        infoMedica.Alergia = usuario.Alergia;
+                        infoMedica.Tratamiento = usuario.Tratamiento;
+                    }
+                    else
+                    {
+                        dbContext.InformacionMedicaTB.Add(new InformacionMedicaTB
+                        {
+                            IdUsuario = IdUsuario,
+                            Padecimiento = usuario.Padecimiento,
+                            Alergia = usuario.Alergia,
+                            Tratamiento = usuario.Tratamiento
+                        });
+                    }
+                    dbContext.SaveChanges();
+                    TempData["SwalSuccess"] = "Información médica actualizada exitosamente.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["SwalError"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("MiPerfil");
+        }
+
+        [HttpPost]
+
+        public ActionResult ActualizarEspecialidadSeccion(UsuarioModel usuario)
+        {
+            try
+            {
+                var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var Especialidad = dbContext.UsuarioEspecialidadTB.FirstOrDefault(im => im.IdUsuario == IdUsuario);
+                    if (Especialidad != null)
+                    {
+                        Especialidad.IdEspecialidad = usuario.IdEspecialidad;
+                    }
+                    else
+                    {
+                        dbContext.UsuarioEspecialidadTB.Add(new UsuarioEspecialidadTB
+                        {
+                            IdUsuario = IdUsuario,
+                            IdEspecialidad = usuario.IdEspecialidad,
+                            IdEstado = 1
+                        });
+
+                    }
+
+
+                    var seccion = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == IdUsuario);
+                    if (seccion != null)
+                    {
+                        seccion.IdSeccion = usuario.IdSeccion;
+                    }
+
+                    dbContext.SaveChanges();
+                    TempData["SwalSuccess"] = "Información académica actualizada exitosamente.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["SwalError"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("MiPerfil");
+        }
+            [HttpPost]
+
+            public ActionResult ActualizarInformacionAcademica(UsuarioModel usuario)
+            {
+                try
+                {
+                    var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+                    using (var dbContext = new SIGEPEntities())
+                    {
+                        var InfoAcademica = dbContext.FormacionAcademicaTB.FirstOrDefault(im => im.IdUsuario == IdUsuario);
+                        if (InfoAcademica != null)
+                        {
+                            InfoAcademica.Carrera = usuario.Carrera;
+                            InfoAcademica.Titulo = usuario.TituloObtenido;
+                            InfoAcademica.AnnoGraduacion = usuario.AnnoGraduacion;
+                        }
+                        else
+                        {
+                            dbContext.FormacionAcademicaTB.Add(new FormacionAcademicaTB
+                            {
+                                Carrera = usuario.Carrera,
+                                Titulo = usuario.TituloObtenido,
+                                AnnoGraduacion = usuario.AnnoGraduacion,
+                                IdUsuario = IdUsuario
+                            });
+
+                        }
+                        dbContext.SaveChanges();
+                        TempData["SwalSuccess"] = "Información académica actualizada exitosamente.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    TempData["SwalError"] = "Error: " + ex.Message;
+                }
+                return RedirectToAction("MiPerfil");
+
+
+            }
+
+
+        [HttpPost]
+
+        public ActionResult ActualizarInformacionLaboral(UsuarioModel usuario)
+        {
+            try
+            {
+                var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var InfoLaboral = dbContext.InformacionLaboralTB.FirstOrDefault(im => im.IdUsuario == IdUsuario);
+                    if (InfoLaboral != null)
+                    {
+                        InfoLaboral.EmpresaActual = usuario.EmpresaActual;
+                        InfoLaboral.PuestoActual = usuario.PuestoActual;
+                    }
+                    else
+                    {
+                        dbContext.InformacionLaboralTB.Add(new InformacionLaboralTB
+                        {
+                           EmpresaActual = usuario.EmpresaActual,
+                            PuestoActual = usuario.PuestoActual,
+                            IdUsuario = IdUsuario
+                        });
+
+                    }
+                    dbContext.SaveChanges();
+                    TempData["SwalSuccess"] = "Información laboral actualizada exitosamente.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["SwalError"] = "Error: " + ex.Message;
+            }
+            return RedirectToAction("MiPerfil");
+
+
+        }
+
+
+        [HttpPost]
+        public JsonResult SubirDocumento(HttpPostedFileBase archivo, int idUsuario)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                if (archivo == null || archivo.ContentLength == 0)
+                {
+                    return Json(new { success = false, message = "No se seleccionó ningún archivo" });
+                }
+
+                // Validar extensión
+                var extensionesPermitidas = new[] { ".xls", ".xlsx", ".pdf" };
+                var extension = System.IO.Path.GetExtension(archivo.FileName).ToLower();
+
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    return Json(new { success = false, message = "Solo se permiten archivos .xls, .xlsx o .pdf" });
+                }
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Obtener cédula del estudiante
+                    var estudiante = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idUsuario);
+                    if (estudiante == null)
+                    {
+                        return Json(new { success = false, message = "Usuario no encontrado" });
+                    }
+
+                    string cedulaEstudiante = estudiante.Cedula;
+
+                    // Crear directorio en C:\sigep si no existe
+                    string directorioBase = @"C:\sigep\Perfil\"+estudiante.Cedula;
+                    if (!System.IO.Directory.Exists(directorioBase))
+                    {
+                        System.IO.Directory.CreateDirectory(directorioBase);
+                    }
+
+                    // Generar nombre del archivo con cédula (sin fecha/hora)
+                    string nombreOriginal = System.IO.Path.GetFileNameWithoutExtension(archivo.FileName);
+                    string nombreArchivo = $"{cedulaEstudiante}_{nombreOriginal}{extension}";
+
+                    // Ruta completa del archivo
+                    string rutaCompleta = System.IO.Path.Combine(directorioBase, nombreArchivo);
+
+                    // Si el archivo ya existe, se sobrescribe
+                    archivo.SaveAs(rutaCompleta);
+
+                    // Guardar registro en BD con la ruta del archivo
+                    var documento = new DocumentosTB
+                    {
+                        Documento = archivo.FileName, // Nombre original para mostrar
+                        Tipo = "Perfil",
+                        RutaArchivo = rutaCompleta,
+                        FechaSubida = DateTime.Now,
+                        IdUsuario = idUsuario
+                    };
+
+                    dbContext.DocumentosTB.Add(documento);
+                    dbContext.SaveChanges();
+
+                    return Json(new { success = true, message = "Documento subido correctamente" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerDocumentos(int idUsuario)
+        {
+       
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documentos = dbContext.ObtenerDocumentosEvaluacionSP(idUsuario).ToList();
+
+                    var resultado = documentos.Select(d => new
+                    {
+                        IdDocumento = d.IdDocumento,
+                        Nombre = d.Documento,
+                        RutaArchivo = d.RutaArchivo,
+                        FechaSubida = d.FechaSubida.ToString("dd/MM/yyyy HH:mm"),
+                        Extension = d.Extension ?? System.IO.Path.GetExtension(d.Documento)
+                    }).ToList();
+
+                    return Json(new { success = true, documentos = resultado }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+
+        [HttpPost]
+        public JsonResult EliminarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var doc = dbContext.DocumentosTB.Find(idDocumento);
+                    if (doc == null)
+                        return Json(new { success = false, message = "Documento no encontrado" });
+
+                    // Eliminar archivo físico
+                    if (System.IO.File.Exists(doc.RutaArchivo))
+                        System.IO.File.Delete(doc.RutaArchivo);
+
+                    dbContext.DocumentosTB.Remove(doc);
+                    dbContext.SaveChanges();
+
+                    return Json(new { success = true, message = "Documento eliminado correctamente" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+
+
+        public FileResult DescargarDocumento(string ruta, bool download = false)
+        {
+            if (!System.IO.File.Exists(ruta))
+                return null;
+
+            string nombreArchivo = System.IO.Path.GetFileName(ruta);
+            string contentType = "application/octet-stream";
+
+            if (download)
+                return File(ruta, contentType, nombreArchivo); // descarga
+            else
+                return File(ruta, contentType); // abre en navegador
+        }
+
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
+

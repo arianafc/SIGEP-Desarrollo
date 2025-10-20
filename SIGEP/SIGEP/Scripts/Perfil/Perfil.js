@@ -1,5 +1,161 @@
 ﻿$(function () {
 
+    $('#btnSubirDoc').on('click', function () {
+        var archivo = $('#ArchivoDoc')[0].files[0];
+        var idUsuario = $('#IdUsuarioDoc').val();
+
+        if (!archivo) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No hay archivo',
+                text: 'Por favor seleccione un archivo antes de continuar.',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        // Validar extensión
+        var extensionesPermitidas = ['.xls', '.xlsx', '.pdf'];
+        var extension = '.' + archivo.name.split('.').pop().toLowerCase();
+        if (!extensionesPermitidas.includes(extension)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Extensión inválida',
+                text: 'Solo se permiten archivos .xls, .xlsx o .pdf',
+                confirmButtonColor: '#d33'
+            });
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('archivo', archivo);
+        formData.append('idUsuario', idUsuario);
+
+        $.ajax({
+            url: '/Perfil/SubirDocumento',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: response.message,
+                        icon: 'success',
+                        confirmButtonColor: '#2D594D'
+                    }).then(() => {
+                        $('#modalSubirDoc').modal('hide');
+                        location.reload(); // recarga la página para mostrar el documento
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.message,
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al subir el documento: ' + error,
+                    icon: 'error',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        });
+    });
+
+    function cargarDocumentos() {
+
+        let idUsuario = $('#IdUsuarioDocumento').val();
+
+        $.ajax({
+            url: '/Perfil/ObtenerDocumentos',
+            type: 'GET',
+            data: { idUsuario: idUsuario },
+            success: function (documentos) {
+                var contenedor = $('#listaDocumentos');
+                contenedor.empty();
+
+                if (documentos.length === 0) {
+                    contenedor.append('<div class="text-center text-muted">No hay documentos subidos.</div>');
+                    return;
+                }
+
+                documentos.forEach(function (doc) {
+                    var item = $(`
+                        <div class="list-group-item d-flex justify-content-between align-items-center" 
+                             style="background-color: white; border: 1px solid #8CA653; border-radius: 8px; margin-bottom: 10px;">
+                            <div>
+                                <strong>${doc.Documento}</strong><br />
+                                <small>Cargado: ${doc.Fecha}</small>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}" 
+                                   target="_blank" title="Ver" class="btn btn-link p-0 text-secondary">
+                                   <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}&download=true" 
+                                   title="Descargar" class="btn btn-link p-0 text-secondary">
+                                   <i class="fas fa-download"></i>
+                                </a>
+                                <button class="btn btn-link p-0 text-secondary btnEliminarDoc" data-id="${doc.IdDocumento}" title="Eliminar">
+                                   <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                    contenedor.append(item);
+                });
+            },
+            error: function () {
+                Swal.fire('Error', 'No se pudieron cargar los documentos.', 'error');
+            }
+        });
+    }
+
+    // Evento para eliminar
+    $(document).on('click', '.btnEliminarDoc', function () {
+        var idDocumento = $(this).data('id');
+
+        Swal.fire({
+            title: '¿Desea eliminar este documento?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Perfil/EliminarDocumento',
+                    type: 'POST',
+                    data: { idDocumento: idDocumento },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Eliminado', response.message, 'success');
+                            cargarDocumentos(); // recargar lista
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Ocurrió un error al eliminar.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // Cargar documentos al abrir el modal
+    $('#modalVerDocs').on('shown.bs.modal', function () {
+        cargarDocumentos();
+    });
+
     var Contrasenna = $('#ContrasennaNueva');
     var ConfirmarContrasenna = $('#ConfirmarContrasenna');
     var Form = $('#CambiarContrasennaForm');
@@ -53,10 +209,21 @@
             data: data,
             success: function (response) {
                 if (response.success) {
-                    Swal.fire('Éxito', response.mensaje, 'success')
-                        .then(() => window.location.href = '/Perfil/MiPerfil');
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: response.mensaje,
+                        icon: 'success',
+                        confirmButtonColor: '#2D594D'
+                    }).then(() => {
+                        window.location.href = '/Perfil/MiPerfil';
+                    });
                 } else {
-                    Swal.fire('Error', response.mensaje, 'error');
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.mensaje,
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             },
             error: function (error) {
@@ -81,6 +248,26 @@
             Cedula: $('#CedulaEditar').val()
         };
 
+        if (!data.Cedula || !data.Nombre || !data.Apellido1 || !data.Apellido2 || !data.Telefono || !data.Correo || !data.Ocupacion || !data.LugarTrabajo || !data.Parentesco) {
+            Swal.fire('Error', 'Por favor complete todos los campos obligatorios.', 'error');
+            return;
+        }
+
+        // Validar correo electrónico
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(data.Correo)) {
+            Swal.fire('Error', 'Ingrese un correo electrónico válido.', 'error');
+            return;
+        }
+
+        // Validar teléfono (solo números y mínimo 8 dígitos)
+        var telefonoPattern = /^\d{8,}$/;
+        if (!telefonoPattern.test(data.Telefono)) {
+            Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+            return;
+        }
+
+
         $.ajax({
             url: '/Perfil/ActualizarEncargado',
             type: 'POST',
@@ -88,10 +275,21 @@
             success: function (response) {
                 if (response.success) {
                     $('#modalEditarEncargado').modal('hide');
-                    Swal.fire('Éxito', response.mensaje, 'success')
-                        .then(() => window.location.href = '/Perfil/MiPerfil');
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: response.mensaje,
+                        icon: 'success',
+                        confirmButtonColor: '#2D594D'
+                    }).then(() => {
+                        window.location.href = '/Perfil/MiPerfil';
+                    });
                 } else {
-                    Swal.fire('Error', response.mensaje, 'error');
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.mensaje,
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             },
             error: function () {
@@ -139,33 +337,6 @@
         }
     });
 
-    // ===================== VALIDACIÓN DE INFO PERSONAL =====================
-    document.getElementById("btnActualizarInfo")?.addEventListener("click", function () {
-        const campos = document.querySelectorAll('#info-personal input');
-        let incompletos = false;
-
-        campos.forEach(input => {
-            if (input.value.trim() === "") {
-                incompletos = true;
-            }
-        });
-
-        if (incompletos) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Campos incompletos',
-                text: 'Por favor complete todos los campos obligatorios',
-                confirmButtonColor: '#8CA653'
-            });
-        } else {
-            Swal.fire({
-                icon: 'success',
-                title: 'Información actualizada correctamente',
-                showConfirmButton: false,
-                timer: 2000
-            });
-        }
-    });
 
     // ===================== MENSAJES REUTILIZABLES =====================
     function mostrarSuccessMensaje() {
@@ -237,10 +408,21 @@ function eliminarEncargado(idEncargado) {
                 data: { IdEncargado: idEncargado },
                 success: function (response) {
                     if (response.success) {
-                        Swal.fire('Éxito', response.mensaje, 'success')
-                            .then(() => window.location.href = '/Perfil/MiPerfil');
+                        Swal.fire({
+                            title: 'Éxito',
+                            text: response.mensaje,
+                            icon: 'success',
+                            confirmButtonColor: '#2D594D'
+                        }).then(() => {
+                            window.location.href = '/Perfil/MiPerfil';
+                        });
                     } else {
-                        Swal.fire('Error', response.mensaje, 'error');
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.mensaje,
+                            icon: 'error',
+                            confirmButtonColor: '#d33'
+                        });
                     }
                 },
                 error: function () {
@@ -270,10 +452,21 @@ function activarEncargado(idEncargado) {
                 data: { IdEncargado: idEncargado },
                 success: function (response) {
                     if (response.success) {
-                        Swal.fire('Éxito', response.mensaje, 'success')
-                            .then(() => window.location.href = '/Perfil/MiPerfil');
+                        Swal.fire({
+                            title: 'Éxito',
+                            text: response.mensaje,
+                            icon: 'success',
+                            confirmButtonColor: '#2D594D'
+                        }).then(() => {
+                            window.location.href = '/Perfil/MiPerfil';
+                        });
                     } else {
-                        Swal.fire('Error', response.mensaje, 'error');
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.mensaje,
+                            icon: 'error',
+                            confirmButtonColor: '#d33'
+                        });
                     }
                 },
                 error: function () {
@@ -336,6 +529,65 @@ $('#CedulaNuevoEncargado').on('blur', function () {
                 title: 'Error de conexión',
                 text: 'No se pudo consultar la cédula. Intente nuevamente.'
             });
+        }
+    });
+});
+
+
+
+$('#ActualizarPerfil').on('submit', function (e) {
+    e.preventDefault(); // Evita envío automático
+
+    let nombre = $('#NombrePerfil').val().trim();
+    let apellido1 = $('#Apellido1Perfil').val().trim();
+    let apellido2 = $('#Apellido2Perfil').val().trim();
+    let cedula = $('#CedulaPerfil').val().trim();
+    let telefono = $('#TelefonoPerfil').val().trim();
+    let correo = $('#CorreoPersonalPerfil').val().trim();
+    let direccion = $('#DireccionPerfil').val().trim();
+
+    // Validar campos vacíos
+    if (!nombre || !apellido1 || !apellido2 || !cedula || !telefono ||
+        !correo || !direccion) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Campos incompletos',
+            text: 'Por favor complete todos los campos obligatorios antes de continuar.',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    // Validar correo electrónico
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correo)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Correo inválido',
+            text: 'Por favor ingrese un correo electrónico válido.',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    // Validar teléfono (solo números y mínimo 8 dígitos)
+    var telefonoPattern = /^\d{8,}$/;
+    if (!telefonoPattern.test(telefono)) {
+        Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+        return;
+    }
+    // Confirmación antes de enviar
+    Swal.fire({
+        title: '¿Desea actualizar su información?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            e.currentTarget.submit();
         }
     });
 });
