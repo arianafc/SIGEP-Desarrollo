@@ -219,29 +219,45 @@
                 $('#vis-FechaCierre').val(d.FechaCierre?.split('T')[0] || '');
                 $('#modalVisualizarVacante').modal('show');
 
-                // Cargar postulaciones
+                $('#modalVisualizarVacante').data('idVacante', id);
+
+                // =====================================================
+                // 🔹 Cargar postulaciones en el modal "Visualizar Vacante"
+                // =====================================================
                 $.getJSON(CFG.urls.obtenerPostulaciones, { idVacante: id }, r2 => {
+                    console.log("📦 Datos devueltos por el backend:", r2);
+
                     const $lista = $('#listaPostulaciones').empty();
-                    $('#mensajeSinPostulaciones').toggle(!r2.ok || !r2.data.length);
+                    $('#mensajeSinPostulaciones').toggle(!r2.ok || !r2.data?.length);
 
                     if (r2.ok && r2.data?.length) {
                         r2.data.forEach(p => {
+                            console.log("🧾 Postulación procesada:", p);
+
                             const estado = p.EstadoDescripcion || 'Sin estado';
+                            const estNorm = estado
+                                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                                .toLowerCase().trim();
+
                             const badge = badgeEstado(estado);
-                            const mostrarBoton = ['en proceso de aplicacion', 'asignada'].includes(estado.toLowerCase());
+                            const mostrarBoton = ['asignada', 'en proceso de aplicacion'].includes(estNorm);
+
                             const btnDes = mostrarBoton
                                 ? `<button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
-                 data-idpractica="${p.IdPostulacion}" data-idusuario="${p.IdUsuario}"
-                 title="Desasignar práctica" style="color:#2D594D;">
-                 <i class="fas fa-trash-alt"></i>
-               </button>`
+         data-idpractica="${p.IdPractica}" 
+         data-nombre="${escapeHtml(p.NombreCompleto)}"
+         title="Desasignar práctica" style="color:#2D594D;">
+         <i class="fas fa-trash-alt"></i>
+       </button>`
                                 : '';
 
                             $lista.append(`
 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
   <div>
-    <a href="#" class="link-postulacion text-decoration-none fw-bold" 
-       data-idpostulacion="${p.IdPostulacion}" style="color:#2d594d;">
+    <a href="${CFG.urls.visualizacionPostulacion}?idVacante=${p.IdVacante}&idUsuario=${p.IdUsuario}"
+       target="_blank"
+       class="text-decoration-none fw-bold"
+       style="color:#2d594d;">
        ${escapeHtml(p.NombreCompleto)}
     </a>
   </div>
@@ -250,20 +266,16 @@
                         });
                     }
                 });
+
+               
+
             });
         });
 
-        // 🔹 Redirigir correctamente a la vista de la postulación
-        $(document).on('click', '.link-postulacion', function (e) {
-            e.preventDefault();
-            const idPostulacion = $(this).data('idpostulacion');
-            if (idPostulacion) {
-                window.location.href = CFG.urls.visualizacionPostulacion + '?idPostulacion=' + idPostulacion;
-            }
-        });
+        
 
         // =====================================================
-        // 🔹 Asignar / Desasignar Estudiantes
+        // 🔹 Asignar Estudiantes
         // =====================================================
         $('#miTabla').on('click', '.btn-asignar', function () {
             const idVacante = $(this).data('id');
@@ -297,14 +309,14 @@
                     }
 
                     tbody.append(`
-                <tr>
-                    <td>${escapeHtml(e.NombreCompleto)}</td>
-                    <td>${escapeHtml(e.Cedula || '')}</td>
-                    <td>${escapeHtml(e.Especialidad || '')}</td>
-                    <td>${badge}</td>
-                    <td class="text-center">${e.EstadoAcademico === false ? '<span class="text-danger fw-bold">Rezagado</span>' : 'Activo'}</td>
-                    <td class="text-center">${btn}</td>
-                </tr>`);
+                        <tr>
+                            <td>${escapeHtml(e.NombreCompleto)}</td>
+                            <td>${escapeHtml(e.Cedula || '')}</td>
+                            <td>${escapeHtml(e.Especialidad || '')}</td>
+                            <td class="text-center">${badge}</td>
+                            <td class="text-center">${btn}</td>
+                        </tr>
+                    `);
                 });
             });
         });
@@ -337,89 +349,8 @@
             });
         });
 
-        // =====================================================
-        // 🔹 Desasignar práctica (igual que en ListaEstudiantes.js)
-        // =====================================================
-        $(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
-            e.preventDefault();
+        
 
-            const boton = $(this);
-            const idPractica = boton.data("idpractica");
-            const idUsuario = boton.data("idusuario");
-
-            if (!idPractica) {
-                Swal.fire('Error', 'Datos inválidos (falta idPractica).', 'error');
-                return;
-            }
-
-            const modalVisual = document.getElementById("modalVisualizarVacante");
-            const modalAsig = document.getElementById("modalAsignar");
-            const modalActivo =
-                (modalVisual && bootstrap.Modal.getOrCreateInstance(modalVisual)) ||
-                (modalAsig && bootstrap.Modal.getOrCreateInstance(modalAsig));
-
-            if (modalActivo && modalActivo._focustrap)
-                modalActivo._focustrap.deactivate();
-
-            Swal.fire({
-                title: '¿Deseas desasignar esta práctica?',
-                text: 'El estado se cambiará a "Retirada".',
-                icon: 'warning',
-                input: 'textarea',
-                inputLabel: 'Comentario (opcional)',
-                inputPlaceholder: 'Escribe un comentario...',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, desasignar',
-                cancelButtonText: 'Cancelar',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    const textarea = Swal.getInput();
-                    if (textarea) {
-                        textarea.removeAttribute("readonly");
-                        textarea.removeAttribute("disabled");
-                        textarea.focus();
-                        setTimeout(() => textarea.focus(), 100);
-                    }
-                },
-                didClose: () => {
-                    if (modalActivo && modalActivo._focustrap)
-                        modalActivo._focustrap.activate();
-                }
-            }).then(result => {
-                if (!result.isConfirmed) {
-                    if (modalActivo && modalActivo._focustrap)
-                        modalActivo._focustrap.activate();
-                    return;
-                }
-
-                $.ajax({
-                    url: CFG.urls.desasignarPractica,
-                    type: 'POST',
-                    data: { idPractica: idPractica, comentario: result.value || '' },
-                    success: function (res, status, xhr) {
-                        if (redirSiLogin(res, xhr)) return;
-
-                        if (res.ok) {
-                            Swal.fire({
-                                title: "Desasignado",
-                                text: res.msg || "La práctica fue retirada correctamente.",
-                                icon: "success",
-                                timer: 1500,
-                                showConfirmButton: false
-                            }).then(() => {
-                                $('#modalVisualizarVacante, #modalAsignar').modal('hide');
-                                tabla.ajax.reload(null, false);
-                            });
-                        } else {
-                            Swal.fire("Error", res.msg || "No se pudo desasignar", "error");
-                        }
-                    },
-                    error: function () {
-                        Swal.fire("Error", "Ocurrió un error al procesar la solicitud", "error");
-                    }
-                });
-            });
-        });
 
 
 
@@ -494,110 +425,144 @@
             });
         });
 
+       
+
+        
         // =====================================================
-        // 🔹 Asignar / Desasignar Estudiantes
+        // 🔹 Desasignar práctica (mantiene el modal abierto y actualiza lista)
         // =====================================================
-        $('#miTabla').on('click', '.btn-asignar', function () {
-            const idVacante = $(this).data('id');
-            $('#modalAsignar').data('idVacante', idVacante).modal('show');
+        $(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
+            e.preventDefault();
 
-            $.getJSON(CFG.urls.obtenerEstudiantesAsignar, { idVacante }, res => {
-                const tbody = $('#miTablaAsignar tbody').empty();
-                if (!res?.ok || !res.data?.length)
-                    return tbody.append('<tr><td colspan="6" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
+            const boton = $(this);
+            const idPractica = boton.data("idpractica");
+            const nombreEst = boton.data("nombre");
+            const idVacante = $('#modalVisualizarVacante').data('idVacante');
 
-                res.data.forEach(e => {
-                    const estado = (e.EstadoVacante || '—').toLowerCase();
-                    const badge = badgeEstado(e.EstadoVacante);
-                    let btn = '';
+            if (!idPractica) {
+                Swal.fire('Error', 'No se encontró el identificador de la práctica.', 'error');
+                return;
+            }
 
-                    // Bloqueo por EstadoAcademico == false
-                    if (e.EstadoAcademico === false) {
-                        btn = `<button class="btn btn-sm btn-secondary" disabled title="Estudiante rezagado">
-                        <i class="fas fa-user-slash"></i> No elegible</button>`;
-                    } else if (['asignada', 'en curso', 'finalizada', 'rezagado'].includes(estado)) {
-                        btn = `<button class="btn btn-sm btn-outline-secondary btn-bloqueado" title="Ya tiene práctica activa">
-                        <i class="fas fa-ban"></i> No disponible</button>`;
-                    } else if (!e.TieneRelacionEnVacante || ['rechazada', 'retirada'].includes(estado)) {
-                        btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante"
-                            data-idusuario="${e.IdUsuario}" data-nombre="${escapeHtml(e.NombreCompleto)}">
-                            <i class="fas fa-user-plus"></i> Asignar</button>`;
-                    } else if (['en proceso de aplicacion', 'asignada'].includes(estado)) {
-                        btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante"
-                            data-idusuario="${e.IdUsuario}" data-nombre="${escapeHtml(e.NombreCompleto)}">
-                            <i class="fas fa-user-minus"></i> Retirar</button>`;
+            const modalVisual = document.getElementById("modalVisualizarVacante");
+            const modalInstance = modalVisual ? bootstrap.Modal.getInstance(modalVisual) : null;
+
+            if (modalInstance && modalInstance._focustrap) modalInstance._focustrap.deactivate();
+
+            Swal.fire({
+                title: '¿Deseas desasignar esta práctica?',
+                text: `El estado de ${nombreEst || 'el estudiante'} se cambiará a "Retirada".`,
+                icon: 'warning',
+                input: 'textarea',
+                inputLabel: 'Comentario (opcional)',
+                inputPlaceholder: 'Escribe un comentario...',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, desasignar',
+                cancelButtonText: 'Cancelar',
+                allowOutsideClick: false,
+                confirmButtonColor: '#2d594d',
+                didOpen: () => {
+                    const textarea = Swal.getInput();
+                    if (textarea) {
+                        textarea.removeAttribute("readonly");
+                        textarea.removeAttribute("disabled");
+                        textarea.focus();
                     }
+                },
+                didClose: () => {
+                    if (modalInstance && modalInstance._focustrap) modalInstance._focustrap.activate();
+                }
+            }).then(result => {
+                if (!result.isConfirmed) {
+                    if (modalInstance && modalInstance._focustrap) modalInstance._focustrap.activate();
+                    return;
+                }
 
-                    tbody.append(`
-                <tr>
-                    <td>${escapeHtml(e.NombreCompleto)}</td>
-                    <td>${escapeHtml(e.Cedula || '')}</td>
-                    <td>${escapeHtml(e.Especialidad || '')}</td>
-                    <td>${badge}</td>
-                    <td class="text-center">${e.EstadoAcademico === false ? '<span class="text-danger fw-bold">Rezagado</span>' : 'Activo'}</td>
-                    <td class="text-center">${btn}</td>
-                </tr>`);
+                $.ajax({
+                    url: CFG.urls.desasignarPractica,
+                    type: 'POST',
+                    data: {
+                        idPractica: idPractica,
+                        comentario: result.value || ''
+                    },
+                    success: function (res, status, xhr) {
+                        if (redirSiLogin(res, xhr)) return;
+
+                        if (res.ok) {
+                            Swal.fire({
+                                title: "Desasignado",
+                                text: res.msg || "La práctica fue desasignada correctamente.",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                // ✅ Desactivar momentáneamente el focus trap
+                                if (modalInstance && modalInstance._focustrap)
+                                    modalInstance._focustrap.deactivate();
+
+                                // ✅ Recargar lista de postulaciones sin cerrar el modal
+                                $.getJSON(CFG.urls.obtenerPostulaciones, { idVacante: idVacante }, r2 => {
+                                    const $lista = $('#listaPostulaciones').empty();
+                                    $('#mensajeSinPostulaciones').toggle(!r2.ok || !r2.data?.length);
+
+                                    if (r2.ok && r2.data?.length) {
+                                        r2.data.forEach(p => {
+                                            const estado = p.EstadoDescripcion || 'Sin estado';
+                                            const estNorm = estado.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+                                            const badge = badgeEstado(estado);
+                                            const mostrarBoton = ['asignada', 'en proceso de aplicacion'].includes(estNorm);
+
+                                            const btnDes = mostrarBoton
+                                                ? `<button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
+                                             data-idpractica="${p.IdPractica}" 
+                                             data-nombre="${escapeHtml(p.NombreCompleto)}"
+                                             title="Desasignar práctica" style="color:#2D594D;">
+                                             <i class="fas fa-trash-alt"></i>
+                                           </button>`
+                                                : '';
+
+                                            // ✅ Enlace funcional directo
+                                            $lista.append(`
+                                                <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                                                  <div>
+                                                    <a href="${CFG.urls.visualizacionPostulacion}?idVacante=${p.IdVacante}&idUsuario=${p.IdUsuario}"
+                                                       target="_blank"
+                                                       class="text-decoration-none fw-bold"
+                                                       style="color:#2d594d;">
+                                                       ${escapeHtml(p.NombreCompleto)}
+                                                    </a>
+                                                  </div>
+                                                  <div class="d-flex align-items-center gap-2">${badge}${btnDes}</div>
+                                                </li>`);
+                                        });
+                                    }
+
+                                    // ✅ Reactivar focus trap al final
+                                    if (modalInstance && modalInstance._focustrap)
+                                        modalInstance._focustrap.activate();
+                                });
+
+                                // ✅ Refrescar tabla principal (sin cerrar modal)
+                                if (typeof tabla !== "undefined")
+                                    tabla.ajax.reload(null, false);
+                            });
+                        } else {
+                            Swal.fire("Error", res.msg || "No se pudo desasignar la práctica.", "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error", "Ocurrió un error al procesar la solicitud.", "error");
+                    },
+                    complete: function () {
+                        if (modalInstance && modalInstance._focustrap)
+                            modalInstance._focustrap.activate();
+                    }
                 });
             });
         });
 
-        // Validación previa al asignar estudiante
-        $(document).on('click', '.btn-asignar-estudiante', function () {
-            const idUsuario = $(this).data('idusuario');
-            const idVacante = $('#modalAsignar').data('idVacante');
-            const nombre = $(this).data('nombre');
 
-            $.post(CFG.urls.asignarEstudiante, { idUsuario, idVacante })
-                .done(res => {
-                    if (res.ok) {
-                        Swal.fire('Éxito', `El estudiante ${nombre} fue asignado correctamente.`, 'success');
-                        $('#modalAsignar').modal('hide');
-                        tabla.ajax.reload(null, false);
-                    } else {
-                        Swal.fire('Error', res.message || 'No se pudo asignar el estudiante.', 'error');
-                    }
-                })
-                .fail(() => Swal.fire('Error', 'Error al asignar estudiante.', 'error'));
-        });
 
-        // Bloqueo por clic en botón “no disponible”
-        $(document).on('click', '.btn-bloqueado', function () {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Estudiante no disponible',
-                text: 'Este estudiante ya tiene una práctica activa o completada y no puede ser asignado.'
-            });
-        });
-
-        // Desasignar / Retirar
-        $(document).on('click', '.BtnDesasignarPracticaEstudiante, .btn-retirar-estudiante', function () {
-            const idUsuario = $(this).data('idusuario');
-            const idVacante = $(this).data('idvacante') || $('#modalAsignar').data('idVacante');
-            if (!idUsuario || !idVacante) return Swal.fire('Error', 'Datos inválidos.', 'error');
-
-            Swal.fire({
-                title: '¿Deseas desasignar esta práctica?',
-                text: 'El estado cambiará a "Retirada".',
-                icon: 'warning',
-                input: 'textarea',
-                inputLabel: 'Comentario (opcional)',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, desasignar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2d594d'
-            }).then(result => {
-                if (!result.isConfirmed) return;
-                $.post(CFG.urls.desasignarPractica, { idUsuario, idVacante, comentario: result.value || '' })
-                    .done(res => {
-                        if (res.ok) {
-                            Swal.fire('Listo', res.message, 'success');
-                            $('#modalAsignar, #modalVisualizarVacante').modal('hide');
-                            tabla.ajax.reload(null, false);
-                        } else Swal.fire('Error', res.message, 'error');
-                    })
-                    .fail(() => Swal.fire('Error', 'Ocurrió un problema al retirar.', 'error'));
-            });
-        });
         
     });
 })(jQuery);

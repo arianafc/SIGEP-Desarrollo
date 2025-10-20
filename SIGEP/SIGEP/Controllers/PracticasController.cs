@@ -148,7 +148,7 @@ namespace SIGEP.Controllers
             {
                 try
                 {
-                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1; // fallback
+                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1; 
                     var vacante = new VacantesPracticasTB
                     {
                         Nombre = model.Nombre,
@@ -347,78 +347,6 @@ namespace SIGEP.Controllers
             }
         }
 
-        //[HttpPost]
-        //public JsonResult Eliminar(int id)
-        //{
-        //    try
-        //    {
-        //        using (var db = new SIGEPEntities())
-        //        {
-        //            var vacante = db.VacantesPracticasTB.FirstOrDefault(v => v.IdVacante == id);
-        //            if (vacante == null)
-        //                return Json(new { ok = false, message = "La vacante no existe." });
-        //            var estadosActivosProceso = new int[] { 3, 5, 6, 11 };
-        //            var estadosPermitenArchivarSolo = new int[] { 4, 7 };
-        //            int idArchivado = 10;
-
-        //            bool hayActivos = db.PracticaEstudianteTB
-        //                .Any(pe => pe.IdVacante == id && estadosActivosProceso.Contains(pe.IdEstado));
-        //            var estadosRelacion = db.PracticaEstudianteTB
-        //                .Where(pe => pe.IdVacante == id)
-        //                .Select(pe => pe.IdEstado)
-        //                .Distinct()
-        //                .ToList();
-
-        //            bool soloRechRet = estadosRelacion.Count == 0
-        //                || estadosRelacion.All(s => estadosPermitenArchivarSolo.Contains(s));
-
-        //            if (hayActivos && !soloRechRet)
-        //            {
-        //                return Json(new
-        //                {
-        //                    ok = false,
-        //                    message = "No es posible desactivar la práctica: existen estudiantes con procesos activos."
-        //                });
-        //            }
-        //            var postulacionesNoActivas = db.PracticaEstudianteTB
-        //                .Where(pe => pe.IdVacante == id && !estadosActivosProceso.Contains(pe.IdEstado))
-        //                .ToList();
-
-        //            foreach (var p in postulacionesNoActivas)
-        //            {
-        //                p.IdEstado = idArchivado;
-        //                p.FechaAplicacion = DateTime.Now;
-        //            }
-
-
-        //            vacante.IdEstado = idArchivado;
-
-
-        //            var idUsuarioSesion = Session["IdUsuario"] as int?;
-        //            if (idUsuarioSesion != null)
-        //            {
-        //                db.AuditoriaGlobalTB.Add(new AuditoriaGlobalTB
-        //                {
-        //                    IdUsuario = idUsuarioSesion.Value,
-        //                    TablaAfectada = "VacantesPracticasTB",
-        //                    IdRegistro = vacante.IdVacante,
-        //                    Accion = "Archivar (Desactivar práctica)",
-        //                    CampoAfectado = "IdEstado",
-        //                    DatosAnteriores = vacante.IdEstado.ToString(),
-        //                    DatosNuevos = idArchivado.ToString()
-        //                });
-        //            }
-
-        //            db.SaveChanges();
-
-        //            return Json(new { ok = true, message = "Práctica desactivada (archivada) correctamente." });
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { ok = false, message = "Error al desactivar la práctica: " + ex.Message });
-        //    }
-        //}
         [HttpPost]
         public JsonResult Eliminar(int id)
         {
@@ -433,7 +361,7 @@ namespace SIGEP.Controllers
                     // ==========================================
                     // DEFINICIÓN DE ESTADOS
                     // ==========================================
-                    int idArchivado = 10; // Estado "Archivado"
+                    int idArchivado = 10; 
 
                     // Estados que representan procesos activos
                     var estadosActivos = new int[] { 3, 5, 6, 11, 12 }; // Ejemplo: En proceso, Asignada, En curso, etc.
@@ -534,23 +462,25 @@ namespace SIGEP.Controllers
                 var lista = (from p in db.PracticaEstudianteTB
                              join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
                              join e in db.EstadosTB on p.IdEstado equals e.IdEstado
+                             join v in db.VacantesPracticasTB on p.IdVacante equals v.IdVacante
+                             join emp in db.EmpresasTB on v.IdEmpresa equals emp.IdEmpresa
                              where p.IdVacante == idVacante
                              orderby u.Nombre
-                             select new PracticaEstudianteViewModel
+                             select new
                              {
-                                 IdUsuario = u.IdUsuario,
-                                 Cedula = u.Cedula,
+                                 p.IdPractica,
+                                 p.IdVacante, 
+                                 u.IdUsuario,
+                                 u.Cedula,
                                  NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
-                                 IdEstado = p.IdEstado,
-                                 EstadoDescripcion = e.Descripcion
+                                 p.IdEstado,
+                                 EstadoDescripcion = e.Descripcion,
+                                 Empresa = emp.NombreEmpresa
                              }).ToList();
 
                 return Json(new { ok = true, data = lista }, JsonRequestBehavior.AllowGet);
             }
         }
-
-
-
 
         [HttpGet]
         public JsonResult ObtenerEstudiantesAsignar(int idVacante)
@@ -707,41 +637,6 @@ namespace SIGEP.Controllers
 
         // ==============================
         // ASIGNAR ESTUDIANTE A VACANTE 
-        //[HttpPost]
-        //public JsonResult AsignarEstudiante(int idVacante, int idUsuario)
-        //{
-        //    using (var db = new SIGEPEntities())
-        //    {
-
-        //        var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == 3);
-        //        if (estado == null)
-        //            return Json(new { ok = false, message = "No existe el estado con Id=3 (En proceso de Aplicación)." },
-        //                        JsonRequestBehavior.AllowGet);
-
-        //        var existente = db.PracticaEstudianteTB
-        //            .FirstOrDefault(p => p.IdVacante == idVacante && p.IdUsuario == idUsuario);
-
-        //        if (existente != null)
-        //        {
-        //            existente.IdEstado = estado.IdEstado;
-        //            existente.FechaAplicacion = DateTime.Now;
-        //        }
-        //        else
-        //        {
-        //            db.PracticaEstudianteTB.Add(new PracticaEstudianteTB
-        //            {
-        //                IdVacante = idVacante,
-        //                IdUsuario = idUsuario,
-        //                IdEstado = estado.IdEstado,
-        //                FechaAplicacion = DateTime.Now
-        //            });
-        //        }
-
-        //        db.SaveChanges();
-        //        return Json(new { ok = true, message = "Estudiante asignado en estado 'En proceso de Aplicación'." },
-        //                    JsonRequestBehavior.AllowGet);
-        //    }
-        //}
 
         [HttpPost]
         public JsonResult AsignarEstudiante(int idVacante, int idUsuario)
@@ -759,7 +654,6 @@ namespace SIGEP.Controllers
                 "Rezagado"
             };
 
-                    // Buscar si el estudiante ya tiene alguna práctica activa con esos estados
                     var practicaExistente = (from p in db.PracticaEstudianteTB
                                              join e in db.EstadosTB on p.IdEstado equals e.IdEstado
                                              where p.IdUsuario == idUsuario &&
@@ -1082,10 +976,10 @@ namespace SIGEP.Controllers
                     }).ToList();
                 ViewBag.Usuarios = usuarios;
 
-                // 🔽 ESTOS TRES SON CLAVE PARA LOS FILTROS
-                ViewBag.Modalidades = ObtenerModalidades();        // <-- faltaba
-                ViewBag.Especialidades = ObtenerEspecialidades();  // <-- por si activas el filtro luego
-                ViewBag.Estados = ObtenerEstadosVacante();         // <-- SOLO Activo / Archivado (igual que estudiantes)
+              
+                ViewBag.Modalidades = ObtenerModalidades();        
+                ViewBag.Especialidades = ObtenerEspecialidades();
+                ViewBag.Estados = ObtenerEstadosVacante();      
 
                 return View(vacantes);
             }
@@ -1604,7 +1498,6 @@ namespace SIGEP.Controllers
 
         // === API para DataTables (AJAX) ===
         // Devuelve estudiantes (de las especialidades del profesor) y su situación global de práctica,
-        // más datos de contacto/empresa y relación con alguna vacante reciente.
         [HttpGet]
         public JsonResult ListarEstudiantesJson(int? idVacante = null)
         {
@@ -1673,29 +1566,7 @@ namespace SIGEP.Controllers
             return q.FirstOrDefault();
         }
 
-        // === Desasignar/retirar práctica (usa SP de actualización de estado) ===
-        //[HttpPost]
-        //public JsonResult DesasignarPractica(int idPractica, string comentario)
-        //{
-        //    try
-        //    {
-        //        // Buscar estado "Retirada" o "Cancelada" (usa el que exista en EstadosTB)
-        //        int idEstado = EstadoIdPorDescripcion(new[] { "Retirada", "Cancelada" });
-
-        //        db.Database.ExecuteSqlCommand(
-        //            "EXEC dbo.ActualizarEstadoPracticaSP @IdPractica, @IdEstado, @Comentario",
-        //            new SqlParameter("@IdPractica", idPractica),
-        //            new SqlParameter("@IdEstado", idEstado),
-        //            new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value)
-        //        );
-
-        //        return Json(new { ok = true, msg = "Práctica desasignada correctamente." });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { ok = false, msg = ex.Message });
-        //    }
-        //}
+        
         [HttpPost]
         public JsonResult DesasignarPractica(int idPractica, string comentario)
         {
