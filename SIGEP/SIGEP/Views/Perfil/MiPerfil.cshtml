@@ -7,7 +7,7 @@
     var usuario = Session["IdUsuario"] != null ? Convert.ToInt32(Session["IdUsuario"]) : 0;
     var NombreCompleto = $"{Session["Nombre"] ?? ""} {Session["Apellido1"] ?? ""}";
     var encargado = Model.ListaEncargadoMostrar?.FirstOrDefault();
-    
+
 }
 
 @section Styles {
@@ -85,626 +85,603 @@
             </div>
         </div>
     }
-<div class="info-box">
-    <div class="perfil-icon">
-        <img src="@Url.Content("~/Images/logoSIGEP.png")" alt="Perfil" class="perfil-img" width="65">
-    </div>
+    <div class="info-box">
+        <div class="perfil-icon">
+            <img src="@Url.Content("~/Images/logoSIGEP.png")" alt="Perfil" class="perfil-img" width="65">
+        </div>
 
 
-    <h5 class="section-title">INFORMACIÓN PERSONAL</h5>
+        <h5 class="section-title">INFORMACIÓN PERSONAL</h5>
 
-    @using (Html.BeginForm("ActualizarPerfil", "Perfil", FormMethod.Post, new { id = "ActualizarPerfil" }))
-    {
-        <div class="row" id="info-personal">
-            <div class="col-md-6 form-group">
-                <label>Nombre</label>
-                @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", @id = "NombrePerfil" })
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label>Primer Apellido</label>
-                @Html.TextBoxFor(m => m.Apellido1, new { @class = "form-control", @id = "Apellido1Perfil" })
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label>Segundo Apellido</label>
-                @Html.TextBoxFor(m => m.Apellido2, new { @class = "form-control", @id = "Apellido2Perfil" })
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label>Cédula</label>
-                @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @id = "CedulaPerfil" })
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label>Teléfono</label>
-                @Html.TextBoxFor(m => m.Telefono, new { @class = "form-control", @id = "TelefonoPerfil" })
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label>Correo Electrónico</label>
-                @Html.TextBoxFor(m => m.CorreoPersonal, new { @class = "form-control", @id = "CorreoPersonalPerfil" })
-            </div>
-
-            @if (rol != 4)
-            {
+        @using (Html.BeginForm("ActualizarPerfil", "Perfil", FormMethod.Post, new { id = "ActualizarPerfil" }))
+        {
+            <div class="row" id="info-personal">
                 <div class="col-md-6 form-group">
-                    <label>Correo Electrónico MEP</label>
-                    @Html.TextBoxFor(m => m.CorreoMEP, new { @class = "form-control", @id = "CorreoMEPPerfil" })
+                    <label>Nombre</label>
+                    @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", @id = "NombrePerfil" })
                 </div>
-            }
-
-            <div class="col-md-6 form-group">
-                <label>Sexo / Género</label>
-                @Html.DropDownListFor(m => m.Sexo,
-                    new SelectList(
-                        new[]
-                        {
-                            new { Value = "", Text = "Seleccione..." },
-                            new { Value = "Masculino", Text = "Masculino" },
-                            new { Value = "Femenino", Text = "Femenino" },
-                            new { Value = "No binario", Text = "No binario" },
-                            new { Value = "Otro", Text = "Otro" },
-                            new { Value = "Prefiero no decirlo", Text = "Prefiero no decirlo" }
-                        },
-                        "Value", "Text",
-                        Model.Sexo
-                    ),
-                    new { @class = "form-control", @id = "SexoPerfil" }
-                )
-            </div>
-
-            <div class="col-md-6 form-group">
-                <label>Nacionalidad</label>
-                @Html.TextBoxFor(m => m.Nacionalidad, new { @class = "form-control", @id = "NacionalidadPerfil" })
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Provincia <span class="text-danger">*</span></label>
-                @Html.DropDownListFor(m => m.provincia,
-                    new SelectList(new[]
-                    {
-                        "San José","Alajuela","Cartago","Heredia","Guanacaste","Puntarenas","Limón"
-                    }, Model.provincia),
-                    "Seleccione una provincia",
-                    new { @class = "form-control", onchange = "cargarCantones()", required = "required" }
-                )
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Cantón <span class="text-danger">*</span></label>
-                @Html.DropDownListFor(m => m.canton,
-                    new SelectList(Enumerable.Empty<string>(), Model.canton),
-                    "Seleccione un cantón",
-                    new { @class = "form-control", onchange = "cargarDistritos()", required = "required" }
-                )
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Distrito <span class="text-danger">*</span></label>
-                @Html.DropDownListFor(m => m.distrito,
-                    new SelectList(Enumerable.Empty<string>(), Model.distrito),
-                    "Seleccione un distrito",
-                    new { @class = "form-control", required = "required" }
-                )
-            </div>
-
-            <div class="col-md-@(Model.IdRol != 4 ? 12 : 6) mb-3">
-                <label class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.DireccionExacta, new { @class = "form-control", @id = "DireccionPerfil" })
-            </div>
-        </div>
-
-        <div class="action-buttons mt-3 mb-4">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-edit me-2"></i> Actualizar Información Personal
-            </button>
-        </div>
-    }
-
-
-    <h5 class="section-title">ACTUALIZAR CONTRASEÑA</h5>
-    @using (Html.BeginForm("CambiarContrasenna", "Perfil", FormMethod.Post, new { @id = "CambiarContrasennaForm", @class = "row" }))
-    {
-
-
-        <div class="col-md-12 form-group">
-            <label>Contraseña</label>
-            @Html.PasswordFor(m => m.Contrasenna, new { @id = "ContrasennaNueva", @type = "password", @class = "form-control", placeholder = "Ingresa tu nueva contraseña" })
-
-        </div>
-        <div class="col-md-12 form-group">
-            <label>Confirmar Contraseña</label>
-            @Html.PasswordFor(m => m.NuevaContrasenna, new { @id = "ConfirmarContrasenna", @type = "password", @class = "form-control", placeholder = "Confirma tu contraseña" })
-
-        </div>
-
-
-        <div class="action-buttons mt-3 mb-4">
-            <button type="submit" id="BtnActualizarContrasenna">
-                <i class="fas fa-edit me-2"></i> Actualizar Contraseña
-            </button>
-        </div>
-    }
-
-
-
-    @if (rol == 1 || rol == 4)
-    {
-        <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
-
-        if (rol == 1)
-        {
-
-            using (Html.BeginForm("ActualizarEspecialidadSeccion", "Perfil", FormMethod.Post, new { @id = "ActualizarEspecialidadSeccionForm", @class = "row" }))
-            {
-
-                <div class=" form-group">
-                    @Html.DropDownListFor(
-    model => model.IdEspecialidad,
-    new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre", Model.IdEspecialidad),
-    "Seleccione una especialidad",
-    new { @class = "form-control" }
-  )
-                </div>
-
-                <div class="form-group">
-                    <label>Sección</label>
-                    @Html.DropDownListFor(
-                          model => model.IdSeccion,
-                          new SelectList(Model.ListaSecciones, "IdSeccion", "Seccion", Model.IdSeccion),
-                          "Seleccione una sección",
-                          new { @class = "form-control" }
-                      )
-                </div>
-
-
-                <div class="action-buttons mt-3 mb-4">
-                    <button type="submit" id="btnActualizarAcademica">
-                        <i class="fas fa-edit me-2"></i> Actualizar Información Académica
-                    </button>
-                </div>
-            }
-
-        }
-
-
-        if (rol == 4)
-        {
-            using (Html.BeginForm("ActualizarInformacionAcademica", "Perfil", FormMethod.Post, new { @id = "ActualizarInfoAcademicaForm", @class = "row" }))
-            {
 
                 <div class="col-md-6 form-group">
-                    <label>Carrera</label>
-                    @Html.TextBoxFor(m => m.Carrera, new { @class = "form-control" })
+                    <label>Primer Apellido</label>
+                    @Html.TextBoxFor(m => m.Apellido1, new { @class = "form-control", @id = "Apellido1Perfil" })
                 </div>
+
                 <div class="col-md-6 form-group">
-                    <label>Año De Graduación</label>
-                    @Html.TextBoxFor(m => m.AnnoGraduacion, new { @class = "form-control", @type = "number" })
-                </div>
-                <div class="col-md-12 form-group">
-                    <label>Título</label>
-                    @Html.TextBoxFor(m => m.TituloObtenido, new { @class = "form-control" })
+                    <label>Segundo Apellido</label>
+                    @Html.TextBoxFor(m => m.Apellido2, new { @class = "form-control", @id = "Apellido2Perfil" })
                 </div>
 
-                <div class="action-buttons mt-3 mb-4">
-                    <button type="submit" id="btnActualizarAcademica">
-                        <i class="fas fa-edit me-2"></i> Actualizar Información Académica
-                    </button>
-                </div>
-            }
-
-        }
-
-
-
-    }
-    @if (rol == 1)
-    {
-        <!-- CONTACTO EMERGENCIA -->
-        <h5 class="section-title">ENCARGADOS</h5>
-        if (encargado != null)
-        {
-            <div class="row mb-3 p-3 rounded">
                 <div class="col-md-6 form-group">
                     <label>Cédula</label>
-                    <input type="text" class="form-control" value="@encargado.Cedula" readonly />
-                </div>
-
-                <div class="col-md-6 form-group">
-                    <label>Nombre y Apellidos</label>
-                    <input type="text" class="form-control" value="@encargado.Nombre" readonly />
+                    @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @id = "CedulaPerfil" })
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label>Teléfono</label>
-                    <input type="text" class="form-control" value="@encargado.Telefono" readonly />
+                    @Html.TextBoxFor(m => m.Telefono, new { @class = "form-control", @id = "TelefonoPerfil" })
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Parentesco</label>
-                    <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
+                    <label>Correo Electrónico</label>
+                    @Html.TextBoxFor(m => m.CorreoPersonal, new { @class = "form-control", @id = "CorreoPersonalPerfil" })
+                </div>
+
+                @if (rol != 4)
+                {
+                    <div class="col-md-6 form-group">
+                        <label>Correo Electrónico MEP</label>
+                        @Html.TextBoxFor(m => m.CorreoMEP, new { @class = "form-control", @id = "CorreoMEPPerfil" })
+                    </div>
+                }
+
+                <div class="col-md-6 form-group">
+                    <label>Sexo / Género</label>
+                    @Html.DropDownListFor(m => m.Sexo,
+                        new SelectList(
+                            new[]
+                            {
+                                new { Value = "", Text = "Seleccione..." },
+                                new { Value = "Masculino", Text = "Masculino" },
+                                new { Value = "Femenino", Text = "Femenino" },
+                                new { Value = "No binario", Text = "No binario" },
+                                new { Value = "Otro", Text = "Otro" },
+                                new { Value = "Prefiero no decirlo", Text = "Prefiero no decirlo" }
+                            },
+                            "Value", "Text",
+                            Model.Sexo
+                        ),
+                        new { @class = "form-control", @id = "SexoPerfil" }
+                    )
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Residencia o Trabajo</label>
-                    <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
+                    <label>Nacionalidad</label>
+                    @Html.TextBoxFor(m => m.Nacionalidad, new { @class = "form-control", @id = "NacionalidadPerfil" })
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Provincia <span class="text-danger">*</span></label>
+                    @Html.DropDownListFor(m => m.provincia,
+                        new SelectList(new[]
+                        {
+                            "San José","Alajuela","Cartago","Heredia","Guanacaste","Puntarenas","Limón"
+                        }, Model.provincia),
+                        "Seleccione una provincia",
+                        new { @class = "form-control", onchange = "cargarCantones()", required = "required" }
+                    )
                 </div>
 
-                <div class="col-md-6 form-group">
-                    <label>Ocupación</label>
-                    <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Cantón <span class="text-danger">*</span></label>
+                    @Html.DropDownListFor(m => m.canton,
+                        new SelectList(Enumerable.Empty<string>(), Model.canton),
+                        "Seleccione un cantón",
+                        new { @class = "form-control", onchange = "cargarDistritos()", required = "required" }
+                    )
                 </div>
 
-
-            </div>
-        }
-        else
-        {
-            <p class="text-muted">No hay encargado registrado.</p>
-        }
-
-        <div class="row">
-            <div class="action-buttons mt-3 col-md-6 form-group">
-                <button type="button" class="btn btn-primary" id="BtnVerEncargadosModal" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
-                    <i class="fas fa-plus me-2"></i> Agregar Encargado
-                </button>
-            </div>
-            <div class="action-buttons mt-3 col-md-6 form-group">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
-                    <i class="fas fa-eye me-2"></i> Ver Encargados
-                </button>
-            </div>
-        </div>
-
-    }
-    @if (rol == 4)
-    {
-
-
-        <h5 class="section-title">INFORMACIÓN LABORAL</h5>
-
-        using (Html.BeginForm("ActualizarInformacionLaboral", "Perfil", FormMethod.Post, new { @id = "ActualizarInformacionLaboral", @class = "row" }))
-        {
-        <div class="row">
-            <div class="col-md-6 form-group">
-                <label>Empresa</label>
-                @Html.TextBoxFor(m => m.EmpresaActual, new { @class = "form-control" , required = "required"})
-            </div>
-            <div class="col-md-6 form-group">
-                <label>Puesto</label>
-                @Html.TextBoxFor(m => m.PuestoActual, new { @class = "form-control", required = "required" })
-            </div>
-           
-        </div>
-
-        <div class="action-buttons mt-3 mb-4">
-            <button type="submit" id="btnActualizarLaboral">
-                <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
-            </button>
-        </div>
-        }
-    }
-    @if (rol == 1)
-    {
-        <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
-        using (Html.BeginForm("ActualizarInformacionMedica", "Perfil", FormMethod.Post, new { @id = "ActualizarInformacionMedicaForm", @class = "row" }))
-        {
-
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label>Padecimientos</label>
-                    @Html.TextBoxFor(m => m.Padecimiento, new { @class = "form-control" })
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Distrito <span class="text-danger">*</span></label>
+                    @Html.DropDownListFor(m => m.distrito,
+                        new SelectList(Enumerable.Empty<string>(), Model.distrito),
+                        "Seleccione un distrito",
+                        new { @class = "form-control", required = "required" }
+                    )
                 </div>
-                <div class="col-md-6 form-group">
-                    <label>Medicamentos</label>
-                    @Html.TextBoxFor(m => m.Tratamiento, new { @class = "form-control" })
-                </div>
-                <div class="col-md-12 form-group">
-                    <label>Alergías</label>
-                    @Html.TextBoxFor(m => m.Alergia, new { @class = "form-control" })
+
+                <div class="col-md-@(Model.IdRol != 4 ? 12 : 6) mb-3">
+                    <label class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
+                    @Html.TextBoxFor(m => m.DireccionExacta, new { @class = "form-control", @id = "DireccionPerfil" })
                 </div>
             </div>
 
             <div class="action-buttons mt-3 mb-4">
-                <button type="submit" id="btnActualizarMedica">
-                    <i class="fas fa-edit me-2"></i> Actualizar Información Médica
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i> Actualizar Información Personal
                 </button>
             </div>
         }
-    }
-</div>
-</div>
 
 
-    <!--Modal para ver encargados-->
+        <h5 class="section-title">ACTUALIZAR CONTRASEÑA</h5>
+        @using (Html.BeginForm("CambiarContrasenna", "Perfil", FormMethod.Post, new { @id = "CambiarContrasennaForm", @class = "row" }))
+        {
 
 
-    <div class="modal fade" id="modalVerEncargados" tabindex="-1" aria-labelledby="modalVerEncargadosLabel"  aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+            <div class="col-md-12 form-group">
+                <label>Contraseña</label>
+                @Html.PasswordFor(m => m.Contrasenna, new { @id = "ContrasennaNueva", @type = "password", @class = "form-control", placeholder = "Ingresa tu nueva contraseña" })
 
-                <!-- Header -->
-                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                    <h5 class="modal-title text-white" id="modalVerEncargadosLabel">Lista de Encargados</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-
-                <!-- Body -->
-                <div class="modal-body">
-                    @if (Model.ListaEncargados != null && Model.ListaEncargados.Any())
-                    {
-                        <table class="table table-hover align-middle">
-                            <thead class=" text-center"  style="background-color: #dddddd">
-                                <tr>
-                                    <th>Cédula</th>
-                                    <th>Nombre</th>
-                                    <th>Teléfono</th>
-                                    <th>Parentesco</th>
-                                    <th>Ocupación</th>
-                                    <th>Lugar de Trabajo</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-center">
-                                @foreach (var encargados in Model.ListaEncargados)
-                                {
-                                    <tr>
-                                        <td>@encargados.Cedula</td>
-                                        <td>@encargados.Nombre</td>
-                                        <td>@encargados.Telefono</td>
-                                        <td>@encargados.Parentesco</td>
-                                        <td>@encargados.Ocupacion</td>
-                                        <td>@encargados.LugarTrabajo</td>
-                                        <td>
-                                            @if (encargados.IdEstado == 1)
-                                            {
-                                                <!-- Encargado activo: mostrar Editar y Eliminar -->
-                                                <button class="btn btn-sm btn-primary btn-editar btnEditarEncargado" style="background-color: #8CA653; color: white; border: none; border-radius: 2px " data-id="@encargados.IdEncargado">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-danger btn-sm"  style="background-color: brown; color: white; border: none; border-radius: 2px " onclick="eliminarEncargado(@encargados.IdEncargado)">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <!-- Encargado inactivo: mostrar solo Activar -->
-                                                <button type="button" class="btn btn-success btn-sm" style="background-color: #2D594D; color: white; border: none; border-radius: 2px " onclick="activarEncargado(@encargados.IdEncargado)">
-                                                    <i class="fas fa-check"></i> Activar
-                                                </button>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                    else
-                    {
-                        <p class="text-muted text-center">No hay encargados registrados.</p>
-                    }
-                </div>
-
-                <!-- Footer -->
-                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cerrar</button>
-                </div>
             </div>
-        </div>
-    </div>
+            <div class="col-md-12 form-group">
+                <label>Confirmar Contraseña</label>
+                @Html.PasswordFor(m => m.NuevaContrasenna, new { @id = "ConfirmarContrasenna", @type = "password", @class = "form-control", placeholder = "Confirma tu contraseña" })
 
-
-    <!-- Modal para Agregar Encargado -->
-    <div class="modal fade" id="modalAgregarEncargado" tabindex="-1" aria-labelledby="modalAgregarEncargadoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
-
-                <!-- Header -->
-                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                    <h5 class="modal-title text-white" id="modalAgregarEncargadoLabel">Agregar Nuevo Encargado</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-
-                <!-- Body -->
-                <div class="modal-body">
-                    <form>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Cédula</label>
-                                <input type="text" class="form-control" id="CedulaNuevoEncargado" name="Cedula" placeholder="Ej. 1-1035-0212">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Nombre</label>
-                                <input type="text" class="form-control" id="NombreNuevoEncargado" name="Nombre" placeholder="Ej. Juan Pérez">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Primer Apellido</label>
-                                <input type="text" class="form-control" id="Apellido1NuevoEncargado" name="Apellido1" placeholder="Ej. Juan Pérez">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Segundo Apellido</label>
-                                <input type="text" class="form-control" id="Apellido2NuevoEncargado" name="SegundoApellido" placeholder="Ej. Juan Pérez">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Teléfono</label>
-                                <input type="text" class="form-control" id="TelefonoNuevoEncargado" name="Telefono" placeholder="Ej. 8888-9999">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Parentesco</label>
-                                <input type="text" class="form-control" id="ParentescoNuevoEncargado" name="Parentesco" placeholder="Ej. Madre, Tío, etc.">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Residencia o Trabajo</label>
-                                <input type="text" class="form-control" id="ResidenciaNuevoEncargado" name="LugarTrabajo" placeholder="Ej. Cartago, CR">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Ocupación</label>
-                                <input type="text" class="form-control" id="OcupacionNuevoEncargado" name="Ocupacion" placeholder="Ej. Ingeniero Civil">
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Correo</label>
-                                <input type="email" class="form-control" id="CorreoNuevoEncargado" name="Correo" placeholder="Ej. correo@gmail.com">
-                            </div>
-                        </div>
-                    </form>
-               
             </div>
 
-                <!-- Footer -->
-                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btnGuardarEncargado" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Encargado</button>
+
+            <div class="action-buttons mt-3 mb-4">
+                <button type="submit" id="BtnActualizarContrasenna">
+                    <i class="fas fa-edit me-2"></i> Actualizar Contraseña
+                </button>
+            </div>
+        }
+
+
+
+        @if (rol == 1 || rol == 4)
+        {
+            <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
+
+            if (rol == 1)
+            {
+
+                using (Html.BeginForm("ActualizarEspecialidadSeccion", "Perfil", FormMethod.Post, new { @id = "ActualizarEspecialidadSeccionForm", @class = "row" }))
+                {
+
+                    <div class=" form-group">
+                        @Html.DropDownListFor(
+        model => model.IdEspecialidad,
+        new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre", Model.IdEspecialidad),
+        "Seleccione una especialidad",
+        new { @class = "form-control" }
+      )
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sección</label>
+                        @Html.DropDownListFor(
+                              model => model.IdSeccion,
+                              new SelectList(Model.ListaSecciones, "IdSeccion", "Seccion", Model.IdSeccion),
+                              "Seleccione una sección",
+                              new { @class = "form-control" }
+                          )
+                    </div>
+
+
+                    <div class="action-buttons mt-3 mb-4">
+                        <button type="submit" id="btnActualizarAcademica">
+                            <i class="fas fa-edit me-2"></i> Actualizar Información Académica
+                        </button>
+                    </div>
+                }
+
+            }
+
+
+            if (rol == 4)
+            {
+                using (Html.BeginForm("ActualizarInformacionAcademica", "Perfil", FormMethod.Post, new { @id = "ActualizarInfoAcademicaForm", @class = "row" }))
+                {
+
+                    <div class="col-md-6 form-group">
+                        <label>Carrera</label>
+                        @Html.TextBoxFor(m => m.Carrera, new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Año De Graduación</label>
+                        @Html.TextBoxFor(m => m.AnnoGraduacion, new { @class = "form-control", @type = "number" })
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label>Título</label>
+                        @Html.TextBoxFor(m => m.TituloObtenido, new { @class = "form-control" })
+                    </div>
+
+                    <div class="action-buttons mt-3 mb-4">
+                        <button type="submit" id="btnActualizarAcademica">
+                            <i class="fas fa-edit me-2"></i> Actualizar Información Académica
+                        </button>
+                    </div>
+                }
+
+            }
+
+
+
+        }
+        @if (rol == 1)
+        {
+            <!-- CONTACTO EMERGENCIA -->
+            <h5 class="section-title">ENCARGADOS</h5>
+            if (encargado != null)
+            {
+                <div class="row mb-3 p-3 rounded">
+                    <div class="col-md-6 form-group">
+                        <label>Cédula</label>
+                        <input type="text" class="form-control" value="@encargado.Cedula" readonly />
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>Nombre y Apellidos</label>
+                        <input type="text" class="form-control" value="@encargado.Nombre" readonly />
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>Teléfono</label>
+                        <input type="text" class="form-control" value="@encargado.Telefono" readonly />
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>Parentesco</label>
+                        <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>Residencia o Trabajo</label>
+                        <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <label>Ocupación</label>
+                        <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
+                    </div>
+
+
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No hay encargado registrado.</p>
+            }
+
+            <div class="row">
+                <div class="action-buttons mt-3 col-md-6 form-group">
+                    <button type="button" class="btn btn-primary" id="BtnVerEncargadosModal" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
+                        <i class="fas fa-plus me-2"></i> Agregar Encargado
+                    </button>
+                </div>
+                <div class="action-buttons mt-3 col-md-6 form-group">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
+                        <i class="fas fa-eye me-2"></i> Ver Encargados
+                    </button>
                 </div>
             </div>
-        </div>
-    </div>
+
+        }
+        @if (rol == 4)
+        {
 
 
-    <!-- Modal para Editar Encargado -->
-    <div class="modal fade" id="modalEditarEncargado" tabindex="-1" aria-labelledby="modalEditarEncargadoLabel"  aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+            <h5 class="section-title">INFORMACIÓN LABORAL</h5>
 
-                <!-- Header -->
-                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                    <h5 class="modal-title text-white" id="modalEditarEncargadoLabel">Editar Encargado</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            using (Html.BeginForm("ActualizarInformacionLaboral", "Perfil", FormMethod.Post, new { @id = "ActualizarInformacionLaboral", @class = "row" }))
+            {
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Empresa</label>
+                        @Html.TextBoxFor(m => m.EmpresaActual, new { @class = "form-control", required = "required" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Puesto</label>
+                        @Html.TextBoxFor(m => m.PuestoActual, new { @class = "form-control", required = "required" })
+                    </div>
+
                 </div>
 
-                <!-- Body -->
-                <div class="modal-body">
-                    <form id="formEditarEncargado">
-                        <input type="hidden" id="IdEncargado" name="IdEncargado" />
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Cédula</label>
-                                <input type="text" class="form-control" id="CedulaEditar" name="Cedula" placeholder="Ej. 1-1035-0212">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Nombre</label>
-                                <input type="text" class="form-control" id="NombreEditar" name="Nombre" placeholder="Ej. Juan Pérez">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Primer Apellido</label>
-                                <input type="text" class="form-control" id="Apellido1Editar" name="Apellido1" placeholder="Ej. Juan Pérez">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Segundo Apellido</label>
-                                <input type="text" class="form-control" id="Apellido2Editar" name="SegundoApellido" placeholder="Ej. Juan Pérez">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Teléfono</label>
-                                <input type="text" class="form-control" id="TelefonoEditar" name="Telefono" placeholder="Ej. 8888-9999">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Parentesco</label>
-                                <input type="text" class="form-control" id="ParentescoEditar" name="Parentesco" placeholder="Ej. Madre, Tío, etc.">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Residencia o Trabajo</label>
-                                <input type="text" class="form-control" id="LugarTrabajoEditar" name="LugarTrabajo" placeholder="Ej. Cartago, CR">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Ocupación</label>
-                                <input type="text" class="form-control" id="OcupacionEditar" name="Ocupacion" placeholder="Ej. Ingeniero Civil">
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold" style="color: #2D594D;">Correo</label>
-                                <input type="email" class="form-control" id="CorreoEditar" name="Correo" placeholder="Ej. correo@gmail.com">
-                            </div>
-                        </div>
-                    </form>
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="submit" id="btnActualizarLaboral">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
+                    </button>
                 </div>
+            }
+        }
+        @if (rol == 1)
+        {
+            <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
+            using (Html.BeginForm("ActualizarInformacionMedica", "Perfil", FormMethod.Post, new { @id = "ActualizarInformacionMedicaForm", @class = "row" }))
+            {
 
-                <!-- Footer -->
-                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btnActualizarEncargado" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Cambios</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- Modal para Subir Documento -->
-    <div class="modal fade" id="modalSubirDoc" tabindex="-1" aria-labelledby="modalSubirDocLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
-                <!-- Header -->
-                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                    <h5 class="modal-title text-white" id="modalSubirDocLabel">Subir Documento</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-
-                <!-- Body -->
-                <div class="modal-body">
-                    <form>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold" style="color: #2D594D;">Archivo</label><br />
-                            <button type="button" class="btn" style="background-color: #8CA653; color: white;">
-                                <i class="fas fa-folder-open me-2"></i>Seleccionar Documento
-                            </button>
-                            <div class="mt-2" style="color: #A0A0A0; font-size: 0.9rem;">
-                                * CV_JOHNNYCASTILLO.pdf
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Footer -->
-                <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-                    <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btnSubirDoc" class="btn" style="background-color: #2D594D; color: white; border: none;" data-bs-dismiss="modal">Subir Documento</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para Ver Documentos -->
-    <div class="modal fade" id="modalVerDocs" tabindex="-1" aria-labelledby="modalVerDocsLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
-
-                <!-- Header -->
-                <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                    <h5 class="modal-title text-white" id="modalVerDocsLabel">Mis Documentos</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-
-                <!-- Body -->
-                <div class="modal-body">
-                    <div class="list-group">
-
-                        <div class="list-group-item d-flex justify-content-between align-items-center" style="background-color: white; border: 1px solid #8CA653; border-radius: 8px; margin-bottom: 10px;">
-                            <div>
-                                <strong>cedula_johnny_castillo.pdf</strong><br />
-                                <small>Cargado: 2025-07-28</small>
-                            </div>
-                            <div class="d-flex gap-3">
-                                <button title="Ver" class="btn btn-link p-0 text-secondary" id="btnVerFile">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button title="Descargar" class="btn btn-link p-0 text-secondary" id="btnDescargarFile">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                                <button title="Eliminar" class="btn btn-link p-0 text-secondary" id="btnEliminarFile">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label>Padecimientos</label>
+                        @Html.TextBoxFor(m => m.Padecimiento, new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Medicamentos</label>
+                        @Html.TextBoxFor(m => m.Tratamiento, new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label>Alergías</label>
+                        @Html.TextBoxFor(m => m.Alergia, new { @class = "form-control" })
                     </div>
                 </div>
 
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="submit" id="btnActualizarMedica">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Médica
+                    </button>
+                </div>
+            }
+        }
+    </div>
+</div>
 
 
+<!--Modal para ver encargados-->
+
+
+<div class="modal fade" id="modalVerEncargados" tabindex="-1" aria-labelledby="modalVerEncargadosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+            <!-- Header -->
+            <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title text-white" id="modalVerEncargadosLabel">Lista de Encargados</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                @if (Model.ListaEncargados != null && Model.ListaEncargados.Any())
+                {
+                    <table class="table table-hover align-middle">
+                        <thead class=" text-center" style="background-color: #dddddd">
+                            <tr>
+                                <th>Cédula</th>
+                                <th>Nombre</th>
+                                <th>Teléfono</th>
+                                <th>Parentesco</th>
+                                <th>Ocupación</th>
+                                <th>Lugar de Trabajo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            @foreach (var encargados in Model.ListaEncargados)
+                            {
+                                <tr>
+                                    <td>@encargados.Cedula</td>
+                                    <td>@encargados.Nombre</td>
+                                    <td>@encargados.Telefono</td>
+                                    <td>@encargados.Parentesco</td>
+                                    <td>@encargados.Ocupacion</td>
+                                    <td>@encargados.LugarTrabajo</td>
+                                    <td>
+                                        @if (encargados.IdEstado == 1)
+                                        {
+                                            <!-- Encargado activo: mostrar Editar y Eliminar -->
+                                            <button class="btn btn-sm btn-primary btn-editar btnEditarEncargado" style="background-color: #8CA653; color: white; border: none; border-radius: 2px " data-id="@encargados.IdEncargado">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" style="background-color: brown; color: white; border: none; border-radius: 2px " onclick="eliminarEncargado(@encargados.IdEncargado)">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <!-- Encargado inactivo: mostrar solo Activar -->
+                                            <button type="button" class="btn btn-success btn-sm" style="background-color: #2D594D; color: white; border: none; border-radius: 2px " onclick="activarEncargado(@encargados.IdEncargado)">
+                                                <i class="fas fa-check"></i> Activar
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted text-center">No hay encargados registrados.</p>
+                }
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
 </div>
+
+
+<!-- Modal para Agregar Encargado -->
+<div class="modal fade" id="modalAgregarEncargado" tabindex="-1" aria-labelledby="modalAgregarEncargadoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+            <!-- Header -->
+            <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title text-white" id="modalAgregarEncargadoLabel">Agregar Nuevo Encargado</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Cédula</label>
+                            <input type="text" class="form-control" id="CedulaNuevoEncargado" name="Cedula" placeholder="Ej. 1-1035-0212">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Nombre</label>
+                            <input type="text" class="form-control" id="NombreNuevoEncargado" name="Nombre" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Primer Apellido</label>
+                            <input type="text" class="form-control" id="Apellido1NuevoEncargado" name="Apellido1" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Segundo Apellido</label>
+                            <input type="text" class="form-control" id="Apellido2NuevoEncargado" name="SegundoApellido" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Teléfono</label>
+                            <input type="text" class="form-control" id="TelefonoNuevoEncargado" name="Telefono" placeholder="Ej. 8888-9999">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Parentesco</label>
+                            <input type="text" class="form-control" id="ParentescoNuevoEncargado" name="Parentesco" placeholder="Ej. Madre, Tío, etc.">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Residencia o Trabajo</label>
+                            <input type="text" class="form-control" id="ResidenciaNuevoEncargado" name="LugarTrabajo" placeholder="Ej. Cartago, CR">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Ocupación</label>
+                            <input type="text" class="form-control" id="OcupacionNuevoEncargado" name="Ocupacion" placeholder="Ej. Ingeniero Civil">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Correo</label>
+                            <input type="email" class="form-control" id="CorreoNuevoEncargado" name="Correo" placeholder="Ej. correo@gmail.com">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnGuardarEncargado" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Encargado</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal para Editar Encargado -->
+<div class="modal fade" id="modalEditarEncargado" tabindex="-1" aria-labelledby="modalEditarEncargadoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+            <!-- Header -->
+            <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title text-white" id="modalEditarEncargadoLabel">Editar Encargado</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="formEditarEncargado">
+                    <input type="hidden" id="IdEncargado" name="IdEncargado" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Cédula</label>
+                            <input type="text" class="form-control" id="CedulaEditar" name="Cedula" placeholder="Ej. 1-1035-0212">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Nombre</label>
+                            <input type="text" class="form-control" id="NombreEditar" name="Nombre" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Primer Apellido</label>
+                            <input type="text" class="form-control" id="Apellido1Editar" name="Apellido1" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Segundo Apellido</label>
+                            <input type="text" class="form-control" id="Apellido2Editar" name="SegundoApellido" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Teléfono</label>
+                            <input type="text" class="form-control" id="TelefonoEditar" name="Telefono" placeholder="Ej. 8888-9999">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Parentesco</label>
+                            <input type="text" class="form-control" id="ParentescoEditar" name="Parentesco" placeholder="Ej. Madre, Tío, etc.">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Residencia o Trabajo</label>
+                            <input type="text" class="form-control" id="LugarTrabajoEditar" name="LugarTrabajo" placeholder="Ej. Cartago, CR">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Ocupación</label>
+                            <input type="text" class="form-control" id="OcupacionEditar" name="Ocupacion" placeholder="Ej. Ingeniero Civil">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold" style="color: #2D594D;">Correo</label>
+                            <input type="email" class="form-control" id="CorreoEditar" name="Correo" placeholder="Ej. correo@gmail.com">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnActualizarEncargado" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal para Subir Documento -->
+<div class="modal fade" id="modalSubirDoc" tabindex="-1" aria-labelledby="modalSubirDocLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+            <!-- Header -->
+            <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title text-white" id="modalSubirDocLabel">Subir Documento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="formSubirDoc" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="color: #2D594D;">Archivo</label>
+                        <input type="file" class="form-control" id="ArchivoDoc" name="archivo" />
+                        <div class="mt-2" style="color: #A0A0A0; font-size: 0.9rem;">
+                            * Solo archivos .xls, .xlsx o .pdf
+                        </div>
+                    </div>
+                    <input type="hidden" id="IdUsuarioDoc" name="idUsuario" value="@Model.IdUsuario" />
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnSubirDoc" class="btn" style="background-color: #2D594D; color: white; border: none;">Subir Documento</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Ver Documentos -->
+<div class="modal fade" id="modalVerDocs" tabindex="-1" aria-labelledby="modalVerDocsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+            <input type="hidden" id="IdUsuarioDocumento" value="@usuario" />
+            <!-- Header -->
+            <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title text-white" id="modalVerDocsLabel">Mis Documentos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <div class="list-group" id="listaDocumentos">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section scripts {
     <script src="~/Scripts/Practicas/Autogestion.js"></script>

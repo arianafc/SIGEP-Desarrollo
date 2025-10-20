@@ -1,5 +1,160 @@
 ﻿$(function () {
 
+    $('#btnSubirDoc').on('click', function () {
+        var archivo = $('#ArchivoDoc')[0].files[0];
+        var idUsuario = $('#IdUsuarioDoc').val();
+
+        if (!archivo) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No hay archivo',
+                text: 'Por favor seleccione un archivo antes de continuar.',
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
+        // Validar extensión
+        var extensionesPermitidas = ['.xls', '.xlsx', '.pdf'];
+        var extension = '.' + archivo.name.split('.').pop().toLowerCase();
+        if (!extensionesPermitidas.includes(extension)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Extensión inválida',
+                text: 'Solo se permiten archivos .xls, .xlsx o .pdf',
+                confirmButtonColor: '#d33'
+            });
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append('archivo', archivo);
+        formData.append('idUsuario', idUsuario);
+
+        $.ajax({
+            url: '/Perfil/SubirDocumento',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: response.message,
+                        icon: 'success',
+                        confirmButtonColor: '#2D594D'
+                    }).then(() => {
+                        $('#modalSubirDoc').modal('hide');
+                        location.reload(); // recarga la página para mostrar el documento
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.message,
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al subir el documento: ' + error,
+                    icon: 'error',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        });
+    });
+
+    function cargarDocumentos() {
+
+        let idUsuario = $('#IdUsuarioDocumento').val();
+
+        $.ajax({
+            url: '/Perfil/ObtenerDocumentos',
+            type: 'GET',
+            data: { idUsuario: idUsuario },
+            success: function (documentos) {
+                var contenedor = $('#listaDocumentos');
+                contenedor.empty();
+
+                if (documentos.length === 0) {
+                    contenedor.append('<div class="text-center text-muted">No hay documentos subidos.</div>');
+                    return;
+                }
+
+                documentos.forEach(function (doc) {
+                    var item = $(`
+                        <div class="list-group-item d-flex justify-content-between align-items-center" 
+                             style="background-color: white; border: 1px solid #8CA653; border-radius: 8px; margin-bottom: 10px;">
+                            <div>
+                                <strong>${doc.Documento}</strong><br />
+                                <small>Cargado: ${doc.Fecha}</small>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}" 
+                                   target="_blank" title="Ver" class="btn btn-link p-0 text-secondary">
+                                   <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}&download=true" 
+                                   title="Descargar" class="btn btn-link p-0 text-secondary">
+                                   <i class="fas fa-download"></i>
+                                </a>
+                                <button class="btn btn-link p-0 text-secondary btnEliminarDoc" data-id="${doc.IdDocumento}" title="Eliminar">
+                                   <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                    contenedor.append(item);
+                });
+            },
+            error: function () {
+                Swal.fire('Error', 'No se pudieron cargar los documentos.', 'error');
+            }
+        });
+    }
+
+    // Evento para eliminar
+    $(document).on('click', '.btnEliminarDoc', function () {
+        var idDocumento = $(this).data('id');
+
+        Swal.fire({
+            title: '¿Desea eliminar este documento?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Perfil/EliminarDocumento',
+                    type: 'POST',
+                    data: { idDocumento: idDocumento },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire('Eliminado', response.message, 'success');
+                            cargarDocumentos(); // recargar lista
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Ocurrió un error al eliminar.', 'error');
+                    }
+                });
+            }
+        });
+    });
+
+    // Cargar documentos al abrir el modal
+    $('#modalVerDocs').on('shown.bs.modal', function () {
+        cargarDocumentos();
+    });
 
     var Contrasenna = $('#ContrasennaNueva');
     var ConfirmarContrasenna = $('#ConfirmarContrasenna');
@@ -436,3 +591,4 @@ $('#ActualizarPerfil').on('submit', function (e) {
         }
     });
 });
+

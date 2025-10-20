@@ -817,7 +817,183 @@ namespace SIGEP.Controllers
 
 
         }
-    }
+
+
+        [HttpPost]
+        public JsonResult SubirDocumento(HttpPostedFileBase archivo, int idUsuario)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                if (archivo == null || archivo.ContentLength == 0)
+                {
+                    return Json(new { success = false, message = "No se seleccionó ningún archivo" });
+                }
+
+                // Validar extensión
+                var extensionesPermitidas = new[] { ".xls", ".xlsx", ".pdf" };
+                var extension = System.IO.Path.GetExtension(archivo.FileName).ToLower();
+
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    return Json(new { success = false, message = "Solo se permiten archivos .xls, .xlsx o .pdf" });
+                }
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Obtener cédula del estudiante
+                    var estudiante = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idUsuario);
+                    if (estudiante == null)
+                    {
+                        return Json(new { success = false, message = "Usuario no encontrado" });
+                    }
+
+                    string cedulaEstudiante = estudiante.Cedula;
+
+                    // Crear directorio en C:\sigep si no existe
+                    string directorioBase = @"C:\sigep\Perfil\"+estudiante.Cedula;
+                    if (!System.IO.Directory.Exists(directorioBase))
+                    {
+                        System.IO.Directory.CreateDirectory(directorioBase);
+                    }
+
+                    // Generar nombre del archivo con cédula (sin fecha/hora)
+                    string nombreOriginal = System.IO.Path.GetFileNameWithoutExtension(archivo.FileName);
+                    string nombreArchivo = $"{cedulaEstudiante}_{nombreOriginal}{extension}";
+
+                    // Ruta completa del archivo
+                    string rutaCompleta = System.IO.Path.Combine(directorioBase, nombreArchivo);
+
+                    // Si el archivo ya existe, se sobrescribe
+                    archivo.SaveAs(rutaCompleta);
+
+                    // Guardar registro en BD con la ruta del archivo
+                    var documento = new DocumentosTB
+                    {
+                        Documento = archivo.FileName, // Nombre original para mostrar
+                        Tipo = "Perfil",
+                        RutaArchivo = rutaCompleta,
+                        FechaSubida = DateTime.Now,
+                        IdUsuario = idUsuario
+                    };
+
+                    dbContext.DocumentosTB.Add(documento);
+                    dbContext.SaveChanges();
+
+                    return Json(new { success = true, message = "Documento subido correctamente" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerDocumentos(int idUsuario)
+        {
+       
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documentos = dbContext.ObtenerDocumentosEvaluacionSP(idUsuario).ToList();
+
+                    var resultado = documentos.Select(d => new
+                    {
+                        IdDocumento = d.IdDocumento,
+                        Nombre = d.Documento,
+                        RutaArchivo = d.RutaArchivo,
+                        FechaSubida = d.FechaSubida.ToString("dd/MM/yyyy HH:mm"),
+                        Extension = d.Extension ?? System.IO.Path.GetExtension(d.Documento)
+                    }).ToList();
+
+                    return Json(new { success = true, documentos = resultado }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+
+        [HttpPost]
+        public JsonResult EliminarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var doc = dbContext.DocumentosTB.Find(idDocumento);
+                    if (doc == null)
+                        return Json(new { success = false, message = "Documento no encontrado" });
+
+                    // Eliminar archivo físico
+                    if (System.IO.File.Exists(doc.RutaArchivo))
+                        System.IO.File.Delete(doc.RutaArchivo);
+
+                    dbContext.DocumentosTB.Remove(doc);
+                    dbContext.SaveChanges();
+
+                    return Json(new { success = true, message = "Documento eliminado correctamente" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+
+
+        public FileResult DescargarDocumento(string ruta, bool download = false)
+        {
+            if (!System.IO.File.Exists(ruta))
+                return null;
+
+            string nombreArchivo = System.IO.Path.GetFileName(ruta);
+            string contentType = "application/octet-stream";
+
+            if (download)
+                return File(ruta, contentType, nombreArchivo); // descarga
+            else
+                return File(ruta, contentType); // abre en navegador
+        }
+
+
+
+
+
+
+
+
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
 
