@@ -41,7 +41,8 @@
                 'archivado': { cls: 'badge-archivado', txt: 'Archivado' },
                 'en curso': { cls: 'badge-en-curso', txt: 'En Curso' },
                 'activo': { cls: 'badge-activo', txt: 'Activo' },
-                'inactivo': { cls: 'badge-inactivo', txt: 'Inactivo' }
+                'inactivo': { cls: 'badge-inactivo', txt: 'Inactivo' },
+                'sin proceso activo': { cls: 'badge-no-asignada', txt: 'Sin proceso activo' }
             };
 
             const info = mapa[est] || { cls: 'badge-no-asignada', txt: estadoOriginal || '—' };
@@ -287,25 +288,25 @@
                     return tbody.append('<tr><td colspan="6" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
 
                 res.data.forEach(e => {
-                    const estado = (e.EstadoVacante || '—').toLowerCase();
-                    const badge = badgeEstado(e.EstadoVacante);
+                    const estado = (e.EstadoPractica || 'Sin proceso activo').toLowerCase();
+                    const badge = badgeEstado(e.EstadoPractica);
                     let btn = '';
 
-                    // Bloqueo por EstadoAcademico == false
+                    // 🔹 Bloqueo por EstadoAcademico == false (ya no llegan, pero dejamos por seguridad)
                     if (e.EstadoAcademico === false) {
                         btn = `<button class="btn btn-sm btn-secondary" disabled title="Estudiante rezagado">
-                        <i class="fas fa-user-slash"></i> No elegible</button>`;
-                    } else if (['asignada', 'en curso', 'finalizada', 'rezagado'].includes(estado)) {
+                <i class="fas fa-user-slash"></i> No elegible</button>`;
+                    }
+                    // 🔹 Estudiantes con práctica activa o finalizada
+                    else if (['asignada', 'en curso', 'finalizada', 'aprobada', 'rechazada', 'retirada'].includes(estado)) {
                         btn = `<button class="btn btn-sm btn-outline-secondary btn-bloqueado" title="Ya tiene práctica activa">
-                        <i class="fas fa-ban"></i> No disponible</button>`;
-                    } else if (!e.TieneRelacionEnVacante || ['rechazada', 'retirada'].includes(estado)) {
+                <i class="fas fa-ban"></i> No disponible</button>`;
+                    }
+                    // 🔹 Estudiantes sin proceso activo
+                    else {
                         btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante"
-                            data-idusuario="${e.IdUsuario}" data-nombre="${escapeHtml(e.NombreCompleto)}">
-                            <i class="fas fa-user-plus"></i> Asignar</button>`;
-                    } else if (['en proceso de aplicacion', 'asignada'].includes(estado)) {
-                        btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante"
-                            data-idusuario="${e.IdUsuario}" data-nombre="${escapeHtml(e.NombreCompleto)}">
-                            <i class="fas fa-user-minus"></i> Retirar</button>`;
+                    data-idusuario="${e.IdUsuario}" data-nombre="${escapeHtml(e.NombreCompleto)}">
+                    <i class="fas fa-user-plus"></i> Asignar</button>`;
                     }
 
                     tbody.append(`

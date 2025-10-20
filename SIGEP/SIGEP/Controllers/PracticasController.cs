@@ -493,6 +493,7 @@ namespace SIGEP.Controllers
                     from u in db.UsuariosTB
                     join r in db.RolesTB on u.IdRol equals r.IdRol
                     where r.Descripcion == "Estudiante"
+                          && u.EstadoAcademico == true // ✅ solo activos académicamente
                     join ue in db.UsuarioEspecialidadTB.Where(x => x.IdEstado == 1)
                         on u.IdUsuario equals ue.IdUsuario into jue
                     from ue in jue.DefaultIfEmpty()
@@ -505,12 +506,19 @@ namespace SIGEP.Controllers
                         IdUsuario = g.Key.IdUsuario,
                         NombreCompleto = g.Key.Nombre + " " + g.Key.Apellido1 + " " + g.Key.Apellido2,
                         Cedula = g.Key.Cedula,
-                        Especialidad = g.Select(x => x.esp != null ? x.esp.Nombre : "").FirstOrDefault()
+                        Especialidad = g.Select(x => x.esp != null ? x.esp.Nombre : "").FirstOrDefault(),
+                        EstadoAcademico = g.Select(x => x.u.EstadoAcademico).FirstOrDefault()
                     }
                 ).ToList();
 
                 var data = estudiantes.Select(e =>
                 {
+                    // Última práctica del estudiante
+                    var ultimaPractica = db.PracticaEstudianteTB
+                        .Where(p => p.IdUsuario == e.IdUsuario)
+                        .OrderByDescending(p => p.IdPractica)
+                        .FirstOrDefault();
+
                     var rel = db.PracticaEstudianteTB
                         .Where(p => p.IdUsuario == e.IdUsuario && p.IdVacante == idVacante)
                         .OrderByDescending(p => p.IdPractica)
@@ -522,9 +530,14 @@ namespace SIGEP.Controllers
                     bool tieneActivos = !tieneRelacion && db.PracticaEstudianteTB
                         .Any(p => p.IdUsuario == e.IdUsuario && estadosActivos.Contains(p.IdEstado));
 
+                    // 🟩 Aquí replicamos la lógica del módulo de Estudiantes:
+                    string estadoPractica = ultimaPractica != null
+                        ? (ultimaPractica.EstadosTB.Descripcion ?? "").Trim()
+                        : "Sin proceso activo";
+
                     string estadoMostrar = tieneRelacion
                         ? estadoVacante
-                        : (tieneActivos ? "Con Procesos Activos" : "Sin Procesos Activos");
+                        : (tieneActivos ? "Con procesos activos" : "Sin proceso activo");
 
                     return new
                     {
@@ -532,8 +545,10 @@ namespace SIGEP.Controllers
                         e.NombreCompleto,
                         e.Cedula,
                         e.Especialidad,
+                        e.EstadoAcademico,
                         TieneRelacionEnVacante = tieneRelacion,
                         EstadoVacante = estadoVacante,
+                        EstadoPractica = estadoPractica,  // ✅ NUEVO CAMPO IDÉNTICO AL MÓDULO ESTUDIANTES
                         EstadoMostrar = estadoMostrar
                     };
                 }).ToList();
@@ -541,6 +556,7 @@ namespace SIGEP.Controllers
                 return Json(new { ok = true, data }, JsonRequestBehavior.AllowGet);
             }
         }
+
 
         [HttpGet]
         public ActionResult ObtenerEstudiantesParaAsignar(int idVacante)
