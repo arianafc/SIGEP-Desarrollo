@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Web.Mvc;
 using SIGEP.EF;
 
-
 namespace SIGEP.Web.Controllers
 {
-    
     public class AdministracionGeneralController : Controller
     {
+        // Fuerza UTF-8 en todas las respuestas JSON de este controlador
+        protected override JsonResult Json(object data, string contentType, Encoding contentEncoding, JsonRequestBehavior behavior)
+        {
+            Response.ContentEncoding = Encoding.UTF8;
+            Response.Charset = "utf-8";
+            return base.Json(data, "application/json; charset=utf-8", Encoding.UTF8, behavior);
+        }
+
         // ===== VISTA =====
         [HttpGet]
         public ActionResult AdministracionGeneral(string tab = "usuarios")
@@ -35,23 +42,18 @@ namespace SIGEP.Web.Controllers
                                                .Select(x => x.Email)
                                                .FirstOrDefault(),
                             Rol = r.Descripcion,
-                            Estado = e.Descripcion, // "Activo"/"Inactivo"
+                            Estado = e.Descripcion,
                             u.IdEstado
                         };
 
                 if (!string.IsNullOrWhiteSpace(rol))
                     q = q.Where(x => x.Rol == rol);
 
-                var data = q.OrderBy(x => x.IdEstado)  // 1 -> Activo, 2 -> Inactivo
+                var data = q.OrderBy(x => x.IdEstado)  // 1 Activo, 2 Inactivo
                             .ThenBy(x => x.Nombre)
                             .ToList();
 
-                return new JsonResult
-                {
-                    Data = new { data },
-                    JsonRequestBehavior = JsonRequestBehavior.AllowGet,
-                    MaxJsonLength = int.MaxValue
-                };
+                return Json(new { data }, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -105,7 +107,7 @@ namespace SIGEP.Web.Controllers
             }
         }
 
-        // ===== ESPECIALIDADES ===== (nunca borrar; desactivar si NO hay usuarios ACTIVOS relacionados)
+        // ===== ESPECIALIDADES =====
         [HttpGet]
         public JsonResult Especialidades()
         {
@@ -122,19 +124,28 @@ namespace SIGEP.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult CrearEspecialidad(string nombre, string descripcion)
+        public JsonResult CrearEspecialidad(string nombre)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(nombre))
+                var nom = (nombre ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nom))
                     return Json(new { ok = false, msg = "El nombre es requerido." });
 
                 using (var db = new SIGEPEntities())
                 {
+                    var existente = db.EspecialidadesTB.FirstOrDefault(x => x.Nombre == nom);
+                    if (existente != null)
+                    {
+                        if (existente.IdEstado == 2)
+                            return Json(new { ok = false, msg = "Ya existe una especialidad con ese nombre, pero está INACTIVA. Actívela desde Acciones." });
+                        return Json(new { ok = false, msg = "Ya existe una especialidad ACTIVA con ese nombre." });
+                    }
+
                     db.EspecialidadesTB.Add(new EF.EspecialidadesTB
                     {
-                        Nombre = nombre.Trim(),
-                        IdEstado = 1 // Activo
+                        Nombre = nom,
+                        IdEstado = 1
                     });
                     db.SaveChanges();
                     return Json(new { ok = true, msg = "Especialidad creada correctamente." });
@@ -147,16 +158,28 @@ namespace SIGEP.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult EditarEspecialidad(int id, string nombre, string descripcion)
+        public JsonResult EditarEspecialidad(int id, string nombre)
         {
             try
             {
+                var nom = (nombre ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nom))
+                    return Json(new { ok = false, msg = "El nombre es requerido." });
+
                 using (var db = new SIGEPEntities())
                 {
                     var esp = db.EspecialidadesTB.FirstOrDefault(x => x.IdEspecialidad == id);
                     if (esp == null) return Json(new { ok = false, msg = "La especialidad no existe." });
 
-                    esp.Nombre = (nombre ?? "").Trim();
+                    var duplicado = db.EspecialidadesTB.FirstOrDefault(x => x.Nombre == nom && x.IdEspecialidad != id);
+                    if (duplicado != null)
+                    {
+                        if (duplicado.IdEstado == 2)
+                            return Json(new { ok = false, msg = "No se puede usar ese nombre: existe otro registro INACTIVO con el mismo nombre." });
+                        return Json(new { ok = false, msg = "No se puede usar ese nombre: ya existe un registro ACTIVO igual." });
+                    }
+
+                    esp.Nombre = nom;
                     db.SaveChanges();
                     return Json(new { ok = true, msg = "Cambios guardados." });
                 }
@@ -168,38 +191,45 @@ namespace SIGEP.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult DesactivarEspecialidad(int id)
+        public JsonResult CambiarEstadoEspecialidad(int id, string nuevoEstado)
         {
             try
             {
                 using (var db = new SIGEPEntities())
                 {
-                    // Solo bloquear si hay usuarios ACTIVOS relacionados vía UsuarioEspecialidadTB
-                    bool tieneUsuariosActivos = (
-                        from ue in db.UsuarioEspecialidadTB
-                        join u in db.UsuariosTB on ue.IdUsuario equals u.IdUsuario
-                        where ue.IdEspecialidad == id && u.IdEstado == 1
-                        select u.IdUsuario
-                    ).Any();
+                    int idEstado = string.Equals(nuevoEstado, "Activo", StringComparison.OrdinalIgnoreCase) ? 1 :
+                                   string.Equals(nuevoEstado, "Inactivo", StringComparison.OrdinalIgnoreCase) ? 2 : 0;
+                    if (idEstado == 0) return Json(new { ok = false, msg = "Estado no válido." });
 
-                    if (tieneUsuariosActivos)
-                        return Json(new { ok = false, msg = "No se puede desactivar: hay usuarios activos relacionados." });
+                    // Bloquear desactivación solo si hay usuarios ACTIVOS relacionados
+                    if (idEstado == 2)
+                    {
+                        bool tieneUsuariosActivos = (
+                            from ue in db.UsuarioEspecialidadTB
+                            join u in db.UsuariosTB on ue.IdUsuario equals u.IdUsuario
+                            where ue.IdEspecialidad == id && u.IdEstado == 1
+                            select u.IdUsuario
+                        ).Any();
+
+                        if (tieneUsuariosActivos)
+                            return Json(new { ok = false, msg = "No se puede desactivar: hay usuarios activos relacionados." });
+                    }
 
                     var esp = db.EspecialidadesTB.FirstOrDefault(x => x.IdEspecialidad == id);
                     if (esp == null) return Json(new { ok = false, msg = "La especialidad no existe." });
 
-                    esp.IdEstado = 2; // Inactivo
+                    esp.IdEstado = idEstado;
                     db.SaveChanges();
-                    return Json(new { ok = true, msg = "Especialidad desactivada." });
+                    return Json(new { ok = true, msg = $"Especialidad {(idEstado == 1 ? "activada" : "desactivada")}." });
                 }
             }
             catch
             {
-                return Json(new { ok = false, msg = "No se pudo desactivar la especialidad." });
+                return Json(new { ok = false, msg = "No se pudo cambiar el estado." });
             }
         }
 
-        // ===== SECCIONES ===== (nunca borrar; desactivar si NO hay usuarios ACTIVOS relacionados)
+        // ===== SECCIONES =====
         [HttpGet]
         public JsonResult Secciones()
         {
@@ -215,18 +245,27 @@ namespace SIGEP.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult CrearSeccion(string nombreSeccion, string descripcionSeccion)
+        public JsonResult CrearSeccion(string nombreSeccion)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(nombreSeccion))
+                var nom = (nombreSeccion ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nom))
                     return Json(new { ok = false, msg = "El nombre es requerido." });
 
                 using (var db = new SIGEPEntities())
                 {
+                    var existente = db.SeccionesTB.FirstOrDefault(x => x.Seccion == nom);
+                    if (existente != null)
+                    {
+                        if (existente.IdEstado == 2)
+                            return Json(new { ok = false, msg = "Ya existe una sección con ese nombre, pero está INACTIVA. Actívela desde Acciones." });
+                        return Json(new { ok = false, msg = "Ya existe una sección ACTIVA con ese nombre." });
+                    }
+
                     db.SeccionesTB.Add(new EF.SeccionesTB
                     {
-                        Seccion = nombreSeccion.Trim(),
+                        Seccion = nom,
                         IdEstado = 1
                     });
                     db.SaveChanges();
@@ -240,16 +279,28 @@ namespace SIGEP.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult EditarSeccion(int id, string nombreSeccion, string descripcionSeccion)
+        public JsonResult EditarSeccion(int id, string nombreSeccion)
         {
             try
             {
+                var nom = (nombreSeccion ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nom))
+                    return Json(new { ok = false, msg = "El nombre es requerido." });
+
                 using (var db = new SIGEPEntities())
                 {
                     var s = db.SeccionesTB.FirstOrDefault(x => x.IdSeccion == id);
                     if (s == null) return Json(new { ok = false, msg = "La sección no existe." });
 
-                    s.Seccion = (nombreSeccion ?? "").Trim();
+                    var duplicado = db.SeccionesTB.FirstOrDefault(x => x.Seccion == nom && x.IdSeccion != id);
+                    if (duplicado != null)
+                    {
+                        if (duplicado.IdEstado == 2)
+                            return Json(new { ok = false, msg = "No se puede usar ese nombre: existe otro registro INACTIVO con el mismo nombre." });
+                        return Json(new { ok = false, msg = "No se puede usar ese nombre: ya existe un registro ACTIVO igual." });
+                    }
+
+                    s.Seccion = nom;
                     db.SaveChanges();
                     return Json(new { ok = true, msg = "Cambios guardados." });
                 }
@@ -261,28 +312,34 @@ namespace SIGEP.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult DesactivarSeccion(int id)
+        public JsonResult CambiarEstadoSeccion(int id, string nuevoEstado)
         {
             try
             {
                 using (var db = new SIGEPEntities())
                 {
-                    // Bloquear solo si hay usuarios ACTIVOS con esa sección
-                    bool tieneUsuariosActivos = db.UsuariosTB.Any(u => u.IdSeccion == id && u.IdEstado == 1);
-                    if (tieneUsuariosActivos)
-                        return Json(new { ok = false, msg = "No se puede desactivar: hay usuarios activos relacionados." });
+                    int idEstado = string.Equals(nuevoEstado, "Activo", StringComparison.OrdinalIgnoreCase) ? 1 :
+                                   string.Equals(nuevoEstado, "Inactivo", StringComparison.OrdinalIgnoreCase) ? 2 : 0;
+                    if (idEstado == 0) return Json(new { ok = false, msg = "Estado no válido." });
+
+                    if (idEstado == 2)
+                    {
+                        bool tieneUsuariosActivos = db.UsuariosTB.Any(u => u.IdSeccion == id && u.IdEstado == 1);
+                        if (tieneUsuariosActivos)
+                            return Json(new { ok = false, msg = "No se puede desactivar: hay usuarios activos relacionados." });
+                    }
 
                     var s = db.SeccionesTB.FirstOrDefault(x => x.IdSeccion == id);
                     if (s == null) return Json(new { ok = false, msg = "La sección no existe." });
 
-                    s.IdEstado = 2; // Inactivo
+                    s.IdEstado = idEstado;
                     db.SaveChanges();
-                    return Json(new { ok = true, msg = "Sección desactivada." });
+                    return Json(new { ok = true, msg = $"Sección {(idEstado == 1 ? "activada" : "desactivada")}." });
                 }
             }
             catch
             {
-                return Json(new { ok = false, msg = "No se pudo desactivar la sección." });
+                return Json(new { ok = false, msg = "No se pudo cambiar el estado." });
             }
         }
     }
