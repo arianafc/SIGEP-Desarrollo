@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <!-- USUARIOS -->
+    <!-- ===================== USUARIOS ===================== -->
     <div id="usuarios" class="seccion-adm @clsUsuarios">
         <h3 class="text-center">Gestión de Usuarios</h3>
         <div class="row mb-3">
@@ -44,7 +44,7 @@
                 </select>
             </div>
         </div>
-        <div class="table-container">
+        <div class="card rounded-5 p-3">
             <table id="tablaUsuarios" class="display responsive nowrap w-100">
                 <thead>
                     <tr>
@@ -62,17 +62,18 @@
         </div>
     </div>
 
-    <!-- ESPECIALIDADES -->
+    <!-- ================== ESPECIALIDADES ================== -->
     <div id="especialidades" class="seccion-adm @clsEspecialidades">
         <h3 class="text-center">Especialidades Registradas</h3>
         <button type="button" class="btn mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearEspecialidad">
             + Nueva Especialidad
         </button>
-        <div class="table-container">
+        <div class="card rounded-5 p-3">
             <table id="tablaEspecialidades" class="display responsive nowrap w-100">
                 <thead>
                     <tr>
                         <th>Nombre</th>
+                        <th>Estado</th>           <!-- NUEVA -->
                         <th>Acciones</th>
                         <th class="d-none">EstadoOrden</th>
                     </tr>
@@ -82,17 +83,18 @@
         </div>
     </div>
 
-    <!-- SECCIONES -->
+    <!-- ===================== SECCIONES ===================== -->
     <div id="secciones" class="seccion-adm @clsSecciones">
         <h3 class="text-center">Secciones Registradas</h3>
         <button type="button" class="btn mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearSeccion">
             + Nueva Sección
         </button>
-        <div class="table-container">
+        <div class="card rounded-5 p-3">
             <table id="tablaSecciones" class="display responsive nowrap w-100">
                 <thead>
                     <tr>
                         <th>Código</th>
+                        <th>Estado</th>           <!-- NUEVA -->
                         <th>Acciones</th>
                         <th class="d-none">EstadoOrden</th>
                     </tr>
@@ -101,128 +103,131 @@
             </table>
         </div>
     </div>
-</section>
 
-<!-- MODALES -->
-<div class="modal fade" id="modalEditarRolUsuario" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formEditarRolUsuario">
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Rol de Usuario</h5>
-                    <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Cerrar">×</button>
+    <!-- ======================= MODALES ===================== -->
+    <!-- Editar Rol Usuario -->
+    <div class="modal fade" id="modalEditarRolUsuario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header rounded-top-4" style="background-color:#2D594D;color:#fff;">
+                    <h5 class="modal-title"><i class="fas fa-user-gear me-2"></i> Editar Rol de Usuario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="mb-1"><strong>Nombre:</strong> <span id="rolNombre"></span></p>
-                    <p class="mb-1"><strong>Cédula:</strong> <span id="rolCedula"></span></p>
-                    <p class="mb-3"><strong>Email:</strong> <span id="rolEmail"></span></p>
-                    <label class="form-label">Rol *</label>
-                    <select id="rol" name="rol" required class="form-control">
-                        <option value="">-- Seleccione --</option>
-                        <option>Profesor</option>
-                        <option>Estudiante</option>
-                        <option>Egresado</option>
-                        <option>Coordinador</option>
-                    </select>
-                    <input type="hidden" id="usuarioId" name="usuarioId" />
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn">Guardar Cambios</button>
-                </div>
-            </form>
+                <form id="formEditarRolUsuario">
+                    <div class="modal-body">
+                        <p class="mb-1 text-muted"><strong>Nombre:</strong> <span id="rolNombre"></span></p>
+                        <p class="mb-1 text-muted"><strong>Cédula:</strong> <span id="rolCedula"></span></p>
+                        <p class="mb-3 text-muted"><strong>Email:</strong> <span id="rolEmail"></span></p>
+                        <label class="form-label fw-bold">Rol *</label>
+                        <select id="rol" name="rol" required class="form-control">
+                            <option value="">-- Seleccione --</option>
+                            <option>Profesor</option>
+                            <option>Estudiante</option>
+                            <option>Egresado</option>
+                            <option>Coordinador</option>
+                        </select>
+                        <input type="hidden" id="usuarioId" name="usuarioId" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn CerrarModal"><i class="fas fa-save me-1"></i> Guardar</button>
+                        <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="modalCrearEspecialidad" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formCrearEspecialidad">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrar Nueva Especialidad</h5>
-                    <button type="button" class="btn" data-bs-dismiss="modal">×</button>
+    <!-- Crear Especialidad -->
+    <div class="modal fade" id="modalCrearEspecialidad" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header rounded-top-4" style="background-color:#2D594D;color:#fff;">
+                    <h5 class="modal-title"><i class="fas fa-wrench me-2"></i> Registrar Nueva Especialidad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
-                    <label class="form-label">Nombre *</label>
-                    <input type="text" id="nombreEspecialidad" name="nombreEspecialidad" required class="form-control" />
-                    <label class="form-label">Descripción (no se guarda)</label>
-                    <textarea id="descripcionEspecialidad" name="descripcionEspecialidad" class="form-control"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn">Guardar</button>
-                </div>
-            </form>
+                <form id="formCrearEspecialidad">
+                    <div class="modal-body">
+                        <label class="form-label fw-bold">Nombre *</label>
+                        <input type="text" id="nombreEspecialidad" name="nombreEspecialidad" required class="form-control" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn CerrarModal"><i class="fas fa-save me-1"></i> Guardar</button>
+                        <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="modalEditarEspecialidad" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formEditarEspecialidad">
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Especialidad</h5>
-                    <button type="button" class="btn" data-bs-dismiss="modal">×</button>
+    <!-- Editar Especialidad -->
+    <div class="modal fade" id="modalEditarEspecialidad" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header rounded-top-4" style="background-color:#2D594D;color:#fff;">
+                    <h5 class="modal-title"><i class="fas fa-pen-to-square me-2"></i> Editar Especialidad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
-                    <input type="hidden" id="editarIdEspecialidad" name="id" />
-                    <label class="form-label">Nombre *</label>
-                    <input type="text" id="editarNombreEspecialidad" name="nombreEspecialidad" required class="form-control" />
-                    <label class="form-label">Descripción (no se guarda)</label>
-                    <textarea id="editarDescripcionEspecialidad" name="descripcionEspecialidad" class="form-control"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn">Guardar</button>
-                </div>
-            </form>
+                <form id="formEditarEspecialidad">
+                    <div class="modal-body">
+                        <input type="hidden" id="editarIdEspecialidad" name="id" />
+                        <label class="form-label fw-bold">Nombre *</label>
+                        <input type="text" id="editarNombreEspecialidad" name="nombreEspecialidad" required class="form-control" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn CerrarModal"><i class="fas fa-save me-1"></i> Guardar</button>
+                        <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="modalCrearSeccion" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formCrearSeccion">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrar Nueva Sección</h5>
-                    <button type="button" class="btn" data-bs-dismiss="modal">×</button>
+    <!-- Crear Sección -->
+    <div class="modal fade" id="modalCrearSeccion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header rounded-top-4" style="background-color:#2D594D;color:#fff;">
+                    <h5 class="modal-title"><i class="fas fa-layer-group me-2"></i> Registrar Nueva Sección</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
-                    <label class="form-label">Nombre de la sección *</label>
-                    <input type="text" id="nombreSeccion" name="nombreSeccion" required class="form-control" />
-                    <label class="form-label">Descripción (no se guarda)</label>
-                    <textarea id="descripcionSeccion" name="descripcionSeccion" class="form-control"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn">Guardar</button>
-                </div>
-            </form>
+                <form id="formCrearSeccion">
+                    <div class="modal-body">
+                        <label class="form-label fw-bold">Nombre de la sección *</label>
+                        <input type="text" id="nombreSeccion" name="nombreSeccion" required class="form-control" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn CerrarModal"><i class="fas fa-save me-1"></i> Guardar</button>
+                        <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="modalEditarSeccion" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form id="formEditarSeccion">
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Sección</h5>
-                    <button type="button" class="btn" data-bs-dismiss="modal">×</button>
+    <!-- Editar Sección -->
+    <div class="modal fade" id="modalEditarSeccion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header rounded-top-4" style="background-color:#2D594D;color:#fff;">
+                    <h5 class="modal-title"><i class="fas fa-pen-to-square me-2"></i> Editar Sección</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
-                    <input type="hidden" id="editarIdSeccion" name="id" />
-                    <label class="form-label">Nombre de la sección *</label>
-                    <input type="text" id="editarNombreSeccion" name="nombreSeccion" required class="form-control" />
-                    <label class="form-label">Descripción (no se guarda)</label>
-                    <textarea id="editarDescripcionSeccion" name="descripcionSeccion" class="form-control"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn">Guardar</button>
-                </div>
-            </form>
+                <form id="formEditarSeccion">
+                    <div class="modal-body">
+                        <input type="hidden" id="editarIdSeccion" name="id" />
+                        <label class="form-label fw-bold">Nombre de la sección *</label>
+                        <input type="text" id="editarNombreSeccion" name="nombreSeccion" required class="form-control" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn CerrarModal"><i class="fas fa-save me-1"></i> Guardar</button>
+                        <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+
+</section>  <!-- 🔧 cierre correcto del section principal -->
 
 @section Scripts{
     <script>window.__TAB_INICIAL__='@tab';</script>

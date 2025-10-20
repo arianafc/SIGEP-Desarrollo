@@ -10,7 +10,8 @@
         infoEmpty: "Mostrando 0 a 0 de 0 registros",
         infoFiltered: "(filtrado de _MAX_ registros en total)",
         lengthMenu: "Mostrar _MENU_ registros",
-        loadingRecords: "Cargando...", processing: "Procesando...",
+        loadingRecords: "Cargando...",
+        processing: "Procesando...",
         search: "Buscar:",
         zeroRecords: "No se encontraron resultados",
         paginate: { first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior" },
@@ -47,7 +48,9 @@
         Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un problema de comunicación.' });
     });
 
-    // ===== USUARIOS =====
+    // ============================
+    //           USUARIOS
+    // ============================
     function loadUsuarios() {
         const rol = $('#filtroRol').val() || '';
         if (dtUsuarios) dtUsuarios.destroy();
@@ -65,7 +68,8 @@
                     data: null,
                     orderable: false,
                     render: (row) => {
-                        if (Number(row.IdEstado) === 2) return 'Inactivo';
+                        const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
+                        const icon = row.IdEstado === 1 ? 'bi-person-slash' : 'bi-person-check';
                         return `
               <a href="#" class="btn btn-sm btn-editar-rol-usuario"
                  data-id="${row.IdUsuario}" data-nombre="${row.Nombre}"
@@ -73,8 +77,8 @@
                  title="Editar rol"><i class="bi bi-person-gear"></i></a>
               <a href="#" class="btn btn-sm btn-toggle-estado"
                  data-id="${row.IdUsuario}" data-estado="${row.Estado}" data-nombre="${row.Nombre}"
-                 title="${row.Estado === 'Activo' ? 'Desactivar' : 'Activar'}">
-                 <i class="bi ${row.IdEstado === 1 ? 'bi-person-slash' : 'bi-person-check'}"></i></a>
+                 title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
+                 <i class="bi ${icon}"></i></a>
             `;
                     }
                 },
@@ -132,7 +136,9 @@
         });
     });
 
-    // ===== ESPECIALIDADES =====
+    // ============================
+    //        ESPECIALIDADES
+    // ============================
     function loadEspecialidades() {
         if (dtEspecialidades) dtEspecialidades.destroy();
         dtEspecialidades = $('#tablaEspecialidades').DataTable({
@@ -141,32 +147,36 @@
             ajax: { url: `${BASE}/Especialidades`, dataSrc: 'data' },
             columns: [
                 { data: 'Nombre' },
+                { data: 'IdEstado', render: v => Number(v) === 1 ? 'Activo' : 'Inactivo' },  // NUEVA COLUMNA
                 {
                     data: null,
                     orderable: false,
                     render: (row) => {
-                        if (Number(row.IdEstado) === 2) return 'Inactivo';
+                        const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
+                        const icon = row.IdEstado === 1 ? 'bi-slash-circle' : 'bi-check-circle';
                         return `
-              <a href="#" class="btn btn-sm btn-editar-especialidad"
-                 data-id="${row.IdEspecialidad}" data-nombre="${row.Nombre}"
-                 title="Editar"><i class="bi bi-pencil-square"></i></a>
-              <a href="#" class="btn btn-sm btn-desactivar-especialidad"
-                 data-id="${row.IdEspecialidad}"
-                 title="Desactivar"><i class="bi bi-slash-circle"></i></a>
-            `;
+            <a href="#" class="btn btn-sm btn-editar-especialidad"
+               data-id="${row.IdEspecialidad}" data-nombre="${row.Nombre}"
+               title="Editar"><i class="bi bi-pencil-square"></i></a>
+            <a href="#" class="btn btn-sm btn-toggle-especialidad"
+               data-id="${row.IdEspecialidad}" data-actual="${row.IdEstado}"
+               title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
+               <i class="bi ${icon}"></i></a>
+          `;
                     }
                 },
-                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 }
+                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 } // EstadoOrden
             ],
-            order: [[2, 'asc'], [0, 'asc']]
+            order: [[3, 'asc'], [0, 'asc']] // ordena por EstadoOrden, luego Nombre
         });
     }
 
+
+    // Crear (sin descripción)
     $('#formCrearEspecialidad').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/CrearEspecialidad`, {
-            nombre: $('#nombreEspecialidad').val(),
-            descripcion: $('#descripcionEspecialidad').val()
+            nombre: $('#nombreEspecialidad').val()
         })
             .done(r => {
                 Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
@@ -179,16 +189,15 @@
         e.preventDefault();
         $('#editarIdEspecialidad').val($(this).data('id'));
         $('#editarNombreEspecialidad').val($(this).data('nombre'));
-        $('#editarDescripcionEspecialidad').val('');
         $('#modalEditarEspecialidad').modal('show');
     });
 
+    // Editar (sin descripción)
     $('#formEditarEspecialidad').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/EditarEspecialidad`, {
             id: $('#editarIdEspecialidad').val(),
-            nombre: $('#editarNombreEspecialidad').val(),
-            descripcion: $('#editarDescripcionEspecialidad').val()
+            nombre: $('#editarNombreEspecialidad').val()
         })
             .done(r => {
                 Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
@@ -197,22 +206,29 @@
             .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo editar la especialidad.' }));
     });
 
-    $(document).on('click', '.btn-desactivar-especialidad', function (e) {
+    // Toggle estado
+    $(document).on('click', '.btn-toggle-especialidad', function (e) {
         e.preventDefault();
         const id = $(this).data('id');
-        Swal.fire({ title: 'Desactivar especialidad', text: '¿Deseas desactivarla?', icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'Cancelar' })
+        const actual = Number($(this).data('actual'));
+        const nuevo = actual === 1 ? 'Inactivo' : 'Activo';
+        const verbo = nuevo === 'Inactivo' ? 'desactivar' : 'activar';
+
+        Swal.fire({ title: `¿Deseas ${verbo} la especialidad?`, icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'Cancelar' })
             .then(res => {
                 if (!res.isConfirmed) return;
-                $.post(`${BASE}/DesactivarEspecialidad`, { id })
+                $.post(`${BASE}/CambiarEstadoEspecialidad`, { id, nuevoEstado: nuevo })
                     .done(r => {
                         Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
                             .then(() => loadEspecialidades());
                     })
-                    .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo desactivar la especialidad.' }));
+                    .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado.' }));
             });
     });
 
-    // ===== SECCIONES =====
+    // ============================
+    //           SECCIONES
+    // ============================
     function loadSecciones() {
         if (dtSecciones) dtSecciones.destroy();
         dtSecciones = $('#tablaSecciones').DataTable({
@@ -221,32 +237,36 @@
             ajax: { url: `${BASE}/Secciones`, dataSrc: 'data' },
             columns: [
                 { data: 'Seccion' },
+                { data: 'IdEstado', render: v => Number(v) === 1 ? 'Activo' : 'Inactivo' },  // NUEVA COLUMNA
                 {
                     data: null,
                     orderable: false,
                     render: (row) => {
-                        if (Number(row.IdEstado) === 2) return 'Inactivo';
+                        const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
+                        const icon = row.IdEstado === 1 ? 'bi-slash-circle' : 'bi-check-circle';
                         return `
-              <a href="#" class="btn btn-sm btn-editar-seccion"
-                 data-id="${row.IdSeccion}" data-nombre="${row.Seccion}"
-                 title="Editar"><i class="bi bi-pencil-square"></i></a>
-              <a href="#" class="btn btn-sm btn-desactivar-seccion"
-                 data-id="${row.IdSeccion}"
-                 title="Desactivar"><i class="bi bi-slash-circle"></i></a>
-            `;
+            <a href="#" class="btn btn-sm btn-editar-seccion"
+               data-id="${row.IdSeccion}" data-nombre="${row.Seccion}"
+               title="Editar"><i class="bi bi-pencil-square"></i></a>
+            <a href="#" class="btn btn-sm btn-toggle-seccion"
+               data-id="${row.IdSeccion}" data-actual="${row.IdEstado}"
+               title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
+               <i class="bi ${icon}"></i></a>
+          `;
                     }
                 },
-                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 }
+                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 } // EstadoOrden
             ],
-            order: [[2, 'asc'], [0, 'asc']]
+            order: [[3, 'asc'], [0, 'asc']]
         });
     }
 
+
+    // Crear (sin descripción)
     $('#formCrearSeccion').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/CrearSeccion`, {
-            nombreSeccion: $('#nombreSeccion').val(),
-            descripcionSeccion: $('#descripcionSeccion').val()
+            nombreSeccion: $('#nombreSeccion').val()
         })
             .done(r => {
                 Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
@@ -259,16 +279,15 @@
         e.preventDefault();
         $('#editarIdSeccion').val($(this).data('id'));
         $('#editarNombreSeccion').val($(this).data('nombre'));
-        $('#editarDescripcionSeccion').val('');
         $('#modalEditarSeccion').modal('show');
     });
 
+    // Editar (sin descripción)
     $('#formEditarSeccion').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/EditarSeccion`, {
             id: $('#editarIdSeccion').val(),
-            nombreSeccion: $('#editarNombreSeccion').val(),
-            descripcionSeccion: $('#editarDescripcionSeccion').val()
+            nombreSeccion: $('#editarNombreSeccion').val()
         })
             .done(r => {
                 Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
@@ -277,21 +296,29 @@
             .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo editar la sección.' }));
     });
 
-    $(document).on('click', '.btn-desactivar-seccion', function (e) {
+    // Toggle estado
+    $(document).on('click', '.btn-toggle-seccion', function (e) {
         e.preventDefault();
         const id = $(this).data('id');
-        Swal.fire({ title: 'Desactivar sección', text: '¿Deseas desactivarla?', icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'Cancelar' })
+        const actual = Number($(this).data('actual'));
+        const nuevo = actual === 1 ? 'Inactivo' : 'Activo';
+        const verbo = nuevo === 'Inactivo' ? 'desactivar' : 'activar';
+
+        Swal.fire({ title: `¿Deseas ${verbo} la sección?`, icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'Cancelar' })
             .then(res => {
                 if (!res.isConfirmed) return;
-                $.post(`${BASE}/DesactivarSeccion`, { id })
+                $.post(`${BASE}/CambiarEstadoSeccion`, { id, nuevoEstado: nuevo })
                     .done(r => {
                         Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
                             .then(() => loadSecciones());
                     })
-                    .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo desactivar la sección.' }));
+                    .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado.' }));
             });
     });
 
+    // ============================
+    //      INICIALIZACIÓN
+    // ============================
     const inicial = window.__TAB_INICIAL__ || (new URLSearchParams(location.search).get('tab') || 'usuarios');
     show(inicial);
 })();
