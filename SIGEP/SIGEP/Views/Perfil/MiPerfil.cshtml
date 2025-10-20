@@ -92,44 +92,47 @@
 
 
     <h5 class="section-title">INFORMACIÓN PERSONAL</h5>
-    
-    @using (Html.BeginForm("ActualizarPerfil", "Perfil", FormMethod.Post))
+
+    @using (Html.BeginForm("ActualizarPerfil", "Perfil", FormMethod.Post, new { id = "ActualizarPerfil" }))
     {
         <div class="row" id="info-personal">
             <div class="col-md-6 form-group">
                 <label>Nombre</label>
-                @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", @id = "NombrePerfil" })
             </div>
 
             <div class="col-md-6 form-group">
                 <label>Primer Apellido</label>
-                @Html.TextBoxFor(m => m.Apellido1, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.Apellido1, new { @class = "form-control", @id = "Apellido1Perfil" })
             </div>
 
             <div class="col-md-6 form-group">
                 <label>Segundo Apellido</label>
-                @Html.TextBoxFor(m => m.Apellido2, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.Apellido2, new { @class = "form-control", @id = "Apellido2Perfil" })
             </div>
 
             <div class="col-md-6 form-group">
                 <label>Cédula</label>
-                @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @id = "CedulaPerfil" })
             </div>
 
             <div class="col-md-6 form-group">
                 <label>Teléfono</label>
-                @Html.TextBoxFor(m => m.Telefono, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.Telefono, new { @class = "form-control", @id = "TelefonoPerfil" })
             </div>
 
             <div class="col-md-6 form-group">
                 <label>Correo Electrónico</label>
-                @Html.TextBoxFor(m => m.CorreoPersonal, new { @class = "form-control", @id = "CorreoPersonal" })
+                @Html.TextBoxFor(m => m.CorreoPersonal, new { @class = "form-control", @id = "CorreoPersonalPerfil" })
             </div>
 
-            <div class="col-md-6 form-group">
-                <label>Correo Electrónico MEP</label>
-                @Html.TextBoxFor(m => m.CorreoMEP, new { @class = "form-control", @id = "CorreoMEP"})
-            </div>
+            @if (rol != 4)
+            {
+                <div class="col-md-6 form-group">
+                    <label>Correo Electrónico MEP</label>
+                    @Html.TextBoxFor(m => m.CorreoMEP, new { @class = "form-control", @id = "CorreoMEPPerfil" })
+                </div>
+            }
 
             <div class="col-md-6 form-group">
                 <label>Sexo / Género</label>
@@ -147,15 +150,14 @@
                         "Value", "Text",
                         Model.Sexo
                     ),
-                    new { @class = "form-control" }
+                    new { @class = "form-control", @id = "SexoPerfil" }
                 )
             </div>
 
             <div class="col-md-6 form-group">
                 <label>Nacionalidad</label>
-                @Html.TextBoxFor(m => m.Nacionalidad, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.Nacionalidad, new { @class = "form-control", @id = "NacionalidadPerfil" })
             </div>
-
             <div class="col-md-6 mb-3">
                 <label class="form-label">Provincia <span class="text-danger">*</span></label>
                 @Html.DropDownListFor(m => m.provincia,
@@ -186,9 +188,9 @@
                 )
             </div>
 
-            <div class="col-md-12 mb-3">
+            <div class="col-md-@(Model.IdRol != 4 ? 12 : 6) mb-3">
                 <label class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
-                @Html.TextBoxFor(m => m.DireccionExacta, new { @class = "form-control" })
+                @Html.TextBoxFor(m => m.DireccionExacta, new { @class = "form-control", @id = "DireccionPerfil" })
             </div>
         </div>
 
@@ -223,144 +225,171 @@
             </button>
         </div>
     }
-    <div class="row" id="info-personal">
 
 
-        @if (rol == 1 || rol == 4)
+
+    @if (rol == 1 || rol == 4)
+    {
+        <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
+
+        if (rol == 1)
         {
-            <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
-            <div class="row">
-                @if (rol == 1)
-                {
-                    <div class=" form-group">
-                        @Html.DropDownListFor(
-      model => model.IdEspecialidad,
-      new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre", Model.IdEspecialidad),
-      "Seleccione una especialidad",
-      new { @class = "form-control" }
+
+            using (Html.BeginForm("ActualizarEspecialidadSeccion", "Perfil", FormMethod.Post, new { @id = "ActualizarEspecialidadSeccionForm", @class = "row" }))
+            {
+
+                <div class=" form-group">
+                    @Html.DropDownListFor(
+    model => model.IdEspecialidad,
+    new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre", Model.IdEspecialidad),
+    "Seleccione una especialidad",
+    new { @class = "form-control" }
   )
-                    </div>
-
-                    <div class="form-group">
-                        <label>Sección</label>
-                        @Html.DropDownListFor(
-                            model => model.IdSeccion,
-                            new SelectList(Model.ListaSecciones, "IdSeccion", "Seccion", Model.IdSeccion),
-                            "Seleccione una sección",
-                            new { @class = "form-control" }
-                        )
-                    </div>
-                }
-                @if (rol == 4)
-                {
-                    <div class="col-md-6 form-group">
-                        <label>Carrera</label>
-                        <input type="email" class="form-control" value="xxxxxxxxx" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Año De Graduación</label>
-                        <input type="text" class="form-control" value="2022" />
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Título</label>
-                        <input type="email" class="form-control" value="xxxxxx" />
-                    </div>
-
-                }
-            </div>
-
-            <div class="action-buttons mt-3 mb-4">
-                <button type="button" id="btnActualizarAcademica">
-                    <i class="fas fa-edit me-2"></i> Actualizar Información Académica
-                </button>
-            </div>
-        }
-        @if (rol == 1)
-        {
-            <!-- CONTACTO EMERGENCIA -->
-            <h5 class="section-title">ENCARGADOS</h5>
-            if (encargado != null)
-            {
-                <div class="row mb-3 p-3 rounded">
-                    <div class="col-md-6 form-group">
-                        <label>Cédula</label>
-                        <input type="text" class="form-control" value="@encargado.Cedula" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Nombre y Apellidos</label>
-                        <input type="text" class="form-control" value="@encargado.Nombre" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Teléfono</label>
-                        <input type="text" class="form-control" value="@encargado.Telefono" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Parentesco</label>
-                        <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Residencia o Trabajo</label>
-                        <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Ocupación</label>
-                        <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
-                    </div>
-
-
                 </div>
-            }
-            else
-            {
-                <p class="text-muted">No hay encargado registrado.</p>
-            }
 
-            <div class="row">
-                <div class="action-buttons mt-3 col-md-6 form-group">
-                    <button type="button" class="btn btn-primary" id="BtnVerEncargadosModal" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
-                        <i class="fas fa-plus me-2"></i> Agregar Encargado
+                <div class="form-group">
+                    <label>Sección</label>
+                    @Html.DropDownListFor(
+                          model => model.IdSeccion,
+                          new SelectList(Model.ListaSecciones, "IdSeccion", "Seccion", Model.IdSeccion),
+                          "Seleccione una sección",
+                          new { @class = "form-control" }
+                      )
+                </div>
+
+
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="submit" id="btnActualizarAcademica">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Académica
                     </button>
                 </div>
-                <div class="action-buttons mt-3 col-md-6 form-group">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
-                        <i class="fas fa-eye me-2"></i> Ver Encargados
+            }
+
+        }
+
+
+        if (rol == 4)
+        {
+            using (Html.BeginForm("ActualizarInformacionAcademica", "Perfil", FormMethod.Post, new { @id = "ActualizarInfoAcademicaForm", @class = "row" }))
+            {
+
+                <div class="col-md-6 form-group">
+                    <label>Carrera</label>
+                    @Html.TextBoxFor(m => m.Carrera, new { @class = "form-control" })
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Año De Graduación</label>
+                    @Html.TextBoxFor(m => m.AnnoGraduacion, new { @class = "form-control", @type = "number" })
+                </div>
+                <div class="col-md-12 form-group">
+                    <label>Título</label>
+                    @Html.TextBoxFor(m => m.TituloObtenido, new { @class = "form-control" })
+                </div>
+
+                <div class="action-buttons mt-3 mb-4">
+                    <button type="submit" id="btnActualizarAcademica">
+                        <i class="fas fa-edit me-2"></i> Actualizar Información Académica
                     </button>
                 </div>
-            </div>
+            }
 
         }
-        @if (rol == 4)
-        {
-            <h5 class="section-title">INFORMACIÓN LABORAL</h5>
-            <div class="row">
-                <div class="col-md-6 form-group">
-                    <label>Empresa</label>
-                    <input type="text" class="form-control" value="BOSCH" />
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Puesto</label>
-                    <input type="text" class="form-control" value="Payroll Analyst" />
-                </div>
-                <div class="col-md-6 form-group">
-                    <label>Correo Electrónico Laboral</label>
-                    <input type="email" class="form-control" value="johnny@bosch.com" />
-                </div>
-            </div>
 
-            <div class="action-buttons mt-3 mb-4">
-                <button type="button" id="btnActualizarLaboral">
-                    <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
+
+
+    }
+    @if (rol == 1)
+    {
+        <!-- CONTACTO EMERGENCIA -->
+        <h5 class="section-title">ENCARGADOS</h5>
+        if (encargado != null)
+        {
+            <div class="row mb-3 p-3 rounded">
+                <div class="col-md-6 form-group">
+                    <label>Cédula</label>
+                    <input type="text" class="form-control" value="@encargado.Cedula" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Nombre y Apellidos</label>
+                    <input type="text" class="form-control" value="@encargado.Nombre" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Teléfono</label>
+                    <input type="text" class="form-control" value="@encargado.Telefono" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Parentesco</label>
+                    <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Residencia o Trabajo</label>
+                    <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Ocupación</label>
+                    <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
+                </div>
+
+
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No hay encargado registrado.</p>
+        }
+
+        <div class="row">
+            <div class="action-buttons mt-3 col-md-6 form-group">
+                <button type="button" class="btn btn-primary" id="BtnVerEncargadosModal" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
+                    <i class="fas fa-plus me-2"></i> Agregar Encargado
                 </button>
             </div>
-        }
-        @if (rol == 1)
+            <div class="action-buttons mt-3 col-md-6 form-group">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
+                    <i class="fas fa-eye me-2"></i> Ver Encargados
+                </button>
+            </div>
+        </div>
+
+    }
+    @if (rol == 4)
+    {
+
+
+        <h5 class="section-title">INFORMACIÓN LABORAL</h5>
+
+        using (Html.BeginForm("ActualizarInformacionLaboral", "Perfil", FormMethod.Post, new { @id = "ActualizarInformacionLaboral", @class = "row" }))
         {
-            <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label>Empresa</label>
+                @Html.TextBoxFor(m => m.EmpresaActual, new { @class = "form-control" , required = "required"})
+            </div>
+            <div class="col-md-6 form-group">
+                <label>Puesto</label>
+                @Html.TextBoxFor(m => m.PuestoActual, new { @class = "form-control", required = "required" })
+            </div>
+           
+        </div>
+
+        <div class="action-buttons mt-3 mb-4">
+            <button type="submit" id="btnActualizarLaboral">
+                <i class="fas fa-edit me-2"></i> Actualizar Información Laboral
+            </button>
+        </div>
+        }
+    }
+    @if (rol == 1)
+    {
+        <h5 class="section-title">INFORMACIÓN MÉDICA</h5>
+        using (Html.BeginForm("ActualizarInformacionMedica", "Perfil", FormMethod.Post, new { @id = "ActualizarInformacionMedicaForm", @class = "row" }))
+        {
+
             <div class="row">
                 <div class="col-md-6 form-group">
                     <label>Padecimientos</label>
@@ -370,19 +399,20 @@
                     <label>Medicamentos</label>
                     @Html.TextBoxFor(m => m.Tratamiento, new { @class = "form-control" })
                 </div>
-                <div class="col-md-6 form-group">
+                <div class="col-md-12 form-group">
                     <label>Alergías</label>
                     @Html.TextBoxFor(m => m.Alergia, new { @class = "form-control" })
                 </div>
             </div>
 
             <div class="action-buttons mt-3 mb-4">
-                <button type="button" id="btnActualizarMedica">
+                <button type="submit" id="btnActualizarMedica">
                     <i class="fas fa-edit me-2"></i> Actualizar Información Médica
                 </button>
             </div>
         }
-    </div>
+    }
+</div>
 </div>
 
 

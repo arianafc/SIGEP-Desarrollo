@@ -1,5 +1,6 @@
 ﻿$(function () {
 
+
     var Contrasenna = $('#ContrasennaNueva');
     var ConfirmarContrasenna = $('#ConfirmarContrasenna');
     var Form = $('#CambiarContrasennaForm');
@@ -53,10 +54,21 @@
             data: data,
             success: function (response) {
                 if (response.success) {
-                    Swal.fire('Éxito', response.mensaje, 'success')
-                        .then(() => window.location.href = '/Perfil/MiPerfil');
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: response.mensaje,
+                        icon: 'success',
+                        confirmButtonColor: '#2D594D'
+                    }).then(() => {
+                        window.location.href = '/Perfil/MiPerfil';
+                    });
                 } else {
-                    Swal.fire('Error', response.mensaje, 'error');
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.mensaje,
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             },
             error: function (error) {
@@ -81,6 +93,26 @@
             Cedula: $('#CedulaEditar').val()
         };
 
+        if (!data.Cedula || !data.Nombre || !data.Apellido1 || !data.Apellido2 || !data.Telefono || !data.Correo || !data.Ocupacion || !data.LugarTrabajo || !data.Parentesco) {
+            Swal.fire('Error', 'Por favor complete todos los campos obligatorios.', 'error');
+            return;
+        }
+
+        // Validar correo electrónico
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(data.Correo)) {
+            Swal.fire('Error', 'Ingrese un correo electrónico válido.', 'error');
+            return;
+        }
+
+        // Validar teléfono (solo números y mínimo 8 dígitos)
+        var telefonoPattern = /^\d{8,}$/;
+        if (!telefonoPattern.test(data.Telefono)) {
+            Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+            return;
+        }
+
+
         $.ajax({
             url: '/Perfil/ActualizarEncargado',
             type: 'POST',
@@ -88,10 +120,21 @@
             success: function (response) {
                 if (response.success) {
                     $('#modalEditarEncargado').modal('hide');
-                    Swal.fire('Éxito', response.mensaje, 'success')
-                        .then(() => window.location.href = '/Perfil/MiPerfil');
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: response.mensaje,
+                        icon: 'success',
+                        confirmButtonColor: '#2D594D'
+                    }).then(() => {
+                        window.location.href = '/Perfil/MiPerfil';
+                    });
                 } else {
-                    Swal.fire('Error', response.mensaje, 'error');
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.mensaje,
+                        icon: 'error',
+                        confirmButtonColor: '#d33'
+                    });
                 }
             },
             error: function () {
@@ -139,33 +182,6 @@
         }
     });
 
-    // ===================== VALIDACIÓN DE INFO PERSONAL =====================
-    document.getElementById("btnActualizarInfo")?.addEventListener("click", function () {
-        const campos = document.querySelectorAll('#info-personal input');
-        let incompletos = false;
-
-        campos.forEach(input => {
-            if (input.value.trim() === "") {
-                incompletos = true;
-            }
-        });
-
-        if (incompletos) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Campos incompletos',
-                text: 'Por favor complete todos los campos obligatorios',
-                confirmButtonColor: '#8CA653'
-            });
-        } else {
-            Swal.fire({
-                icon: 'success',
-                title: 'Información actualizada correctamente',
-                showConfirmButton: false,
-                timer: 2000
-            });
-        }
-    });
 
     // ===================== MENSAJES REUTILIZABLES =====================
     function mostrarSuccessMensaje() {
@@ -237,10 +253,21 @@ function eliminarEncargado(idEncargado) {
                 data: { IdEncargado: idEncargado },
                 success: function (response) {
                     if (response.success) {
-                        Swal.fire('Éxito', response.mensaje, 'success')
-                            .then(() => window.location.href = '/Perfil/MiPerfil');
+                        Swal.fire({
+                            title: 'Éxito',
+                            text: response.mensaje,
+                            icon: 'success',
+                            confirmButtonColor: '#2D594D'
+                        }).then(() => {
+                            window.location.href = '/Perfil/MiPerfil';
+                        });
                     } else {
-                        Swal.fire('Error', response.mensaje, 'error');
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.mensaje,
+                            icon: 'error',
+                            confirmButtonColor: '#d33'
+                        });
                     }
                 },
                 error: function () {
@@ -270,10 +297,21 @@ function activarEncargado(idEncargado) {
                 data: { IdEncargado: idEncargado },
                 success: function (response) {
                     if (response.success) {
-                        Swal.fire('Éxito', response.mensaje, 'success')
-                            .then(() => window.location.href = '/Perfil/MiPerfil');
+                        Swal.fire({
+                            title: 'Éxito',
+                            text: response.mensaje,
+                            icon: 'success',
+                            confirmButtonColor: '#2D594D'
+                        }).then(() => {
+                            window.location.href = '/Perfil/MiPerfil';
+                        });
                     } else {
-                        Swal.fire('Error', response.mensaje, 'error');
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.mensaje,
+                            icon: 'error',
+                            confirmButtonColor: '#d33'
+                        });
                     }
                 },
                 error: function () {
@@ -340,3 +378,61 @@ $('#CedulaNuevoEncargado').on('blur', function () {
     });
 });
 
+
+
+$('#ActualizarPerfil').on('submit', function (e) {
+    e.preventDefault(); // Evita envío automático
+
+    let nombre = $('#NombrePerfil').val().trim();
+    let apellido1 = $('#Apellido1Perfil').val().trim();
+    let apellido2 = $('#Apellido2Perfil').val().trim();
+    let cedula = $('#CedulaPerfil').val().trim();
+    let telefono = $('#TelefonoPerfil').val().trim();
+    let correo = $('#CorreoPersonalPerfil').val().trim();
+    let direccion = $('#DireccionPerfil').val().trim();
+
+    // Validar campos vacíos
+    if (!nombre || !apellido1 || !apellido2 || !cedula || !telefono ||
+        !correo || !direccion) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Campos incompletos',
+            text: 'Por favor complete todos los campos obligatorios antes de continuar.',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    // Validar correo electrónico
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correo)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Correo inválido',
+            text: 'Por favor ingrese un correo electrónico válido.',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+
+    // Validar teléfono (solo números y mínimo 8 dígitos)
+    var telefonoPattern = /^\d{8,}$/;
+    if (!telefonoPattern.test(telefono)) {
+        Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+        return;
+    }
+    // Confirmación antes de enviar
+    Swal.fire({
+        title: '¿Desea actualizar su información?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            e.currentTarget.submit();
+        }
+    });
+});
