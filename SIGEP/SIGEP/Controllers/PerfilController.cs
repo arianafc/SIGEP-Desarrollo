@@ -470,6 +470,25 @@ namespace SIGEP.Controllers
 
                 using (var dbContext = new SIGEPEntities())
                 {
+                    var cedulaExiste = (from u in dbContext.UsuariosTB
+                                         join r in dbContext.RolesTB on u.IdRol equals r.IdRol
+                                         where u.Cedula == cedula && r.Descripcion == "Estudiante" && u.IdEstado == 1
+                                         select u).Any();
+                    if (cedulaExiste) {
+
+                        return Json(new { success = false, mensaje = "La cédula indicada pertenece a un estudiante activo de la institución." });
+                    }
+
+                    var encargadoAsignado = (from e in dbContext.EncargadosTB
+                                             join ee in dbContext.EstudianteEncargadoTB on e.IdEncargado equals ee.IdEncargado
+                                             where e.Cedula == cedula && ee.IdUsuario == IdUsuario
+                                             select e).Any();
+
+                    if (encargadoAsignado) {
+
+                        return Json(new { success = false, mensaje = "La cédula indicada ya pertenece a encargado." });
+                    }
+
                     var accion = 3;
                     var result = dbContext.AccionesEncargadoSP(accion, null, nombre, telefono, parentesco, lugarTrabajo, ocupacion, correo, cedula, apellido1, apellido2, IdUsuario);
                     int? affectedRows = result.FirstOrDefault();
