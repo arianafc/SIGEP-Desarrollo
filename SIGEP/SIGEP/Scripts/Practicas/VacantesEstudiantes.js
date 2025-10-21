@@ -256,7 +256,6 @@
 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
   <div>
     <a href="${CFG.urls.visualizacionPostulacion}?idVacante=${p.IdVacante}&idUsuario=${p.IdUsuario}"
-       target="_blank"
        class="text-decoration-none fw-bold"
        style="color:#2d594d;">
        ${escapeHtml(p.NombreCompleto)}
@@ -298,7 +297,7 @@
                 <i class="fas fa-user-slash"></i> No elegible</button>`;
                     }
                     // 🔹 Estudiantes con práctica activa o finalizada
-                    else if (['asignada', 'en curso', 'finalizada', 'aprobada', 'rechazada', 'retirada'].includes(estado)) {
+                    else if (['asignada', 'en curso', 'finalizada', 'aprobada', 'rezagado'].includes(estado)) {
                         btn = `<button class="btn btn-sm btn-outline-secondary btn-bloqueado" title="Ya tiene práctica activa">
                 <i class="fas fa-ban"></i> No disponible</button>`;
                     }
@@ -527,7 +526,6 @@
                                                 <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
                                                   <div>
                                                     <a href="${CFG.urls.visualizacionPostulacion}?idVacante=${p.IdVacante}&idUsuario=${p.IdUsuario}"
-                                                       target="_blank"
                                                        class="text-decoration-none fw-bold"
                                                        style="color:#2d594d;">
                                                        ${escapeHtml(p.NombreCompleto)}
