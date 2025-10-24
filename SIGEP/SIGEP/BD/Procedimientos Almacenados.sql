@@ -164,7 +164,7 @@ SELECT
 FROM EncargadosTB E
 INNER JOIN EstudianteEncargadoTB EE 
     ON E.IdEncargado = EE.IdEncargado
-WHERE EE.IdUsuario = @IdUsuario;
+WHERE EE.IdUsuario = @IdUsuario AND E.IdEstado = 1;
 
 END;
 

@@ -920,7 +920,7 @@ namespace SIGEP.Controllers
             {
                 using (var dbContext = new SIGEPEntities())
                 {
-                    var documentos = dbContext.ObtenerDocumentosEvaluacionSP(idUsuario).ToList();
+                    var documentos = dbContext.ObtenerDocumentosPerfilSP(idUsuario).ToList();
 
                     var resultado = documentos.Select(d => new
                     {
@@ -970,20 +970,81 @@ namespace SIGEP.Controllers
 
 
 
-        public FileResult DescargarDocumento(string ruta, bool download = false)
+        //public FileResult DescargarDocumento(string ruta, bool download = false)
+        //{
+        //    if (!System.IO.File.Exists(ruta))
+        //        return null;
+
+        //    string nombreArchivo = System.IO.Path.GetFileName(ruta);
+        //    string contentType = "application/octet-stream";
+
+        //    if (download)
+        //        return File(ruta, contentType, nombreArchivo); // descarga
+        //    else
+        //        return File(ruta, contentType); // abre en navegador
+        //}
+
+        public ActionResult DescargarDocumento(string ruta, bool download = false)
         {
-            if (!System.IO.File.Exists(ruta))
-                return null;
+            try
+            {
+                // Convierte a ruta física
+                var fullPath = Server.MapPath(ruta);
 
-            string nombreArchivo = System.IO.Path.GetFileName(ruta);
-            string contentType = "application/octet-stream";
+                if (!System.IO.File.Exists(fullPath))
+                    return HttpNotFound("El archivo no existe.");
 
-            if (download)
-                return File(ruta, contentType, nombreArchivo); // descarga
-            else
-                return File(ruta, contentType); // abre en navegador
+                string nombreArchivo = System.IO.Path.GetFileName(fullPath);
+                string extension = System.IO.Path.GetExtension(fullPath).ToLower();
+
+                // Detectar MIME
+                string contentType;
+                switch (extension)
+                {
+                    case ".pdf":
+                        contentType = "application/pdf";
+                        break;
+                    case ".jpg":
+                    case ".jpeg":
+                        contentType = "image/jpeg";
+                        break;
+                    case ".png":
+                        contentType = "image/png";
+                        break;
+                    case ".gif":
+                        contentType = "image/gif";
+                        break;
+                    case ".txt":
+                        contentType = "text/plain";
+                        break;
+                    case ".doc":
+                        contentType = "application/msword";
+                        break;
+                    case ".docx":
+                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                        break;
+                    case ".xlsx":
+                        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                        break;
+                    default:
+                        contentType = "application/octet-stream";
+                        break;
+                }
+
+                // Mostrar o descargar
+                if (download)
+                    return File(fullPath, contentType, nombreArchivo);
+                else
+                {
+                    Response.AppendHeader("Content-Disposition", $"inline; filename={nombreArchivo}");
+                    return File(fullPath, contentType);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new HttpStatusCodeResult(500, "Error al mostrar el documento: " + ex.Message);
+            }
         }
-
 
 
 

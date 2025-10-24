@@ -15,13 +15,13 @@
         }
 
         // Validar extensión
-        var extensionesPermitidas = ['.xls', '.xlsx', '.pdf'];
+        var extensionesPermitidas = ['.xls', '.xlsx', '.pdf', '.png', '.jpeg'];
         var extension = '.' + archivo.name.split('.').pop().toLowerCase();
         if (!extensionesPermitidas.includes(extension)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Extensión inválida',
-                text: 'Solo se permiten archivos .xls, .xlsx o .pdf',
+                text: 'Solo se permiten archivos .xls, .xlsx, .pdf, .jpeg o .png',
                 confirmButtonColor: '#d33'
             });
             return;
@@ -76,41 +76,46 @@
             url: '/Perfil/ObtenerDocumentos',
             type: 'GET',
             data: { idUsuario: idUsuario },
-            success: function (documentos) {
+            success: function (response) {
                 var contenedor = $('#listaDocumentos');
                 contenedor.empty();
 
-                if (documentos.length === 0) {
+                if (!response.success) {
+                    Swal.fire('Error', response.message || 'No se pudieron cargar los documentos.', 'error');
+                    return;
+                }
+
+                var documentos = response.documentos;
+
+                if (!documentos || documentos.length === 0) {
                     contenedor.append('<div class="text-center text-muted">No hay documentos subidos.</div>');
                     return;
                 }
 
                 documentos.forEach(function (doc) {
                     var item = $(`
-                        <div class="list-group-item d-flex justify-content-between align-items-center" 
-                             style="background-color: white; border: 1px solid #8CA653; border-radius: 8px; margin-bottom: 10px;">
-                            <div>
-                                <strong>${doc.Documento}</strong><br />
-                                <small>Cargado: ${doc.Fecha}</small>
-                            </div>
-                            <div class="d-flex gap-3">
-                                <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}" 
-                                   target="_blank" title="Ver" class="btn btn-link p-0 text-secondary">
-                                   <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}&download=true" 
-                                   title="Descargar" class="btn btn-link p-0 text-secondary">
-                                   <i class="fas fa-download"></i>
-                                </a>
-                                <button class="btn btn-link p-0 text-secondary btnEliminarDoc" data-id="${doc.IdDocumento}" title="Eliminar">
-                                   <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `);
+            <div class="list-group-item d-flex justify-content-between align-items-center" 
+                 style="background-color: white; border: 1px solid #8CA653; border-radius: 8px; margin-bottom: 10px;">
+                <div>
+                    <strong>${doc.Nombre}</strong><br />
+                    <small>Cargado: ${doc.FechaSubida}</small>
+                </div>
+                <div class="d-flex gap-3">
+                    
+                    <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}&download=true" 
+                       title="Descargar" class="btn btn-link p-0 text-secondary">
+                       <i class="fas fa-download"></i>
+                    </a>
+                    <button class="btn btn-link p-0 text-secondary btnEliminarDoc" data-id="${doc.IdDocumento}" title="Eliminar">
+                       <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        `);
                     contenedor.append(item);
                 });
-            },
+            }
+,
             error: function () {
                 Swal.fire('Error', 'No se pudieron cargar los documentos.', 'error');
             }
