@@ -70,7 +70,8 @@ namespace SIGEP.Web.Controllers
                     else return Json(new { ok = false, msg = "Estado no válido." });
 
                     var u = db.UsuariosTB.FirstOrDefault(x => x.IdUsuario == idUsuario);
-                    if (u == null) return Json(new { ok = false, msg = "El usuario no existe." });
+                    if (u == null) 
+                        return Json(new { ok = false, msg = "El usuario no existe." });
 
                     u.IdEstado = idEstado;
                     db.SaveChanges();
