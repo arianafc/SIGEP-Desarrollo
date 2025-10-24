@@ -11,27 +11,27 @@
 
 
 <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
-
     <div class="dropdown">
         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="fas fa-filter"></i> Filtros
         </button>
         <div class="dropdown-menu p-3" style="min-width: 300px;">
-            <div class="mb-2">
-                <label>Estado académfico</label>
+            <!-- Filtro de estado académico -->
+            <div class="mb-3">
+                <label>Estado académico</label>
                 <select id="filtroEstado" class="form-control">
                     <option value="">Todos</option>
                     @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
                     {
                         <option value="@estado.Text">@estado.Text</option>
-                        @* Si filtras por Id, usa Value; si por texto (como tu controller), usa Text *@
                     }
                 </select>
-
             </div>
-            @if (idRol != 3)
+
+            <!-- Filtro de especialidad -->
+            @if (ViewBag.Especialidades != null && (ViewBag.Especialidades as List<SelectListItem>).Count > 0)
             {
-                <div>
+                <div class="mb-2">
                     <label>Especialidad</label>
                     <select id="filtroEspecialidad" class="form-control">
                         <option value="">Todas</option>
@@ -44,6 +44,8 @@
             }
         </div>
     </div>
+
+
 </div>
 
 <div class="card rounded-5 p-3 table-responsive">

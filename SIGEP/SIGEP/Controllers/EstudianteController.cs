@@ -26,8 +26,36 @@ namespace SIGEP.Controllers
         [HttpGet]
         public ActionResult Estudiantes()
         {
-            ViewBag.Especialidades = ObtenerEspecialidades();
             ViewBag.Estados = ObtenerEstados();
+
+            int idRol = 0;
+            if (Session["IdRol"] != null)
+                int.TryParse(Session["IdRol"].ToString(), out idRol);
+
+            if (idRol == 3) // Profesor
+            {
+                int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+
+                // ✅ Cargar solo las especialidades del profesor
+                var especialidadesProfesor = (from ue in db.UsuarioEspecialidadTB
+                                              join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
+                                              where ue.IdUsuario == idUsuario
+                                              select new SelectListItem
+                                              {
+                                                  Value = ue.IdEspecialidad.ToString(),
+                                                  Text = esp.Nombre
+                                              })
+                                              .Distinct()
+                                              .OrderBy(x => x.Text)
+                                              .ToList();
+
+                ViewBag.Especialidades = especialidadesProfesor;
+            }
+            else
+            {
+                ViewBag.Especialidades = ObtenerEspecialidades();
+            }
+
             return View();
         }
         // ==============================
@@ -96,25 +124,40 @@ namespace SIGEP.Controllers
             int idRol = 0;
             if (Session["IdRol"] != null) int.TryParse(Session["IdRol"].ToString(), out idRol);
 
-            if (idRol == 3) // Profesor: SIEMPRE filtra por SU especialidad. Ignora idEspecialidad del cliente.
+            if (idRol == 3) // Profesor
             {
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
-                int? idEspecialidadProfesor = db.UsuarioEspecialidadTB
-                    .Where(ue => ue.IdUsuario == idUsuario)
-                    .OrderByDescending(ue => ue.IdUsuarioEspecialidad)
-                    .Select(ue => ue.IdEspecialidad)
-                    .FirstOrDefault();
 
-                if (idEspecialidadProfesor.HasValue)
-                    query = query.Where(x => x.IdEspecialidad == idEspecialidadProfesor.Value);
+                // ✅ Obtener todas las especialidades del profesor
+                var especialidadesProfesor = db.UsuarioEspecialidadTB
+                    .Where(ue => ue.IdUsuario == idUsuario)
+                    .Select(ue => ue.IdEspecialidad)
+                    .Distinct()
+                    .ToList();
+
+                // ✅ Si el profesor tiene varias, usar filtro del UI (si lo envía)
+                if (especialidadesProfesor.Count > 1)
+                {
+                    if (idEspecialidad > 0)
+                    {
+                        query = query.Where(x => x.IdEspecialidad == idEspecialidad);
+                    }
+                    else
+                    {
+                        query = query.Where(x => especialidadesProfesor.Contains(x.IdEspecialidad));
+                    }
+                }
+                else if (especialidadesProfesor.Count == 1)
+                {
+                    int idEsp = especialidadesProfesor.First();
+                    query = query.Where(x => x.IdEspecialidad == idEsp);
+                }
             }
             else
             {
-                // Coordinador (2) u otros: aplicar el filtro de UI si viene
+                // Coordinador u otros roles
                 if (idEspecialidad > 0)
-                {
                     query = query.Where(x => x.IdEspecialidad == idEspecialidad);
-                }
             }
 
             var list = query.OrderByDescending(x => x.IdUsuario).ToList();
