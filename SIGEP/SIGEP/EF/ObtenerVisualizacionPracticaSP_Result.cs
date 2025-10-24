@@ -28,6 +28,7 @@ namespace SIGEP.EF
         public string ContactoEmpresaNombre { get; set; }
         public string ContactoEmpresaEmail { get; set; }
         public string ContactoEmpresaTelefono { get; set; }
+        public int IdPractica { get; set; }
         public System.DateTime FechaAplicacion { get; set; }
         public string EstadoPractica { get; set; }
     }

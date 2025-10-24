@@ -1,4 +1,4 @@
-USE SIGEP;
+﻿USE SIGEP;
 
 Go
 
@@ -21,7 +21,7 @@ BEGIN
     -- Validaciones
     IF @IdSeccion IS NULL
     BEGIN
-        RAISERROR('La secci�n especificada no existe.', 16, 1);
+        RAISERROR('La sección especificada no existe.', 16, 1);
         RETURN;
     END
 
@@ -33,7 +33,7 @@ BEGIN
 
     IF EXISTS (SELECT 1 FROM UsuariosTB WHERE Cedula = @Cedula)
     BEGIN
-        RAISERROR('Imposible completar el registro. Ya existe una cuenta asociada a esa c�dula.', 16, 1);
+        RAISERROR('Imposible completar el registro. Ya existe una cuenta asociada a esa cédula.', 16, 1);
         RETURN;
     END
 
@@ -61,7 +61,7 @@ BEGIN
         INSERT INTO dbo.EmailsTB (IdUsuario, Email) 
         VALUES (@IdUsuario, @Correo);
 
-        -- Relaci�n usuario-especialidad
+        -- Relación usuario-especialidad
         INSERT INTO dbo.UsuarioEspecialidadTB (IdEspecialidad, IdUsuario, IdEstado) 
         VALUES (@IdEspecialidad, @IdUsuario, 1);
 
@@ -118,7 +118,7 @@ END;
 GO
 
 -----------------------------------------------------------
---23 DE SEPTIEMBRE -- SP PARA RECUPERAR CONTRASE�A
+--23 DE SEPTIEMBRE -- SP PARA RECUPERAR CONTRASEÑA
 USE [SIGEP]
 GO
 
@@ -141,10 +141,191 @@ BEGIN
         RETURN;
     END
 
-    -- Actualiza la contrase�a encriptada
+    -- Actualiza la contraseña encriptada
     UPDATE UsuariosTB
     SET Contrasenna = CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', @NUEVA_CONTRASENNA), 2)
     WHERE Cedula = @CEDULA;
 END;
 GO
+
+CREATE OR ALTER PROCEDURE ObtenerEncargadosUsuarioSP
+@IdUsuario int
+AS
+BEGIN
+SELECT 
+    E.IdEncargado, E.Cedula, E.Nombre, E.Apellido1, E.Apellido2, 
+    E.FechaRegistro, E.Ocupacion, E.LugarTrabajo, EE.IdEstado,
+    EE.Parentesco,
+    (SELECT TOP 1 T.Telefono 
+     FROM TelefonosTB T 
+     WHERE T.IdEncargado = E.IdEncargado) AS Telefono, (SELECT TOP 1 C.Email 
+     FROM EmailsTB C
+     WHERE C.IdEncargado = E.IdEncargado) AS Correo
+FROM EncargadosTB E
+INNER JOIN EstudianteEncargadoTB EE 
+    ON E.IdEncargado = EE.IdEncargado
+WHERE EE.IdUsuario = @IdUsuario AND E.IdEstado = 1;
+
+END;
+
+--SP PARA ACCIONES DE ENCARGADO EN MI PERFIL
+
+USE [SIGEP]
+GO
+
+/****** Object:  StoredProcedure [dbo].[AccionesEncargadoSP]    Script Date: 10/19/2025 11:56:35 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[AccionesEncargadoSP]
+    @Accion INT,
+    @IdEncargado INT = NULL,
+    @Nombre VARCHAR(255) = NULL,
+    @Telefono VARCHAR(255) = NULL,
+    @Parentesco VARCHAR(255) = NULL,
+    @LugarTrabajo VARCHAR(255) = NULL,
+    @Ocupacion VARCHAR(255) = NULL,
+    @Correo VARCHAR(255) = NULL,
+    @Cedula VARCHAR(255) = NULL,
+    @Apellido1 VARCHAR(255) = NULL,
+    @Apellido2 VARCHAR(255) = NULL,
+    @IdUsuario INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @EsEstudiante INT;
+    DECLARE @IdDuplicado INT;
+    DECLARE @IdEncargadoExistente INT;
+
+
+    -- ========================================
+    -- 1️ ACTUALIZAR ENCARGADO
+    -- ========================================
+    IF (@Accion = 1)
+    BEGIN
+      
+
+        -- Actualizar datos del encargado
+        UPDATE EncargadosTB
+        SET Cedula = @Cedula,
+            Nombre = @Nombre,
+            Apellido1 = @Apellido1,
+            Apellido2 = @Apellido2,
+            Ocupacion = @Ocupacion,
+            LugarTrabajo = @LugarTrabajo
+        WHERE IdEncargado = @IdEncargado;
+
+        -- Actualizar o insertar teléfono
+        IF EXISTS (SELECT 1 FROM TelefonosTB WHERE IdEncargado = @IdEncargado)
+            UPDATE TelefonosTB
+            SET Telefono = @Telefono
+            WHERE IdEncargado = @IdEncargado;
+        ELSE
+            INSERT INTO TelefonosTB (Telefono, IdEncargado)
+            VALUES (@Telefono, @IdEncargado);
+
+        -- Actualizar o insertar correo
+        IF EXISTS (SELECT 1 FROM EmailsTB WHERE IdEncargado = @IdEncargado)
+            UPDATE EmailsTB
+            SET Email = @Correo
+            WHERE IdEncargado = @IdEncargado;
+        ELSE
+            INSERT INTO EmailsTB (Email, IdEncargado)
+            VALUES (@Correo, @IdEncargado);
+
+        SELECT 1 AS Result;
+    END
+
+    -- ========================================
+    -- 2️ DESACTIVAR RELACIÓN
+    -- ========================================
+    ELSE IF (@Accion = 2)
+    BEGIN
+        UPDATE EstudianteEncargadoTB
+        SET IdEstado = 2
+        WHERE IdUsuario = @IdUsuario AND IdEncargado = @IdEncargado;
+
+        SELECT 1 AS Result;
+    END
+
+    -- ========================================
+    -- 3️ AGREGAR NUEVO ENCARGADO / ACTUALIZAR SI EXISTE
+    -- ========================================
+    ELSE IF (@Accion = 3)
+    BEGIN
+        -- Verificar si ya existe la cédula en EncargadosTB
+        SELECT @IdEncargadoExistente = IdEncargado
+        FROM EncargadosTB
+        WHERE Cedula = @Cedula;
+
+        IF @IdEncargadoExistente IS NULL
+        BEGIN
+            -- Insertar nuevo encargado
+            INSERT INTO EncargadosTB (Cedula, Nombre, Apellido1, Apellido2, FechaRegistro, Ocupacion, LugarTrabajo, IdEstado)
+            VALUES (@Cedula, @Nombre, @Apellido1, @Apellido2, GETDATE(), @Ocupacion, @LugarTrabajo, 1);
+
+            SET @IdEncargadoExistente = SCOPE_IDENTITY();
+        END
+        ELSE
+        BEGIN
+            -- Si ya existe, actualizar sus datos
+            UPDATE EncargadosTB
+            SET Nombre = @Nombre,
+                Apellido1 = @Apellido1,
+                Apellido2 = @Apellido2,
+                Ocupacion = @Ocupacion,
+                LugarTrabajo = @LugarTrabajo
+            WHERE IdEncargado = @IdEncargadoExistente;
+        END
+
+        -- Actualizar o insertar correo
+        IF EXISTS (SELECT 1 FROM EmailsTB WHERE IdEncargado = @IdEncargadoExistente)
+            UPDATE EmailsTB
+            SET Email = @Correo
+            WHERE IdEncargado = @IdEncargadoExistente;
+        ELSE
+            INSERT INTO EmailsTB (Email, IdEncargado)
+            VALUES (@Correo, @IdEncargadoExistente);
+
+        -- Actualizar o insertar teléfono
+        IF EXISTS (SELECT 1 FROM TelefonosTB WHERE IdEncargado = @IdEncargadoExistente)
+            UPDATE TelefonosTB
+            SET Telefono = @Telefono
+            WHERE IdEncargado = @IdEncargadoExistente;
+        ELSE
+            INSERT INTO TelefonosTB (Telefono, IdEncargado)
+            VALUES (@Telefono, @IdEncargadoExistente);
+
+        -- Relacionar encargado con el estudiante (si no existe)
+        IF NOT EXISTS (
+            SELECT 1 FROM EstudianteEncargadoTB
+            WHERE IdEncargado = @IdEncargadoExistente AND IdUsuario = @IdUsuario
+        )
+        BEGIN
+            INSERT INTO EstudianteEncargadoTB (IdEncargado, IdUsuario, Parentesco, IdEstado)
+            VALUES (@IdEncargadoExistente, @IdUsuario, @Parentesco, 1);
+        END
+
+        SELECT @IdEncargadoExistente AS Result;
+    END
+
+    -- ========================================
+    -- 4️ ACTIVAR ENCARGADO
+    -- ========================================
+    ELSE IF (@Accion = 4)
+    BEGIN
+        UPDATE EstudianteEncargadoTB
+        SET IdEstado = 1
+        WHERE IdUsuario = @IdUsuario AND IdEncargado = @IdEncargado;
+
+        SELECT 1 AS Result;
+    END
+END
+GO
+
 

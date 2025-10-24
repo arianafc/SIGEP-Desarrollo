@@ -3,7 +3,7 @@
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
 }
 
-<section class="vacantes-wrapper">
+<section class="vacantes-wrapper vacantes-profesor">
     <h2 class="vacantes-titulo titulo-principal">Vacantes Disponibles</h2>
 
     <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-3 align-items-center">
@@ -39,19 +39,21 @@
                         }
                     </select>
                 </div>
-                <div>
-                    <label>Especialidad</label>
-                    <select id="filtroEspecialidad" class="form-control">
-                        <option value="">Todas</option>
-                        @if (ViewBag.Especialidades != null)
-                        {
-                            foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                @* Si necesitas volver a activar el filtro de especialidad, descomenta y cierra bien el bloque:
+                    <div>
+                        <label>Especialidad</label>
+                        <select id="filtroEspecialidad" class="form-control">
+                            <option value="">Todas</option>
+                            @if (ViewBag.Especialidades != null)
                             {
-                                <option value="@e.Value">@e.Text</option>
+                                foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
+                                {
+                                    <option value="@e.Value">@e.Text</option>
+                                }
                             }
-                        }
-                    </select>
-                </div>
+                        </select>
+                    </div>
+                *@
             </div>
         </div>
     </div>
@@ -135,302 +137,21 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     <script>
-$(function () {
-
-    // -------------------------
-    // Carga inicial y filtros
-    // -------------------------
-    filtrarVacantes();
-    $("#filtroPractica, #filtroModalidad, #filtroEspecialidad").change(filtrarVacantes);
-
-    function filtrarVacantes() {
-        var estado = $("#filtroPractica").val();
-        var modalidad = $("#filtroModalidad").val();
-        var especialidad = $("#filtroEspecialidad").val();
-
-        $.getJSON('@Url.Action("GetVacantesProfesor", "Practicas")',
-            { estado: estado, idModalidad: modalidad, idEspecialidad: especialidad },
-            function (resp) {
-                if (resp && resp.data) renderVacantes(resp.data);
-            });
-    }
-
-    // -------------------------
-    // Render tarjetas
-    // -------------------------
-    function renderVacantes(vacantes) {
-        var contenedor = $(".vacantes-lista");
-        contenedor.empty();
-
-        if (!vacantes || vacantes.length === 0) {
-            contenedor.append('<div class="vacante-alerta"><strong>Información:</strong> No se encontraron vacantes.</div>');
-            return;
-        }
-
-        vacantes.forEach(function (v) {
-            var badge = v.NumCupos <= 0
-                ? '<span class="badge text-white fw-bold" style="background-color: darkgoldenrod; font-size: 14px">Vacante llena</span>'
-                : '';
-
-            var aplicacionesCount = v.EstudiantesPostulados || 0;
-
-            var card = `
-                <article class="vacante-card" data-area="${escapeHtml(v.EspecialidadNombre || '')}">
-                    <header class="vacante-header">
-                        <h3 class="vacante-titulo">${escapeHtml(v.Nombre)}</h3>
-                        <span class="vacante-empresa">${escapeHtml(v.EmpresaNombre)}</span>
-                    </header>
-                    <ul class="vacante-detalles">
-                        <li><strong>Requisitos:</strong> ${escapeHtml(v.Requerimientos || '')}</li>
-                        <li><strong>Modalidad:</strong> ${escapeHtml(v.ModalidadNombre || '')}</li>
-                        <li><strong>Fecha límite de aplicación:</strong> ${v.FechaMaxAplicacion ? formatFecha(v.FechaMaxAplicacion) : ''}</li>
-                        <li><strong>Número de cupos:</strong> ${v.NumCupos}</li>
-                        <li><strong>Número de aplicaciones:</strong> ${aplicacionesCount}</li>
-                    </ul>
-                    <div class="row justify-content-between">
-                        <button class="col-md-6 btn btn-cta btn-detalle" data-id="${v.IdVacante}">Ver más</button>
-                        <button class="col-md-5 btn btn-cta btn-asignar" data-id="${v.IdVacante}" ${v.NumCupos <= 0 ? "disabled" : ""}>Asignar</button>
-                    </div>
-                </article>`;
-            contenedor.append(card);
-        });
-    }
-
-    // -------------------------
-    // Helpers
-    // -------------------------
-    function formatFecha(isoOrDateString) {
-        if (!isoOrDateString) return "";
-        var d = new Date(isoOrDateString);
-        if (isNaN(d.getTime())) {
-            var parts = (isoOrDateString + '').split('T')[0].split('-');
-            if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
-            return isoOrDateString;
-        }
-        return d.toLocaleDateString('es-CR');
-    }
-    function escapeHtml(text) { if (!text && text !== 0) return ''; return $('<div>').text(text).html(); }
-
-    // -------------------------
-    // Ver más -> detalle vacante
-    // -------------------------
-    $(document).on('click', '.btn-detalle', function () {
-        var idVacante = $(this).data('id');
-        if (!idVacante) return;
-
-        $.getJSON('@Url.Action("Detalle", "Practicas")', { id: idVacante }, function (res) {
-            if (!res || !res.ok) { Swal.fire('Error', 'No se pudo cargar la vacante', 'error'); return; }
-
-            var d = res.data;
-            $('#vis-Nombre').text(d.Nombre || '');
-            $('#vis-Empresa').text(d.EmpresaNombre || '');
-            $('#vis-Descripcion').text(d.Descripcion || '');
-            $('#vis-Requisitos').text(d.Requerimientos || '');
-            $('#vis-Modalidad').text(d.ModalidadNombre || '');
-            $('#vis-Ubicacion').text(d.Ubicacion || '');
-            $('#vis-FechaAplicacion').text(d.FechaMaxAplicacion ? formatFecha(d.FechaMaxAplicacion) : '');
-            $('#vis-NombreContacto').text(d.NombreContacto || '-');
-            $('#vis-Telefonos').text((d.Telefonos && d.Telefonos.length) ? d.Telefonos.join(', ') : 'No disponible');
-            $('#vis-Emails').text((d.Emails && d.Emails.length) ? d.Emails.join(', ') : 'No disponible');
-
-            $('#modalVisualizar').modal('show');
-            cargarPostulaciones(idVacante);
-        });
-    });
-
-    // -------------------------
-    // Postulaciones dentro del modal Visualizar
-    // -------------------------
-    function cargarPostulaciones(idVacante) {
-        $.getJSON('@Url.Action("ObtenerPostulaciones", "Practicas")', { idVacante: idVacante }, function (res) {
-            var $lista = $('#listaPostulaciones');
-            $lista.empty();
-
-            if (!res || !res.ok || !res.data || res.data.length === 0) {
-                $('#mensajeSinAsignados').show();
-                return;
-            }
-            $('#mensajeSinAsignados').hide();
-
-            var perfilUrl = '@Url.Action("VisualizacionPostulacion", "Practicas")';
-
-            res.data.forEach(function (p) {
-                var estado = (p.EstadoDescripcion || p.EstadoVacante || '').trim();
-                var est = estado.toLowerCase();
-
-                var badgeClass = 'bg-secondary';
-                if (['asignada','asignado'].includes(est)) badgeClass = 'bg-success';
-                else if (['en progreso','en proceso','pendiente de aprobación'].includes(est)) badgeClass = 'bg-warning';
-                else if (['rechazada','retirada','rezagado'].includes(est)) badgeClass = 'bg-danger';
-                else if (['aprobada','finalizada'].includes(est)) badgeClass = 'bg-primary';
-
-                var badgeHtml = `<span class="badge ${badgeClass}">${escapeHtml(estado || '—')}</span>`;
-
-                // botón: retirada -> Reactivar; estados cerrados (rechazada/aprobada/finalizada) -> sin botón; otros -> Retirar
-                var btnHtml = '';
-                if (est === 'retirada') {
-                    btnHtml = `<button class="btn btn-sm btn-outline-success btn-reactivar"
-                                      data-idusuario="${p.IdUsuario}" data-idvacante="${idVacante}">
-                                  Reactivar
-                               </button>`;
-                } else if (!['rechazada','aprobada','finalizada'].includes(est)) {
-                    btnHtml = `<button class="btn btn-sm btn-outline-danger btn-retirar"
-                                      data-idusuario="${p.IdUsuario}" data-idvacante="${idVacante}">
-                                  Retirar
-                               </button>`;
-                }
-
-                var href = perfilUrl + '?idUsuario=' + encodeURIComponent(p.IdUsuario) + '&idVacante=' + encodeURIComponent(idVacante);
-
-                var item = $(`
-                    <a href="${href}" class="d-flex justify-content-between PostulacionesPerfil align-items-center p-2 border rounded mb-2" style="color:#2D594D;">
-                        <span>${escapeHtml(p.NombreCompleto)} | ${escapeHtml(p.Cedula || '')}</span>
-                        <div class="row gx-2 align-items-center">
-                            <div class="col-auto">${badgeHtml}</div>
-                            <div class="col-auto">${btnHtml}</div>
-                        </div>
-                    </a>
-                `);
-                $lista.append(item);
-            });
-        });
-    }
-
-    // Retirar / Reactivar (lista Visualizar)
-    $(document).on('click', '#listaPostulaciones .btn-retirar', function (ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        var idUsuario = $(this).data('idusuario');
-        var idVacante = $(this).data('idvacante');
-        $.post('@Url.Action("RetirarEstudiante", "Practicas")', { idUsuario, idVacante }, function (resp) {
-            if (resp && resp.ok) {
-                Swal.fire('Retirada', resp.message || 'Marcado como Retirada.', 'success');
-                cargarPostulaciones(idVacante); filtrarVacantes();
-            } else { Swal.fire('Error', resp && resp.message || 'No se pudo retirar.', 'error'); }
-        });
-    });
-    $(document).on('click', '#listaPostulaciones .btn-reactivar', function (ev) {
-        ev.preventDefault(); ev.stopPropagation();
-        var idUsuario = $(this).data('idusuario');
-        var idVacante = $(this).data('idvacante');
-        $.post('@Url.Action("AsignarEstudiante", "Practicas")', { idUsuario, idVacante }, function (resp) {
-            if (resp && resp.ok) {
-                Swal.fire('Listo', resp.message || 'Reactivado a "En proceso".', 'success');
-                cargarPostulaciones(idVacante); filtrarVacantes();
-            } else { Swal.fire('Error', resp && resp.message || 'No se pudo reactivar.', 'error'); }
-        });
-    });
-
-    // -------------------------
-    // DataTable en modal ASIGNAR
-    // -------------------------
-    var tablaAsignar = $('#tablaAsignar').DataTable({
-        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-        responsive: true, pageLength: 5, autoWidth: false, scrollX: false, destroy: true
-    });
-
-    $(document).on('click', '.btn-asignar', function () {
-        var idVacante = $(this).data('id');
-        $('#modalAsignarVacante').data('idvacante', idVacante);
-
-        $.getJSON('@Url.Action("ObtenerEstudiantesAsignar", "Practicas")', { idVacante: idVacante }, function (res) {
-            tablaAsignar.clear();
-
-            if (!res.ok || !res.data || res.data.length === 0) {
-                tablaAsignar.row.add(['—','—','—','—','<span class="text-danger">No hay estudiantes disponibles</span>']);
-                tablaAsignar.draw();
-                return;
-            }
-
-            res.data.forEach(function (e) {
-                var estado = (e.EstadoVacante || e.EstadoMostrar || '').trim();
-                var est = (estado || '').toLowerCase();
-
-                var badge = `<span class="badge ${
-                    e.TieneRelacionEnVacante ? 'bg-info'
-                    : (estado === 'Con Procesos Activos' ? 'bg-warning' : 'bg-secondary')
-                }">${escapeHtml(estado || '—')}</span>`;
-
-                var btn = '';
-                if (!e.TieneRelacionEnVacante) {
-                    // sin relación → Asignar
-                    btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante"
-                                   data-idusuario="${e.IdUsuario}">
-                              Asignar
-                           </button>`;
-                } else if (est === 'retirada') {
-                    // relación retirada → Reactivar
-                    btn = `<button class="btn btn-sm btn-outline-success btn-reactivar-estudiante"
-                                   data-idusuario="${e.IdUsuario}">
-                              Reactivar
-                           </button>`;
-                } else if (!['rechazada','aprobada','finalizada'].includes(est)) {
-                    // relación activa → Retirar
-                    btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante"
-                                   data-idusuario="${e.IdUsuario}">
-                              Retirar
-                           </button>`;
-                } // (rechazada/aprobada/finalizada) → sin botón
-
-                tablaAsignar.row.add([
-                    escapeHtml(e.NombreCompleto),
-                    escapeHtml(e.Cedula),
-                    escapeHtml(e.Especialidad),
-                    badge,
-                    btn
-                ]);
-            });
-
-            tablaAsignar.draw();
-        });
-
-        $('#modalAsignarVacante').modal('show');
-    });
-
-    // -------------------------
-    // Acciones del modal ASIGNAR
-    // -------------------------
-    $(document).on('click', '.btn-asignar-estudiante', function () {
-        var idUsuario = $(this).data('idusuario');
-        var idVacante = $('#modalAsignarVacante').data('idvacante');
-
-        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
-            if (resp.ok) {
-                Swal.fire('Éxito', resp.message, 'success');
-                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
-                filtrarVacantes();
-            } else { Swal.fire('Error', resp.message, 'error'); }
-        });
-    });
-
-    $(document).on('click', '.btn-retirar-estudiante', function () {
-        var idUsuario = $(this).data('idusuario');
-        var idVacante = $('#modalAsignarVacante').data('idvacante');
-
-        $.post('@Url.Action("RetirarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
-            if (resp.ok) {
-                Swal.fire('Listo', resp.message || 'Marcado como Retirada.', 'success');
-                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
-                filtrarVacantes();
-            } else { Swal.fire('Error', resp.message || 'No se pudo retirar.', 'error'); }
-        });
-    });
-
-    $(document).on('click', '.btn-reactivar-estudiante', function () {
-        var idUsuario = $(this).data('idusuario');
-        var idVacante = $('#modalAsignarVacante').data('idvacante');
-
-        $.post('@Url.Action("AsignarEstudiante","Practicas")', { idUsuario, idVacante }, function (resp) {
-            if (resp.ok) {
-                Swal.fire('Listo', resp.message || 'Reactivado a "En proceso".', 'success');
-                $('.btn-asignar[data-id="'+idVacante+'"]').trigger('click');
-                filtrarVacantes();
-            } else { Swal.fire('Error', resp.message || 'No se pudo reactivar.', 'error'); }
-        });
-    });
-
-}); // fin $(function)
+    window.VacantesProfesorCfg = {
+      urls: {
+        getVacantesProfesor: '@Url.Action("GetVacantesProfesor","Practicas")',
+        login: '@Url.Action("Login","Home")',
+        detalle: '@Url.Action("Detalle","Practicas")',
+        obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones","Practicas")',
+        obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar","Practicas")',
+        asignarEstudiante: '@Url.Action("AsignarEstudiante","Practicas")',
+        retirarEstudiante: '@Url.Action("RetirarEstudiante","Practicas")',
+            visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion","Practicas")',
+         agregarComentario: '/Practicas/AgregarComentario',
+      }
+    };
     </script>
+    <script src="~/Scripts/Practicas/VistaVacantesProfesor.js?v=@DateTime.Now.Ticks"></script>
 }

@@ -1,6 +1,5 @@
 --INSERTS TABLA ESTADOS
-INSERT INTO EstadosTB (Descripcion) VALUES ('Activo'), ('Inactivo')
-
+INSERT INTO EstadosTB (Descripcion) VALUES ('Activo'), ('Inactivo'), ('En proceso de Aplicacion'), ('Rechazada'), ('Asignada'), ('Aprobada'), ('Retirada'), ('Finalizada'), ('Rezagado'), ('Archivado'), ('En Curso')
 
 --INSERTS TEMPORALES PARA ESPECIALIDADES
 INSERT INTO EspecialidadesTB (Nombre, IdEstado) VALUES 

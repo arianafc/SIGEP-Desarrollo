@@ -276,3 +276,132 @@
 .password-input::-webkit-password-toggle-button {
     display: none !important;
 }
+
+/* Aprobado → igual que Asignada (verde oliva) */
+.badge-aprobado {
+    background-color: #768C46;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Activo → igual que Desasignada (verde claro) */
+.badge-activo {
+    background-color: #EAF2D8;
+    color: #2d594d;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Inactivo → igual que No asignada (gris suave) */
+.badge-inactivo {
+    background-color: #f2f2f2;
+    color: #2d594d;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #ccc; /* opcional para diferenciarlo */
+}
+
+/* Rezagado → único diferente (rojo fuerte) */
+.badge-rezagado {
+    background-color: #E57373;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.badge-en-progreso {
+    background-color: #F5B97A; /* naranja claro */
+    color: #2D594D; /* verde oscuro para contraste */
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Archivado (10) */
+.badge-archivado {
+    background-color: #e2e3e5; /* gris medio */
+    color: #383d41;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    min-width: 90px;
+}
+
+
+/* En curso */
+.badge-en-curso {
+    background-color: #d1ecf1; /* celeste suave */
+    color: #0c5460;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Rechazada */
+.badge-rechazada {
+    background-color: #f8d7da; /* rojo claro */
+    color: #721c24;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Finalizada */
+.badge-finalizada {
+    background-color: #e2e3e5; /* gris medio */
+    color: #383d41;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Retirada */
+.badge-retirada {
+    background-color: #f5c6cb; /* rosado más fuerte */
+    color: #721c24;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Aprobada (masculino/femenino) */
+.badge-aprobada,
+.badge-aprobado {
+    background-color: #d4edda; /* verde éxito */
+    color: #155724;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+.badge-aprobado,
+.badge-activo,
+.badge-inactivo,
+.badge-rezagado,
+.badge-en-progreso,
+.badge-en-curso,
+.badge-finalizada,
+.badge-retirada,
+.badge-rechazada,
+.badge-aprobada,
+.badge-asignada,
+.badge-no-asignada,
+.badge-archivado {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 90px; /* Opcional: mantiene ancho uniforme */
+}
+
+.vacantes-egresado,
+.vacantes-egresado .vacante-card,
+.vacantes-egresado .vacante-card * {
+    color: #000 !important;
+}
+
+    .vacantes-egresado .modal-content,
+    .vacantes-egresado .modal-body,
+    .vacantes-egresado .modal-body * {
+        color: #000 !important;
+    }

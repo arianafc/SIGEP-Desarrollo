@@ -1,0 +1,152 @@
+﻿@model SIGEP.Models.EstudianteDetalleDTO
+@using System.Text
+@using System.Text.RegularExpressions
+
+@{
+    // Roles: 1=Estudiante, 2=Coordinador, 3=Profesor, 4=Egresado
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+}
+
+<div class="container-fluid">
+
+    <!-- Información Personal -->
+    <h5 class="section-title mb-3">Información Personal</h5>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @((Model.Nombre ?? "") + " " + (Model.Apellido1 ?? "") + " " + (Model.Apellido2 ?? ""))</div>
+        <div class="col-md-6"><strong>Correo Electrónico:</strong> @(Model.Correo ?? "—")</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Teléfono:</strong> @(Model.Telefono ?? "—")</div>
+        <div class="col-md-6"><strong>Dirección:</strong> @(Model.Direccion ?? "—")</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Especialidad:</strong> @(Model.Especialidad ?? "Sin especialidad")</div>
+        <div class="col-md-6"><strong>Sección:</strong> @(Model.Seccion ?? "—")</div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-6"><strong>Edad:</strong> @Model.Edad</div>
+    </div>
+
+    <hr />
+
+    <!-- Encargado -->
+    <h5 class="section-title mb-3">Información del Encargado</h5>
+    @if (Model.Encargados != null && Model.Encargados.Any())
+    {
+        foreach (var enc in Model.Encargados)
+        {
+            <div class="row mb-2">
+                <div class="col-md-6"><strong>Nombre y Apellidos:</strong> @(enc.Nombre ?? "—")</div>
+                <div class="col-md-6"><strong>Teléfono:</strong> @(enc.Telefono ?? "—")</div>
+                <div class="col-md-6"><strong>Ocupación:</strong> @(enc.Ocupacion ?? "—")</div>
+            </div>
+            <hr />
+        }
+    }
+    else
+    {
+        <p class="text-muted">No hay encargado registrado.</p>
+    }
+
+    <!-- Prácticas -->
+    <h5 class="section-title mb-3">Prácticas / Postulaciones</h5>
+    @if (Model.Practicas != null && Model.Practicas.Any())
+    {
+        <ul class="list-group mb-3">
+            @foreach (var post in Model.Practicas)
+            {
+                // C# PLANO (sin "@{}") porque ya estamos dentro del bloque del foreach
+                var estadoRaw = (post.Estado ?? "").Trim();
+                var estadoNorm = Regex
+                    .Replace(
+                        (estadoRaw.ToLowerInvariant()).Normalize(NormalizationForm.FormD),
+                        "\\p{IsCombiningDiacriticalMarks}+",
+                        string.Empty
+                    )
+                    .Replace("  ", " ")
+                    .Trim();
+
+                var clase = "badge badge-no-asignada";
+
+                if (estadoNorm == "en proceso de aplicacion") { clase = "badge badge-en-progreso"; }
+                else if (estadoNorm == "rechazada") { clase = "badge badge-rechazada"; }
+                else if (estadoNorm == "asignada") { clase = "badge badge-asignada"; }
+                else if (estadoNorm == "aprobada" || estadoNorm == "aprobado") { clase = "badge badge-aprobada"; }
+                else if (estadoNorm == "retirada") { clase = "badge badge-retirada"; }
+                else if (estadoNorm == "finalizada") { clase = "badge badge-finalizada"; }
+                else if (estadoNorm == "rezagado") { clase = "badge badge-rezagado"; }
+                else if (estadoNorm == "archivado") { clase = "badge badge-archivado"; }
+                else if (estadoNorm == "en curso") { clase = "badge badge-en-curso"; }
+                else if (estadoNorm == "en progreso") { clase = "badge badge-en-progreso"; } // compatibilidad
+
+                <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                    <div>
+                        <a href="@Url.Action("VisualizacionPostulacion", "Practicas", new { idVacante = post.IdVacante, idUsuario = post.IdUsuario })"
+                           class="text-decoration-none"
+                           style="color: #2D594D; font-weight:600;">
+                            @(post.Empresa ?? "—")
+                        </a>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="@clase">@((string.IsNullOrWhiteSpace(post.Estado) ? "No Asignada" : post.Estado))</span>
+
+                        @* Botón de desasignar visible para Profesor (rol 3) en estados permitidos *@
+                        @if ((idRol == 2 || idRol == 3)
+                            && !string.IsNullOrEmpty(post.Estado)
+                            && (post.Estado.Equals("Asignada", StringComparison.OrdinalIgnoreCase)
+                                || post.Estado.Equals("En proceso de Aplicacion", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            <button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
+                                    data-idpractica="@post.IdPostulacion"
+                                    data-idvacante="@post.IdVacante"
+                                    data-idusuario="@post.IdUsuario"
+                                    title="Desasignar práctica"
+                                    style="color:#2D594D;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="text-muted">No hay postulaciones registradas.</p>
+    }
+
+    <hr />
+
+    <!-- Documentos -->
+    <h5 class="section-title mb-3">Documentos</h5>
+    @if (Model.Documentos != null && Model.Documentos.Any())
+    {
+        foreach (var doc in Model.Documentos)
+        {
+            <div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                <span style="color: #2D594D;">@(doc.Documento ?? "—")</span>
+                <div>
+                    <a href="@Url.Action("VisualizarDocumento", "Estudiante", new { id = doc.IdDocumento })"
+                       target="_blank" style="color:#2D594D; margin-right:10px;">
+                        <i class="fas fa-eye" title="Visualizar"></i>
+                    </a>
+                    <a href="@Url.Action("DescargarDocumento", "Estudiante", new { id = doc.IdDocumento })"
+                       style="color:#2D594D; margin-right:10px;">
+                        <i class="fas fa-download" title="Descargar"></i>
+                    </a>
+                    <button class="btn bg-transparent btn-eliminar-doc"
+                            data-id="@doc.IdDocumento" title="Eliminar"
+                            style="color:#2D594D;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">No hay documentos cargados.</p>
+    }
+
+</div>

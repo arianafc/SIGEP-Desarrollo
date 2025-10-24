@@ -7,8 +7,7 @@ body {
     font-family: 'Rubik', sans-serif;
 }
 
-/* Títulos primarios */
-.titulo-principal {
+/* Títulos primarios */.titulo-principal {
     font-family: 'Rubik', sans-serif;
     /*font-size: 30px;*/
     /*font-weight: 700;*/
@@ -936,4 +935,94 @@ body {
 .btn:hover,
 .btn:focus {
     opacity: 0.85;
+}
+
+/* ===== Vista Profesor: solo texto en negro/gris, sin tocar botones ni títulos ===== */
+.vacantes-profesor .vacante-card {
+    /* NO cambiamos fondo ni sombras ni botones */
+    color: #1f2937; /* gris muy oscuro por defecto en el card */
+}
+
+/* Título se mantiene como viene (#2D594D), no lo sobrescribimos */
+.vacantes-profesor .vacante-titulo { /* sin cambios intencionalmente */
+}
+
+/* Empresa y detalles: texto oscuro para mejor contraste */
+.vacantes-profesor .vacante-empresa {
+    color: #111827; /* casi negro */
+}
+
+.vacantes-profesor .vacante-detalles {
+    color: #111827; /* casi negro */
+}
+
+    .vacantes-profesor .vacante-detalles li {
+        color: #111827;
+    }
+
+/* IMPORTANT: arregla la regla global a:visited que los dejaba blancos.
+   Solo los enlaces que NO son botones deben verse oscuros en estas tarjetas. */
+.vacantes-profesor .vacante-card a:not(.btn-cta),
+.vacantes-profesor .vacante-card a:not(.btn-cta):visited,
+.vacantes-profesor .vacante-card a:not(.btn-cta):active {
+    color: #111827 !important;
+    text-decoration: none;
+}
+
+    .vacantes-profesor .vacante-card a:not(.btn-cta):hover {
+        text-decoration: underline;
+    }
+
+/* Los ítems clickeables de postulaciones dentro del modal (si los tienes) */
+.vacantes-profesor .PostulacionesPerfil {
+    color: #111827 !important;
+    background: #fff;
+}
+
+    .vacantes-profesor .PostulacionesPerfil:hover {
+        background: #f9fafb;
+    }
+
+/* ===== Modal Visualizar Vacante: texto en negro ===== */
+#modalVisualizar .vacante-detalle,
+#modalVisualizar .vacante-detalle p,
+#modalVisualizar .vacante-detalle span,
+#modalVisualizar .vacante-info p,
+#modalVisualizar .vacante-info span {
+    color: #111827; /* casi negro */
+}
+
+    /* Mantén títulos/headers como están (no se tocan) */
+
+    /* Enlaces dentro del modal (no botones) */
+    #modalVisualizar .vacante-detalle a:not(.btn-cta),
+    #modalVisualizar .vacante-detalle a:not(.btn-cta):visited,
+    #modalVisualizar .vacante-detalle a:not(.btn-cta):active {
+        color: #111827 !important;
+        text-decoration: none;
+    }
+
+        #modalVisualizar .vacante-detalle a:not(.btn-cta):hover {
+            text-decoration: underline;
+        }
+
+/* Lista de “Aplicaciones” con mismo look usado antes */
+#modalVisualizar .PostulacionesPerfil {
+    color: #111827 !important;
+    background: #fff;
+    border: 1px solid #e5e7eb; /* gris claro */
+}
+
+    #modalVisualizar .PostulacionesPerfil:hover {
+        background: #f9fafb;
+    }
+
+/* El badge usa tus clases existentes (.badge-asignada, .badge-en-curso, etc.) */
+#modalVisualizar .badge {
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-radius: 0.5rem;
+    padding: 0.35em 0.6em;
+    min-width: 90px; /* consistente con tus badges */
+    text-align: center;
 }

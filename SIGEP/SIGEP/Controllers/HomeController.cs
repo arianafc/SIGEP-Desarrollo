@@ -25,7 +25,7 @@ namespace SIGEP.Controllers
         #region Login
 
         [HttpPost]
-        public ActionResult Login(Autenticacion Usuario)
+        public ActionResult Login(UsuarioModel Usuario)
 
         {
             try
@@ -35,6 +35,12 @@ namespace SIGEP.Controllers
                     var resultado = dbContext.LoginSP(Usuario.Cedula, Usuario.Contrasenna).FirstOrDefault();
                     if (resultado != null)
                     {
+                       
+                        if(resultado.IdEstado != 1)
+                        {
+                            return Json(new { success = false, message = "Su cuenta está inactiva. Por favor, contacte al administrador." });
+                        } 
+                            // Establecer variables de sesión
                         Session["IdRol"] = resultado.IdRol;
                         Session["Nombre"] = resultado.Nombre;
                         Session["Apellido1"] = resultado.Apellido1;
@@ -77,7 +83,7 @@ namespace SIGEP.Controllers
             {
                 using (var dbContext = new SIGEPEntities())
                 {
-                    var Datos = new Autenticacion();
+                    var Datos = new UsuarioModel();
 
                     Datos.ListaEspecialidades = dbContext.EspecialidadesTB
                     .Where(e => e.IdEstado == 1)
@@ -100,7 +106,7 @@ namespace SIGEP.Controllers
 
 
         [HttpPost]
-        public ActionResult Registro(Autenticacion Usuario)
+        public ActionResult Registro(UsuarioModel Usuario)
         {
             try
             {
@@ -110,10 +116,10 @@ namespace SIGEP.Controllers
                         Usuario.Nombre,
                         Usuario.Apellido1,
                         Usuario.Apellido2,
-                        Usuario.Correo,
-                        Usuario.Especialidad,
+                        Usuario.CorreoPersonal,
+                        Usuario.IdEspecialidad,
                         Usuario.FechaNacimiento,
-                        Usuario.Seccion,
+                        Usuario.IdSeccion,
                         Usuario.Contrasenna,
                         Usuario.Cedula
                     ).FirstOrDefault();
@@ -163,7 +169,7 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-        public ActionResult RecuperarAcceso(Autenticacion usuario)
+        public ActionResult RecuperarAcceso(UsuarioModel usuario)
         {
             using (var dbContext = new SIGEPEntities())
             {

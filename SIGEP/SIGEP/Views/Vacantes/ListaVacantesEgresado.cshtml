@@ -1,0 +1,89 @@
+﻿@{
+    ViewBag.Title = "Vacantes - Egresado";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, 2=Coord, 3=Prof, 4=Egr
+}
+
+<section class="vacantes-wrapper vacantes-profesor">
+    <h2 class="vacantes-titulo titulo-principal">Empleos Disponibles</h2>
+
+    <!-- Filtros (mismo estilo que profesor) -->
+    <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-3 align-items-center">
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-filter"></i>
+            </button>
+            <div class="dropdown-menu p-3" style="min-width: 300px;">
+                <div class="mb-2">
+                    <label>Modalidad</label>
+                    <select id="filtroModalidad" class="form-control">
+                        <option value="">Todas</option>
+                        @if (ViewBag.Modalidades != null)
+                        {
+                            foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
+                            {
+                                <option value="@m.Value">@m.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label>Área profesional</label>
+                    <select id="filtroArea" class="form-control">
+                        <option value="">Todas</option>
+                        @if (ViewBag.Areas != null)
+                        {
+                            foreach (var a in ViewBag.Areas as List<SelectListItem>)
+                            {
+                                <option value="@a.Value">@a.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="vacantes-lista"></div>
+</section>
+
+<!-- MODAL VISUALIZAR -->
+<div class="modal fade" id="modalVisualizar" tabindex="-1" aria-labelledby="modalVisualizarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Detalle de Vacante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body px-4">
+                <section class="vacante-detalle bg-transparent">
+                    <h2 id="vis-Nombre" class="vacante-titulo"></h2>
+                    <p class="vacante-empresa"><strong>Empresa:</strong> <span id="vis-Empresa"></span></p>
+
+                    <div class="vacante-info">
+                        <p><strong>Descripción:</strong> <span id="vis-Descripcion"></span></p>
+                        <p><strong>Requisitos:</strong> <span id="vis-Requisitos"></span></p>
+                        <p><strong>Modalidad:</strong> <span id="vis-Modalidad"></span></p>
+                        <p><strong>Área profesional:</strong> <span id="vis-Area"></span></p>
+                        <p><strong>Fecha publicación:</strong> <span id="vis-FechaPublicacion"></span></p>
+                        <p><strong>Fecha límite:</strong> <span id="vis-FechaLimite"></span></p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        window.VacantesEgresadoCfg = {
+            urls: {
+                getVacantes: '@Url.Action("ObtenerVacantesEgresado", "Vacantes")'
+            }
+        };
+    </script>
+    <script src="~/Scripts/Vacantes/VistaVacantesEgresado.js?v=@DateTime.Now.Ticks"></script>
+}

@@ -42,246 +42,260 @@ else
             Mi Práctica - @(Model?.EstudianteNombre ?? "Estudiante")
         </h2>
     }
-    }
+}
 
 
 
-    <div class="d-flex flex-wrap justify-content-between" style="gap: 2rem;">
-        <!-- Columna Izquierda: Información General -->
-        <div class="card p-4 shadow mb-4" style="flex: 1 1 48%;">
-            <div class="row mb-3">
-                <h3 class="section-title">Información General</h3>
+<div class="d-flex flex-wrap justify-content-between" style="gap: 2rem;">
+    <!-- Columna Izquierda: Información General -->
+    <div class="card p-4 shadow mb-4" style="flex: 1 1 48%;">
+        <div class="row mb-3">
+            <h3 class="section-title">Información General</h3>
 
-            </div>
-            <div class="row g-4 justify-content-between">
-
-                <!-- Columna de Vacante -->
-                <div class="col-md-6">
-                    <div class="card shadow-sm p-3" style="border-radius: 12px; background-color: #F9F9F9;">
-                        @if (rol == 2 || rol == 3)
-                        {
-                            <h5 class="mb-3" style="color: #2D594D;"><strong>Información de Vacante</strong></h5>
-                        }
-                        @if (rol == 1)
-                        {
-                            <h5 class="mb-3" style="color: #2D594D;"><strong>Información del Puesto</strong></h5>
-                        }
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Nombre</strong></label><br />
-                            <span>@(Model?.Nombre ?? "No disponible")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Empresa</strong></label><br />
-                            <span>@(Model?.EmpresaNombre ?? "No disponible")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Requerimientos</strong></label><br />
-                            <span>@(Model?.Requerimientos ?? "No especificados")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Fecha de Aplicación</strong></label><br />
-                            <span>@(Model?.FechaAplicacion?.ToString("dd-MM-yyyy") ?? "No disponible")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Modalidad</strong></label><br />
-                            <span>@(Model?.ModalidadNombre ?? "No especificada")</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Columna de Estudiante -->
-                <div class="col-md-6">
-                    <div class="card shadow-sm p-3" style="border-radius: 12px; background-color: #F9F9F9;">
-                        @if (rol == 2 || rol == 3)
-                        {
-                            <h5 class="mb-3" style="color: #2D594D;"><strong>Información del Estudiante</strong></h5>
-                        }
-                        @if (rol == 1)
-                        {
-                            <h5 class="mb-3" style="color: #2D594D;"><strong>Mi Información</strong></h5>
-                        }
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Nombre</strong></label><br />
-                            <span>@(Model?.EstudianteNombre ?? "No disponible")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Cédula</strong></label><br />
-                            <span>@(Model?.EstudianteCedula ?? "No disponible")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Correo</strong></label><br />
-                            <span>@(Model?.EstudianteCorreo ?? "No disponible")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Especialidad</strong></label><br />
-                            <span>@(Model?.EstudianteEspecialidad ?? "No especificada")</span>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label text-muted"><strong>Edad</strong></label><br />
-                            <span>@(Model?.EstudianteEdad.ToString() ?? "No disponible") años</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <hr />
-            @if (rol == 2 || rol == 3)
-            {
-                <h3 class="section-title">Información de Contacto</h3>
-            }
-            @if (rol == 1)
-            {
-                <h3 class="section-title">Contacto con la Empresa</h3>
-            }
-            <div class="mb-2"><label style="color: #2D594D"><strong>Contacto en la empresa</strong></label><br /><span>@(Model?.ContactoEmpresaNombre ?? "No disponible")</span></div>
-            <div class="mb-2"><label style="color: #2D594D"><strong>Email</strong></label><br /><span>@(Model?.ContactoEmpresaEmail ?? "No disponible")</span></div>
-            <div class="mb-2"><label style="color: #2D594D"><strong>Teléfono</strong></label><br /><span>@(Model?.ContactoEmpresaTelefono ?? "No disponible")</span></div>
         </div>
+        <div class="row g-4 justify-content-between">
 
-        <!-- Columna Derecha: Proceso de Aplicación -->
-        <div class="card p-4 shadow mb-4" style="flex: 1 1 48%;">
-            @if (rol == 2 || rol == 3)
-            {
-                <h3 class="section-title">Proceso de Aplicación</h3>
-                <h4 style="color: #2D594D; font-weight: 600;">Comentarios del Proceso</h4>
-                <hr />
-            }
-            @if (rol == 1)
-            {
-                <h3 class="section-title">Proceso de la Práctica</h3>
-                <h4 style="color: #2D594D; font-weight: 600;">Comentarios de la Práctica</h4>
-                <hr />
-            }
-
-            <!-- Comentarios -->
-            <div id="comentariosAnteriores">
-                <ul class="list-unstyled">
-                    @if (Model?.Comentarios != null && Model.Comentarios.Any())
-                    {
-                        foreach (var comentario in Model.Comentarios)
-                        {
-                            <li>
-                                <strong>@comentario.Fecha.ToString("dd/MM/yyyy") - @comentario.Usuario:</strong><br />
-                                @comentario.Comentario
-                            </li>
-                        }
-                    }
-                    else
-                    {
-                        <li>No hay comentarios disponibles.</li>
-                    }
-                </ul>
-            </div>
-
-            <!-- Estado -->
-            <div class="mt-4">
-                <h4 style="color: #2D594D; font-weight: 600;">Estado Actual</h4>
-                @if (rol == 2 || rol == 3)
-                {
-                    <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
-
-                }
-                @if (rol == 1)
-                {
-                    <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
-
-                }
-            </div>
-
-            <!-- Botones -->
-            <div class="mt-4 action-buttons">
-                <div class="row top-buttons">
-                    <div class="col-md-6">
-                        <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalAgregarComentario">
-                            Agregar Comentario
-                        </button>
-                    </div>
+            <!-- Columna de Vacante -->
+            <div class="col-md-6">
+                <div class="card shadow-sm p-3" style="border-radius: 12px; background-color: #F9F9F9;">
                     @if (rol == 2 || rol == 3)
                     {
-                        <div class="col-md-6">
-                            <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalActualizarEstado">
-                                Actualizar Estado
-                            </button>
-                        </div>
+                        <h5 class="mb-3" style="color: #2D594D;"><strong>Información de Vacante</strong></h5>
                     }
-                </div>
-            </div>
-
-            <!-- evaluaciones -->
-            @if (rol == 2 || rol == 3)
-            {
-                <div class="mt-4">
-                    <h4 style="color: #2D594D; font-weight: 600;">Evaluaciones</h4>
-                    <div class="alert alert-warning mt-2" role="alert" style="background-color: #FFF3CD; color: #856404; border: 1px solid #FFEEBA;">
-                        Aún no cuenta con ninguna evaluación.
+                    @if (rol == 1)
+                    {
+                        <h5 class="mb-3" style="color: #2D594D;"><strong>Información del Puesto</strong></h5>
+                    }
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Nombre</strong></label><br />
+                        <span>@(Model?.Nombre ?? "No disponible")</span>
                     </div>
-                </div>
-            }
-
-            <!--MODAL PARA ACTUALIZAR ESTADO-->
-            <div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-labelledby="modalActualizarEstadoLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-                        <div class="modal-header" style="background-color: #2D594D; color: white;">
-                            <h5 class="modal-title">Actualizar Estado</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <div class="modal-body px-4">
-                            <form id="formActualizarEstado">
-                                <!-- Hidden con IdPractica -->
-                                @Html.Hidden("idPractica", Model?.IdPractica)
-
-                                <div class="mb-3">
-                                    <label for="nuevoEstado" class="form-label" style="font-size: 14px">Nuevo Estado</label>
-                                    <select id="nuevoEstado" name="nuevoEstado" style="font-size: 14px" class="form-select" required>
-                                        <option value="">Seleccione un estado</option>
-                                        @foreach (var estado in Model.ListaEstados)
-                                        {
-                                            <option value="@estado.IdEstado">@estado.Descripcion</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="comentarioEstado" class="form-label">Comentario</label>
-                                    <textarea id="comentarioEstado" name="comentarioEstado" class="form-control" rows="4" placeholder="Agrega un comentario sobre esta actualización..." required></textarea>
-                                </div>
-                                <div class="text-end">
-                                    <button type="submit" class="btn-verde-personalizado" id="BtnActualizarEstado">Actualizar</button>
-                                </div>
-                            </form>
-                        </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Empresa</strong></label><br />
+                        <span>@(Model?.EmpresaNombre ?? "No disponible")</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Requerimientos</strong></label><br />
+                        <span>@(Model?.Requerimientos ?? "No especificados")</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Fecha de Aplicación</strong></label><br />
+                        <span>@(Model?.FechaAplicacion?.ToString("dd-MM-yyyy") ?? "No disponible")</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Modalidad</strong></label><br />
+                        <span>@(Model?.ModalidadNombre ?? "No especificada")</span>
                     </div>
                 </div>
             </div>
 
-
-            <div class="modal fade" id="modalAgregarComentario" tabindex="-1" aria-labelledby="modalCrearVacanteLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-                        <div class="modal-header" style="background-color: #2D594D; color: white;">
-                            <h5 class="modal-title">Comentarios</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <div class="modal-body px-4">
-                            <form id="formAgregarComentario">
-                                @Html.Hidden("idVacante", Model?.IdVacante)
-                                @Html.Hidden("idUsuario", Model?.IdUsuario)
-                                <div class="mb-3">
-                                    <label for="comentarioEstado" class="form-label">Comentario</label>
-                                    <textarea id="ComentarioProceso" name="comentarioEstado" class="form-control" rows="4" placeholder="Agrega un comentario sobre el proceso de postulación.."></textarea>
-                                </div>
-                                <div class="text-end">
-                                    <button type="submit" class="btn-verde-personalizado" id="BtnAgregarComentario">Agregar</button>
-                                </div>
-                            </form>
-                        </div>
+            <!-- Columna de Estudiante -->
+            <div class="col-md-6">
+                <div class="card shadow-sm p-3" style="border-radius: 12px; background-color: #F9F9F9;">
+                    @if (rol == 2 || rol == 3)
+                    {
+                        <h5 class="mb-3" style="color: #2D594D;"><strong>Información del Estudiante</strong></h5>
+                    }
+                    @if (rol == 1)
+                    {
+                        <h5 class="mb-3" style="color: #2D594D;"><strong>Mi Información</strong></h5>
+                    }
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Nombre</strong></label><br />
+                        <span>@(Model?.EstudianteNombre ?? "No disponible")</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Cédula</strong></label><br />
+                        <span>@(Model?.EstudianteCedula ?? "No disponible")</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Correo</strong></label><br />
+                        <span>@(Model?.EstudianteCorreo ?? "No disponible")</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Especialidad</strong></label><br />
+                        <span>@(Model?.EstudianteEspecialidad ?? "No especificada")</span>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label text-muted"><strong>Edad</strong></label><br />
+                        <span>@(Model?.EstudianteEdad.ToString() ?? "No disponible") años</span>
                     </div>
                 </div>
             </div>
-
         </div>
+
+        <hr />
+        @if (rol == 2 || rol == 3)
+        {
+            <h3 class="section-title">Información de Contacto</h3>
+        }
+        @if (rol == 1)
+        {
+            <h3 class="section-title">Contacto con la Empresa</h3>
+        }
+        <div class="mb-2"><label style="color: #2D594D"><strong>Contacto en la empresa</strong></label><br /><span>@(Model?.ContactoEmpresaNombre ?? "No disponible")</span></div>
+        <div class="mb-2"><label style="color: #2D594D"><strong>Email</strong></label><br /><span>@(Model?.ContactoEmpresaEmail ?? "No disponible")</span></div>
+        <div class="mb-2"><label style="color: #2D594D"><strong>Teléfono</strong></label><br /><span>@(Model?.ContactoEmpresaTelefono ?? "No disponible")</span></div>
     </div>
 
-    @section scripts {
-        <script src="~/Scripts/Practicas/ScriptPracticas.js"></script>
-    }
+    <!-- Columna Derecha: Proceso de Aplicación -->
+    <div class="card p-4 shadow mb-4" style="flex: 1 1 48%;">
+        @if (rol == 2 || rol == 3)
+        {
+            <h3 class="section-title">Proceso de Aplicación</h3>
+            <h4 style="color: #2D594D; font-weight: 600;">Comentarios del Proceso</h4>
+            <hr />
+        }
+        @if (rol == 1)
+        {
+            <h3 class="section-title">Proceso de la Práctica</h3>
+            <h4 style="color: #2D594D; font-weight: 600;">Comentarios de la Práctica</h4>
+            <hr />
+        }
+
+        <!-- Comentarios -->
+        <div id="comentariosAnteriores">
+            <ul class="list-unstyled">
+                @if (Model?.Comentarios != null && Model.Comentarios.Any())
+                {
+                    foreach (var comentario in Model.Comentarios)
+                    {
+                        <li>
+                            <strong>@comentario.Fecha.ToString("dd/MM/yyyy") - @comentario.Usuario:</strong><br />
+                            @comentario.Comentario
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li>No hay comentarios disponibles.</li>
+                }
+            </ul>
+        </div>
+
+        <!-- Estado -->
+        <div class="mt-4">
+            <h4 style="color: #2D594D; font-weight: 600;">Estado Actual</h4>
+            @if (rol == 2 || rol == 3)
+            {
+                <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
+
+            }
+            @if (rol == 1)
+            {
+                <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
+
+            }
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-4 action-buttons">
+            <div class="row top-buttons">
+                <div class="col-md-6">
+                    <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalAgregarComentario">
+                        Agregar Comentario
+                    </button>
+                </div>
+                @if (rol == 2 || rol == 3)
+                {
+                    <div class="col-md-6">
+                        <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalActualizarEstado">
+                            Actualizar Estado
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- evaluaciones -->
+        @if (Model?.EstadoPractica == "En Curso" ||
+             Model?.EstadoPractica == "Aprobada" ||
+             Model?.EstadoPractica == "Finalizada" ||
+             Model?.EstadoPractica == "Rezagada")
+        {
+            <div class="mb-4">
+                <h5 class="section-title">Evaluación y Notas</h5>
+                <div class="row">
+                    <div class="col-md-4 form-group mb-3">
+                        <label>Nota 1</label>
+                        <input type="text" class="form-control" value="@(Model.Nota1?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-4 form-group mb-3">
+                        <label>Nota 2</label>
+                        <input type="text" class="form-control" value="@(Model.Nota2?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #f8f9fa;">
+                    </div>
+                    <div class="col-md-4 form-group mb-3">
+                        <label>Nota Final (Promedio)</label>
+                        <input type="text" class="form-control" value="@(Model.NotaFinal?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #e3f2fd; font-weight: bold;">
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!--MODAL PARA ACTUALIZAR ESTADO-->
+        <div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-labelledby="modalActualizarEstadoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+                    <div class="modal-header" style="background-color: #2D594D; color: white;">
+                        <h5 class="modal-title">Actualizar Estado</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body px-4">
+                        <form id="formActualizarEstado">
+                            <!-- Hidden con IdPractica -->
+                            @Html.Hidden("idPractica", Model?.IdPractica)
+
+                            <div class="mb-3">
+                                <label for="nuevoEstado" class="form-label" style="font-size: 14px">Nuevo Estado</label>
+                                <select id="nuevoEstado" name="nuevoEstado" style="font-size: 14px" class="form-select" required>
+                                    <option value="">Seleccione un estado</option>
+                                    @foreach (var estado in Model.ListaEstados)
+                                    {
+                                        <option value="@estado.IdEstado">@estado.Descripcion</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="comentarioEstado" class="form-label">Comentario</label>
+                                <textarea id="comentarioEstado" name="comentarioEstado" class="form-control" rows="4" placeholder="Agrega un comentario sobre esta actualización..." required></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn-verde-personalizado" id="BtnActualizarEstado">Actualizar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="modalAgregarComentario" tabindex="-1" aria-labelledby="modalCrearVacanteLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+                    <div class="modal-header" style="background-color: #2D594D; color: white;">
+                        <h5 class="modal-title">Comentarios</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body px-4">
+                        <form id="formAgregarComentario">
+                            @Html.Hidden("idVacante", Model?.IdVacante)
+                            @Html.Hidden("idUsuario", Model?.IdUsuario)
+                            <div class="mb-3">
+                                <label for="comentarioEstado" class="form-label">Comentario</label>
+                                <textarea id="ComentarioProceso" name="comentarioEstado" class="form-control" rows="4" placeholder="Agrega un comentario sobre el proceso de postulación.."></textarea>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn-verde-personalizado" id="BtnAgregarComentario">Agregar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section scripts {
+    <script src="~/Scripts/Practicas/ScriptPracticas.js"></script>
+}

@@ -1,0 +1,514 @@
+﻿using SIGEP.EF;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace SIGEP.Controllers
+{
+    public class EvaluacionController : Controller
+    {
+        public ActionResult ListarEstudianteConPractica()
+        {
+            if (Session["IdUsuario"] == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerEstudiantes()
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
+
+                int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var estudiantes = dbContext.ObtenerEstudiantesParaEvaluacionSP(idProfesor)
+                        .Select(e => new
+                        {
+                            IdUsuario = e.IdUsuario,
+                            Cedula = e.Cedula,
+                            NombreCompleto = e.NombreCompleto,
+                            Especialidad = e.Especialidad,
+                            Telefono = e.Telefono,
+                            PracticaAsignada = e.PracticaAsignada,
+                            EstadoAcademico = e.EstadoAcademico,
+                            NotaFinal = e.NotaFinal
+                        }).ToList();
+
+                    return Json(estudiantes, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerPerfilEstudiante(int idUsuario)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var perfil = dbContext.ObtenerPerfilEstudianteSP(idUsuario).FirstOrDefault();
+
+                    if (perfil == null)
+                    {
+                        return Json(new { success = false, message = "No se encontró el estudiante" }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    var comentarios = dbContext.ObtenerComentariosEstudianteSP(idUsuario)
+                        .Select(c => new
+                        {
+                            Autor = c.Autor,
+                            Fecha = c.Fecha.ToString("dd/MM/yyyy HH:mm"),
+                            Comentario = c.Comentario
+                        }).ToList();
+
+                    var resultado = new
+                    {
+                        success = true,
+                        perfil = new
+                        {
+                            NombreCompleto = perfil.NombreCompleto,
+                            Correo = perfil.Correo,
+                            Telefono = perfil.Telefono,
+                            Direccion = perfil.Direccion,
+                            Sexo = perfil.Sexo,
+                            Especialidad = perfil.Especialidad,
+                            Edad = perfil.Edad,
+                            Seccion = perfil.Seccion,
+                            NombreEmpresa = perfil.NombreEmpresa,
+                            TelefonoEmpresa = perfil.TelefonoEmpresa,
+                            Comentarios = comentarios
+                        }
+                    };
+
+                    return Json(resultado, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerComentarios(int idUsuario)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var comentarios = dbContext.ObtenerComentariosEstudianteSP(idUsuario)
+                        .Select(c => new
+                        {
+                            Autor = c.Autor,
+                            Fecha = c.Fecha.ToString("dd/MM/yyyy HH:mm"),
+                            Comentario = c.Comentario
+                        }).ToList();
+
+                    return Json(comentarios, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerNotas(int idUsuario)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var notas = dbContext.ObtenerNotasEstudianteSP(idUsuario).FirstOrDefault();
+
+                    if (notas == null)
+                    {
+                        return Json(new { Nota1 = (decimal?)null, Nota2 = (decimal?)null, NotaFinal = (decimal?)null }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    return Json(new
+                    {
+                        Nota1 = notas.Nota1,
+                        Nota2 = notas.Nota2,
+                        NotaFinal = notas.NotaFinal
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { Nota1 = (decimal?)null, Nota2 = (decimal?)null, NotaFinal = (decimal?)null }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarNota(int idUsuario, decimal? nota1, decimal? nota2, decimal? notaFinal)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
+
+                // Validar que al menos una nota esté ingresada
+                if (nota1 == null && nota2 == null)
+                {
+                    return Json(new { success = false, message = "Debe ingresar al menos una nota" });
+                }
+
+                // Validaciones de rango solo para notas que no son null
+                if (nota1 != null && (nota1 < 0 || nota1 > 100))
+                {
+                    return Json(new { success = false, message = "La Nota 1 debe estar entre 0 y 100" });
+                }
+
+                if (nota2 != null && (nota2 < 0 || nota2 > 100))
+                {
+                    return Json(new { success = false, message = "La Nota 2 debe estar entre 0 y 100" });
+                }
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Verificar si ya existe un registro de notas
+                    var notaExistente = dbContext.NotasEstudiantesTB.FirstOrDefault(n => n.IdUsuario == idUsuario);
+
+                    if (notaExistente != null)
+                    {
+                        // Actualizar solo las notas que se enviaron
+                        if (nota1 != null)
+                        {
+                            notaExistente.Nota1 = nota1;
+                        }
+
+                        if (nota2 != null)
+                        {
+                            notaExistente.Nota2 = nota2;
+                        }
+
+                        // Calcular nota final solo si ambas notas existen
+                        if (notaExistente.Nota1 != null && notaExistente.Nota2 != null)
+                        {
+                            notaExistente.NotaFinal = (notaExistente.Nota1 + notaExistente.Nota2) / 2;
+                        }
+                        else
+                        {
+                            notaExistente.NotaFinal = null;
+                        }
+
+                        notaExistente.FechaActualizacion = DateTime.Now;
+                        notaExistente.IdProfesor = idProfesor;
+                    }
+                    else
+                    {
+                        // Insertar nuevas notas
+                        var nuevaNota = new NotasEstudiantesTB
+                        {
+                            IdUsuario = idUsuario,
+                            Nota1 = nota1,
+                            Nota2 = nota2,
+                            NotaFinal = notaFinal,
+                            FechaRegistro = DateTime.Now,
+                            IdProfesor = idProfesor
+                        };
+                        dbContext.NotasEstudiantesTB.Add(nuevaNota);
+                    }
+
+                    dbContext.SaveChanges();
+
+                    string mensaje = "Nota registrada correctamente";
+                    if (nota1 != null && nota2 != null)
+                    {
+                        mensaje = "Notas registradas correctamente. Nota final calculada.";
+                    }
+                    else if (nota1 != null)
+                    {
+                        mensaje = "Nota 1 registrada correctamente. Ingrese Nota 2 para calcular la nota final.";
+                    }
+                    else if (nota2 != null)
+                    {
+                        mensaje = "Nota 2 registrada correctamente. Ingrese Nota 1 para calcular la nota final.";
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = mensaje
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en GuardarNota: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Error al guardar la nota: " + ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarComentario(int idUsuario, string comentario)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Obtener el IdPractica del estudiante
+                    var practica = dbContext.PracticaEstudianteTB.FirstOrDefault(p => p.IdUsuario == idUsuario);
+
+                    if (practica == null)
+                    {
+                        return Json(new { success = false, message = "El estudiante no tiene práctica asignada" });
+                    }
+
+                    // Insertar comentario
+                    var nuevoComentario = new ComentariosPracticaTB
+                    {
+                        Comentario = comentario,
+                        Fecha = DateTime.Now,
+                        IdUsuario = idProfesor,
+                        IdPractica = practica.IdPractica,
+                        Tipo = "Evaluación Tutor"
+                    };
+
+                    dbContext.ComentariosPracticaTB.Add(nuevoComentario);
+                    dbContext.SaveChanges();
+
+                    // Obtener nombre del profesor
+                    var profesor = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idProfesor);
+                    string nombreProfesor = profesor != null
+                        ? $"{profesor.Nombre} {profesor.Apellido1}"
+                        : "Profesor";
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Comentario agregado exitosamente",
+                        autor = nombreProfesor,
+                        fecha = DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SubirDocumento(HttpPostedFileBase archivo, int idUsuario)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                if (archivo == null || archivo.ContentLength == 0)
+                {
+                    return Json(new { success = false, message = "No se seleccionó ningún archivo" });
+                }
+
+                // Validar extensión
+                var extensionesPermitidas = new[] { ".xls", ".xlsx", ".pdf" };
+                var extension = System.IO.Path.GetExtension(archivo.FileName).ToLower();
+
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    return Json(new { success = false, message = "Solo se permiten archivos .xls, .xlsx o .pdf" });
+                }
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Obtener cédula del estudiante
+                    var estudiante = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idUsuario);
+                    if (estudiante == null)
+                    {
+                        return Json(new { success = false, message = "Estudiante no encontrado" });
+                    }
+
+                    string cedulaEstudiante = estudiante.Cedula;
+
+                    // Crear directorio en C:\sigep si no existe
+                    string directorioBase = @"C:\sigep\Evaluaciones";
+                    if (!System.IO.Directory.Exists(directorioBase))
+                    {
+                        System.IO.Directory.CreateDirectory(directorioBase);
+                    }
+
+                    // Generar nombre del archivo con cédula (sin fecha/hora)
+                    string nombreOriginal = System.IO.Path.GetFileNameWithoutExtension(archivo.FileName);
+                    string nombreArchivo = $"{cedulaEstudiante}_{nombreOriginal}{extension}";
+
+                    // Ruta completa del archivo
+                    string rutaCompleta = System.IO.Path.Combine(directorioBase, nombreArchivo);
+
+                    // Si el archivo ya existe, se sobrescribe
+                    archivo.SaveAs(rutaCompleta);
+
+                    // Guardar registro en BD con la ruta del archivo
+                    var documento = new DocumentosTB
+                    {
+                        Documento = archivo.FileName, // Nombre original para mostrar
+                        Tipo = "Evaluación",
+                        RutaArchivo = rutaCompleta,
+                        FechaSubida = DateTime.Now,
+                        IdUsuario = idUsuario
+                    };
+
+                    dbContext.DocumentosTB.Add(documento);
+                    dbContext.SaveChanges();
+
+                    return Json(new { success = true, message = "Documento subido correctamente" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerDocumentosEvaluacion(int idUsuario)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documentos = dbContext.ObtenerDocumentosEvaluacionSP(idUsuario).ToList();
+
+                    var resultado = documentos.Select(d => new
+                    {
+                        IdDocumento = d.IdDocumento,
+                        Nombre = d.Documento,
+                        RutaArchivo = d.RutaArchivo,
+                        FechaSubida = d.FechaSubida.ToString("dd/MM/yyyy HH:mm"),
+                        Extension = d.Extension ?? System.IO.Path.GetExtension(d.Documento)
+                    }).ToList();
+
+                    return Json(new { success = true, documentos = resultado }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult DescargarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
+
+                    if (documento == null)
+                    {
+                        return HttpNotFound("Documento no encontrado");
+                    }
+
+                    // Ya tenemos la ruta física completa, no usar Server.MapPath
+                    var filePath = documento.RutaArchivo;
+
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        return HttpNotFound("Archivo no encontrado en el servidor");
+                    }
+
+                    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                    var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
+
+                    string contentType = "application/octet-stream";
+                    if (extension == ".pdf")
+                        contentType = "application/pdf";
+                    else if (extension == ".xlsx")
+                        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    else if (extension == ".xls")
+                        contentType = "application/vnd.ms-excel";
+
+                    return File(fileBytes, contentType, documento.Documento);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error al descargar: " + ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult VisualizarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
+
+                    if (documento == null)
+                    {
+                        return HttpNotFound("Documento no encontrado");
+                    }
+
+                    // Ya tenemos la ruta física completa
+                    var filePath = documento.RutaArchivo;
+
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        return HttpNotFound("Archivo no encontrado");
+                    }
+
+                    var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
+
+                    // Solo permitir visualización de PDFs en el navegador
+                    if (extension == ".pdf")
+                    {
+                        var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                        return File(fileBytes, "application/pdf");
+                    }
+                    else
+                    {
+                        // Para Excel, forzar descarga
+                        return DescargarDocumento(idDocumento);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error: " + ex.Message);
+            }
+        }
+    }
+}
+

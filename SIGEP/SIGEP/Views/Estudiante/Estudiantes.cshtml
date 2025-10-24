@@ -1,0 +1,135 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Listado de Estudiantes";
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, 3=Prof, 2=Coord, 4=Egr
+}
+
+
+<h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
+    @(idRol == 2 ? "Estudiantes" : idRol == 3 ? "Mis Estudiantes" : "Estudiantes") @DateTime.Now.Year
+</h2>
+
+
+<div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-filter"></i> Filtros
+        </button>
+        <div class="dropdown-menu p-3" style="min-width: 300px;">
+            <!-- Filtro de estado académico -->
+            <div class="mb-3">
+                <label>Estado académico</label>
+                <select id="filtroEstado" class="form-control">
+                    <option value="">Todos</option>
+                    @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
+                    {
+                        <option value="@estado.Text">@estado.Text</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Filtro de especialidad -->
+            @if (ViewBag.Especialidades != null && (ViewBag.Especialidades as List<SelectListItem>).Count > 0)
+            {
+                <div class="mb-2">
+                    <label>Especialidad</label>
+                    <select id="filtroEspecialidad" class="form-control">
+                        <option value="">Todas</option>
+                        @foreach (var esp in ViewBag.Especialidades as List<SelectListItem>)
+                        {
+                            <option value="@esp.Value">@esp.Text</option>
+                        }
+                    </select>
+                </div>
+            }
+        </div>
+    </div>
+
+
+</div>
+
+<div class="card rounded-5 p-3 table-responsive">
+    <table id="tablaEstudiantes" class="display nowrap w-100">
+        <thead>
+            <tr>
+                <th>Cédula</th>
+                <th>Nombre Completo</th>
+                <th>Especialidad</th>
+                <th>Teléfono</th>
+                <th>Estado Académico</th>
+                <th>Estado de Práctica</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- MODAL PERFIL -->
+<div class="modal fade" id="modalPerfil" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Perfil del Estudiante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4" id="perfilBody">
+                <div class="text-center">
+                    <span class="text-muted">Cargando datos...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ACTUALIZAR ESTADO -->
+<div class="modal fade" id="modalActualizarEstado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Actualizar Estado Académico</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4">
+                <input type="hidden" id="hdnIdUsuario" />
+                <div class="form-group mb-3">
+                    <label for="ddlNuevoEstado">Seleccione nuevo estado:</label>
+                    <select id="ddlNuevoEstado" class="form-select OpcionesVacantes w-100" style="font-size:14px">
+                        @foreach (var estado in ViewBag.Estados as List<SelectListItem>)
+                        {
+                            <option value="@estado.Value">@estado.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer px-4">
+                <button type="button" class="btn CerrarModal" id="btnConfirmarActualizar">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        window.EstuCfg = {
+            rol: @idRol,
+            urls: {
+                get: '@Url.Action("GetEstudiantes","Estudiante")',
+                detalle: '@Url.Action("Detalle","Estudiante")',
+                actualizarEstado: '@Url.Action("ActualizarEstado","Estudiante")',
+                eliminarDocumento: '@Url.Action("EliminarDocumento","Estudiante")',
+                desasignarPractica: '@Url.Action("DesasignarPractica","Practicas")',  // ✅ Actualizado
+                login: '@Url.Action("Login","Home")'
+            }
+        };
+    </script>
+    <script src="~/Scripts/Estudiantes/ListaEstudiantes.js?v=@DateTime.Now.Ticks"></script>
+}
+
+
+

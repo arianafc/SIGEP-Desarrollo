@@ -62,7 +62,7 @@
                 <div class="navbar-collapse collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav float-start me-auto"></ul>
                     <ul class="navbar-nav float-end">
-                        <span class="me-3" style="color: #2d594d">
+                        <span class="me-3" style="color: #fff">
                             <b>Hola, @Session["Nombre"]</b>
                         </span>
                     </ul>
@@ -77,7 +77,7 @@
                     <ul id="sidebarnav">
 
                         <!-- PRÁCTICAS -->
-                        @if (rol == 1 || rol == 4 || rol == 2)
+                        @if (rol == 1 || rol == 3 || rol == 2)
                         {
                             <li class="nav-small-cap">
                                 <i class="mdi mdi-dots-horizontal"></i>
@@ -127,7 +127,7 @@
                             </li>
 
                             <li class="sidebar-item">
-                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("ListarEstudiante", "Estudiante")">
+                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("Estudiantes", "Estudiante")">
                                     <i class="ti-user"></i>
                                     <span class="hide-menu">Estudiantes</span>
                                 </a>
@@ -182,7 +182,7 @@
                             if (rol == 2)
                             {
                                 <li class="sidebar-item">
-                                    <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("ListaEgresados", "Coordinador")">
+                                    <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("ListaEgresados", "Egresados")">
                                         <i class="ti-id-badge"></i>
                                         <span class="hide-menu">Historial</span>
                                     </a>
@@ -197,7 +197,7 @@
                             else
                             {
                                 <li class="sidebar-item">
-                                    <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("ListaVacantesEgresado", "Vacante")">
+                                    <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("ListaVacantesEgresado", "Vacantes")">
                                         <i class="ti-id-badge"></i>
                                         <span class="hide-menu">Bolsa de Empleo</span>
                                     </a>
@@ -213,7 +213,7 @@
                         @if (rol == 2)
                         {
                             <li class="sidebar-item">
-                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("GestionAdministracion", "AdministracionGeneral")">
+                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("AdministracionGeneral", "AdministracionGeneral")">
                                     <i class="ti-id-badge"></i>
                                     <span class="hide-menu">Administración General</span>
                                 </a>
@@ -306,7 +306,7 @@
           });
       </text>
   }
-
+    
   @if (TempData["SwalSuccess"] != null)
   {
       <text>

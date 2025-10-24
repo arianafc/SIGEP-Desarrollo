@@ -1,6 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
-    var rol = Session["rol"] != null ? Convert.ToInt32(Session["rol"]) : 0;
+    var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
 }
 
 <style>
@@ -14,7 +14,7 @@
 
 <main class="container py-4">
 
-    @if (rol == 1 || rol == 4)
+    @if (rol == 2 || rol == 3 )
     {
         <h2 class="fw-bold mb-4">Dashboard - Prácticas Profesionales</h2>
 
@@ -160,7 +160,7 @@
 
     }
 
-    @if (rol == 2)
+    @if (rol == 1)
     {
         <!-- Estudiante -->
         <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">
@@ -215,7 +215,7 @@
             </a>
         </section>
     }
-    else if (rol == 3)
+    else if (rol == 4)
     {
         <!-- Egresado -->
         <section class="mb-5 text-center" style="background-color:#EAF2D8; padding: 3rem; border-radius: 1rem;">

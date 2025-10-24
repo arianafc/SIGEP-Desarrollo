@@ -128,8 +128,15 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\AdministracionGeneralController.cs" />
+    <Compile Include="Controllers\EgresadosController.cs" />
+    <Compile Include="Controllers\EmpresaController.cs" />
+    <Compile Include="Controllers\EstudianteController.cs" />
+    <Compile Include="Controllers\EvaluacionController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PerfilController.cs" />
     <Compile Include="Controllers\PracticasController.cs" />
+    <Compile Include="Controllers\VacantesController.cs" />
     <Compile Include="EF\ActualizarEstadoPracticaSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -178,13 +185,13 @@
     <Compile Include="EF\EstadosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="EF\EstadoTB_Backup.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
     <Compile Include="EF\EstudianteEncargadoTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\FormacionAcademicaTB.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\GuardarNotaEstudianteSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\InformacionLaboralTB.cs">
@@ -214,7 +221,34 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Model1.edmx</DependentUpon>
     </Compile>
+    <Compile Include="EF\NotasEstudiantesTB.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerComentariosEstudianteSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\ObtenerComentariosPracticaSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerDocumentosEvaluacionSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerEncargadosUsuarioSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerEstudiantesParaEvaluacionSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerEstudiantesProfesorSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerNotasEstudianteSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerPerfilEstudianteSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerPostulacionesEstudianteSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\ObtenerVisualizacionPracticaSP_Result.cs">
@@ -226,13 +260,19 @@
     <Compile Include="EF\ProvinciasTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\RegistrarAutogestionPracticaSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\RolesTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="EF\RolesTB_Backup.cs">
+    <Compile Include="EF\SeccionesTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="EF\SeccionesTB.cs">
+    <Compile Include="EF\sp_ObtenerDocumentosPorUsuario_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\sp_ObtenerDocumento_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\TelefonosTB.cs">
@@ -251,9 +291,15 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Autenticacion.cs" />
-    <Compile Include="Models\EstadoVM.cs" />
+    <Compile Include="Models\DocumentoDTO.cs" />
+    <Compile Include="Models\EncargadoDTO.cs" />
+    <Compile Include="Models\EstudianteDetalleDTO.cs" />
+    <Compile Include="Models\EstudianteDetalleVM.cs" />
+    <Compile Include="Models\EstudianteDTO.cs" />
     <Compile Include="Models\FiltroSeguridad.cs" />
+    <Compile Include="Models\MisPostulacionesVM.cs" />
     <Compile Include="Models\PracticaEstudianteViewModel.cs" />
+    <Compile Include="Models\UsuarioModel.cs" />
     <Compile Include="Models\VacantePracticaDTO.cs" />
     <Compile Include="Models\VacantePracticaVM.cs" />
     <Compile Include="Models\VacanteViewModel.cs" />
@@ -329,6 +375,7 @@
     <Content Include="Images\logo-light-text.png" />
     <Content Include="Images\logo-text.png" />
     <Content Include="Images\logoSIGEP.png" />
+    <Content Include="Scripts\administracion-general.js" />
     <Content Include="Scripts\app-style-switcher.js" />
     <Content Include="Scripts\app.init.js" />
     <Content Include="Scripts\app.min.js" />
@@ -374,6 +421,7 @@
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.ttf" />
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff" />
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff2" />
+    <Content Include="Content\Direcciones\provincias_cantones_distritos_costa_rica.json" />
     <EntityDeploy Include="EF\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
@@ -383,6 +431,9 @@
     </Content>
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\DataTable\dataTables.js" />
+    <Content Include="Scripts\Egresados\ListaEgresados.js" />
+    <Content Include="Scripts\Estudiantes\ListaEstudiantes.js" />
+    <Content Include="Scripts\Evaluacion\Evaluacion.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
     <Content Include="Scripts\jquery-3.7.0.slim.js" />
@@ -395,10 +446,16 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\perfect-scrollbar.jquery.min.js" />
+    <Content Include="Scripts\Perfil\Perfil.js" />
     <Content Include="Scripts\popper.min.js" />
+    <Content Include="Scripts\Practicas\Autogestion.js" />
+    <Content Include="Scripts\Practicas\ScriptPracticas.js" />
+    <Content Include="Scripts\Practicas\VacantesEstudiantes.js" />
+    <Content Include="Scripts\Practicas\VistaVacantesProfesor.js" />
     <Content Include="Scripts\script.js" />
     <Content Include="Scripts\sidebarmenu.js" />
     <Content Include="Scripts\sparkline.js" />
+    <Content Include="Scripts\Vacantes\VistaVacantesEgresado.js" />
     <Content Include="Scripts\validaciones.js" />
     <Content Include="Scripts\waves.js" />
     <Content Include="Web.config" />
@@ -419,6 +476,16 @@
     <Content Include="Views\Home\Registro.cshtml" />
     <Content Include="Views\Practicas\VistaVacantesProfesor.cshtml" />
     <Content Include="Views\Practicas\VisualizacionPostulacion.cshtml" />
+    <Content Include="Views\Practicas\PostulacionesEstudiantes.cshtml" />
+    <Content Include="Views\Empresa\ListaEmpresas.cshtml" />
+    <Content Include="Views\Perfil\MiPerfil.cshtml" />
+    <Content Include="Views\Practicas\PracticasCoordinador.cshtml" />
+    <Content Include="Views\Estudiante\Estudiantes.cshtml" />
+    <Content Include="Views\Estudiante\_DetalleEstudiante.cshtml" />
+    <Content Include="Views\Egresados\ListaEgresados.cshtml" />
+    <Content Include="Views\AdministracionGeneral\AdministracionGeneral.cshtml" />
+    <Content Include="Views\Evaluacion\ListarEstudianteConPractica.cshtml" />
+    <Content Include="Views\Vacantes\ListaVacantesEgresado.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
