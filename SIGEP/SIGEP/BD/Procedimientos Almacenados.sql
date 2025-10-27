@@ -329,3 +329,35 @@ END
 GO
 
 
+
+USE [SIGEP]
+GO
+
+/****** Object:  StoredProcedure [dbo].[ObtenerDocumentosPerfilSP]    Script Date: 10/27/2025 4:32:28 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[ObtenerDocumentosPerfilSP]
+    @IdUsuario INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        IdDocumento,
+        Documento,
+        Tipo,
+        RutaArchivo,
+        FechaSubida,
+        LOWER(RIGHT(Documento, CHARINDEX('.', REVERSE(Documento)))) AS Extension
+    FROM DocumentosTB
+    WHERE IdUsuario = @IdUsuario 
+        AND Tipo = 'Perfil'
+    ORDER BY FechaSubida DESC;
+END
+GO
+
+
