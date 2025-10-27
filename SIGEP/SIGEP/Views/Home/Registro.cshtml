@@ -47,7 +47,7 @@
                                 <div class="col-md-6">
                                     <div class="input-icon-container mb-3">
                                         <i class="fas fa-briefcase"></i>
-                                        <select id="Especialidad" name="Especialidad" class="input-field">
+                                        <select id="IdEspecialidad" name="IdEspecialidad" class="input-field">
                                             <option value="">Seleccione una Especialidad</option>
                                             @if (Model?.ListaEspecialidades != null && Model.ListaEspecialidades.Any())
                                             {
@@ -66,7 +66,7 @@
                                 <div class="col-md-6">
                                     <div class="input-icon-container mb-3">
                                         <i class="fas fa-briefcase"></i>
-                                        <select id="Seccion" name="Seccion" class="input-field">
+                                        <select id="IdSeccion" name="IdSeccion" class="input-field">
                                             <option value="">Seleccione una Sección</option>
                                             @if (Model?.ListaSecciones != null && Model.ListaSecciones.Any())
                                             {
@@ -191,8 +191,8 @@ $(function () {
             Apellido1: $("#Apellido1").val().trim(),
             Apellido2: $("#Apellido2").val().trim(),
             CorreoPersonal: $("#CorreoRegistro").val().trim(),
-            Especialidad: $("#Especialidad").val(),
-            Seccion: $("#Seccion").val(),
+            IdEspecialidad: $("#IdEspecialidad").val(),
+            IdSeccion: $("#IdSeccion").val(),
             FechaNacimiento: $("#FechaNacimiento").val().trim(),
             Cedula: $("#CedulaRegistro").val().trim(),
             Contrasenna: $("#ContrasennaRegistro").val().trim()
