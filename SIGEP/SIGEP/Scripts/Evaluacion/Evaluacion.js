@@ -16,7 +16,10 @@
             {
                 data: 'EstadoAcademico',
                 render: function (data) {
-                    return `<span class="badge badge-asignada">${data}</span>`;
+                    var badgeClass = data === 'Aprobado' ? 'badge-aprobada' :
+                        data === 'Rezagado' ? 'badge-rezagado' :
+                            'badge-secondary';
+                    return `<span class="badge ${badgeClass}">${data}</span>`;
                 }
             },
             {
@@ -154,7 +157,6 @@ function cargarPerfilEstudiante(idUsuario) {
 }
 
 // Función para llenar el modal de perfil
-// Función para llenar el modal de perfil
 function llenarModalPerfil(perfil) {
     console.log('Datos recibidos:', perfil);
 
@@ -177,9 +179,33 @@ function llenarModalPerfil(perfil) {
     $(inputs[6]).val(perfil.Edad ? perfil.Edad + ' años' : '');
     $(inputs[7]).val(perfil.Seccion || '');
 
-    // Información de la práctica
-    $(inputs[8]).val(perfil.NombreEmpresa || '');
-    $(inputs[9]).val(perfil.TelefonoEmpresa || '');
+    // Información de la práctica - Solo enlace
+    var practicaContainer = $('#infoPracticaContainer').empty();
+
+    if (perfil.NombreEmpresa && perfil.IdVacante && perfil.IdUsuario) {
+        var urlVisualizacion = '/Practicas/VisualizacionPostulacion?idVacante=' + perfil.IdVacante + '&idUsuario=' + perfil.IdUsuario;
+
+        practicaContainer.html(`
+            <div class="col-md-12">
+                <a href="${urlVisualizacion}" 
+                   class="d-flex justify-content-between align-items-center p-3 text-decoration-none"
+                   style="background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #2D594D; color: #2D594D;">
+                    <span style="font-weight: 600;">${perfil.NombreEmpresa}</span>
+                    <span class="badge badge-en-curso">En Curso</span>
+                </a>
+            </div>
+        `);
+    } else {
+        practicaContainer.html(`
+            <div class="col-md-12">
+                <div class="p-3 text-center" style="background-color: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-info-circle"></i> No tiene práctica asignada
+                    </p>
+                </div>
+            </div>
+        `);
+    }
 
     // Retroalimentaciones
     var contenedor = $('#retroalimentacionComentarios').empty();
@@ -337,6 +363,7 @@ function abrirModalComentarios(idUsuario, nombre, cedula, practica) {
     $('#practicaAsignada').text(practica);
     $('#btnGuardarComentario').data('idusuario', idUsuario);
     $('#nuevoComentario').val('');
+    $('#contadorCaracteres').text('0'); // Resetear contador
 
     // Cargar comentarios anteriores
     $.ajax({
@@ -344,19 +371,29 @@ function abrirModalComentarios(idUsuario, nombre, cedula, practica) {
         type: 'GET',
         data: { idUsuario: idUsuario },
         success: function (data) {
-            var ul = $('#comentariosAnteriores').empty();
+            var container = $('#comentariosAnteriores').empty();
             if (data && data.length > 0) {
                 data.forEach(function (comentario) {
-                    ul.append(`
-                        <li class="list-group-item" style="word-break: break-word; white-space: pre-wrap; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 6px; padding: 10px;">
-                            <div><strong>Comentario:</strong> ${comentario.Comentario}</div>
-                            <small class="text-muted">
-                                <i class="bi bi-person"></i> ${comentario.Autor} |
-                                <i class="bi bi-clock"></i> ${comentario.Fecha}
-                            </small>
-                        </li>
+                    container.append(`
+                        <div class="mb-2" style="background-color: #f8f9fa; border-left: 3px solid #2D594D; border-radius: 4px; padding: 6px 10px;">
+                            <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 4px;">
+                                <strong style="color: #2D594D; font-size: 0.8rem;">
+                                    <i class="bi bi-person-circle"></i> ${comentario.Autor}
+                                </strong>
+                                <small class="text-muted" style="font-size: 0.7rem;">
+                                    <i class="bi bi-clock"></i> ${comentario.Fecha}
+                                </small>
+                            </div>
+                            <div style="font-size: 0.8rem; line-height: 1.3; color: #495057;">${comentario.Comentario}</div>
+                        </div>
                     `);
                 });
+            } else {
+                container.html(`
+                    <p class="text-muted text-center py-2" style="font-size: 0.85rem;">
+                        <i class="bi bi-info-circle"></i> No hay comentarios anteriores
+                    </p>
+                `);
             }
             $('#modalComentarios').modal('show');
         },
@@ -498,6 +535,12 @@ function guardarComentario() {
         return;
     }
 
+    // Validación de longitud
+    if (comentario.length > 255) {
+        Swal.fire('Advertencia', 'El comentario no puede exceder los 255 caracteres', 'warning');
+        return;
+    }
+
     $.ajax({
         url: '/Evaluacion/GuardarComentario',
         type: 'POST',
@@ -513,19 +556,22 @@ function guardarComentario() {
                     timer: 2000,
                     showConfirmButton: false
                 });
-
-                // Agregar el comentario a la lista
+                // Agregar el comentario con padding muy pequeño
                 $('#comentariosAnteriores').prepend(`
-                    <li class="list-group-item" style="word-break: break-word; white-space: pre-wrap; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 6px; padding: 10px;">
-                        <div><strong>Comentario:</strong> ${comentario}</div>
-                        <small class="text-muted">
-                            <i class="bi bi-person"></i> ${response.autor} |
-                            <i class="bi bi-clock"></i> ${response.fecha}
-                        </small>
-                    </li>
+                    <div class="mb-2" style="background-color: #f8f9fa; border-left: 3px solid #2D594D; border-radius: 4px; padding: 6px 10px;">
+                        <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 4px;">
+                            <strong style="color: #2D594D; font-size: 0.8rem;">
+                                <i class="bi bi-person-circle"></i> ${response.autor}
+                            </strong>
+                            <small class="text-muted" style="font-size: 0.7rem;">
+                                <i class="bi bi-clock"></i> ${response.fecha}
+                            </small>
+                        </div>
+                        <div style="font-size: 0.8rem; line-height: 1.3; color: #495057;">${comentario}</div>
+                    </div>
                 `);
-
                 $('#nuevoComentario').val('');
+                $('#contadorCaracteres').text('0'); // Resetear contador
             } else {
                 Swal.fire('Error', response.message, 'error');
             }
@@ -589,3 +635,52 @@ function subirDocumento() {
         }
     });
 }
+
+// Contador de caracteres para el comentario
+$(document).on('input', '#nuevoComentario', function () {
+    var longitud = $(this).val().length;
+    $('#contadorCaracteres').text(longitud);
+
+    // Cambiar color según la cantidad de caracteres
+    if (longitud >= 255) {
+        $('#contadorCaracteres').css('color', '#dc3545'); // Rojo cuando llega al límite
+        $('#contadorCaracteres').css('font-weight', 'bold');
+    } else if (longitud >= 230) {
+        $('#contadorCaracteres').css('color', '#ffc107'); // Amarillo cuando está cerca
+        $('#contadorCaracteres').css('font-weight', 'normal');
+    } else {
+        $('#contadorCaracteres').css('color', '#6c757d'); // Gris normal
+        $('#contadorCaracteres').css('font-weight', 'normal');
+    }
+});
+
+// Validar al pegar texto
+$(document).on('paste', '#nuevoComentario', function (e) {
+    var pastedText = (e.originalEvent || e).clipboardData.getData('text/plain');
+    var currentText = $(this).val();
+    var maxLength = 255;
+
+    // Si el texto pegado más el actual excede el límite, truncar
+    if ((currentText + pastedText).length > maxLength) {
+        e.preventDefault();
+        var remainingLength = maxLength - currentText.length;
+        var truncatedText = pastedText.substring(0, remainingLength);
+
+        // Insertar el texto truncado
+        var textarea = this;
+        var startPos = textarea.selectionStart;
+        var endPos = textarea.selectionEnd;
+        textarea.value = currentText.substring(0, startPos) + truncatedText + currentText.substring(endPos);
+
+        // Actualizar contador
+        $('#contadorCaracteres').text(textarea.value.length);
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Texto truncado',
+            text: 'El texto pegado excedía el límite de 255 caracteres y fue recortado.',
+            timer: 3000,
+            showConfirmButton: false
+        });
+    }
+});

@@ -342,7 +342,7 @@ GO
 -- Sprint #2
 
 -- SP para obtener estudiantes asignados a un profesor
-CREATE OR ALTER PROCEDURE ObtenerEstudiantesParaEvaluacionSP
+CREATE OR ALTER PROCEDURE [dbo].[ObtenerEstudiantesParaEvaluacionSP]
     @IdProfesor INT
 AS
 BEGIN
@@ -368,18 +368,23 @@ BEGIN
     INNER JOIN PracticaEstudianteTB p ON u.IdUsuario = p.IdUsuario
     LEFT JOIN VacantesPracticasTB v ON p.IdVacante = v.IdVacante
     LEFT JOIN NotasEstudiantesTB n ON u.IdUsuario = n.IdUsuario
-    WHERE u.IdRol = 1 -- Estudiantes
-        AND u.IdEstado = 1 -- Activos
-        AND p.IdEstado IN (
-            SELECT IdEstado FROM EstadosTB 
-            WHERE Descripcion IN ('En Curso')
+    INNER JOIN EstadosTB est ON p.IdEstado = est.IdEstado
+    WHERE u.IdRol = 1 
+        AND u.IdEstado = 1 
+        AND u.EstadoAcademico = 1 
+        AND est.Descripcion = 'En Curso' 
+        AND EXISTS (
+            SELECT 1 
+            FROM UsuarioEspecialidadTB esp
+            WHERE esp.IdUsuario = @IdProfesor
+                AND esp.IdEspecialidad = ue.IdEspecialidad
+                AND esp.IdEstado = 1
         )
     ORDER BY u.Nombre, u.Apellido1;
 END
-GO
 
 -- SP para obtener perfil completo del estudiante
-CREATE OR ALTER PROCEDURE ObtenerPerfilEstudianteSP
+CREATE OR ALTER PROCEDURE [dbo].[ObtenerPerfilEstudianteSP]
     @IdUsuario INT
 AS
 BEGIN
@@ -390,12 +395,14 @@ BEGIN
         em.Email AS Correo,
         t.Telefono,
         d.DireccionExacta + ', ' + dis.Nombre + ', ' + c.Nombre + ', ' + p.Nombre AS Direccion,
-        CASE WHEN u.Nombre LIKE '%a' THEN 'Femenino' ELSE 'Masculino' END AS Sexo, -- Ajustar según tu campo
+        CASE WHEN u.Sexo = 'M' THEN 'Masculino' WHEN u.Sexo = 'F' THEN 'Femenino' ELSE u.Sexo END AS Sexo,
         e.Nombre AS Especialidad,
         DATEDIFF(YEAR, u.FechaNacimiento, GETDATE()) AS Edad,
         s.Seccion,
         emp.NombreEmpresa,
-        temp.Telefono AS TelefonoEmpresa
+        temp.Telefono AS TelefonoEmpresa,
+        pr.IdVacante,
+        pr.IdUsuario
     FROM UsuariosTB u
     LEFT JOIN EmailsTB em ON u.IdUsuario = em.IdUsuario
     LEFT JOIN TelefonosTB t ON u.IdUsuario = t.IdUsuario
@@ -412,7 +419,6 @@ BEGIN
     LEFT JOIN TelefonosTB temp ON emp.IdEmpresa = temp.IdEmpresa
     WHERE u.IdUsuario = @IdUsuario;
 END
-GO
 
 -- SP para obtener comentarios del estudiante
 CREATE OR ALTER PROCEDURE ObtenerComentariosEstudianteSP

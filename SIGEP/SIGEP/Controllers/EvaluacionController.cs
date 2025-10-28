@@ -91,6 +91,8 @@ namespace SIGEP.Controllers
                             Seccion = perfil.Seccion,
                             NombreEmpresa = perfil.NombreEmpresa,
                             TelefonoEmpresa = perfil.TelefonoEmpresa,
+                            IdVacante = perfil.IdVacante,      
+                            IdUsuario = perfil.IdUsuario,      
                             Comentarios = comentarios
                         }
                     };

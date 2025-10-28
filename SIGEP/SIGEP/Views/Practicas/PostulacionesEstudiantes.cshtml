@@ -9,9 +9,13 @@
 <div class="postulaciones-wrapper">
     <h4 class="section-title">Mis Postulaciones</h4>
 
-    <button class="btn btn-verde-oscuro mb-3" data-bs-toggle="modal" data-bs-target="#modalAutogestion">
-        <i class="fas fa-plus me-2"></i>Autogestionar Práctica
-    </button>
+
+    @if (Model.EstadoAcademico)
+    {
+        <button class="btn btn-verde-oscuro mb-3" data-bs-toggle="modal" data-bs-target="#modalAutogestion">
+            <i class="fas fa-plus me-2"></i>Autogestionar Práctica
+        </button>
+    }
 
     @if (Model?.Postulaciones != null && Model.Postulaciones.Any())
     {

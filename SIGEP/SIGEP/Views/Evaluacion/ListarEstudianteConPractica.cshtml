@@ -107,25 +107,30 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-
             <div class="modal-body">
                 <p><strong>Nombre:</strong> <span id="nombreEstudiante"></span></p>
                 <p><strong>Cédula:</strong> <span id="cedulaEstudiante"></span></p>
                 <p><strong>Práctica Asignada:</strong> <span id="practicaAsignada"></span></p>
-
                 <hr>
-
-                <h6>Comentarios anteriores</h6>
-                <ul id="comentariosAnteriores" class="list-group mb-3">
+                <h6 class="mb-3">Comentarios anteriores</h6>
+                <div id="comentariosAnteriores" class="mb-3" style="max-height: 300px; overflow-y: auto;">
                     <!-- Comentarios dinámicos -->
-                </ul>
-
+                </div>
                 <div class="mb-3">
-                    <label for="nuevoComentario" class="form-label">Nuevo Comentario</label>
-                    <textarea class="form-control" id="nuevoComentario" rows="3" placeholder="Escriba el comentario aquí..."></textarea>
+                    <label for="nuevoComentario" class="form-label">
+                        Nuevo Comentario
+                        <span class="text-muted" style="font-size: 0.85rem;">
+                            (<span id="contadorCaracteres">0</span>/255)
+                        </span>
+                    </label>
+                    <textarea class="form-control"
+                              id="nuevoComentario"
+                              rows="3"
+                              maxlength="255"
+                              placeholder="Escriba el comentario aquí..."></textarea>
+                    <small class="text-muted">Máximo 255 caracteres</small>
                 </div>
             </div>
-
             <div class="modal-footer">
                 <button id="btnGuardarComentario" class="btn CerrarModal">
                     <i class="fas fa-save me-1"></i> Guardar
@@ -209,15 +214,8 @@
                 <!-- Sección: Práctica -->
                 <div class="mb-4">
                     <h5 class="section-title">Información de la práctica</h5>
-                    <div class="row">
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Nombre de la empresa</label>
-                            <input type="text" class="form-control" readonly>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Teléfono de Contacto</label>
-                            <input type="text" class="form-control" readonly>
-                        </div>
+                    <div class="row" id="infoPracticaContainer">
+                        <!-- Se cargará dinámicamente con JavaScript -->
                     </div>
                 </div>
 

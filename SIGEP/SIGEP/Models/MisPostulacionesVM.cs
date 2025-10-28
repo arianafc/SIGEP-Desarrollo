@@ -8,6 +8,7 @@ namespace SIGEP.Models
     public class MisPostulacionesVM
     {
         public List<PostulacionEstudianteVM> Postulaciones { get; set; } = new List<PostulacionEstudianteVM>();
+        public bool EstadoAcademico { get; set; } = true;
     }
 
     public class PostulacionEstudianteVM
