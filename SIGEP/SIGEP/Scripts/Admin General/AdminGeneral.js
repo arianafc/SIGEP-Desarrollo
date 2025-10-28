@@ -1,4 +1,4 @@
-(function () {
+ï»¿(function () {
     const BASE = '/AdministracionGeneral';
     const tabs = ['usuarios', 'especialidades', 'secciones'];
     let dtUsuarios, dtEspecialidades, dtSecciones;
@@ -14,7 +14,7 @@
         processing: "Procesando...",
         search: "Buscar:",
         zeroRecords: "No se encontraron resultados",
-        paginate: { first: "Primero", last: "Último", next: "Siguiente", previous: "Anterior" },
+        paginate: { first: "Primero", last: "Ãšltimo", next: "Siguiente", previous: "Anterior" },
         aria: { sortAscending: ": activar para ordenar ascendente", sortDescending: ": activar para ordenar descendente" }
     };
 
@@ -41,11 +41,11 @@
 
     $(document).ajaxError(function (e, xhr) {
         if (xhr && xhr.status === 401) {
-            Swal.fire({ icon: 'warning', title: 'No autorizado', text: 'Debes iniciar sesión como Coordinador.' })
+            Swal.fire({ icon: 'warning', title: 'No autorizado', text: 'Debes iniciar sesiÃ³n como Coordinador.' })
                 .then(() => location.href = '/Account/Login');
             return;
         }
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un problema de comunicación.' });
+        Swal.fire({ icon: 'error', title: 'Error', text: 'OcurriÃ³ un problema de comunicaciÃ³n.' });
     });
 
     // ============================
@@ -107,7 +107,7 @@
             rol: $('#rol').val()
         })
             .done(r => {
-                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
+                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Ã‰xito' : 'Error', text: r.msg || '' })
                     .then(() => { if (r.ok) $('#modalEditarRolUsuario').modal('hide'); loadUsuarios(); });
             })
             .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar el rol.' }));
@@ -123,13 +123,13 @@
         const verbo = nuevo === 'Inactivo' ? 'desactivar' : 'activar';
 
         Swal.fire({
-            title: `¿Deseas ${verbo} a ${nombre}?`,
-            icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'Cancelar'
+            title: `Â¿Deseas ${verbo} a ${nombre}?`,
+            icon: 'question', showCancelButton: true, confirmButtonText: 'SÃ­', cancelButtonText: 'Cancelar'
         }).then(res => {
             if (!res.isConfirmed) return;
             $.post(`${BASE}/CambiarEstadoUsuario`, { idUsuario: id, nuevoEstado: nuevo })
                 .done(r => {
-                    Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
+                    Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Ã‰xito' : 'Error', text: r.msg || '' })
                         .then(() => loadUsuarios());
                 })
                 .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado.' }));
@@ -172,14 +172,14 @@
     }
 
 
-    // Crear (sin descripción)
+    // Crear (sin descripciÃ³n)
     $('#formCrearEspecialidad').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/CrearEspecialidad`, {
             nombre: $('#nombreEspecialidad').val()
         })
             .done(r => {
-                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
+                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Ã‰xito' : 'Error', text: r.msg || '' })
                     .then(() => { if (r.ok) $('#modalCrearEspecialidad').modal('hide'); loadEspecialidades(); });
             })
             .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo crear la especialidad.' }));
@@ -192,7 +192,7 @@
         $('#modalEditarEspecialidad').modal('show');
     });
 
-    // Editar (sin descripción)
+    // Editar (sin descripciÃ³n)
     $('#formEditarEspecialidad').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/EditarEspecialidad`, {
@@ -200,7 +200,7 @@
             nombre: $('#editarNombreEspecialidad').val()
         })
             .done(r => {
-                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
+                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Ã‰xito' : 'Error', text: r.msg || '' })
                     .then(() => { if (r.ok) $('#modalEditarEspecialidad').modal('hide'); loadEspecialidades(); });
             })
             .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo editar la especialidad.' }));
@@ -214,12 +214,12 @@
         const nuevo = actual === 1 ? 'Inactivo' : 'Activo';
         const verbo = nuevo === 'Inactivo' ? 'desactivar' : 'activar';
 
-        Swal.fire({ title: `¿Deseas ${verbo} la especialidad?`, icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'Cancelar' })
+        Swal.fire({ title: `Â¿Deseas ${verbo} la especialidad?`, icon: 'question', showCancelButton: true, confirmButtonText: 'SÃ­', cancelButtonText: 'Cancelar' })
             .then(res => {
                 if (!res.isConfirmed) return;
                 $.post(`${BASE}/CambiarEstadoEspecialidad`, { id, nuevoEstado: nuevo })
                     .done(r => {
-                        Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
+                        Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Ã‰xito' : 'Error', text: r.msg || '' })
                             .then(() => loadEspecialidades());
                     })
                     .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado.' }));
@@ -262,18 +262,40 @@
     }
 
 
-    // Crear (sin descripción)
+    // Crear (sin descripciÃ³n)
     $('#formCrearSeccion').on('submit', function (e) {
         e.preventDefault();
-        $.post(`${BASE}/CrearSeccion`, {
-            nombreSeccion: $('#nombreSeccion').val()
-        })
-            .done(r => {
-                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
-                    .then(() => { if (r.ok) $('#modalCrearSeccion').modal('hide'); loadSecciones(); });
-            })
-            .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo crear la sección.' }));
+
+        $.ajax({
+            url: `${BASE}/CrearSeccion`,
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({
+                nombreSeccion: $('#nombreSeccion').val().trim()
+            }),
+            success: function (r) {
+                Swal.fire({
+                    icon: r.ok ? 'success' : 'error',
+                    title: r.ok ? 'Ã‰xito' : 'Error',
+                    text: r.msg || ''
+                }).then(() => {
+                    if (r.ok) {
+                        $('#modalCrearSeccion').modal('hide');
+                        loadSecciones();
+                    }
+                });
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo crear la secciÃ³n.'
+                });
+            }
+        });
     });
+
 
     $(document).on('click', '.btn-editar-seccion', function (e) {
         e.preventDefault();
@@ -282,7 +304,7 @@
         $('#modalEditarSeccion').modal('show');
     });
 
-    // Editar (sin descripción)
+    // Editar (sin descripciÃ³n)
     $('#formEditarSeccion').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/EditarSeccion`, {
@@ -290,10 +312,10 @@
             nombreSeccion: $('#editarNombreSeccion').val()
         })
             .done(r => {
-                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
+                Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Ã‰xito' : 'Error', text: r.msg || '' })
                     .then(() => { if (r.ok) $('#modalEditarSeccion').modal('hide'); loadSecciones(); });
             })
-            .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo editar la sección.' }));
+            .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo editar la secciÃ³n.' }));
     });
 
     // Toggle estado
@@ -304,12 +326,12 @@
         const nuevo = actual === 1 ? 'Inactivo' : 'Activo';
         const verbo = nuevo === 'Inactivo' ? 'desactivar' : 'activar';
 
-        Swal.fire({ title: `¿Deseas ${verbo} la sección?`, icon: 'question', showCancelButton: true, confirmButtonText: 'Sí', cancelButtonText: 'Cancelar' })
+        Swal.fire({ title: `Â¿Deseas ${verbo} la secciÃ³n?`, icon: 'question', showCancelButton: true, confirmButtonText: 'SÃ­', cancelButtonText: 'Cancelar' })
             .then(res => {
                 if (!res.isConfirmed) return;
                 $.post(`${BASE}/CambiarEstadoSeccion`, { id, nuevoEstado: nuevo })
                     .done(r => {
-                        Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Éxito' : 'Error', text: r.msg || '' })
+                        Swal.fire({ icon: r.ok ? 'success' : 'error', title: r.ok ? 'Ã‰xito' : 'Error', text: r.msg || '' })
                             .then(() => loadSecciones());
                     })
                     .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cambiar el estado.' }));
@@ -317,7 +339,7 @@
     });
 
     // ============================
-    //      INICIALIZACIÓN
+    //      INICIALIZACIÃ“N
     // ============================
     const inicial = window.__TAB_INICIAL__ || (new URLSearchParams(location.search).get('tab') || 'usuarios');
     show(inicial);

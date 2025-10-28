@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using SIGEP.EF;
+using SIGEP.Models;
 
 namespace SIGEP.Web.Controllers
 {
@@ -17,6 +18,8 @@ namespace SIGEP.Web.Controllers
         }
 
         // ===== VISTA =====
+        [FiltroSesion]
+        [FiltroCoordinador]
         [HttpGet]
         public ActionResult AdministracionGeneral(string tab = "usuarios")
         {
@@ -270,7 +273,14 @@ namespace SIGEP.Web.Controllers
                         IdEstado = 1
                     });
                     db.SaveChanges();
-                    return Json(new { ok = true, msg = "Sección creada correctamente." });
+                    return new JsonResult
+                    {
+                        Data = new { ok = true, msg = "Sección creada correctamente." },
+                        JsonRequestBehavior = JsonRequestBehavior.AllowGet,
+                        ContentEncoding = Encoding.UTF8
+                    };
+
+
                 }
             }
             catch
