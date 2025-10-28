@@ -2032,5 +2032,58 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error interno del servidor: " + ex.Message });
             }
         }
+
+        // ==============================
+        // INICIAR TODAS LAS PRÁCTICAS
+        // ==============================
+        [HttpPost]
+        public JsonResult IniciarPracticas()
+        {
+            try
+            {
+                if (Session["IdRol"] == null || Convert.ToInt32(Session["IdRol"]) != 2)
+                    return Json(new { ok = false, message = "Solo el Coordinador puede iniciar prácticas." });
+
+                using (var db = new SIGEPEntities())
+                {
+                    db.Database.ExecuteSqlCommand("EXEC IniciarPracticasSP");
+                }
+
+                return Json(new { ok = true, message = "✅ Proceso iniciado: prácticas 'Asignadas' pasaron a 'En Curso' y las demás a 'Retirada'." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, message = "Error al iniciar prácticas: " + ex.Message });
+            }
+        }
+
+
+        // ==============================
+        // FINALIZAR TODAS LAS PRÁCTICAS
+        // ==============================
+        [HttpPost]
+        public JsonResult FinalizarPracticas()
+        {
+            try
+            {
+                if (Session["IdRol"] == null || Convert.ToInt32(Session["IdRol"]) != 2)
+                    return Json(new { ok = false, message = "Solo el Coordinador puede finalizar prácticas." });
+
+                using (var db = new SIGEPEntities())
+                {
+                    db.Database.ExecuteSqlCommand("EXEC FinalizarPracticasSP");
+                }
+
+                return Json(new
+                {
+                    ok = true,
+                    message = "✅ Prácticas finalizadas: estados actualizados, vacantes archivadas y estudiantes egresados correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, message = "Error al finalizar prácticas: " + ex.Message });
+            }
+        }
     }
 }

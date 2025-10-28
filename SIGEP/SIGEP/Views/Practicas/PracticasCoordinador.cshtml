@@ -35,6 +35,16 @@
     </div>
 </h2>
 
+<!-- 🔹 NUEVOS BOTONES para iniciar y finalizar prácticas -->
+<div class="d-flex justify-content-end mb-3">
+    <button id="btnIniciarPracticas" class="btn btn-success me-2">
+        <i class="fas fa-play"></i> Iniciar Prácticas
+    </button>
+    <button id="btnFinalizarPracticas" class="btn btn-danger">
+        <i class="fas fa-stop"></i> Finalizar Prácticas
+    </button>
+</div>
+
 <div class="card rounded-5 p-3">
     <table id="miTabla" class="display responsive nowrap w-100">
         <thead>
@@ -199,6 +209,53 @@
                     }
                 });
             });
+
+             // === INICIAR PRÁCTICAS ===
+            $('#btnIniciarPracticas').click(function () {
+                Swal.fire({
+                    title: '¿Iniciar todas las prácticas?',
+                    html: 'Las prácticas <b>Asignadas</b> pasarán a <b>En Curso</b>.<br>Las demás se marcarán como <b>Retirada</b> con comentario automático.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, iniciar',
+                    cancelButtonText: 'Cancelar'
+                }).then(res => {
+                    if (res.isConfirmed) {
+                        $.post('@Url.Action("IniciarPracticas", "Practicas")', function (r) {
+                            if (r.ok) {
+                                Swal.fire('Hecho', r.message, 'success');
+                                table.ajax.reload(null, false);
+                            } else {
+                                Swal.fire('Error', r.message, 'error');
+                            }
+                        }).fail(() => Swal.fire('Error', 'No se pudo iniciar el proceso.', 'error'));
+                    }
+                });
+            });
+
+            // === FINALIZAR PRÁCTICAS ===
+            $('#btnFinalizarPracticas').click(function () {
+                Swal.fire({
+                    title: '¿Finalizar todas las prácticas?',
+                    html: 'Las prácticas en estado <b>Aprobada</b> o <b>Rezagado</b> se marcarán como <b>Finalizadas</b>.<br>Las vacantes serán archivadas y los estudiantes aprobados pasarán a <b>Egresado</b>.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, finalizar',
+                    cancelButtonText: 'Cancelar'
+                }).then(res => {
+                    if (res.isConfirmed) {
+                        $.post('@Url.Action("FinalizarPracticas", "Practicas")', function (r) {
+                            if (r.ok) {
+                                Swal.fire('Hecho', r.message, 'success');
+                                table.ajax.reload(null, false);
+                            } else {
+                                Swal.fire('Error', r.message, 'error');
+                            }
+                        }).fail(() => Swal.fire('Error', 'No se pudo finalizar el proceso.', 'error'));
+                    }
+                });
+            });
+
 
         });
     </script>
