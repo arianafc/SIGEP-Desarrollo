@@ -2063,6 +2063,7 @@ namespace SIGEP.Controllers
         // ==============================
         [HttpPost]
         public JsonResult FinalizarPracticas()
+
         {
             try
             {

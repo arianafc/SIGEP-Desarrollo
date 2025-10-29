@@ -17,13 +17,7 @@ function inicializarTabla() {
                 text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
                 className: 'btn btn-verde-personalizado btn-sm'
             },
-            {
-                extend: 'pdfHtml5',
-                text: '<i class="fas fa-file-pdf"></i> Exportar a PDF',
-                className: 'btn btn-verde-personalizado btn-sm',
-                orientation: 'landscape',
-                pageSize: 'A4'
-            },
+            
             {
                 extend: 'print',
                 text: '<i class="fas fa-print"></i> Imprimir',

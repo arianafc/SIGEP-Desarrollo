@@ -452,6 +452,7 @@
     <Content Include="Scripts\Perfil\Perfil.js" />
     <Content Include="Scripts\popper.min.js" />
     <Content Include="Scripts\Practicas\Autogestion.js" />
+    <Content Include="Scripts\Practicas\PracticasCoordinador.js" />
     <Content Include="Scripts\Practicas\ScriptPracticas.js" />
     <Content Include="Scripts\Practicas\VacantesEstudiantes.js" />
     <Content Include="Scripts\Practicas\VistaVacantesProfesor.js" />

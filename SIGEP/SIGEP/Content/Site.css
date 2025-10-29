@@ -405,3 +405,44 @@
     .vacantes-egresado .modal-body * {
         color: #000 !important;
     }
+
+/* === PRÁCTICAS COORDINADOR === */
+
+.btn-verde-claro {
+    background-color: #768C46 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 8px 16px;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-verde-claro:hover {
+        background-color: #8CA653 !important;
+    }
+
+.vacantes-titulo {
+    color: #2D594D;
+    font-weight: 600;
+}
+
+#filtroEstadoAcademico,
+#filtroPractica,
+#filtroEspecialidad {
+    min-width: 160px;
+    border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+    .row.align-items-end {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .col-md-4.text-end {
+        text-align: left !important;
+        margin-top: 10px;
+    }
+}
+
