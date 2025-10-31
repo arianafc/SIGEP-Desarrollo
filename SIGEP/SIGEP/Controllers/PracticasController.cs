@@ -148,7 +148,7 @@ namespace SIGEP.Controllers
             {
                 try
                 {
-                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1; 
+                    var idEstado = model.IdEstado > 0 ? model.IdEstado : 1;
                     var vacante = new VacantesPracticasTB
                     {
                         Nombre = model.Nombre,
@@ -361,7 +361,7 @@ namespace SIGEP.Controllers
                     // ==========================================
                     // DEFINICIÓN DE ESTADOS
                     // ==========================================
-                    int idArchivado = 10; 
+                    int idArchivado = 10;
 
                     // Estados que representan procesos activos
                     var estadosActivos = new int[] { 3, 5, 6, 11, 12 }; // Ejemplo: En proceso, Asignada, En curso, etc.
@@ -469,7 +469,7 @@ namespace SIGEP.Controllers
                              select new
                              {
                                  p.IdPractica,
-                                 p.IdVacante, 
+                                 p.IdVacante,
                                  u.IdUsuario,
                                  u.Cedula,
                                  NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
@@ -1089,10 +1089,10 @@ namespace SIGEP.Controllers
                     }).ToList();
                 ViewBag.Usuarios = usuarios;
 
-              
-                ViewBag.Modalidades = ObtenerModalidades();        
+
+                ViewBag.Modalidades = ObtenerModalidades();
                 ViewBag.Especialidades = ObtenerEspecialidades();
-                ViewBag.Estados = ObtenerEstadosVacante();      
+                ViewBag.Estados = ObtenerEstadosVacante();
 
                 return View(vacantes);
             }
@@ -1389,6 +1389,9 @@ namespace SIGEP.Controllers
         {
             if (Session["IdUsuario"] == null)
                 return RedirectToAction("Login", "Home");
+            ViewBag.Especialidades = ObtenerEspecialidades();
+            ViewBag.Modalidades = ObtenerModalidades();
+            ViewBag.Estados = ObtenerEstados();
 
             return View(); // buscará Views/Practicas/PracticasCoordinador.cshtml
         }
@@ -1589,7 +1592,7 @@ namespace SIGEP.Controllers
                     var viewModel = new MisPostulacionesVM
                     {
                         Postulaciones = postulaciones,
-                        EstadoAcademico = estadoAcademico 
+                        EstadoAcademico = estadoAcademico
                     };
 
                     return View(viewModel);
@@ -1643,6 +1646,8 @@ namespace SIGEP.Controllers
                 EstadoPostulacion = x.EstadoPractica,
                 Empresa = UltimaEmpresa(x.IdUsuario),
 
+                // EstadoAcademico = x.EstadoAcademico == true ? "Aprobado" : "Rezagado",
+
                 // ⬇️ Normalizamos el nullable a bool y además caemos a IdPracticaVacante si hace falta
                 TieneRelacionEnVacante =
         ( /* si existe en el SP */ (bool?)(x.TieneRelacionEnVacante ?? null) ?? false)
@@ -1682,7 +1687,7 @@ namespace SIGEP.Controllers
             return q.FirstOrDefault();
         }
 
-        
+
         [HttpPost]
         public JsonResult DesasignarPractica(int idPractica, string comentario)
         {
@@ -1808,6 +1813,7 @@ namespace SIGEP.Controllers
 
             // ⬇️ NUEVA: para evitar el "no existe en el contexto actual"
             public bool TieneRelacionEnVacante { get; set; }
+            public string EstadoAcademico { get; set; }
         }
 
 
@@ -2032,7 +2038,6 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error interno del servidor: " + ex.Message });
             }
         }
-
         // ==============================
         // INICIAR TODAS LAS PRÁCTICAS
         // ==============================
@@ -2044,9 +2049,17 @@ namespace SIGEP.Controllers
                 if (Session["IdRol"] == null || Convert.ToInt32(Session["IdRol"]) != 2)
                     return Json(new { ok = false, message = "Solo el Coordinador puede iniciar prácticas." });
 
+                if (Session["IdUsuario"] == null)
+                    return Json(new { ok = false, message = "Sesión expirada." });
+
+                int idUsuarioCoord = Convert.ToInt32(Session["IdUsuario"]);
+
                 using (var db = new SIGEPEntities())
                 {
-                    db.Database.ExecuteSqlCommand("EXEC IniciarPracticasSP");
+                    db.Database.ExecuteSqlCommand(
+                        "EXEC IniciarPracticasSP @IdUsuarioCoordinador",
+                        new SqlParameter("@IdUsuarioCoordinador", idUsuarioCoord)
+                    );
                 }
 
                 return Json(new { ok = true, message = "✅ Proceso iniciado: prácticas 'Asignadas' pasaron a 'En Curso' y las demás a 'Retirada'." });
@@ -2057,22 +2070,28 @@ namespace SIGEP.Controllers
             }
         }
 
-
         // ==============================
         // FINALIZAR TODAS LAS PRÁCTICAS
         // ==============================
         [HttpPost]
         public JsonResult FinalizarPracticas()
-
         {
             try
             {
                 if (Session["IdRol"] == null || Convert.ToInt32(Session["IdRol"]) != 2)
                     return Json(new { ok = false, message = "Solo el Coordinador puede finalizar prácticas." });
 
+                if (Session["IdUsuario"] == null)
+                    return Json(new { ok = false, message = "Sesión expirada." });
+
+                int idUsuarioCoord = Convert.ToInt32(Session["IdUsuario"]);
+
                 using (var db = new SIGEPEntities())
                 {
-                    db.Database.ExecuteSqlCommand("EXEC FinalizarPracticasSP");
+                    db.Database.ExecuteSqlCommand(
+                        "EXEC FinalizarPracticasSP @IdUsuarioCoordinador",
+                        new SqlParameter("@IdUsuarioCoordinador", idUsuarioCoord)
+                    );
                 }
 
                 return Json(new

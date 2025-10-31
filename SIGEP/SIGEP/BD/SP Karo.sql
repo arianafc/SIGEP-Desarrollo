@@ -74,10 +74,11 @@ END
 GO
 
 --SP 28 DE OCTUBRE
-USE SIGEP
+USE SIGEP;
 GO
 
 CREATE OR ALTER PROCEDURE IniciarPracticasSP
+    @IdUsuarioCoordinador INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -88,116 +89,158 @@ BEGIN
         @idEstadoRetirada INT;
 
     SELECT @idEstadoAsignada = IdEstado FROM EstadosTB WHERE Descripcion = 'Asignada';
-    SELECT @idEstadoEnCurso = IdEstado FROM EstadosTB WHERE Descripcion = 'En Curso';
-    SELECT @idEstadoRetirada = IdEstado FROM EstadosTB WHERE Descripcion = 'Retirada';
+    SELECT @idEstadoEnCurso   = IdEstado FROM EstadosTB WHERE Descripcion = 'En Curso';
+    SELECT @idEstadoRetirada  = IdEstado FROM EstadosTB WHERE Descripcion = 'Retirada';
 
     IF @idEstadoAsignada IS NULL OR @idEstadoEnCurso IS NULL OR @idEstadoRetirada IS NULL
     BEGIN
-        RAISERROR('Faltan estados requeridos en la tabla EstadosTB.', 16, 1);
+        RAISERROR('Faltan estados requeridos en EstadosTB.', 16, 1);
         RETURN;
     END;
 
-    -- 1️⃣ Pasar a “En Curso” las prácticas Asignadas de estudiantes activos
-    UPDATE p
-    SET p.IdEstado = @idEstadoEnCurso,
-        p.FechaAplicacion = GETDATE()
-    FROM PracticaEstudianteTB p
-    INNER JOIN UsuariosTB u ON u.IdUsuario = p.IdUsuario
-    WHERE p.IdEstado = @idEstadoAsignada
-      AND u.EstadoAcademico = 1;
+    BEGIN TRY
+        BEGIN TRAN;
 
-    -- 2️⃣ Pasar a “Retirada” todas las demás prácticas con comentario automático
-    DECLARE @mensaje NVARCHAR(400) = N'La práctica fue retirada automáticamente porque nunca fue asignada al iniciar el proceso general.';
+        -- 1️⃣ Cambiar a “En Curso” solo las prácticas asignadas de estudiantes activos
+        UPDATE p
+        SET p.IdEstado = @idEstadoEnCurso,
+            p.FechaAplicacion = GETDATE()
+        FROM PracticaEstudianteTB p
+        INNER JOIN UsuariosTB u ON u.IdUsuario = p.IdUsuario
+        WHERE p.IdEstado = @idEstadoAsignada
+          AND u.EstadoAcademico = 1;
 
-    DECLARE @idPractica INT;
+        -- 2️⃣ Cambiar a “Retirada” las demás prácticas (que no estén asignadas o en curso)
+        DECLARE @mensaje NVARCHAR(400) = 
+            N'La práctica fue retirada automáticamente porque nunca fue asignada al iniciar el proceso general.';
 
-    DECLARE c CURSOR FOR
-        SELECT IdPractica FROM PracticaEstudianteTB
-        WHERE IdEstado NOT IN (@idEstadoAsignada, @idEstadoEnCurso);
+        UPDATE p
+        SET p.IdEstado = @idEstadoRetirada,
+            p.FechaAplicacion = GETDATE()
+        FROM PracticaEstudianteTB p
+        WHERE p.IdEstado NOT IN (@idEstadoAsignada, @idEstadoEnCurso);
 
-    OPEN c;
-    FETCH NEXT FROM c INTO @idPractica;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        UPDATE PracticaEstudianteTB
-        SET IdEstado = @idEstadoRetirada,
-            FechaAplicacion = GETDATE()
-        WHERE IdPractica = @idPractica;
-
+        -- 3️⃣ Comentario y auditoría
         INSERT INTO ComentariosPracticaTB (Comentario, Fecha, IdUsuario, IdPractica)
-        VALUES (@mensaje, GETDATE(), 1, @idPractica);
+        SELECT @mensaje, GETDATE(), @IdUsuarioCoordinador, p.IdPractica
+        FROM PracticaEstudianteTB p
+        WHERE p.IdEstado = @idEstadoRetirada;
 
         INSERT INTO AuditoriaGlobalTB (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
-        VALUES (1, 'PracticaEstudianteTB', @idPractica, 'Cambio automático a Retirada', 'IdEstado', 'N/A', 'Retirada');
+        SELECT DISTINCT @IdUsuarioCoordinador, 'PracticaEstudianteTB', p.IdPractica,
+               'Cambio automático a Retirada', 'IdEstado', 'N/A', 'Retirada'
+        FROM PracticaEstudianteTB p
+        WHERE p.IdEstado = @idEstadoRetirada;
 
-        FETCH NEXT FROM c INTO @idPractica;
-    END;
+        INSERT INTO AuditoriaGlobalTB (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
+        SELECT DISTINCT @IdUsuarioCoordinador, 'PracticaEstudianteTB', p.IdPractica,
+               'Cambio automático a En Curso', 'IdEstado', 'Asignada', 'En Curso'
+        FROM PracticaEstudianteTB p
+        WHERE p.IdEstado = @idEstadoEnCurso;
 
-    CLOSE c;
-    DEALLOCATE c;
-
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRAN;
+        THROW;
+    END CATCH
 END;
 GO
 
+USE SIGEP;
+GO
+
 CREATE OR ALTER PROCEDURE FinalizarPracticasSP
+    @IdUsuarioCoordinador INT
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DECLARE 
-        @idEstadoAprobada INT,
-        @idEstadoRezagado INT,
+        @idEstadoAprobada   INT,
+        @idEstadoRezagado   INT,
         @idEstadoFinalizada INT,
-        @idEstadoArchivado INT,
-        @idRolEgresado INT;
+        @idEstadoArchivado  INT,
+        @idRolEgresado      INT;
 
-    SELECT @idEstadoAprobada = IdEstado FROM EstadosTB WHERE Descripcion = 'Aprobada';
-    SELECT @idEstadoRezagado = IdEstado FROM EstadosTB WHERE Descripcion = 'Rezagado';
+    SELECT @idEstadoAprobada   = IdEstado FROM EstadosTB WHERE Descripcion = 'Aprobada';
+    SELECT @idEstadoRezagado   = IdEstado FROM EstadosTB WHERE Descripcion = 'Rezagado';
     SELECT @idEstadoFinalizada = IdEstado FROM EstadosTB WHERE Descripcion = 'Finalizada';
-    SELECT @idEstadoArchivado = IdEstado FROM EstadosTB WHERE Descripcion = 'Archivado';
-    SELECT @idRolEgresado = IdRol FROM RolesTB WHERE Descripcion = 'Egresado';
+    SELECT @idEstadoArchivado  = IdEstado FROM EstadosTB WHERE Descripcion = 'Archivado'; -- corregido
+    SELECT @idRolEgresado      = IdRol    FROM RolesTB   WHERE Descripcion = 'Egresado';
 
-    IF @idEstadoAprobada IS NULL OR @idEstadoRezagado IS NULL OR @idEstadoFinalizada IS NULL OR @idRolEgresado IS NULL
+    IF @idEstadoAprobada IS NULL OR @idEstadoRezagado IS NULL 
+       OR @idEstadoFinalizada IS NULL OR @idEstadoArchivado IS NULL 
+       OR @idRolEgresado IS NULL
     BEGIN
-        RAISERROR('Faltan estados o roles requeridos.', 16, 1);
+        RAISERROR('Faltan estados o roles requeridos. Verifique EstadosTB y RolesTB.', 16, 1);
         RETURN;
     END;
 
-    -- 1️⃣ Finalizar prácticas en Aprobada o Rezagado
-    UPDATE p
-    SET p.IdEstado = @idEstadoFinalizada,
-        p.FechaAplicacion = GETDATE()
-    FROM PracticaEstudianteTB p
-    WHERE p.IdEstado IN (@idEstadoAprobada, @idEstadoRezagado);
+    BEGIN TRY
+        BEGIN TRAN;
 
-    -- 2️⃣ Archivar TODAS las vacantes relacionadas
-    UPDATE v
-    SET v.IdEstado = @idEstadoArchivado
-    FROM VacantesPracticasTB v
-    WHERE EXISTS (SELECT 1 FROM PracticaEstudianteTB p WHERE p.IdVacante = v.IdVacante);
+        --------------------------------------------------------
+        -- 1️⃣ Cambiar prácticas en Aprobada o Rezagado → Finalizada
+        --------------------------------------------------------
+        UPDATE p
+        SET p.IdEstado = @idEstadoFinalizada,
+            p.FechaAplicacion = GETDATE()
+        FROM PracticaEstudianteTB p
+        WHERE p.IdEstado IN (@idEstadoAprobada, @idEstadoRezagado);
 
-    -- 3️⃣ Pasar a rol Egresado solo estudiantes aprobados (no rezagados)
-    UPDATE u
-    SET u.IdRol = @idRolEgresado
-    FROM UsuariosTB u
-    WHERE u.EstadoAcademico = 1
-      AND EXISTS (
-          SELECT 1 FROM PracticaEstudianteTB p
-          WHERE p.IdUsuario = u.IdUsuario
-            AND p.IdEstado = @idEstadoAprobada
-      )
-      AND NOT EXISTS (
-          SELECT 1 FROM PracticaEstudianteTB p2
-          WHERE p2.IdUsuario = u.IdUsuario
-            AND p2.IdEstado = @idEstadoRezagado
-      );
+        --------------------------------------------------------
+        -- 2️⃣ Archivar vacantes que ya tuvieron prácticas
+        --------------------------------------------------------
+        UPDATE v
+        SET v.IdEstado = @idEstadoArchivado
+        FROM VacantesPracticasTB v
+        WHERE EXISTS (SELECT 1 FROM PracticaEstudianteTB p WHERE p.IdVacante = v.IdVacante);
 
-    -- 4️⃣ Auditoría
-    INSERT INTO AuditoriaGlobalTB (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
-    SELECT DISTINCT 1, 'PracticaEstudianteTB', p.IdPractica, 'Finalización de prácticas', 'IdEstado', 'Aprobada/Rezagado', 'Finalizada'
-    FROM PracticaEstudianteTB p
-    WHERE p.IdEstado = @idEstadoFinalizada;
+        --------------------------------------------------------
+        -- 3️⃣ Pasar estudiantes aprobados a Rol Egresado
+        --------------------------------------------------------
+        UPDATE u
+        SET u.IdRol = @idRolEgresado
+        FROM UsuariosTB u
+        WHERE u.EstadoAcademico = 1
+          AND EXISTS (
+              SELECT 1 
+              FROM PracticaEstudianteTB p
+              WHERE p.IdUsuario = u.IdUsuario
+                AND p.IdEstado = @idEstadoFinalizada
+          )
+          AND NOT EXISTS (
+              SELECT 1 
+              FROM PracticaEstudianteTB p2
+              WHERE p2.IdUsuario = u.IdUsuario
+                AND p2.IdEstado = @idEstadoRezagado
+          );
 
+        --------------------------------------------------------
+        -- 4️⃣ Auditoría de finalización
+        --------------------------------------------------------
+        INSERT INTO AuditoriaGlobalTB (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
+        SELECT DISTINCT @IdUsuarioCoordinador, 'PracticaEstudianteTB', p.IdPractica,
+               'Finalización de prácticas', 'IdEstado', 'Aprobada/Rezagado', 'Finalizada'
+        FROM PracticaEstudianteTB p
+        WHERE p.IdEstado = @idEstadoFinalizada;
+
+        --------------------------------------------------------
+        -- 5️⃣ Auditoría de cambio de rol (opcional pero recomendado)
+        --------------------------------------------------------
+        INSERT INTO AuditoriaGlobalTB (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
+        SELECT DISTINCT @IdUsuarioCoordinador, 'UsuariosTB', u.IdUsuario,
+               'Cambio de rol por finalización', 'IdRol', 'Estudiante', 'Egresado'
+        FROM UsuariosTB u
+        WHERE u.IdRol = @idRolEgresado;
+
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRAN;
+        THROW;
+    END CATCH
 END;
 GO
+

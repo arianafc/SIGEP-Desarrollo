@@ -1,14 +1,13 @@
 ﻿$(function () {
-
     console.log("✅ PracticasCoordinador.js cargado correctamente");
 
-    var table = $('#miTabla').DataTable({
+    const table = $('#miTabla').DataTable({
         responsive: true,
         processing: true,
         ajax: {
             url: '/Practicas/ListarEstudiantesJson',
             type: 'GET',
-            dataSrc: json => json.data || []
+            dataSrc: 'data'
         },
         columns: [
             { data: 'Cedula' },
@@ -19,42 +18,34 @@
                 data: 'EstadoPostulacion',
                 render: function (d) {
                     if (!d) return '—';
-                    const estado = d.toLowerCase();
                     const cls =
-                        estado.includes('asignada') ? 'badge-asignada' :
-                            estado.includes('proceso') ? 'badge-en-proceso' :
-                                estado.includes('curso') ? 'badge-en-curso' :
-                                    estado.includes('finalizada') ? 'badge-finalizada' :
-                                        estado.includes('rechazada') ? 'badge-rechazada' :
-                                            estado.includes('retirada') ? 'badge-retirada' :
-                                                estado.includes('aprobada') ? 'badge-aprobada' :
-                                                    estado.includes('rezagado') ? 'badge-rezagado' :
-                                                        'badge-no-asignada';
+                        d === 'Asignada' ? 'badge-asignada' :
+                            d === 'Con Procesos Activos' ? 'badge-en-proceso' :
+                                'badge-no-asignada';
                     return `<span class="badge ${cls}">${d}</span>`;
                 }
             },
             { data: 'Empresa', render: d => d || '—' },
             {
                 data: 'Tipo',
-                render: function (d, type, row) {
-                    // ✅ mostrar el estado académico si existe
-                    const val = row.EstadoVacante || d || row.EstadoAcademico || '—';
-                    const cls =
-                        val.toLowerCase().includes('aprob') ? 'badge-aprobada' :
-                            val.toLowerCase().includes('rezag') ? 'badge-rezagado' :
-                                'badge-secondary';
-                    return `<span class="badge ${cls}">${val}</span>`;
+                render: function (d) {
+                    if (!d || d === '—')
+                        return '<span class="badge badge-secondary">—</span>';
+                    const cls = d.toLowerCase().includes('asign')
+                        ? 'badge-asignada'
+                        : 'badge-en-proceso';
+                    return `<span class="badge ${cls}">${d}</span>`;
                 }
             },
             {
                 data: null,
                 orderable: false,
                 render: function (row) {
-                    let btns = '';
+                    let html = '';
 
                     // 👁️ Ver detalle
                     if (row.IdVacanteUltima && row.IdUsuario) {
-                        btns += `
+                        html += `
                             <a href="javascript:void(0);" class="btn-ver"
                                data-idvacante="${row.IdVacanteUltima}"
                                data-idusuario="${row.IdUsuario}"
@@ -65,7 +56,7 @@
                     }
 
                     // 🎓 Cambiar estado académico
-                    btns += `
+                    html += `
                         <a href="javascript:void(0);" class="btn-cambiar-estado"
                            data-idusuario="${row.IdUsuario}"
                            data-nombre="${row.Nombre}"
@@ -75,9 +66,8 @@
                         </a>`;
 
                     // 🗑️ Desasignar
-                    if (row.IdPracticaVacante &&
-                        (row.EstadoPostulacion === 'Asignada' || row.EstadoPostulacion === 'En proceso de aplicacion')) {
-                        btns += `
+                    if (row.IdPracticaVacante && (row.EstadoPostulacion === 'Asignada' || row.EstadoPostulacion === 'Con Procesos Activos')) {
+                        html += `
                             <a href="javascript:void(0);" class="btn-desasignar"
                                data-idpractica="${row.IdPracticaVacante}"
                                data-nombre="${row.Nombre}"
@@ -87,7 +77,7 @@
                             </a>`;
                     }
 
-                    return btns || '—';
+                    return html || '—';
                 }
             }
         ],
@@ -100,11 +90,14 @@
     $('#filtroPractica').on('change', function () {
         table.column(4).search(this.value).draw();
     });
-    $('#filtroEspecialidad').on('keyup', function () {
-        table.column(2).search(this.value).draw();
+
+    // Filtro Estado de práctica
+    $('#filtroPractica').on('change', function () {
+        table.column(4).search(this.value).draw();
     });
-    $('#filtroEstadoAcademico').on('change', function () {
-        table.column(6).search(this.value).draw(); // estado académico
+
+    $('#filtroEspecialidad').on('change', function () {
+        table.column(2).search(this.value).draw();
     });
 
     // === CAMBIAR ESTADO ACADÉMICO ===
@@ -115,7 +108,10 @@
         Swal.fire({
             title: 'Estado académico de ' + nombre,
             input: 'select',
-            inputOptions: { 'Aprobado': 'Aprobado', 'Rezagado': 'Rezagado' },
+            inputOptions: {
+                'Aprobado': 'Aprobado',
+                'Rezagado': 'Rezagado'
+            },
             inputPlaceholder: 'Selecciona un estado',
             showCancelButton: true,
             confirmButtonText: 'Actualizar',
@@ -138,16 +134,17 @@
         const idVacante = $(this).data('idvacante');
         const idUsuario = $(this).data('idusuario');
         if (!idVacante || !idUsuario) return;
-        window.open(`/Practicas/VisualizacionPostulacion?idVacante=${idVacante}&idUsuario=${idUsuario}`, '_blank');
+        window.location.href= `/Practicas/VisualizacionPostulacion?idVacante=${idVacante}&idUsuario=${idUsuario}`;
     });
 
     // === DESASIGNAR ===
     $(document).on('click', '.btn-desasignar', function () {
         const idPractica = $(this).data('idpractica');
         const nombre = $(this).data('nombre');
+
         Swal.fire({
             title: 'Desasignar práctica',
-            html: `¿Deseas desasignar a <b>${nombre}</b>?<br/><small>Se cambiará a estado <b>Retirada</b>.</small>`,
+            html: `¿Deseas desasignar a <b>${nombre}</b>?<br/><small>Se cambiará el estado a <b>Retirada</b>.</small>`,
             input: 'text',
             inputLabel: 'Comentario (opcional)',
             showCancelButton: true,
@@ -179,10 +176,12 @@
             confirmButtonColor: '#2d594d'
         }).then(res => {
             if (res.isConfirmed) {
-                $.post('/Practicas/IniciarPracticas').done(r => {
-                    Swal.fire(r.ok ? 'Hecho' : 'Error', r.message, r.ok ? 'success' : 'error');
-                    table.ajax.reload(null, false);
-                }).fail(() => Swal.fire('Error', 'No se pudo iniciar el proceso', 'error'));
+                $.post('/Practicas/IniciarPracticas')
+                    .done(r => {
+                        Swal.fire(r.ok ? 'Hecho' : 'Error', r.message, r.ok ? 'success' : 'error');
+                        table.ajax.reload(null, false);
+                    })
+                    .fail(() => Swal.fire('Error', 'No se pudo iniciar el proceso', 'error'));
             }
         });
     });
@@ -191,7 +190,7 @@
     $('#btnFinalizarPracticas').click(function () {
         Swal.fire({
             title: '¿Finalizar todas las prácticas?',
-            html: 'Las prácticas <b>Aprobadas</b> o <b>En Curso</b> se marcarán como <b>Finalizadas</b>.<br>Las vacantes serán archivadas y los estudiantes aprobados pasarán a <b>Egresado</b>.',
+            html: 'Las prácticas <b>Aprobadas</b> o <b>En Curso</b> se marcarán como <b>Finalizadas</b>.<br>Los estudiantes aprobados pasarán a <b>Egresado</b>.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, finalizar',
@@ -199,12 +198,13 @@
             confirmButtonColor: '#768C46'
         }).then(res => {
             if (res.isConfirmed) {
-                $.post('/Practicas/FinalizarPracticas').done(r => {
-                    Swal.fire(r.ok ? 'Hecho' : 'Error', r.message, r.ok ? 'success' : 'error');
-                    table.ajax.reload(null, false);
-                }).fail(() => Swal.fire('Error', 'No se pudo finalizar el proceso', 'error'));
+                $.post('/Practicas/FinalizarPracticas')
+                    .done(r => {
+                        Swal.fire(r.ok ? 'Hecho' : 'Error', r.message, r.ok ? 'success' : 'error');
+                        table.ajax.reload(null, false);
+                    })
+                    .fail(() => Swal.fire('Error', 'No se pudo finalizar el proceso', 'error'));
             }
         });
     });
-
 });
