@@ -294,7 +294,7 @@ BEGIN
             WHEN MAX(CASE WHEN asg.TieneAsignada = 1 THEN 1 ELSE 0 END) = 1 THEN 'Asignada'
             WHEN COUNT(p.IdPractica) > 0 THEN 'Con Procesos Activos'
             ELSE 'Sin Procesos Activos'
-        END AS EstadoPractica,                    -- situación global del estudiante
+        END AS EstadoPractica,             
         estUsuario.Descripcion AS EstadoUsuario,
         esp.Nombre             AS Especialidad,
         -- Relación específica con ESTA vacante:
@@ -341,46 +341,87 @@ GO
 
 -- Sprint #2
 
--- SP para obtener estudiantes asignados a un profesor
+-- SP para obtener estudiantes asignados a un profesor o coordinador
 CREATE OR ALTER PROCEDURE [dbo].[ObtenerEstudiantesParaEvaluacionSP]
     @IdProfesor INT
 AS
 BEGIN
     SET NOCOUNT ON;
     
-    SELECT 
-        u.IdUsuario,
-        u.Cedula,
-        u.Nombre + ' ' + u.Apellido1 + ' ' + ISNULL(u.Apellido2, '') AS NombreCompleto,
-        e.Nombre AS Especialidad,
-        t.Telefono,
-        v.Nombre AS PracticaAsignada,
-        CASE 
-            WHEN n.NotaFinal >= 70 THEN 'Aprobado'
-            WHEN n.NotaFinal < 70 AND n.NotaFinal IS NOT NULL THEN 'Rezagado'
-            ELSE 'Aprobado'
-        END AS EstadoAcademico,
-        CAST(n.NotaFinal AS DECIMAL(5,2)) AS NotaFinal
-    FROM UsuariosTB u
-    INNER JOIN UsuarioEspecialidadTB ue ON u.IdUsuario = ue.IdUsuario AND ue.IdEstado = 1
-    INNER JOIN EspecialidadesTB e ON ue.IdEspecialidad = e.IdEspecialidad
-    LEFT JOIN TelefonosTB t ON u.IdUsuario = t.IdUsuario
-    INNER JOIN PracticaEstudianteTB p ON u.IdUsuario = p.IdUsuario
-    LEFT JOIN VacantesPracticasTB v ON p.IdVacante = v.IdVacante
-    LEFT JOIN NotasEstudiantesTB n ON u.IdUsuario = n.IdUsuario
-    INNER JOIN EstadosTB est ON p.IdEstado = est.IdEstado
-    WHERE u.IdRol = 1 
-        AND u.IdEstado = 1 
-        AND u.EstadoAcademico = 1 
-        AND est.Descripcion = 'En Curso' 
-        AND EXISTS (
-            SELECT 1 
-            FROM UsuarioEspecialidadTB esp
-            WHERE esp.IdUsuario = @IdProfesor
-                AND esp.IdEspecialidad = ue.IdEspecialidad
-                AND esp.IdEstado = 1
-        )
-    ORDER BY u.Nombre, u.Apellido1;
+    -- Obtener el rol del usuario
+    DECLARE @IdRol INT;
+    SELECT @IdRol = IdRol FROM UsuariosTB WHERE IdUsuario = @IdProfesor;
+    
+    -- Si es coordinador (rol 2), mostrar TODOS los estudiantes
+    IF @IdRol = 2
+    BEGIN
+        SELECT 
+            u.IdUsuario,
+            u.Cedula,
+            u.Nombre + ' ' + u.Apellido1 + ' ' + ISNULL(u.Apellido2, '') AS NombreCompleto,
+            e.Nombre AS Especialidad,
+            t.Telefono,
+            v.Nombre AS PracticaAsignada,
+            CASE 
+                WHEN n.NotaFinal >= 70 THEN 'Aprobado'
+                WHEN n.NotaFinal < 70 AND n.NotaFinal IS NOT NULL THEN 'Rezagado'
+                ELSE 'Aprobado'
+            END AS EstadoAcademico,
+            CAST(n.NotaFinal AS DECIMAL(5,2)) AS NotaFinal,
+            p.IdPractica,
+            p.IdVacante
+        FROM UsuariosTB u
+        INNER JOIN UsuarioEspecialidadTB ue ON u.IdUsuario = ue.IdUsuario AND ue.IdEstado = 1
+        INNER JOIN EspecialidadesTB e ON ue.IdEspecialidad = e.IdEspecialidad
+        LEFT JOIN TelefonosTB t ON u.IdUsuario = t.IdUsuario
+        INNER JOIN PracticaEstudianteTB p ON u.IdUsuario = p.IdUsuario
+        LEFT JOIN VacantesPracticasTB v ON p.IdVacante = v.IdVacante
+        LEFT JOIN NotasEstudiantesTB n ON u.IdUsuario = n.IdUsuario
+        INNER JOIN EstadosTB est ON p.IdEstado = est.IdEstado
+        WHERE u.IdRol = 1
+            AND u.IdEstado = 1
+            AND u.EstadoAcademico = 1
+            AND est.Descripcion = 'En Curso'
+        ORDER BY u.Nombre, u.Apellido1;
+    END
+    ELSE -- Es profesor (rol 3), filtrar por especialidad
+    BEGIN
+        SELECT 
+            u.IdUsuario,
+            u.Cedula,
+            u.Nombre + ' ' + u.Apellido1 + ' ' + ISNULL(u.Apellido2, '') AS NombreCompleto,
+            e.Nombre AS Especialidad,
+            t.Telefono,
+            v.Nombre AS PracticaAsignada,
+            CASE 
+                WHEN n.NotaFinal >= 70 THEN 'Aprobado'
+                WHEN n.NotaFinal < 70 AND n.NotaFinal IS NOT NULL THEN 'Rezagado'
+                ELSE 'Aprobado'
+            END AS EstadoAcademico,
+            CAST(n.NotaFinal AS DECIMAL(5,2)) AS NotaFinal,
+            p.IdPractica,
+            p.IdVacante
+        FROM UsuariosTB u
+        INNER JOIN UsuarioEspecialidadTB ue ON u.IdUsuario = ue.IdUsuario AND ue.IdEstado = 1
+        INNER JOIN EspecialidadesTB e ON ue.IdEspecialidad = e.IdEspecialidad
+        LEFT JOIN TelefonosTB t ON u.IdUsuario = t.IdUsuario
+        INNER JOIN PracticaEstudianteTB p ON u.IdUsuario = p.IdUsuario
+        LEFT JOIN VacantesPracticasTB v ON p.IdVacante = v.IdVacante
+        LEFT JOIN NotasEstudiantesTB n ON u.IdUsuario = n.IdUsuario
+        INNER JOIN EstadosTB est ON p.IdEstado = est.IdEstado
+        WHERE u.IdRol = 1
+            AND u.IdEstado = 1
+            AND u.EstadoAcademico = 1
+            AND est.Descripcion = 'En Curso'
+            AND EXISTS (
+                SELECT 1 
+                FROM UsuarioEspecialidadTB ue_prof
+                WHERE ue_prof.IdUsuario = @IdProfesor
+                    AND ue_prof.IdEspecialidad = ue.IdEspecialidad
+                    AND ue_prof.IdEstado = 1
+            )
+        ORDER BY u.Nombre, u.Apellido1;
+    END
 END
 
 -- SP para obtener perfil completo del estudiante
@@ -410,10 +451,11 @@ BEGIN
     LEFT JOIN DistritosTB dis ON d.IdDistrito = dis.IdDistrito
     LEFT JOIN CantonesTB c ON dis.IdCanton = c.IdCanton
     LEFT JOIN ProvinciasTB p ON c.IdProvincia = p.IdProvincia
-    LEFT JOIN UsuarioEspecialidadTB ue ON u.IdUsuario = ue.IdUsuario
+    LEFT JOIN UsuarioEspecialidadTB ue ON u.IdUsuario = ue.IdUsuario AND ue.IdEstado = 1
     LEFT JOIN EspecialidadesTB e ON ue.IdEspecialidad = e.IdEspecialidad
     LEFT JOIN SeccionesTB s ON u.IdSeccion = s.IdSeccion
-    LEFT JOIN PracticaEstudianteTB pr ON u.IdUsuario = pr.IdUsuario
+    LEFT JOIN PracticaEstudianteTB pr ON u.IdUsuario = pr.IdUsuario 
+        AND pr.IdEstado = (SELECT IdEstado FROM EstadosTB WHERE Descripcion = 'En Curso')
     LEFT JOIN VacantesPracticasTB v ON pr.IdVacante = v.IdVacante
     LEFT JOIN EmpresasTB emp ON v.IdEmpresa = emp.IdEmpresa
     LEFT JOIN TelefonosTB temp ON emp.IdEmpresa = temp.IdEmpresa

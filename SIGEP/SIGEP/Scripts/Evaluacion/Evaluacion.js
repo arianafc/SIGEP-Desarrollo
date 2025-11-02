@@ -263,10 +263,9 @@ function cargarDocumentosEvaluacion(idUsuario) {
             if (response.success && response.documentos && response.documentos.length > 0) {
                 response.documentos.forEach(function (doc) {
                     var icono = obtenerIconoDocumento(doc.Extension);
-                    var fechaFormateada = doc.FechaSubida;
 
                     var docHtml = `
-                        <div class="mb-3">
+                        <div class="mb-3" id="documento-${doc.IdDocumento}">
                             <div class="documento-item d-flex align-items-center justify-content-between p-3" 
                                  style="background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #2D594D;">
                                 <div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
@@ -274,7 +273,7 @@ function cargarDocumentosEvaluacion(idUsuario) {
                                     <div style="min-width: 0; flex: 1;">
                                         <div class="fw-semibold text-truncate" style="color: #2D594D;">${doc.Nombre}</div>
                                         <small class="text-muted">
-                                            <i class="bi bi-calendar3"></i> ${fechaFormateada}
+                                            <i class="bi bi-calendar3"></i> ${doc.FechaSubida}
                                         </small>
                                     </div>
                                 </div>
@@ -291,6 +290,12 @@ function cargarDocumentosEvaluacion(idUsuario) {
                                             onclick="descargarDocumento(${doc.IdDocumento})"
                                             title="Descargar">
                                         <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm" 
+                                            style="background-color: transparent; color: #dc3545; border: 1px solid #dc3545;" 
+                                            onclick="eliminarDocumentoEvaluacion(${doc.IdDocumento}, '${doc.Nombre}')"
+                                            title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
                             </div>
@@ -314,6 +319,59 @@ function cargarDocumentosEvaluacion(idUsuario) {
                     Error al cargar los documentos.
                 </div>
             `);
+        }
+    });
+}
+
+// Función para eliminar documento de evaluación
+function eliminarDocumentoEvaluacion(idDocumento, nombreDocumento) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        html: `¿Deseas eliminar el documento <strong>${nombreDocumento}</strong>?<br>Esta acción no se puede deshacer.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/Evaluacion/EliminarDocumento',
+                type: 'POST',
+                data: { idDocumento: idDocumento },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Documento eliminado',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+
+                        // Remover el documento de la vista con animación
+                        $('#documento-' + idDocumento).fadeOut(300, function () {
+                            $(this).remove();
+
+                            // Si no quedan documentos, mostrar mensaje
+                            if ($('#evaluacionesContainer .mb-3').length === 0) {
+                                $('#evaluacionesContainer').html(`
+                                    <div class="text-center py-4" style="background-color: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+                                        <i class="bi bi-folder-x" style="font-size: 3rem; color: #6c757d;"></i>
+                                        <p class="text-muted mt-2 mb-0">No hay documentos de evaluación cargados.</p>
+                                    </div>
+                                `);
+                            }
+                        });
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudo eliminar el documento', 'error');
+                }
+            });
         }
     });
 }

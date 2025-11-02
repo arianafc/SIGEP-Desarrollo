@@ -511,6 +511,64 @@ namespace SIGEP.Controllers
                 return Content("Error: " + ex.Message);
             }
         }
+
+        [HttpPost]
+        public JsonResult EliminarDocumento(int idDocumento)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
+
+                using (var dbContext = new SIGEPEntities())
+                {
+                    // Buscar el documento en la base de datos
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
+
+                    if (documento == null)
+                    {
+                        return Json(new { success = false, message = "Documento no encontrado en la base de datos" });
+                    }
+
+                    // Guardar la ruta del archivo antes de eliminar el registro
+                    string rutaArchivo = documento.RutaArchivo;
+
+                    // Eliminar el registro de la base de datos
+                    dbContext.DocumentosTB.Remove(documento);
+                    dbContext.SaveChanges();
+
+                    // Eliminar el archivo físico si existe
+                    if (!string.IsNullOrEmpty(rutaArchivo) && System.IO.File.Exists(rutaArchivo))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(rutaArchivo);
+                        }
+                        catch (Exception exFile)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error al eliminar archivo físico: {exFile.Message}");
+                        }
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Documento eliminado correctamente"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en EliminarDocumento: {ex.Message}");
+                return Json(new
+                {
+                    success = false,
+                    message = "Error al eliminar el documento: " + ex.Message
+                });
+            }
+        }
     }
 }
 
