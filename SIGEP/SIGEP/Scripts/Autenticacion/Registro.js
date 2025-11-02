@@ -100,7 +100,7 @@
 
         $.ajax({
             type: "POST",
-            url: '@Url.Action("Registro", "Home")',
+            url: registroUrl,
             data: formData,
             dataType: "json",
             success: function (resp) {
@@ -108,14 +108,13 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Cuenta creada correctamente',
-                        text: resp.success.message,
+                        text: resp.message,
                         confirmButtonColor: '#2D594D',
                         confirmButtonText: 'Aceptar'
                     }).then(() => {
-                        window.location.href = '@Url.Action("Login", "Home")';
+                        window.location.href = loginUrl;
                     });
                 } else {
-
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
@@ -135,5 +134,8 @@
                 });
             }
         });
+
+
+
     });
 });
