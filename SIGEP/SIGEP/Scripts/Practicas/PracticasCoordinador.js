@@ -20,7 +20,7 @@
                     if (!d) return '—';
                     const cls =
                         d === 'Asignada' ? 'badge-asignada' :
-                            d === 'Con Procesos Activos' ? 'badge-en-proceso' :
+                            d === 'Con Procesos Activos' ? 'badge-procesos-activos' :
                                 'badge-no-asignada';
                     return `<span class="badge ${cls}">${d}</span>`;
                 }

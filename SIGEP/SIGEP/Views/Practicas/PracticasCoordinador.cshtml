@@ -36,10 +36,10 @@
                 <label>Especialidad</label>
                 <select id="filtroEspecialidad" class="form-control">
                     <option value="">Todas</option>
-                     @foreach (var esp in ViewBag.Especialidades as List<SelectListItem>)
-                     {
+                    @foreach (var esp in ViewBag.Especialidades as List<SelectListItem>)
+                    {
                         <option value="@esp.Text">@esp.Text</option>
-                     }
+                    }
                 </select>
             </div>
         </div>
@@ -77,5 +77,42 @@
 
 @section Scripts {
     <script src="~/Scripts/Practicas/PracticasCoordinador.js"></script>
+
+    <script>
+        let tablaRecargada = false;
+
+        function recargarTabla() {
+            if ($.fn.dataTable.isDataTable('#miTabla')) {
+                const table = $('#miTabla').DataTable();
+                table.ajax.reload(null, false);
+                tablaRecargada = true;
+            }
+        }
+
+        // 🔁 Detectar cuando el usuario regresa a esta pestaña o vuelve atrás
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible" && !tablaRecargada) {
+                recargarTabla();
+            }
+        });
+
+        // 🔄 También refrescar si la página fue cacheada (al volver con "atrás")
+        window.addEventListener('pageshow', function () {
+            if (!tablaRecargada) {
+                recargarTabla();
+            }
+        });
+
+        // 🔁 Si viene con ?refresh=true, recargar también
+        $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('refresh') === 'true' && !tablaRecargada) {
+                recargarTabla();
+            }
+        });
+    </script>
 }
+
+
+
 

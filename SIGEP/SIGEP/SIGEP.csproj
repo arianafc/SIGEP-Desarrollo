@@ -152,6 +152,9 @@
     <Compile Include="EF\ComentariosPracticaTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\ComentariosPracticaTB_Backup_20251030.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\ComunicadosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -260,6 +263,9 @@
     <Compile Include="EF\PracticaEstudianteTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\PracticaEstudianteTB_Backup_20251030.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\ProvinciasTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -287,7 +293,13 @@
     <Compile Include="EF\UsuariosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\UsuariosTB_Backup_20251030.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\VacantesPracticasTB.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\VacantesPracticasTB_Backup_20251030.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
@@ -311,8 +323,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="BD\Inserts.sql" />
+    <Content Include="BD\Procedimientos Almacenados-JeanPool.sql" />
     <Content Include="BD\Procedimientos Almacenados.sql" />
     <Content Include="BD\Script de la BD.sql" />
+    <Content Include="BD\SP Karo.sql" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
@@ -378,11 +392,13 @@
     <Content Include="Images\logo-light-text.png" />
     <Content Include="Images\logo-text.png" />
     <Content Include="Images\logoSIGEP.png" />
+    <Content Include="Scripts\Admin General\AdminGeneral.js" />
     <Content Include="Scripts\administracion-general.js" />
     <Content Include="Scripts\app-style-switcher.js" />
     <Content Include="Scripts\app.init.js" />
     <Content Include="Scripts\app.min.js" />
     <Content Include="Scripts\Autenticacion\Autenticacion.js" />
+    <Content Include="Scripts\Autenticacion\Registro.js" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
