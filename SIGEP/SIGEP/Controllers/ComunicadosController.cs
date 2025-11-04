@@ -36,27 +36,36 @@ namespace Sigep.UI.Controllers
             int idRol = Convert.ToInt32(Session["IdRol"]);
             ViewBag.IdRol = idRol;
 
+            // Base: solo comunicados activos
             var q = db.ComunicadosTB.Where(c => c.IdEstado == 1);
 
-            // Visibilidad por rol:
-            // 1 Estudiante => Estudiantes/General
-            // 2 Coordinador => todo
-            // 3 Profesor    => Profesores/General
-            // 4 Egresado    => Egresados/General
+            // Armamos la lista de poblaciones permitidas según el rol
+            // OJO: estos valores deben coincidir EXACTAMENTE con lo que guardás en c.Poblacion
+            // (si usás otras variantes de texto, añadilas aquí)
+            var permitidos = new System.Collections.Generic.List<string> { "General" };
+
             switch (idRol)
             {
-                case 2: // Coordinador ve todo
+                case 2: // Coordinador: ve TODO (no filtramos por población)
                     break;
+
                 case 1: // Estudiante
-                    q = q.Where(c => c.Poblacion == "Estudiantes" || c.Poblacion == "General");
+                    permitidos.Add("Estudiantes");
+                    q = q.Where(c => c.Poblacion != null && permitidos.Contains(c.Poblacion));
                     break;
+
                 case 3: // Profesor
-                    q = q.Where(c => c.Poblacion == "Profesores" || c.Poblacion == "General");
+                    permitidos.Add("Profesores");
+                    q = q.Where(c => c.Poblacion != null && permitidos.Contains(c.Poblacion));
                     break;
+
                 case 4: // Egresado
-                    q = q.Where(c => c.Poblacion == "Egresados" || c.Poblacion == "General");
+                    permitidos.Add("Egresados");
+                    q = q.Where(c => c.Poblacion != null && permitidos.Contains(c.Poblacion));
                     break;
+
                 default:
+                    // Rol inválido: no verá nada
                     q = q.Where(c => 1 == 0);
                     break;
             }
@@ -70,7 +79,7 @@ namespace Sigep.UI.Controllers
                     FechaPublicacion = c.Fecha,
                     FechaAplicacion = c.FechaLimite,
                     Descripcion = c.Informacion,
-                    // Ajusta si tu navegación es distinta (ej: c.UsuariosTB.Nombre)
+                    // Ajusta si tu navegación es distinta
                     PublicadoPor = c.UsuariosTB.Nombre,
                     DirigidoA = c.Poblacion
                 })
@@ -78,6 +87,7 @@ namespace Sigep.UI.Controllers
 
             return View(model);
         }
+
 
         /// <summary>
         /// Crea un comunicado y notifica por correo a la población objetivo (emails uno por uno).
