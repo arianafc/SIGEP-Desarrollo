@@ -1121,13 +1121,8 @@ namespace SIGEP.Controllers
                                    "En Proceso de Aplicacion",
                                    "Rechazada",
                                    "Asignada",
-                                   "Aprobada",
                                    "Retirada",
-                                   "Rezagado",
-                                   "Archivado",
-                                   "Aprobada",
-                                   "En Curso",
-                                   "Finalizada"};
+                                   "En Curso" };
 
                     var viewModel = new VacantePracticaVM
                     {

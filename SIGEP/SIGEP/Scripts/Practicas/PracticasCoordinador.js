@@ -190,7 +190,7 @@
     $('#btnFinalizarPracticas').click(function () {
         Swal.fire({
             title: '¿Finalizar todas las prácticas?',
-            html: 'Las prácticas <b>Aprobadas</b> o <b>En Curso</b> se marcarán como <b>Finalizadas</b>.<br>Los estudiantes aprobados pasarán a <b>Egresado</b>.',
+            html: 'Las prácticas <b>Aprobadas</b> o <b>Rezagadas</b> se marcarán como <b>Finalizadas</b>.<br>Los estudiantes aprobados pasarán a <b>Egresado</b>.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, finalizar',
