@@ -455,6 +455,7 @@ namespace SIGEP.Controllers
         // ==============================
         // ACTUALIZAR ESTADO ACADÉMICO
         // ==============================
+
         [HttpPost]
         public JsonResult ActualizarEstado(int idUsuario, int nuevoEstadoId)
         {
@@ -475,13 +476,47 @@ namespace SIGEP.Controllers
                 if (desc != "aprobada" && desc != "rezagado")
                     return Json(new { success = false, message = "Solo se permite cambiar a Rezagado o Aprobado." });
 
-                // Actualiza IdEstado y el booleano
+                // ✅ Actualiza IdEstado y el booleano
                 usuario.IdEstado = nuevoEstadoId;
                 usuario.EstadoAcademico = (desc == "aprobada");
-
                 db.SaveChanges();
 
-                return Json(new { success = true, message = $"Estado académico actualizado a {((bool)usuario.EstadoAcademico ? "Aprobado" : "Rezagado")} correctamente." });
+                // ========================================
+                // NUEVA LÓGICA: Si pasa a "Rezagado", práctica pasa a "Retirada"
+                // ========================================
+                if (desc == "rezagado")
+                {
+                    // Buscar práctica activa más reciente
+                    var practica = db.PracticaEstudianteTB
+                                     .Where(p => p.IdUsuario == idUsuario)
+                                     .OrderByDescending(p => p.IdPractica)
+                                     .FirstOrDefault();
+
+                    if (practica != null)
+                    {
+                        // Obtener el IdEstado de "Retirada"
+                        var estadoRetirada = db.EstadosTB
+                            .FirstOrDefault(e => e.Descripcion.Trim().ToLower() == "retirada");
+
+                        if (estadoRetirada != null)
+                        {
+                            // Si la práctica no está ya retirada, cambiarla
+                            if (practica.IdEstado != estadoRetirada.IdEstado)
+                            {
+                                practica.IdEstado = estadoRetirada.IdEstado;
+                                db.SaveChanges();
+                            }
+                        }
+                    }
+                }
+
+                // ========================================
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Estado académico actualizado a {(usuario.EstadoAcademico == true ? "Aprobado" : "Rezagado")} correctamente."
+                });
             }
             catch (Exception ex)
             {

@@ -128,8 +128,21 @@
             }
         };
     </script>
+
     <script src="~/Scripts/Estudiantes/ListaEstudiantes.js?v=@DateTime.Now.Ticks"></script>
+
+    <!-- ✅ Auto recarga cuando se vuelve con el botón "Atrás" -->
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            // Detecta si la vista se muestra desde el caché del navegador
+            if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+                console.log("🔄 Recargando vista Estudiantes...");
+                location.reload();
+            }
+        });
+    </script>
 }
+
 
 
 
