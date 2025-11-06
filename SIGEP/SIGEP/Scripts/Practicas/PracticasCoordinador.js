@@ -55,6 +55,18 @@
                             </a>`;
                     }
 
+                    // ➕ Asignar estudiante (solo si no tiene práctica activa)
+                    if (row.EstadoPostulacion === 'Sin Procesos Activos') {
+                        html += `
+                            <a href="javascript:void(0);" class="btn-asignar"
+                               data-idvacante="${row.IdVacanteUltima || 0}"
+                               data-idusuario="${row.IdUsuario}"
+                               title="Asignar práctica"
+                               style="color:#2d594d; margin-right:8px;">
+                               <i class="fas fa-user-plus"></i>
+                            </a>`;
+                    }
+
                     // 🎓 Cambiar estado académico
                     html += `
                         <a href="javascript:void(0);" class="btn-cambiar-estado"
@@ -207,4 +219,29 @@
             }
         });
     });
+
+    //handler de asignar
+    $(document).on('click', '.btn-asignar', function () {
+        const idVacante = $(this).data('idvacante');
+        const idUsuario = $(this).data('idusuario');
+        Swal.fire({
+            title: 'Asignar práctica',
+            text: '¿Deseas asignar esta vacante al estudiante?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, asignar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#2d594d'
+        }).then(res => {
+            if (res.isConfirmed) {
+                $.post('/Practicas/AsignarEstudiante', { idVacante, idUsuario })
+                    .done(r => {
+                        Swal.fire(r.ok ? 'Éxito' : 'Error', r.message, r.ok ? 'success' : 'error');
+                        if (r.ok) table.ajax.reload(null, false);
+                    })
+                    .fail(() => Swal.fire('Error', 'No se pudo asignar.', 'error'));
+            }
+        });
+    });
+
 });

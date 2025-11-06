@@ -198,8 +198,23 @@ namespace SIGEP.Controllers
                 var baseInfo = (from u in db.UsuariosTB
                                 join d in db.DireccionesTB on u.IdDireccion equals d.IdDireccion into jd
                                 from d in jd.DefaultIfEmpty()
+
+                                    // 🔗 Relación: Direccion -> Distrito
+                                join dist in db.DistritosTB on d.IdDistrito equals dist.IdDistrito into jdistr
+                                from dist in jdistr.DefaultIfEmpty()
+
+                                    // 🔗 Relación: Distrito -> Cantón
+                                join cant in db.CantonesTB on dist.IdCanton equals cant.IdCanton into jc
+                                from cant in jc.DefaultIfEmpty()
+
+                                    // 🔗 Relación: Cantón -> Provincia
+                                join prov in db.ProvinciasTB on cant.IdProvincia equals prov.IdProvincia into jp
+                                from prov in jp.DefaultIfEmpty()
+
+                                    // 🔗 Relación: Usuario -> Sección
                                 join s in db.SeccionesTB on u.IdSeccion equals s.IdSeccion into js
                                 from s in js.DefaultIfEmpty()
+
                                 where u.IdUsuario == id
                                 select new
                                 {
@@ -210,8 +225,12 @@ namespace SIGEP.Controllers
                                     u.Apellido2,
                                     u.FechaNacimiento,
                                     DireccionExacta = d != null ? d.DireccionExacta : "",
+                                    Provincia = prov != null ? prov.Nombre : "",
+                                    Canton = cant != null ? cant.Nombre : "",
+                                    Distrito = dist != null ? dist.Nombre : "",
                                     Seccion = s != null ? s.Seccion : ""
                                 }).FirstOrDefault();
+
 
                 if (baseInfo == null)
                     return HttpNotFound("No se encontró el estudiante.");
@@ -269,7 +288,7 @@ namespace SIGEP.Controllers
                     Correo = correo,
                     Telefono = telefono,
                     Especialidad = especialidad,
-                    Direccion = baseInfo.DireccionExacta,
+                    Direccion = $"{baseInfo.Provincia}, {baseInfo.Canton}, {baseInfo.Distrito}, {baseInfo.DireccionExacta}".Trim(' ', ','),
                     EstadoPractica = estadoPractica,
                     Documentos = documentos,
                     Encargados = encargados,

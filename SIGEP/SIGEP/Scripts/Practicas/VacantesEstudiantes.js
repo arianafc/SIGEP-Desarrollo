@@ -145,12 +145,50 @@
             ajax: {
                 url: CFG.urls.getVacantes,
                 type: 'GET',
+                cache: false,
+                dataType: 'json',
                 data: d => ({
-                    idEstado: $('#filtroPractica').val() || null,
+                    idEstado: $('#filtroPractica').val() || 0,
                     idEspecialidad: $('#filtroEspecialidad').val() || 0,
                     idModalidad: $('#filtroModalidad').val() || 0
                 }),
-                dataSrc: json => (json && json.data) ? json.data : []
+                dataSrc: function (json) {
+                    // 🔒 Si el backend devolvió HTML (login/500), lo detectamos
+                    if (typeof json === 'string') {
+                        // ¿vino HTML?
+                        if (json.indexOf('<!DOCTYPE html') >= 0 || json.indexOf('<html') >= 0) {
+                            console.error('⚠️ El servidor devolvió HTML (posible login/500).');
+                            Swal.fire('Error', 'La sesión puede haber expirado o el servidor devolvió HTML.', 'error');
+                            return [];
+                        }
+                        // intentar parsear
+                        try { json = JSON.parse(json); } catch (e) {
+                            console.error('⚠️ Respuesta no JSON:', json);
+                            Swal.fire('Error', 'Respuesta no válida del servidor.', 'error');
+                            return [];
+                        }
+                    }
+
+                    // Si el backend incluyó un campo de error
+                    if (json && json.ok === false) {
+                        console.error('❌ Backend error:', json.error);
+                        Swal.fire('Error', json.error || 'Error en servidor.', 'error');
+                        return [];
+                    }
+
+                    // Camino normal
+                    return (json && Array.isArray(json.data)) ? json.data : [];
+                },
+                error: function (xhr) {
+                    const ct = xhr.getResponseHeader('content-type') || '';
+                    if (ct.indexOf('text/html') >= 0) {
+                        console.error('⚠️ HTML recibido en AJAX:', xhr.responseText?.substring(0, 500));
+                        Swal.fire('Error', 'Se recibió HTML en lugar de JSON (¿login/500?).', 'error');
+                    } else {
+                        console.error('❌ Error AJAX:', xhr.status, xhr.responseText);
+                        Swal.fire('Error', `Error consultando vacantes (${xhr.status}).`, 'error');
+                    }
+                }
             },
             columns: [
                 { data: 'EmpresaNombre', title: 'Empresa' },
@@ -170,25 +208,25 @@
                         const muted = inactivo ? 'opacity:0.35; cursor:not-allowed;' : '';
 
                         let acc = `
-                            <button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d">
-                                <i class="fas fa-eye"></i>
-                            </button>`;
+                    <button class="btn bg-transparent btn-visualizar" data-id="${data}" title="Visualizar" style="color:#2d594d">
+                        <i class="fas fa-eye"></i>
+                    </button>`;
 
-                        if ((CFG.rol === 2 || CFG.rol === 3) && !row.Nombre.includes('Práctica Autogestionada')) {
+                        if ((CFG.rol === 2 || CFG.rol === 3) && !(row.Nombre || '').includes('Práctica Autogestionada')) {
                             acc += `
-                                <button class="btn bg-transparent btn-asignar" data-id="${data}" style="color:#2d594d; ${muted}" ${dis}>
-                                    <i class="fas fa-user-plus"></i>
-                                </button>`;
+                        <button class="btn bg-transparent btn-asignar" data-id="${data}" style="color:#2d594d; ${muted}" ${dis}>
+                            <i class="fas fa-user-plus"></i>
+                        </button>`;
                         }
 
                         if (CFG.rol === 2) {
                             acc += `
-                                <button class="btn bg-transparent btn-editar" data-id="${data}" style="color:#2d594d; ${muted}" ${dis}>
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button class="btn bg-transparent btn-eliminar" data-id="${data}" style="color:#2d594d; ${muted}" ${dis}>
-                                    <i class="fas fa-archive"></i>
-                                </button>`;
+                        <button class="btn bg-transparent btn-editar" data-id="${data}" style="color:#2d594d; ${muted}" ${dis}>
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="btn bg-transparent btn-eliminar" data-id="${data}" style="color:#2d594d; ${muted}" ${dis}>
+                            <i class="fas fa-archive"></i>
+                        </button>`;
                         }
                         return acc;
                     }
@@ -198,6 +236,9 @@
         });
 
         $('#filtroPractica, #filtroEspecialidad, #filtroModalidad').on('change', () => tabla.ajax.reload());
+
+
+
         // =====================================================
         // 🔹 Visualizar Vacante + Postulaciones
         // =====================================================
@@ -287,25 +328,40 @@
                     return tbody.append('<tr><td colspan="6" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
 
                 res.data.forEach(e => {
-                    const estado = (e.EstadoPractica || 'Sin proceso activo').toLowerCase();
+                    const estadoPractica = (e.EstadoPractica || 'Sin proceso activo').toLowerCase();
                     const badge = badgeEstado(e.EstadoPractica);
+
                     let btn = '';
 
-                    // 🔹 Bloqueo por EstadoAcademico == false (ya no llegan, pero dejamos por seguridad)
-                    if (e.EstadoAcademico === false) {
-                        btn = `<button class="btn btn-sm btn-secondary" disabled title="Estudiante rezagado">
-                <i class="fas fa-user-slash"></i> No elegible</button>`;
-                    }
-                    // 🔹 Estudiantes con práctica activa o finalizada
-                    else if (['asignada', 'en curso', 'finalizada', 'aprobada', 'rezagado'].includes(estado)) {
-                        btn = `<button class="btn btn-sm btn-outline-secondary btn-bloqueado" title="Ya tiene práctica activa">
-                <i class="fas fa-ban"></i> No disponible</button>`;
-                    }
-                    // 🔹 Estudiantes sin proceso activo
-                    else {
+                    const estadoVacante = (e.EstadoVacante || e.EstadoPractica || 'Sin proceso activo')
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase()
+                        .trim();
+
+                    if (["sin proceso activo", "retirada", "en proceso de aplicacion"].includes(estadoVacante)) {
                         btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante"
-                    data-idusuario="${e.IdUsuario}" data-nombre="${escapeHtml(e.NombreCompleto)}">
-                    <i class="fas fa-user-plus"></i> Asignar</button>`;
+        data-idusuario="${e.IdUsuario}"
+        data-nombre="${escapeHtml(e.NombreCompleto)}">
+        <i class="fas fa-user-plus"></i> Asignar
+    </button>`;
+                    }
+                    else if (estadoVacante === "asignada") {
+                        btn = `<button class="btn btn-sm btn-outline-warning btn-retirar-estudiante"
+        data-idusuario="${e.IdUsuario}"
+        data-nombre="${escapeHtml(e.NombreCompleto)}">
+        <i class="fas fa-user-minus"></i> Retirar
+    </button>`;
+                    }
+                    else if (["en curso", "aprobada", "finalizada", "rezagado"].includes(estadoVacante)) {
+                        btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
+        <i class="fas fa-ban"></i> No disponible
+    </button>`;
+                    }
+                    else {
+                        btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
+        <i class="fas fa-question"></i> Estado desconocido
+    </button>`;
                     }
 
                     tbody.append(`
