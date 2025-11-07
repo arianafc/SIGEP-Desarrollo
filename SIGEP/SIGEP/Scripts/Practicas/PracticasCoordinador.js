@@ -43,7 +43,6 @@
                 render: function (row) {
                     let html = '';
 
-                    // 👁️ Ver detalle
                     if (row.IdVacanteUltima && row.IdUsuario) {
                         html += `
                             <a href="javascript:void(0);" class="btn-ver"
@@ -55,8 +54,9 @@
                             </a>`;
                     }
 
-                    // ➕ Asignar estudiante (solo si no tiene práctica activa)
-                    if (row.EstadoPostulacion === 'Sin Procesos Activos') {
+                    const estado = (row.EstadoPostulacion || '').toLowerCase().trim();
+
+                    if (["sin proceso activo", "retirada", "en proceso de aplicacion"].includes(estado)) {
                         html += `
                             <a href="javascript:void(0);" class="btn-asignar"
                                data-idvacante="${row.IdVacanteUltima || 0}"
@@ -67,7 +67,6 @@
                             </a>`;
                     }
 
-                    // 🎓 Cambiar estado académico
                     html += `
                         <a href="javascript:void(0);" class="btn-cambiar-estado"
                            data-idusuario="${row.IdUsuario}"
@@ -77,8 +76,7 @@
                            <i class="fas fa-user-graduate"></i>
                         </a>`;
 
-                    // 🗑️ Desasignar
-                    if (row.IdPracticaVacante && (row.EstadoPostulacion === 'Asignada' || row.EstadoPostulacion === 'Con Procesos Activos')) {
+                    if (row.IdPracticaVacante && ["asignada", "en curso", "aprobada"].includes(estado)) {
                         html += `
                             <a href="javascript:void(0);" class="btn-desasignar"
                                data-idpractica="${row.IdPracticaVacante}"
@@ -222,11 +220,78 @@
 
     //handler de asignar
     $(document).on('click', '.btn-asignar', function () {
+        const idUsuario = $(this).data('idusuario');
+
+        // Mostrar el modal y limpiar antes de cargar
+        const tbody = $('#miTablaAsignar tbody');
+        tbody.html('<tr><td colspan="7" class="text-center text-muted">Cargando...</td></tr>');
+        $('#modalAsignar').modal('show');
+
+        $.getJSON('/Practicas/ObtenerVacantesAsignar', { idUsuario }, res => {
+            tbody.empty();
+
+            if (!res.ok || !res.data?.length) {
+                tbody.append('<tr><td colspan="7" class="text-center text-muted">No hay vacantes registradas</td></tr>');
+                return;
+            }
+
+            res.data.forEach(v => {
+                const estado = (v.EstadoPostulacion || 'Sin proceso activo')
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .trim();
+
+                const cuposRestantes = v.NumCupos - v.CuposOcupados;
+                let btn = '';
+
+                if (["sin proceso activo", "retirada", "en proceso de aplicacion"].includes(estado)) {
+                    btn = cuposRestantes > 0
+                        ? `<button class="btn btn-sm btn-outline-success btn-asignar-vacante"
+                         data-idvacante="${v.IdVacante}" data-idusuario="${idUsuario}">
+                         <i class="fas fa-user-plus"></i> Asignar
+                       </button>`
+                        : `<button class="btn btn-sm btn-outline-secondary" disabled>
+                         <i class="fas fa-ban"></i> Sin cupos
+                       </button>`;
+                } else if (estado === "asignada") {
+                    btn = `<button class="btn btn-sm btn-outline-warning btn-desasignar-vacante"
+                          data-idpractica="${v.IdPractica}" data-nombre="${v.NombreEstudiante}">
+                          <i class="fas fa-user-minus"></i> Retirar
+                        </button>`;
+                } else if (["en curso", "aprobada", "finalizada", "rezagado"].includes(estado)) {
+                    btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
+                         <i class="fas fa-ban"></i> No disponible
+                       </button>`;
+                } else {
+                    btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
+                         <i class="fas fa-question"></i> Estado desconocido
+                       </button>`;
+                }
+
+                tbody.append(`
+                <tr>
+                    <td>${v.NombreVacante}</td>
+                    <td>${v.NombreEmpresa}</td>
+                    <td>${v.Especialidad}</td>
+                    <td>${v.NumCupos}</td>
+                    <td>${v.CuposOcupados}</td>
+                    <td>${btn}</td>
+                </tr>
+            `);
+            });
+        });
+    });
+
+
+    // === ASIGNAR VACANTE A ESTUDIANTE ===
+    $(document).on('click', '.btn-asignar-vacante', function () {
         const idVacante = $(this).data('idvacante');
         const idUsuario = $(this).data('idusuario');
+
         Swal.fire({
-            title: 'Asignar práctica',
-            text: '¿Deseas asignar esta vacante al estudiante?',
+            title: '¿Confirmar asignación?',
+            html: '¿Deseas asignar esta vacante al estudiante?<br><b>Estado: En proceso de aplicación</b>',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sí, asignar',
@@ -235,13 +300,61 @@
         }).then(res => {
             if (res.isConfirmed) {
                 $.post('/Practicas/AsignarEstudiante', { idVacante, idUsuario })
-                    .done(r => {
-                        Swal.fire(r.ok ? 'Éxito' : 'Error', r.message, r.ok ? 'success' : 'error');
-                        if (r.ok) table.ajax.reload(null, false);
+                    .done(resp => {
+                        if (resp.ok) {
+                            Swal.fire({icon: 'success',
+                                title: 'Éxito',
+                                text: resp.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            $('#modalAsignar').modal('hide');
+                            $('#miTabla').DataTable().ajax.reload(null, false);
+                        } else {
+                            Swal.fire('Error', resp.message || 'No se pudo asignar el estudiante.', 'error');
+                        }
                     })
-                    .fail(() => Swal.fire('Error', 'No se pudo asignar.', 'error'));
+                    .fail(() => Swal.fire('Error', 'No se pudo conectar al servidor.', 'error'));
             }
         });
     });
+
+    // === DESASIGNAR VACANTE DESDE EL MODAL ===
+    $(document).on('click', '.btn-desasignar-vacante', function () {
+        const idPractica = $(this).data('idpractica');
+        const nombre = $(this).data('nombre');
+
+        Swal.fire({
+            title: '¿Desasignar práctica?',
+            html: `¿Deseas desasignar a <b>${nombre}</b>?<br/><small>Se cambiará el estado a <b>Retirada</b>.</small>`,
+            input: 'text',
+            inputLabel: 'Comentario (opcional)',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, desasignar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#c00'
+        }).then(r => {
+            if (r.isConfirmed) {
+                $.post('/Practicas/DesasignarPractica', {
+                    idPractica,
+                    comentario: r.value || ''
+                }).done(res => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: res.msg,
+                        timer: 2000,
+                        showConfirmButton: false
+                        });
+                    if (res.ok) {
+                        $('#modalAsignar').modal('hide');
+                        $('#miTabla').DataTable().ajax.reload(null, false);
+                    }
+                }).fail(() => Swal.fire('Error', 'No se pudo conectar al servidor.', 'error'));
+            }
+        });
+    });
+
+
 
 });

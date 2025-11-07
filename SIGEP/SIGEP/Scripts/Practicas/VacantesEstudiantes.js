@@ -49,9 +49,6 @@
             return `<span class="badge ${info.cls}">${info.txt}</span>`;
         }
 
-        // =====================================================
-        // 🔹 Auto-cargar ubicación de empresa (crear / editar)
-        // =====================================================
         $('#IdEmpresa, #edit-IdEmpresa').on('change', function () {
             const idEmpresa = $(this).val();
             const $inputUbicacion = $(this).attr('id') === 'IdEmpresa'
@@ -71,9 +68,7 @@
                 .fail(() => $inputUbicacion.val('Error al obtener ubicación'));
         });
 
-        // =====================================================
-        // 🔹 Validaciones de fechas (crear / editar)
-        // =====================================================
+       
         function validarFechas(fechaAplic, fechaCierre) {
             const f1 = new Date(fechaAplic);
             const f2 = new Date(fechaCierre);
@@ -153,7 +148,7 @@
                     idModalidad: $('#filtroModalidad').val() || 0
                 }),
                 dataSrc: function (json) {
-                    // 🔒 Si el backend devolvió HTML (login/500), lo detectamos
+                   
                     if (typeof json === 'string') {
                         // ¿vino HTML?
                         if (json.indexOf('<!DOCTYPE html') >= 0 || json.indexOf('<html') >= 0) {
@@ -161,7 +156,7 @@
                             Swal.fire('Error', 'La sesión puede haber expirado o el servidor devolvió HTML.', 'error');
                             return [];
                         }
-                        // intentar parsear
+                      
                         try { json = JSON.parse(json); } catch (e) {
                             console.error('⚠️ Respuesta no JSON:', json);
                             Swal.fire('Error', 'Respuesta no válida del servidor.', 'error');
@@ -169,14 +164,14 @@
                         }
                     }
 
-                    // Si el backend incluyó un campo de error
+                   
                     if (json && json.ok === false) {
                         console.error('❌ Backend error:', json.error);
                         Swal.fire('Error', json.error || 'Error en servidor.', 'error');
                         return [];
                     }
 
-                    // Camino normal
+                   
                     return (json && Array.isArray(json.data)) ? json.data : [];
                 },
                 error: function (xhr) {
@@ -322,7 +317,10 @@
             const idVacante = $(this).data('id');
             $('#modalAsignar').data('idVacante', idVacante).modal('show');
 
-            $.getJSON(CFG.urls.obtenerEstudiantesAsignar, { idVacante }, res => {
+            $.getJSON(CFG.urls.obtenerEstudiantesAsignar, {
+                idVacante,
+                idUsuarioSesion: CFG.idUsuarioSesion || 0
+            }, res => {
                 const tbody = $('#miTablaAsignar tbody').empty();
                 if (!res?.ok || !res.data?.length)
                     return tbody.append('<tr><td colspan="6" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
@@ -331,7 +329,7 @@
                     const estadoPractica = (e.EstadoPractica || 'Sin proceso activo').toLowerCase();
                     const badge = badgeEstado(e.EstadoPractica);
 
-                    let btn = '';
+                    let btn = ''; 
 
                     const estadoVacante = (e.EstadoVacante || e.EstadoPractica || 'Sin proceso activo')
                         .normalize('NFD')
@@ -341,43 +339,45 @@
 
                     if (["sin proceso activo", "retirada", "en proceso de aplicacion"].includes(estadoVacante)) {
                         btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante"
-        data-idusuario="${e.IdUsuario}"
-        data-nombre="${escapeHtml(e.NombreCompleto)}">
-        <i class="fas fa-user-plus"></i> Asignar
-    </button>`;
-                    }
-                    else if (estadoVacante === "asignada") {
+            data-idusuario="${e.IdUsuario}"
+            data-nombre="${escapeHtml(e.NombreCompleto)}">
+            <i class="fas fa-user-plus"></i> Asignar
+        </button>`;
+                    } else if (estadoVacante === "asignada") {
                         btn = `<button class="btn btn-sm btn-outline-warning btn-retirar-estudiante"
-        data-idusuario="${e.IdUsuario}"
-        data-nombre="${escapeHtml(e.NombreCompleto)}">
-        <i class="fas fa-user-minus"></i> Retirar
-    </button>`;
-                    }
-                    else if (["en curso", "aprobada", "finalizada", "rezagado"].includes(estadoVacante)) {
+            data-idusuario="${e.IdUsuario}"
+            data-nombre="${escapeHtml(e.NombreCompleto)}">
+            <i class="fas fa-user-minus"></i> Retirar
+        </button>`;
+                    } else if (["rechazada", "aprobada", "en curso", "finalizada", "rezagado", "archivado"].includes(estadoVacante)) {
                         btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
-        <i class="fas fa-ban"></i> No disponible
-    </button>`;
-                    }
-                    else {
+            <i class="fas fa-ban"></i> No disponible
+        </button>`;
+                    } else {
                         btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
-        <i class="fas fa-question"></i> Estado desconocido
-    </button>`;
+            <i class="fas fa-question"></i> Estado desconocido
+        </button>`;
                     }
 
+                    
+
                     tbody.append(`
-                        <tr>
-                            <td>${escapeHtml(e.NombreCompleto)}</td>
-                            <td>${escapeHtml(e.Cedula || '')}</td>
-                            <td>${escapeHtml(e.Especialidad || '')}</td>
-                            <td class="text-center">${badge}</td>
-                            <td class="text-center">${btn}</td>
-                        </tr>
-                    `);
+        <tr class="$">
+            <td>${escapeHtml(e.NombreCompleto)}</td>
+            <td>${escapeHtml(e.Cedula || '')}</td>
+            <td>${escapeHtml(e.Especialidad || '')}</td>
+            <td class="text-center">${badge}</td>
+            <td class="text-center">${btn}</td>
+        </tr>
+    `);
+
                 });
             });
         });
 
-        // Validación previa al asignar estudiante
+        // =====================================================
+        // 🔹 Validación previa al asignar estudiante
+        // =====================================================
         $(document).on('click', '.btn-asignar-estudiante', function () {
             const idUsuario = $(this).data('idusuario');
             const idVacante = $('#modalAsignar').data('idVacante');
@@ -385,8 +385,15 @@
 
             $.post(CFG.urls.asignarEstudiante, { idUsuario, idVacante })
                 .done(res => {
+                    
                     if (res.ok) {
-                        Swal.fire('Éxito', `El estudiante ${nombre} fue asignado correctamente.`, 'success');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Éxito',
+                            text: `El estudiante ${nombre} fue asignado correctamente.`,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                         $('#modalAsignar').modal('hide');
                         tabla.ajax.reload(null, false);
                     } else {
@@ -396,7 +403,9 @@
                 .fail(() => Swal.fire('Error', 'Error al asignar estudiante.', 'error'));
         });
 
-        // Bloqueo por clic en botón “no disponible”
+
+
+
         $(document).on('click', '.btn-bloqueado', function () {
             Swal.fire({
                 icon: 'warning',
@@ -552,11 +561,11 @@
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
-                                // ✅ Desactivar momentáneamente el focus trap
+                                
                                 if (modalInstance && modalInstance._focustrap)
                                     modalInstance._focustrap.deactivate();
 
-                                // ✅ Recargar lista de postulaciones sin cerrar el modal
+                              
                                 $.getJSON(CFG.urls.obtenerPostulaciones, { idVacante: idVacante }, r2 => {
                                     const $lista = $('#listaPostulaciones').empty();
                                     $('#mensajeSinPostulaciones').toggle(!r2.ok || !r2.data?.length);
@@ -592,12 +601,12 @@
                                         });
                                     }
 
-                                    // ✅ Reactivar focus trap al final
+                                   
                                     if (modalInstance && modalInstance._focustrap)
                                         modalInstance._focustrap.activate();
                                 });
 
-                                // ✅ Refrescar tabla principal (sin cerrar modal)
+                               
                                 if (typeof tabla !== "undefined")
                                     tabla.ajax.reload(null, false);
                             });

@@ -3,7 +3,7 @@
     $(function () {
         const CFG = window.EstuCfg || { rol: 0, urls: {} };
 
-        // === Guard: redirigir SOLO si realmente vino el Login ===
+        
         function redirSiLogin(res, xhr) {
             try {
                 if (typeof res !== 'string') return false;
@@ -23,7 +23,7 @@
 
         var rol = parseInt(CFG.rol || 0, 10); // 1=Est, 2=Coord, 3=Prof, 4=Egr
 
-        // === Helper visual para Estado de Práctica (coincide con clases CSS del proyecto)
+       
         function badgeEstado(estadoOriginal) {
             var est = (estadoOriginal || '')
                 .toString()
@@ -40,7 +40,7 @@
                 'rezagado': { cls: 'badge-rezagado', txt: 'Rezagado' },
                 'archivado': { cls: 'badge-archivado', txt: 'Archivado' },
                 'en curso': { cls: 'badge-en-curso', txt: 'En Curso' },
-                // compatibilidad
+               
                 'en progreso': { cls: 'badge-en-progreso', txt: 'En progreso' }
             };
 
@@ -57,7 +57,6 @@
                 data: function (d) {
                     d.estado = $('#filtroEstado').val();
 
-                    // Si hay dropdown de especialidad (coordinador), envíalo; si es profesor (no existe), manda 0
                     var $esp = $('#filtroEspecialidad');
                     d.idEspecialidad = $esp.length ? ($esp.val() || 0) : 0;
                 },
@@ -94,7 +93,7 @@
                     }
                 },
                 {
-                    // Acciones: "Ver perfil" para todos; "Actualizar estado" solo Coordinador(2)/Profesor(3)
+                    
                     data: 'IdUsuario',
                     render: function (data, type, row) {
                         var html =
@@ -114,7 +113,7 @@
             columnDefs: [{ targets: -1, orderable: false, searchable: false, width: "100px" }]
         });
 
-        // Filtros (el de especialidad solo existe para coordinador)
+       
         $('#filtroEstado').on('change', function () { table.ajax.reload(); });
         if ($('#filtroEspecialidad').length) {
             $('#filtroEspecialidad').on('change', function () { table.ajax.reload(); });
@@ -236,7 +235,7 @@
         });
 
         // ===============================
-        // Desasignar práctica (corregido)
+        // Desasignar práctica 
         // ===============================
         $(document).on("click", ".BtnDesasignarPracticaEstudiante", function (e) {
             e.preventDefault();
@@ -245,10 +244,10 @@
             const idPractica = boton.data("idpractica");
             const idUsuario = boton.data("idusuario");
 
-            // Obtener instancia del modal actual
+           
             const modalPerfil = bootstrap.Modal.getInstance(document.getElementById("modalPerfil"));
 
-            // 🔧 1. Desactivar el focus trap de Bootstrap 5.3 (para poder escribir en SweetAlert)
+           
             if (modalPerfil && modalPerfil._focustrap) {
                 modalPerfil._focustrap.deactivate();
             }
@@ -265,7 +264,7 @@
                 cancelButtonText: 'Cancelar',
                 allowOutsideClick: false,
                 didOpen: () => {
-                    // 🔹 Asegurar que el textarea esté editable
+                    
                     const textarea = Swal.getInput();
                     if (textarea) {
                         textarea.removeAttribute("readonly");
@@ -275,14 +274,14 @@
                     }
                 },
                 didClose: () => {
-                    // 🔹 Restaurar focus trap al cerrar SweetAlert
+                   
                     if (modalPerfil && modalPerfil._focustrap) {
                         modalPerfil._focustrap.activate();
                     }
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // 🔹 Enviar datos al backend
+                    
                     $.ajax({
                         url: CFG.urls.desasignarPractica,
                         type: 'POST',
@@ -301,7 +300,7 @@
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    // ✅ Recargar la vista del modal con datos actualizados
+                                    
                                     $.ajax({
                                         url: CFG.urls.detalle,
                                         type: 'GET',
@@ -313,7 +312,7 @@
                                         }
                                     });
 
-                                    // ✅ Refrescar la tabla principal sin cerrar el modal
+                                    
                                     if (typeof table !== "undefined") {
                                         table.ajax.reload(null, false);
                                     }
@@ -327,20 +326,13 @@
                         }
                     });
                 } else {
-                    // 🔁 Restaurar focus trap si el usuario cancela
+                    
                     if (modalPerfil && modalPerfil._focustrap) {
                         modalPerfil._focustrap.activate();
                     }
                 }
             });
         });
-
-      
-
-
-
-
-
 
 
     });

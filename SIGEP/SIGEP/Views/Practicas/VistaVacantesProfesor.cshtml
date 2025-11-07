@@ -39,21 +39,7 @@
                         }
                     </select>
                 </div>
-                @* Si necesitas volver a activar el filtro de especialidad, descomenta y cierra bien el bloque:
-                    <div>
-                        <label>Especialidad</label>
-                        <select id="filtroEspecialidad" class="form-control">
-                            <option value="">Todas</option>
-                            @if (ViewBag.Especialidades != null)
-                            {
-                                foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
-                                {
-                                    <option value="@e.Value">@e.Text</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                *@
+               
             </div>
         </div>
     </div>

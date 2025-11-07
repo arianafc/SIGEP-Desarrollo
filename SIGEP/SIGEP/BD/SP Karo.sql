@@ -318,76 +318,150 @@ GO
 
 --SP 5 DE NOVIMEBRE
 
+--CREATE OR ALTER PROCEDURE [dbo].[ObtenerVacantesAsignarSP]
+--    @IdUsuario INT
+--AS
+--BEGIN
+--    SET NOCOUNT ON;
+
+--    -- ✅ 1. Obtener las especialidades activas del estudiante
+--    DECLARE @EspecialidadesEst TABLE (IdEspecialidad INT);
+
+--    INSERT INTO @EspecialidadesEst (IdEspecialidad)
+--    SELECT DISTINCT IdEspecialidad
+--    FROM UsuarioEspecialidadTB
+--    WHERE IdUsuario = @IdUsuario
+--      AND IdEstado = 1;
+
+--    -- Si no tiene especialidades activas, devolver vacío
+--    IF NOT EXISTS (SELECT 1 FROM @EspecialidadesEst)
+--    BEGIN
+--        SELECT TOP 0
+--            v.IdVacante,
+--            v.Nombre,
+--            e.NombreEmpresa,
+--            esp.Nombre AS Especialidad,
+--            v.NumCupos,
+--            0 AS CuposOcupados,
+--            v.FechaCierre,
+--            v.Requerimientos
+--        FROM VacantesPracticasTB v
+--        JOIN EmpresasTB e ON e.IdEmpresa = v.IdEmpresa
+--        JOIN EspecialidadesVacantesTB ev ON ev.IdVacante = v.IdVacante
+--        JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ev.IdEspecialidad;
+--        RETURN;
+--    END;
+
+--    -- ✅ 2. Vacantes activas (1 = Activo)
+--    SELECT DISTINCT
+--        v.IdVacante,
+--        v.Nombre,
+--        e.NombreEmpresa,
+--        esp.Nombre AS Especialidad,
+--        v.NumCupos,
+--        ISNULL((
+--            SELECT COUNT(*)
+--            FROM PracticaEstudianteTB p
+--            WHERE p.IdVacante = v.IdVacante
+--              AND p.IdEstado IN (3,5,6,7,12)
+--        ),0) AS CuposOcupados,
+--        v.FechaCierre,
+--        v.Requerimientos
+--    FROM VacantesPracticasTB v
+--    INNER JOIN EmpresasTB e ON e.IdEmpresa = v.IdEmpresa
+--    INNER JOIN EspecialidadesVacantesTB ev ON ev.IdVacante = v.IdVacante
+--    INNER JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ev.IdEspecialidad
+--    WHERE v.IdEstado = 1
+--      AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
+--      AND v.NumCupos > (
+--          SELECT COUNT(*) FROM PracticaEstudianteTB p
+--          WHERE p.IdVacante = v.IdVacante
+--            AND p.IdEstado IN (3,5,6,7,12)
+--      )
+--      AND v.IdVacante NOT IN (
+--          SELECT p.IdVacante FROM PracticaEstudianteTB p
+--          WHERE p.IdUsuario = @IdUsuario
+--      )
+--    ORDER BY v.Nombre;
+--END
+
+USE SIGEP;
+GO
+
 CREATE OR ALTER PROCEDURE [dbo].[ObtenerVacantesAsignarSP]
     @IdUsuario INT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- ✅ 1. Obtener las especialidades activas del estudiante
+    -------------------------------------------------
+    -- 1️⃣ Especialidades activas del estudiante
+    -------------------------------------------------
     DECLARE @EspecialidadesEst TABLE (IdEspecialidad INT);
-
     INSERT INTO @EspecialidadesEst (IdEspecialidad)
     SELECT DISTINCT IdEspecialidad
     FROM UsuarioEspecialidadTB
     WHERE IdUsuario = @IdUsuario
       AND IdEstado = 1;
 
-    -- Si no tiene especialidades activas, devolver vacío
-    IF NOT EXISTS (SELECT 1 FROM @EspecialidadesEst)
-    BEGIN
-        SELECT TOP 0
-            v.IdVacante,
-            v.Nombre,
-            e.NombreEmpresa,
-            esp.Nombre AS Especialidad,
-            v.NumCupos,
-            0 AS CuposOcupados,
-            v.FechaCierre,
-            v.Requerimientos
-        FROM VacantesPracticasTB v
-        JOIN EmpresasTB e ON e.IdEmpresa = v.IdEmpresa
-        JOIN EspecialidadesVacantesTB ev ON ev.IdVacante = v.IdVacante
-        JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ev.IdEspecialidad;
-        RETURN;
-    END;
+    -------------------------------------------------
+    -- 2️⃣ Estados considerados “bloqueantes” (ocupación de cupos)
+    -------------------------------------------------
+    DECLARE @EstadosBloqueantes TABLE (IdEstado INT);
+    INSERT INTO @EstadosBloqueantes (IdEstado)
+    SELECT IdEstado
+    FROM EstadosTB
+    WHERE LOWER(LTRIM(RTRIM(Descripcion))) IN (
+        'asignada','en curso','aprobada','finalizada','rezagado'
+    );
 
-    -- ✅ 2. Vacantes activas (1 = Activo)
-    SELECT DISTINCT
-        v.IdVacante,
-        v.Nombre,
-        e.NombreEmpresa,
-        esp.Nombre AS Especialidad,
-        v.NumCupos,
-        ISNULL((
+    -------------------------------------------------
+    -- 3️⃣ Consulta principal
+    -------------------------------------------------
+    SELECT 
+        -------------------------------------------------
+        -- ⚙️ Forzamos tipos y alias correctos para mapeo en EF
+        -------------------------------------------------
+        CAST(v.IdVacante AS INT) AS IdVacante,
+        CAST(LTRIM(RTRIM(v.Nombre)) AS NVARCHAR(200)) AS NombreVacante,
+        CAST(LTRIM(RTRIM(e.NombreEmpresa)) AS NVARCHAR(200)) AS NombreEmpresa,
+        CAST(LTRIM(RTRIM(esp.Nombre)) AS NVARCHAR(200)) AS Especialidad,
+        CAST(v.NumCupos AS INT) AS NumCupos,
+
+        -------------------------------------------------
+        -- Cupos ocupados (solo por estados bloqueantes)
+        -------------------------------------------------
+        CAST(ISNULL((
             SELECT COUNT(*)
             FROM PracticaEstudianteTB p
             WHERE p.IdVacante = v.IdVacante
-              AND p.IdEstado IN (3,5,6,7,12)
-        ),0) AS CuposOcupados,
-        v.FechaCierre,
-        v.Requerimientos
+              AND p.IdEstado IN (SELECT IdEstado FROM @EstadosBloqueantes)
+        ),0) AS INT) AS CuposOcupados,
+
+        CAST(v.FechaCierre AS DATETIME) AS FechaCierre,
+        CAST(v.Requerimientos AS NVARCHAR(MAX)) AS Requerimientos,
+
+        -------------------------------------------------
+        -- 🟢 Estado actual de la postulación del estudiante
+        -------------------------------------------------
+        CAST(ISNULL((
+            SELECT TOP 1 LTRIM(RTRIM(e2.Descripcion))
+            FROM PracticaEstudianteTB p2
+            INNER JOIN EstadosTB e2 ON e2.IdEstado = p2.IdEstado
+            WHERE p2.IdVacante = v.IdVacante
+              AND p2.IdUsuario = @IdUsuario
+            ORDER BY p2.IdPractica DESC
+        ), 'Sin proceso activo') AS NVARCHAR(100)) AS EstadoPostulacion
+
     FROM VacantesPracticasTB v
     INNER JOIN EmpresasTB e ON e.IdEmpresa = v.IdEmpresa
     INNER JOIN EspecialidadesVacantesTB ev ON ev.IdVacante = v.IdVacante
     INNER JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ev.IdEspecialidad
-    WHERE v.IdEstado = 1
-      AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
-      AND v.NumCupos > (
-          SELECT COUNT(*) FROM PracticaEstudianteTB p
-          WHERE p.IdVacante = v.IdVacante
-            AND p.IdEstado IN (3,5,6,7,12)
-      )
-      AND v.IdVacante NOT IN (
-          SELECT p.IdVacante FROM PracticaEstudianteTB p
-          WHERE p.IdUsuario = @IdUsuario
-      )
+    WHERE 
+        v.IdEstado = 1
+        AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
     ORDER BY v.Nombre;
-END
-
-
-
-USE SIGEP;
+END;
 GO
 
 USE SIGEP;
@@ -404,42 +478,48 @@ BEGIN
     -- 1️⃣ Determinar el rol del usuario actual
     -------------------------------------------------
     DECLARE @Rol NVARCHAR(50);
-    SELECT @Rol = r.Descripcion
+    SELECT @Rol = LOWER(LTRIM(RTRIM(r.Descripcion)))
     FROM UsuariosTB u
     INNER JOIN RolesTB r ON r.IdRol = u.IdRol
     WHERE u.IdUsuario = @IdUsuarioSesion;
 
     -------------------------------------------------
-    -- 2️⃣ Estados considerados como "activos" (bloquean nueva asignación)
+    -- 2️⃣ Estados considerados "activos" (bloquean nueva asignación)
     -------------------------------------------------
     DECLARE @EstadosActivos TABLE (Descripcion NVARCHAR(100));
     INSERT INTO @EstadosActivos (Descripcion)
-    VALUES ('Asignada'), ('En Curso'), ('Aprobada'), ('Finalizada'), ('Rezagado');
+    VALUES ('asignada'), ('en curso'), ('aprobada'), ('finalizada'), ('rezagado');
 
     -------------------------------------------------
-    -- 3️⃣ Especialidades relacionadas a la vacante
+    -- 3️⃣ Normalizar las descripciones (por seguridad)
+    -------------------------------------------------
+    UPDATE @EstadosActivos
+    SET Descripcion = LOWER(LTRIM(RTRIM(Descripcion)));
+
+    -------------------------------------------------
+    -- 4️⃣ Especialidades de la vacante (filtrarán los estudiantes)
     -------------------------------------------------
     DECLARE @EspecialidadesVacante TABLE (IdEspecialidad INT);
     INSERT INTO @EspecialidadesVacante (IdEspecialidad)
-    SELECT IdEspecialidad 
-    FROM EspecialidadesVacantesTB 
+    SELECT IdEspecialidad
+    FROM EspecialidadesVacantesTB
     WHERE IdVacante = @IdVacante;
 
     -------------------------------------------------
-    -- 4️⃣ Especialidades del profesor (si aplica)
+    -- 5️⃣ Especialidades del profesor (si aplica)
     -------------------------------------------------
     DECLARE @EspecialidadesProfesor TABLE (IdEspecialidad INT);
-    IF @Rol = 'Profesor'
+    IF @Rol = 'profesor'
     BEGIN
         INSERT INTO @EspecialidadesProfesor (IdEspecialidad)
-        SELECT IdEspecialidad 
+        SELECT IdEspecialidad
         FROM UsuarioEspecialidadTB
-        WHERE IdUsuario = @IdUsuarioSesion 
+        WHERE IdUsuario = @IdUsuarioSesion
           AND IdEstado = 1;
     END;
 
     -------------------------------------------------
-    -- 5️⃣ Seleccionar estudiantes visibles según rol
+    -- 6️⃣ Consulta principal: estudiantes de la especialidad de la vacante
     -------------------------------------------------
     SELECT DISTINCT
         u.IdUsuario,
@@ -449,10 +529,10 @@ BEGIN
         u.EstadoAcademico,
 
         -------------------------------------------------
-        -- Último estado general (cualquier práctica)
+        -- Estado general del estudiante (última práctica)
         -------------------------------------------------
         ISNULL((
-            SELECT TOP 1 e.Descripcion
+            SELECT TOP 1 LTRIM(RTRIM(e.Descripcion))
             FROM PracticaEstudianteTB p
             INNER JOIN EstadosTB e ON e.IdEstado = p.IdEstado
             WHERE p.IdUsuario = u.IdUsuario
@@ -460,10 +540,10 @@ BEGIN
         ), 'Sin proceso activo') AS EstadoPractica,
 
         -------------------------------------------------
-        -- Estado del estudiante en la vacante actual
+        -- Estado en esta vacante específica
         -------------------------------------------------
         ISNULL((
-            SELECT TOP 1 e2.Descripcion
+            SELECT TOP 1 LTRIM(RTRIM(e2.Descripcion))
             FROM PracticaEstudianteTB p2
             INNER JOIN EstadosTB e2 ON e2.IdEstado = p2.IdEstado
             WHERE p2.IdUsuario = u.IdUsuario 
@@ -474,43 +554,57 @@ BEGIN
         -------------------------------------------------
         -- Indicadores
         -------------------------------------------------
-        CASE WHEN EXISTS (
-            SELECT 1 FROM PracticaEstudianteTB p2
-            WHERE p2.IdVacante = @IdVacante 
-              AND p2.IdUsuario = u.IdUsuario
-        ) THEN 1 ELSE 0 END AS TieneRelacionEnVacante,
+        CAST(
+            CASE WHEN EXISTS (
+                SELECT 1 
+                FROM PracticaEstudianteTB p3
+                WHERE p3.IdVacante = @IdVacante 
+                  AND p3.IdUsuario = u.IdUsuario
+            ) THEN 1 ELSE 0 END
+        AS BIT) AS TieneRelacionEnVacante,
 
-        CASE WHEN EXISTS (
-            SELECT 1
-            FROM PracticaEstudianteTB p3
-            INNER JOIN EstadosTB e3 ON e3.IdEstado = p3.IdEstado
-            WHERE p3.IdUsuario = u.IdUsuario
-              AND e3.Descripcion IN (SELECT Descripcion FROM @EstadosActivos)
-        ) THEN 1 ELSE 0 END AS TienePracticaActiva
+        CAST(
+            CASE WHEN EXISTS (
+                SELECT 1
+                FROM PracticaEstudianteTB p4
+                INNER JOIN EstadosTB e4 ON e4.IdEstado = p4.IdEstado
+                WHERE p4.IdUsuario = u.IdUsuario
+                  AND LOWER(LTRIM(RTRIM(e4.Descripcion))) IN (SELECT Descripcion FROM @EstadosActivos)
+            ) THEN 1 ELSE 0 END
+        AS BIT) AS TienePracticaActiva
 
     FROM UsuariosTB u
     INNER JOIN RolesTB r ON r.IdRol = u.IdRol
     INNER JOIN UsuarioEspecialidadTB ue ON ue.IdUsuario = u.IdUsuario AND ue.IdEstado = 1
     INNER JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ue.IdEspecialidad
+
     WHERE 
         -------------------------------------------------
-        -- Solo estudiantes activos o inactivos académicamente
+        -- Solo estudiantes activos o egresados
         -------------------------------------------------
         r.Descripcion = 'Estudiante'
         AND (u.EstadoAcademico = 1 OR u.EstadoAcademico = 0)
 
         -------------------------------------------------
-        -- Coordinador ve todos los estudiantes
-        -- Profesor solo los de sus especialidades
-        -- (que además coincidan con la especialidad de la vacante)
+        -- ✅ Filtrar por especialidades de la vacante
+        -------------------------------------------------
+        AND ue.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesVacante)
+
+        -------------------------------------------------
+        -- ✅ Coordinador ve todos los de la especialidad
+        -- ✅ Profesor ve solo los de su especialidad asignada
         -------------------------------------------------
         AND (
-            @Rol = 'Coordinador'
+            @Rol = 'coordinador'
             OR (
-                ue.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesProfesor)
-                AND ue.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesVacante)
+                @Rol = 'profesor'
+                AND ue.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesProfesor)
             )
         )
+
+    GROUP BY 
+        u.IdUsuario, u.Cedula, u.Nombre, u.Apellido1, u.Apellido2,
+        esp.Nombre, u.EstadoAcademico
 
     ORDER BY NombreCompleto;
 END;

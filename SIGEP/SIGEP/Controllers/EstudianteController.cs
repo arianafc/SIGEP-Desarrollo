@@ -36,7 +36,7 @@ namespace SIGEP.Controllers
             {
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-                // ✅ Cargar solo las especialidades del profesor
+               
                 var especialidadesProfesor = (from ue in db.UsuarioEspecialidadTB
                                               join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
                                               where ue.IdUsuario == idUsuario
@@ -105,7 +105,7 @@ namespace SIGEP.Controllers
                          select ep.Descripcion.Trim()).FirstOrDefault()
                 };
 
-            // Filtro por estado académico (texto del combo)
+           
             if (!string.IsNullOrWhiteSpace(estado))
             {
                 var estadoNorm = estado.Trim().ToLowerInvariant();
@@ -128,14 +128,14 @@ namespace SIGEP.Controllers
             {
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-                // ✅ Obtener todas las especialidades del profesor
+               
                 var especialidadesProfesor = db.UsuarioEspecialidadTB
                     .Where(ue => ue.IdUsuario == idUsuario)
                     .Select(ue => ue.IdEspecialidad)
                     .Distinct()
                     .ToList();
 
-                // ✅ Si el profesor tiene varias, usar filtro del UI (si lo envía)
+              
                 if (especialidadesProfesor.Count > 1)
                 {
                     if (idEspecialidad > 0)
@@ -155,7 +155,7 @@ namespace SIGEP.Controllers
             }
             else
             {
-                // Coordinador u otros roles
+               
                 if (idEspecialidad > 0)
                     query = query.Where(x => x.IdEspecialidad == idEspecialidad);
             }
@@ -199,19 +199,17 @@ namespace SIGEP.Controllers
                                 join d in db.DireccionesTB on u.IdDireccion equals d.IdDireccion into jd
                                 from d in jd.DefaultIfEmpty()
 
-                                    // 🔗 Relación: Direccion -> Distrito
                                 join dist in db.DistritosTB on d.IdDistrito equals dist.IdDistrito into jdistr
                                 from dist in jdistr.DefaultIfEmpty()
 
-                                    // 🔗 Relación: Distrito -> Cantón
                                 join cant in db.CantonesTB on dist.IdCanton equals cant.IdCanton into jc
                                 from cant in jc.DefaultIfEmpty()
 
-                                    // 🔗 Relación: Cantón -> Provincia
+                                  
                                 join prov in db.ProvinciasTB on cant.IdProvincia equals prov.IdProvincia into jp
                                 from prov in jp.DefaultIfEmpty()
 
-                                    // 🔗 Relación: Usuario -> Sección
+                                  
                                 join s in db.SeccionesTB on u.IdSeccion equals s.IdSeccion into js
                                 from s in js.DefaultIfEmpty()
 
@@ -259,7 +257,7 @@ namespace SIGEP.Controllers
                                       orderby p.IdPractica descending
                                       select es.Descripcion).FirstOrDefault() ?? "No Asignada";
 
-                // edad
+                
                 int edad = 0;
                 if (baseInfo.FechaNacimiento != default(DateTime))
                 {
@@ -445,7 +443,7 @@ namespace SIGEP.Controllers
 
         private List<SelectListItem> ObtenerEstados()
         {
-            // estados académicos válidos para UI del filtro
+            
             return db.EstadosTB
                      .Where(est => est.Descripcion == "Aprobada" || est.Descripcion == "Rezagado")
                      .OrderBy(est => est.Descripcion)
@@ -484,28 +482,25 @@ namespace SIGEP.Controllers
                 if (usuario == null)
                     return Json(new { success = false, message = "Estudiante no encontrado" });
 
-                // Buscar descripción del estado seleccionado
                 var estado = db.EstadosTB.FirstOrDefault(e => e.IdEstado == nuevoEstadoId);
                 if (estado == null)
                     return Json(new { success = false, message = "Estado no válido" });
 
                 var desc = (estado.Descripcion ?? "").Trim().ToLowerInvariant();
 
-                // Solo permitimos “Aprobada” o “Rezagado”
+                
                 if (desc != "aprobada" && desc != "rezagado")
                     return Json(new { success = false, message = "Solo se permite cambiar a Rezagado o Aprobado." });
 
-                // ✅ Actualiza IdEstado y el booleano
+              
                 usuario.IdEstado = nuevoEstadoId;
                 usuario.EstadoAcademico = (desc == "aprobada");
                 db.SaveChanges();
 
-                // ========================================
-                // NUEVA LÓGICA: Si pasa a "Rezagado", práctica pasa a "Retirada"
-                // ========================================
+                
                 if (desc == "rezagado")
                 {
-                    // Buscar práctica activa más reciente
+                    
                     var practica = db.PracticaEstudianteTB
                                      .Where(p => p.IdUsuario == idUsuario)
                                      .OrderByDescending(p => p.IdPractica)
@@ -513,13 +508,13 @@ namespace SIGEP.Controllers
 
                     if (practica != null)
                     {
-                        // Obtener el IdEstado de "Retirada"
+                        
                         var estadoRetirada = db.EstadosTB
                             .FirstOrDefault(e => e.Descripcion.Trim().ToLower() == "retirada");
 
                         if (estadoRetirada != null)
                         {
-                            // Si la práctica no está ya retirada, cambiarla
+                            
                             if (practica.IdEstado != estadoRetirada.IdEstado)
                             {
                                 practica.IdEstado = estadoRetirada.IdEstado;
@@ -529,7 +524,6 @@ namespace SIGEP.Controllers
                     }
                 }
 
-                // ========================================
 
                 return Json(new
                 {
