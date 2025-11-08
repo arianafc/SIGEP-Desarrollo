@@ -129,6 +129,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AdministracionGeneralController.cs" />
+    <Compile Include="Controllers\ComunicadosController.cs" />
     <Compile Include="Controllers\EgresadosController.cs" />
     <Compile Include="Controllers\EmpresaController.cs" />
     <Compile Include="Controllers\EstudianteController.cs" />
@@ -188,6 +189,7 @@
     <Compile Include="EF\EstadosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\EstadoTB_Backup.cs" />
     <Compile Include="EF\EstudianteEncargadoTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -246,6 +248,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\ObtenerEstudiantesParaEvaluacionSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerEstudiantesPracticasSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\ObtenerEstudiantesProfesorSP_Result.cs">
@@ -312,11 +317,14 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Autenticacion.cs" />
+    <Compile Include="Models\ComunicadoCardVM.cs" />
+    <Compile Include="Models\DashboardVM.cs" />
     <Compile Include="Models\DocumentoDTO.cs" />
     <Compile Include="Models\EncargadoDTO.cs" />
     <Compile Include="Models\EstudianteDetalleDTO.cs" />
     <Compile Include="Models\EstudianteDetalleVM.cs" />
     <Compile Include="Models\EstudianteDTO.cs" />
+    <Compile Include="Models\EstudiantePracticaVM.cs" />
     <Compile Include="Models\FiltroSeguridad.cs" />
     <Compile Include="Models\MisPostulacionesVM.cs" />
     <Compile Include="Models\PracticaEstudianteViewModel.cs" />
@@ -512,6 +520,7 @@
     <Content Include="Views\AdministracionGeneral\AdministracionGeneral.cshtml" />
     <Content Include="Views\Evaluacion\ListarEstudianteConPractica.cshtml" />
     <Content Include="Views\Vacantes\ListaVacantesEgresado.cshtml" />
+    <Content Include="Views\Comunicados\Comunicados.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
