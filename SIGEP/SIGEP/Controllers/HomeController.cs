@@ -19,6 +19,46 @@ namespace SIGEP.Controllers
         [FiltroSesion]
         public ActionResult Index()
         {
+            try { 
+                
+                var Datos = new DashboardVM();
+                using (var dbContext = new SIGEPEntities())
+                {
+                    Datos.EstudiantesActivos = dbContext.UsuariosTB.Count(u => u.IdRol == 3 && u.IdEstado == 1);
+                    Datos.EmpresasRegistradas = dbContext.EmpresasTB.Count(e => e.IdEstado == 1);
+                    Datos.EstudiantesConPracticasAsignadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 2);
+                    Datos.PracticasFinalizadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 3);
+                    Datos.UltimasPracticasAsignadas = (from p in dbContext.PracticaEstudianteTB
+                                                      join u in dbContext.UsuariosTB on p.IdUsuario equals u.IdUsuario
+                                                      join v in dbContext.VacantesPracticasTB on p.IdVacante equals v.IdVacante
+                                                      join emp in dbContext.EmpresasTB on v.IdEmpresa equals emp.IdEmpresa
+                                                      join e in dbContext.EstadosTB on p.IdEstado equals e.IdEstado
+                                                      where p.IdEstado == 2
+                                                      orderby p.FechaAplicacion descending
+                                                      select new PracticaEstudianteViewModel
+                                                      {
+                                                          IdPractica = p.IdPractica,
+                                                          IdVacante = p.IdVacante,
+                                                          IdUsuario = p.IdUsuario,
+                                                          FechaAplicacion = p.FechaAplicacion,
+                                                          IdEstado = p.IdEstado,
+                                                          EstadoDescripcion = e.Descripcion,
+                                                          Cedula = u.Cedula,
+                                                          NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+                                                          Empresa = emp.NombreEmpresa,
+                                                          Estado = e.Descripcion,
+                                                          IdPostulacion = p.IdPractica
+                                                      }).Take(3).ToList();
+                }
+
+                return View(Datos);
+
+            }
+
+            catch (Exception)
+            {
+                TempData["SwalError"] = "Ocurrió un error al cargar el panel de control. Por favor, inténtelo de nuevo más tarde.";
+            }
             return View();
         }
 
