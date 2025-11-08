@@ -360,25 +360,26 @@
 
 @section Scripts {
     <script>
-        window.VacantesCfg = {
-            urls: {
-                getVacantes: '@Url.Action("GetVacantes", "Practicas")',
-                login: '@Url.Action("Login", "Home")',
-                detalle: '@Url.Action("Detalle", "Practicas")',
-                getUbicacionEmpresa: '@Url.Action("GetUbicacionEmpresa", "Practicas")',
-                crear: '@Url.Action("Crear", "Practicas")',
-                editar: '@Url.Action("Editar", "Practicas")',
-                eliminar: '@Url.Action("Eliminar", "Practicas")',
-                obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones", "Practicas")',
-                asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
-                desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
-                obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar", "Practicas")',
-                visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion", "Practicas")',
-                actualizarEstado: '@Url.Action("ActualizarEstado","Estudiante")',
-            },
-            rol: @idRol,
-            idUsuarioSesion: @(Session["IdUsuario"] ?? 0)
-        };
+    window.VacantesCfg = {
+        urls: {
+            getVacantes: '@Url.Action("GetVacantes", "Practicas")',
+            login: '@Url.Action("Login", "Home")',
+            detalle: '@Url.Action("Detalle", "Practicas")',
+            getUbicacionEmpresa: '@Url.Action("GetUbicacionEmpresa", "Practicas")',
+            crear: '@Url.Action("Crear", "Practicas")',
+            editar: '@Url.Action("Editar", "Practicas")',
+            eliminar: '@Url.Action("Eliminar", "Practicas")',
+            obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones", "Practicas")',
+            asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
+            retirarEstudiante: '@Url.Action("RetirarEstudiante", "Practicas")', 
+            desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
+            obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar", "Practicas")',
+            visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion", "Practicas")',
+            actualizarEstado: '@Url.Action("ActualizarEstado","Estudiante")',
+        },
+        rol: @idRol,
+        idUsuarioSesion: @(Session["IdUsuario"] ?? 0)
+    };
     </script>
     <script src="~/Scripts/Practicas/VacantesEstudiantes.js"></script>
 }

@@ -285,6 +285,7 @@
 
 
     // === ASIGNAR VACANTE A ESTUDIANTE ===
+    // === ASIGNAR VACANTE A ESTUDIANTE ===
     $(document).on('click', '.btn-asignar-vacante', function () {
         const idVacante = $(this).data('idvacante');
         const idUsuario = $(this).data('idusuario');
@@ -298,26 +299,90 @@
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#2d594d'
         }).then(res => {
-            if (res.isConfirmed) {
-                $.post('/Practicas/AsignarEstudiante', { idVacante, idUsuario })
-                    .done(resp => {
-                        if (resp.ok) {
-                            Swal.fire({icon: 'success',
-                                title: 'Éxito',
-                                text: resp.message,
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
-                            $('#modalAsignar').modal('hide');
-                            $('#miTabla').DataTable().ajax.reload(null, false);
-                        } else {
-                            Swal.fire('Error', resp.message || 'No se pudo asignar el estudiante.', 'error');
+            if (!res.isConfirmed) return;
+
+            $.post('/Practicas/AsignarEstudiante', { idVacante, idUsuario })
+                .done(resp => {
+                    if (!resp.ok) {
+                        Swal.fire('Error', resp.message || 'No se pudo asignar el estudiante.', 'error');
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: resp.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // 🔹 NO cerramos el modal, recargamos sus filas
+                    $.getJSON('/Practicas/ObtenerVacantesAsignar', { idUsuario }, res2 => {
+                        const tbody = $('#miTablaAsignar tbody').empty();
+
+                        if (!res2.ok || !res2.data?.length) {
+                            tbody.append('<tr><td colspan="7" class="text-center text-muted">No hay vacantes registradas</td></tr>');
+                            return;
                         }
-                    })
-                    .fail(() => Swal.fire('Error', 'No se pudo conectar al servidor.', 'error'));
-            }
+
+                        res2.data.forEach(v => {
+                            const estado = (v.EstadoPostulacion || 'Sin proceso activo')
+                                .normalize('NFD')
+                                .replace(/[\u0300-\u036f]/g, '')
+                                .toLowerCase()
+                                .trim();
+
+                            const cuposRestantes = v.NumCupos - v.CuposOcupados;
+                            let btn = '';
+
+                            if (["sin proceso activo", "retirada", "en proceso de aplicacion"].includes(estado)) {
+                                btn = cuposRestantes > 0
+                                    ? `<button class="btn btn-sm btn-outline-success btn-asignar-vacante"
+                                       data-idvacante="${v.IdVacante}"
+                                       data-idusuario="${idUsuario}">
+                                       <i class="fas fa-user-plus"></i> Asignar
+                                   </button>`
+                                    : `<button class="btn btn-sm btn-outline-secondary" disabled>
+                                       <i class="fas fa-ban"></i> Sin cupos
+                                   </button>`;
+                            } else if (estado === "asignada") {
+                                btn = `<button class="btn btn-sm btn-outline-warning btn-desasignar-vacante"
+                                       data-idpractica="${v.IdPractica || 0}"
+                                       data-nombre="${v.NombreEstudiante || ''}">
+                                       <i class="fas fa-user-minus"></i> Retirar
+                                   </button>`;
+                            } else if (["en curso", "aprobada", "finalizada", "rezagado"].includes(estado)) {
+                                btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
+                                       <i class="fas fa-ban"></i> No disponible
+                                   </button>`;
+                            } else {
+                                btn = `<button class="btn btn-sm btn-outline-secondary" disabled>
+                                       <i class="fas fa-question"></i> Estado desconocido
+                                   </button>`;
+                            }
+
+                            tbody.append(`
+                            <tr>
+                                <td>${v.NombreVacante}</td>
+                                <td>${v.NombreEmpresa}</td>
+                                <td>${v.Especialidad}</td>
+                                <td>${v.NumCupos}</td>
+                                <td>${v.CuposOcupados}</td>
+                                <td>${btn}</td>
+                            </tr>
+                        `);
+                        });
+                    });
+
+                    // 🔹 Refrescar la tabla principal de estudiantes
+                    $('#miTabla').DataTable().ajax.reload(null, false);
+                })
+                .fail(() => {
+                    Swal.fire('Error', 'No se pudo conectar al servidor.', 'error');
+                });
         });
     });
+
 
     // === DESASIGNAR VACANTE DESDE EL MODAL ===
     $(document).on('click', '.btn-desasignar-vacante', function () {

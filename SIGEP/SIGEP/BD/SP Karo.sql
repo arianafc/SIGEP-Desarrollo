@@ -419,9 +419,6 @@ BEGIN
     -- 3️⃣ Consulta principal
     -------------------------------------------------
     SELECT 
-        -------------------------------------------------
-        -- ⚙️ Forzamos tipos y alias correctos para mapeo en EF
-        -------------------------------------------------
         CAST(v.IdVacante AS INT) AS IdVacante,
         CAST(LTRIM(RTRIM(v.Nombre)) AS NVARCHAR(200)) AS NombreVacante,
         CAST(LTRIM(RTRIM(e.NombreEmpresa)) AS NVARCHAR(200)) AS NombreEmpresa,
@@ -451,15 +448,36 @@ BEGIN
             WHERE p2.IdVacante = v.IdVacante
               AND p2.IdUsuario = @IdUsuario
             ORDER BY p2.IdPractica DESC
-        ), 'Sin proceso activo') AS NVARCHAR(100)) AS EstadoPostulacion
+        ), 'Sin proceso activo') AS NVARCHAR(100)) AS EstadoPostulacion,
+
+        -------------------------------------------------
+        -- 🟠 Nuevo: Indicador si se puede volver a asignar
+        -------------------------------------------------
+        CAST(
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM PracticaEstudianteTB p3
+                    INNER JOIN EstadosTB e3 ON e3.IdEstado = p3.IdEstado
+                    WHERE p3.IdVacante = v.IdVacante
+                      AND p3.IdUsuario = @IdUsuario
+                      AND LOWER(LTRIM(RTRIM(e3.Descripcion))) IN (
+                          'en curso','asignada','aprobada','finalizada','rezagado'
+                      )
+                ) THEN 0
+                ELSE 1
+            END AS BIT
+        ) AS PuedeAsignar
 
     FROM VacantesPracticasTB v
     INNER JOIN EmpresasTB e ON e.IdEmpresa = v.IdEmpresa
     INNER JOIN EspecialidadesVacantesTB ev ON ev.IdVacante = v.IdVacante
     INNER JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ev.IdEspecialidad
+
     WHERE 
         v.IdEstado = 1
         AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
+
     ORDER BY v.Nombre;
 END;
 GO
@@ -477,10 +495,9 @@ BEGIN
     -------------------------------------------------
     -- 1️⃣ Determinar el rol del usuario actual
     -------------------------------------------------
-    DECLARE @Rol NVARCHAR(50);
-    SELECT @Rol = LOWER(LTRIM(RTRIM(r.Descripcion)))
+    DECLARE @IdRol INT;
+    SELECT @IdRol = u.IdRol
     FROM UsuariosTB u
-    INNER JOIN RolesTB r ON r.IdRol = u.IdRol
     WHERE u.IdUsuario = @IdUsuarioSesion;
 
     -------------------------------------------------
@@ -491,13 +508,7 @@ BEGIN
     VALUES ('asignada'), ('en curso'), ('aprobada'), ('finalizada'), ('rezagado');
 
     -------------------------------------------------
-    -- 3️⃣ Normalizar las descripciones (por seguridad)
-    -------------------------------------------------
-    UPDATE @EstadosActivos
-    SET Descripcion = LOWER(LTRIM(RTRIM(Descripcion)));
-
-    -------------------------------------------------
-    -- 4️⃣ Especialidades de la vacante (filtrarán los estudiantes)
+    -- 3️⃣ Especialidades de la vacante (filtrarán los estudiantes)
     -------------------------------------------------
     DECLARE @EspecialidadesVacante TABLE (IdEspecialidad INT);
     INSERT INTO @EspecialidadesVacante (IdEspecialidad)
@@ -506,10 +517,10 @@ BEGIN
     WHERE IdVacante = @IdVacante;
 
     -------------------------------------------------
-    -- 5️⃣ Especialidades del profesor (si aplica)
+    -- 4️⃣ Especialidades del profesor (si aplica)
     -------------------------------------------------
     DECLARE @EspecialidadesProfesor TABLE (IdEspecialidad INT);
-    IF @Rol = 'profesor'
+    IF @IdRol = 3 -- Profesor
     BEGIN
         INSERT INTO @EspecialidadesProfesor (IdEspecialidad)
         SELECT IdEspecialidad
@@ -519,7 +530,7 @@ BEGIN
     END;
 
     -------------------------------------------------
-    -- 6️⃣ Consulta principal: estudiantes de la especialidad de la vacante
+    -- 5️⃣ Consulta principal
     -------------------------------------------------
     SELECT DISTINCT
         u.IdUsuario,
@@ -552,7 +563,18 @@ BEGIN
         ), 'Sin proceso activo') AS EstadoVacante,
 
         -------------------------------------------------
-        -- Indicadores
+        -- Id de la última práctica en esta vacante
+        -------------------------------------------------
+        ISNULL((
+            SELECT TOP 1 p2.IdPractica
+            FROM PracticaEstudianteTB p2
+            WHERE p2.IdUsuario = u.IdUsuario
+              AND p2.IdVacante = @IdVacante
+            ORDER BY p2.IdPractica DESC
+        ), 0) AS IdPracticaVacante,
+
+        -------------------------------------------------
+        -- Indicadores de relación y actividad
         -------------------------------------------------
         CAST(
             CASE WHEN EXISTS (
@@ -578,34 +600,27 @@ BEGIN
     INNER JOIN UsuarioEspecialidadTB ue ON ue.IdUsuario = u.IdUsuario AND ue.IdEstado = 1
     INNER JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ue.IdEspecialidad
 
+    -------------------------------------------------
+    -- 6️⃣ Filtros principales
+    -------------------------------------------------
     WHERE 
-        -------------------------------------------------
-        -- Solo estudiantes activos o egresados
-        -------------------------------------------------
         r.Descripcion = 'Estudiante'
-        AND (u.EstadoAcademico = 1 OR u.EstadoAcademico = 0)
-
-        -------------------------------------------------
-        -- ✅ Filtrar por especialidades de la vacante
-        -------------------------------------------------
+        AND u.EstadoAcademico = 1  -- ✅ Solo estudiantes activos académicamente
         AND ue.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesVacante)
-
-        -------------------------------------------------
-        -- ✅ Coordinador ve todos los de la especialidad
-        -- ✅ Profesor ve solo los de su especialidad asignada
-        -------------------------------------------------
         AND (
-            @Rol = 'coordinador'
+            @IdRol = 2  -- Coordinador ve todo
             OR (
-                @Rol = 'profesor'
+                @IdRol = 3  -- Profesor ve solo sus especialidades
                 AND ue.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesProfesor)
             )
         )
 
+    -------------------------------------------------
+    -- 7️⃣ Agrupación y orden
+    -------------------------------------------------
     GROUP BY 
         u.IdUsuario, u.Cedula, u.Nombre, u.Apellido1, u.Apellido2,
         esp.Nombre, u.EstadoAcademico
-
     ORDER BY NombreCompleto;
 END;
 GO
