@@ -100,6 +100,7 @@ namespace SIGEP.Controllers
             {
                 return Json(new { success = false, message = "Error en el servidor, intente más tarde." + e });
             }
+
         }
        
 

@@ -1,0 +1,326 @@
+﻿@model IEnumerable<Sigep.Models.ComunicadoCardVM>
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var rol = ViewBag.IdRol != null ? (int)ViewBag.IdRol : 0; 
+}
+
+@section Styles {
+    <style>
+        .comunicados-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .comunicado-card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            height: 100%;
+        }
+
+            .comunicado-card h5 {
+                color: #2D594D;
+                font-weight: 600;
+                min-height: 60px;
+                text-align: center;
+            }
+
+            .comunicado-card p {
+                margin: .2rem 0;
+                color: #555;
+                font-size: .95rem;
+            }
+
+        .btn-ver {
+            background-color: #2D594D;
+            color: #fff;
+            border: none;
+            padding: .5rem .8rem;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background-color .3s;
+            margin-right: .5rem;
+        }
+
+            .btn-ver:hover {
+                background-color: #768C46;
+            }
+
+        .titulo-pagina {
+            color: #2D594D;
+            font-weight: bold;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .botones-acciones {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+    </style>
+}
+
+<div class="comunicados-wrapper">
+    <h2 class="titulo-pagina">Comunicados de Prácticas Profesionales</h2>
+
+    @if (rol == 2)
+    {<!-- Coordinador -->
+        <div class="d-flex justify-content-end gap-3 mb-4">
+            <button class="btn-ver" data-bs-toggle="modal" data-bs-target="#modalAgregarComunicado">
+                <i class="bi bi-plus-circle"></i> Agregar Comunicado
+            </button>
+            <button class="btn-ver" data-bs-toggle="modal" data-bs-target="#modalEnviarCorreo">
+                <i class="bi bi-envelope-fill"></i> Enviar Email
+            </button>
+        </div>
+    }
+
+    <div class="row g-4" id="contenedorComunicados">
+        @foreach (var c in Model)
+        {
+            <div class="col-md-4 d-flex" id="comunicado-@c.Id">
+                <div class="comunicado-card w-100">
+                    <p><strong>@c.Titulo</strong></p>
+                    <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                    <div class="botones-acciones">
+                        <button class="btn-ver btn-abrir-comunicado"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalComunicadoUnico"
+                                data-id="@c.Id"
+                                data-titulo="@c.Titulo"
+                                data-descripcion="@c.Descripcion"
+                                data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                data-publicado="@c.PublicadoPor"
+                                data-dirigido="@c.DirigidoA">
+                            Abrir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal Enviar Correo -->
+<div class="modal fade" id="modalEnviarCorreo" tabindex="-1" aria-labelledby="modalEnviarCorreoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:10px; background-color:#F9F9F9;">
+            <div class="modal-header" style="background-color:#2D594D; color:white;">
+                <h5 class="modal-title" id="modalEnviarCorreoLabel"><i class="bi bi-envelope-fill"></i> Enviar Correo Electrónico</h5>
+            </div>
+            <div class="modal-body">
+                <form id="formEnviarCorreo" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Población:</strong></label>
+                        <select class="form-control" id="correoPoblacion" name="Poblacion" required>
+                            <option value="">Seleccione población</option>
+                            <option value="Profesores">Profesores</option>
+                            <option value="Estudiantes">Estudiantes</option>
+                            <option value="Egresados">Egresados</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Asunto:</strong></label>
+                        <input type="text" class="form-control" id="correoAsunto" name="Asunto" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Mensaje:</strong></label>
+                        <textarea class="form-control" id="correoMensaje" name="Mensaje" rows="5" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Adjuntar Archivo:</strong></label>
+                        <input type="file" class="form-control" id="correoArchivo" name="Archivo" />
+                        <small class="text-muted">PDF, DOCX, XLSX (opcional).</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnEnviar" class="btn-ver">Enviar Correo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Agregar Comunicado -->
+<div class="modal fade" id="modalAgregarComunicado" tabindex="-1" aria-labelledby="modalAgregarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:10px; background-color:#F9F9F9;">
+            <div class="modal-header" style="background-color:#2D594D; color:white;">
+                <h5 class="modal-title" id="modalAgregarLabel">Agregar Comunicado</h5>
+            </div>
+            <div class="modal-body">
+                <form id="formComunicado">
+                    @Html.AntiForgeryToken()
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Título</strong></label>
+                            <input type="text" class="form-control" id="cTitulo" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Publicado por</strong></label>
+                            <input type="text" class="form-control" value="@Session["usuario"]" readonly />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Descripción</strong></label>
+                        <textarea class="form-control" id="cDescripcion" rows="5" required></textarea>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Fecha de Publicación</strong></label>
+                            <input type="text" class="form-control" value="@DateTime.Now.ToString("dd-MM-yyyy")" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Fecha de Aplicación</strong></label>
+                            <input type="date" class="form-control" id="cFechaAplicacion" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>¿Quién puede visualizarlo?</strong></label>
+                        <select class="form-control" id="cDirigidoA" required>
+                            <option value="General">General</option>
+                            <option value="Estudiantes">Estudiantes</option>
+                            <option value="Profesores">Profesores</option>
+                            <option value="Egresados">Egresados</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnGuardarComunicado" class="btn-ver">Guardar Comunicado</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal fade" id="modalComunicadoUnico" tabindex="-1" aria-labelledby="modalComunicadoUnicoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:10px; background-color:#F2F2F2;">
+            <div class="modal-header" style="background-color:#2D594D; color:white;">
+                <h5 class="modal-title" id="modalComunicadoUnicoLabel">Título del Comunicado</h5>
+            </div>
+            <div class="modal-body">
+                <p><strong style="color:#2D594D;">Descripción:</strong><br /><span id="comunicadoDescripcion"></span></p>
+                <p><strong style="color:#2D594D;">Fecha de Aplicación:</strong> <span id="comunicadoAplicacion"></span></p>
+                <p><strong style="color:#2D594D;">Fecha de Publicación:</strong> <span id="comunicadoFecha"></span></p>
+                <p><strong style="color:#2D594D;">Publicado por:</strong> <span id="comunicadoPublicadoPor"></span></p>
+                <p><strong style="color:#2D594D;">Dirigido a:</strong> <span id="comunicadoDirigido"></span></p>
+            </div>
+            <div class="modal-footer">
+                @* Si querés botón eliminar real, agregá endpoint en el controller *@
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+  // Abrir modal detalle
+  document.querySelectorAll(".btn-abrir-comunicado").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const t = this.dataset.titulo;
+      const d = this.dataset.descripcion;
+      const f = this.dataset.fecha;
+      const a = this.dataset.aplicacion;
+      const p = this.dataset.publicado;
+      const g = this.dataset.dirigido;
+      const id = this.dataset.id;
+
+      document.getElementById("modalComunicadoUnicoLabel").textContent = t;
+      document.getElementById("comunicadoDescripcion").textContent = d;
+      document.getElementById("comunicadoFecha").textContent = f;
+      document.getElementById("comunicadoAplicacion").textContent = (a && a !== "N/A") ? a : "No aplica";
+      document.getElementById("comunicadoPublicadoPor").textContent = p;
+      document.getElementById("comunicadoDirigido").textContent = g;
+    });
+  });
+
+  // Guardar Comunicado (AJAX) con token del formulario
+  document.getElementById("btnGuardarComunicado")?.addEventListener("click", function () {
+    const form = document.getElementById("formComunicado");
+    const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+    const titulo = document.getElementById("cTitulo").value.trim();
+    const descripcion = document.getElementById("cDescripcion").value.trim();
+    const fa = document.getElementById("cFechaAplicacion").value; // yyyy-MM-dd o vacío
+    const dirigido = document.getElementById("cDirigidoA").value;
+
+    if (!titulo || !descripcion || !dirigido) {
+      Swal.fire({ icon:'warning', title:'Campos incompletos', confirmButtonColor:'#8CA653' });
+      return;
+    }
+
+    $.ajax({
+      url: '@Url.Action("CrearComunicado", "Comunicados")',
+      type: 'POST',
+      data: {
+        __RequestVerificationToken: token,
+        Titulo: titulo,
+        Descripcion: descripcion,
+        FechaAplicacion: fa,
+        DirigidoA: dirigido
+      },
+      success: function (r) {
+        if (r.ok) {
+          Swal.fire({ icon:'success', title:r.msg, timer:1800, showConfirmButton:false });
+          setTimeout(function(){ location.reload(); }, 1200);
+        } else {
+          Swal.fire({ icon:'error', title:r.msg || 'Error', confirmButtonColor:'#8CA653' });
+        }
+      },
+      error: function(){
+        Swal.fire({ icon:'error', title:'Error de comunicación', confirmButtonColor:'#8CA653' });
+      }
+    });
+  });
+
+  // Enviar correo (AJAX) — individual (no masivo)
+  document.getElementById("btnEnviar")?.addEventListener("click", function () {
+    const form = document.getElementById("formEnviarCorreo");
+    const pobl = document.getElementById("correoPoblacion").value;
+    const asunto = document.getElementById("correoAsunto").value.trim();
+    const msg = document.getElementById("correoMensaje").value.trim();
+
+    if (!pobl || !asunto || !msg) {
+      Swal.fire({ icon:'warning', title:'Campos incompletos', confirmButtonColor:'#8CA653' });
+      return;
+    }
+
+    const fd = new FormData(form);
+    $.ajax({
+      url: '@Url.Action("EnviarCorreo","Comunicados")',
+      type: 'POST',
+      data: fd,
+      processData: false,
+      contentType: false,
+      success: function(r){
+        if (r.ok) {
+          Swal.fire({ icon:'success', title:r.msg, timer:1800, showConfirmButton:false });
+          setTimeout(function(){
+            form.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEnviarCorreo'));
+            modal.hide();
+          }, 1200);
+        } else {
+          Swal.fire({ icon:'error', title:r.msg || 'Error', confirmButtonColor:'#8CA653' });
+        }
+      },
+      error: function(){
+        Swal.fire({ icon:'error', title:'Error de comunicación', confirmButtonColor:'#8CA653' });
+      }
+    });
+  });
+    </script>
+}

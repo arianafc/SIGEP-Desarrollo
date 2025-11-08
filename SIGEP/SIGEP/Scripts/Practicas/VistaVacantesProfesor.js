@@ -2,7 +2,7 @@
     $(function () {
         const cfg = window.VacantesProfesorCfg || { urls: {} };
 
-        // ========= helpers =========
+       
         function escapeHtml(text) { if (!text && text !== 0) return ''; return $('<div>').text(text).html(); }
         function formatFecha(val) {
             if (!val) return '';
@@ -17,7 +17,7 @@
             return (s.length === 3) ? (s[2] + '/' + s[1] + '/' + s[0]) : (val + '');
         }
 
-        // === Mismo badge verde que usas en la vista Vacantes (estudiantes)
+      
         function badgeEstado(estadoOriginal) {
             var est = (estadoOriginal || '')
                 .toString()
@@ -34,7 +34,7 @@
                 'rezagado': { cls: 'badge-rezagado', txt: 'Rezagado' },
                 'archivado': { cls: 'badge-archivado', txt: 'Archivado' },
                 'en curso': { cls: 'badge-en-curso', txt: 'En Curso' },
-                // por si llegan a este endpoint:
+              
                 'activo': { cls: 'badge-activo', txt: 'Activo' },
                 'inactivo': { cls: 'badge-inactivo', txt: 'Inactivo' }
             };
@@ -43,12 +43,12 @@
             return `<span class="badge ${info.cls}">${info.txt}</span>`;
         }
 
-        // ========= Filtros + carga =========
+       
         filtrarVacantes();
         $("#filtroPractica,#filtroModalidad").on('change', filtrarVacantes);
 
         function filtrarVacantes() {
-            // Normaliza a minúscula para empatar con el .ToLower() del servidor
+           
             var estado = ($("#filtroPractica").val() || '').toString().trim().toLowerCase();
             var modalidad = parseInt($("#filtroModalidad").val() || '0', 10) || 0;
 
@@ -102,7 +102,7 @@
             });
         }
 
-        // ========= Detalle + Aplicaciones (mismo estilo verde) =========
+      
         $(document).on('click', '.btn-detalle', function () {
             var idVacante = $(this).data('id');
             if (!idVacante) return;
@@ -111,7 +111,7 @@
                 if (!res || !res.ok) { Swal.fire('Error', 'No se pudo cargar la vacante', 'error'); return; }
                 var d = res.data;
 
-                // Campos de cabecera
+              
                 $('#vis-Nombre').text(d.Nombre || '');
                 $('#vis-Empresa').text(d.EmpresaNombre || '');
                 $('#vis-Descripcion').text(d.Descripcion || '');
@@ -138,7 +138,6 @@
                 }
                 $('#mensajeSinAsignados').hide();
 
-                // MISMO markup que en “Vacantes (estudiantes)”: list-group-item + badge verde
                 res.data.forEach(function (p) {
                     var estado = (p.EstadoDescripcion || p.EstadoVacante || '').trim();
                     var url = cfg.urls.visualizacionPostulacion
@@ -148,7 +147,7 @@
                     var nombreLink = `<a href="${url}" class="text-decoration-none" style="color:#2d594d; font-weight:600;">${escapeHtml(p.NombreCompleto)}</a>`;
                     var badge = badgeEstado(estado);
 
-                    // Solo permitir desasignar si el estudiante está en proceso / asignado / en curso
+                    
                     var estadoLower = estado.toLowerCase();
                     var mostrarBoton = ['asignada', 'en curso', 'en proceso de aplicacion'].includes(estadoLower);
 
@@ -175,7 +174,7 @@
             });
         }
 
-        // Reemplaza tu handler por este (mantiene focus trap y UX igual a Estudiantes)
+       
         $(document).on("click", ".btn-desasignar-estudiante", function (e) {
             e.preventDefault();
 
@@ -185,7 +184,7 @@
             const modalVisualizarEl = document.getElementById("modalVisualizar");
             const modalVisualizar = bootstrap.Modal.getInstance(modalVisualizarEl);
 
-            // Desactivar focus trap para que SweetAlert acepte input
+           
             if (modalVisualizar && modalVisualizar._focustrap) {
                 modalVisualizar._focustrap.deactivate();
             }
@@ -219,7 +218,7 @@
                 }
             }).then((result) => {
                 if (!result.isConfirmed) {
-                    // Si cancela, reactivar focus trap y no hacer nada
+                   
                     if (modalVisualizar && modalVisualizar._focustrap) {
                         modalVisualizar._focustrap.activate();
                     }
@@ -228,7 +227,6 @@
 
                 const comentario = (result.value || '').trim();
 
-                // Helper: ejecutar retiro (llamada única a RetirarEstudiante)
                 function ejecutarRetiro() {
                     $.post(cfg.urls.retirarEstudiante, {
                         idVacante: idVacante,
@@ -243,11 +241,11 @@
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    // Recargar postulaciones y vacantes
+                                  
                                     cargarPostulaciones(idVacante);
                                     filtrarVacantes();
 
-                                    // Opcional: recargar detalle completo con comentarios
+                                    
                                     $.get(cfg.urls.detalle, { id: idVacante })
                                         .done(function (html) {
                                             if (html && html.trim()) {
@@ -270,7 +268,6 @@
                         });
                 }
 
-                // Si hay comentario, primero guardarlo con AgregarComentario y luego retirar
                 if (comentario) {
                     $.post(cfg.urls.agregarComentario, {
                         idVacante: idVacante,
@@ -279,10 +276,10 @@
                     })
                         .done(function (res) {
                             if (res && res.success) {
-                                // comentario guardado ok -> proceder a retirar
+                               
                                 ejecutarRetiro();
                             } else {
-                                // No se pudo guardar comentario — mostrar error y NO retirar
+                                
                                 Swal.fire("Error", (res && res.message) || "No se pudo guardar el comentario.", "error")
                                     .then(() => {
                                         if (modalVisualizar && modalVisualizar._focustrap) {
@@ -301,7 +298,7 @@
                                 });
                         });
                 } else {
-                    // Sin comentario, solo retirar
+                   
                     ejecutarRetiro();
                 }
             });
@@ -310,7 +307,6 @@
 
 
 
-        // ========= Modal Asignar (igual) =========
         var tablaAsignar = $('#tablaAsignar').DataTable({
             language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
             responsive: true, pageLength: 5, autoWidth: false, scrollX: false, destroy: true
@@ -332,17 +328,39 @@
                     var estado = (e.EstadoVacante || e.EstadoMostrar || '').trim();
                     var est = (estado || '').toLowerCase();
 
-                    var badge = `<span class="badge ${e.TieneRelacionEnVacante ? 'bg-info'
-                            : (estado === 'Con Procesos Activos' ? 'bg-warning' : 'bg-secondary')
-                        }">${escapeHtml(estado || '—')}</span>`;
+                    var cls =
+                        estado === 'Asignada' ? 'badge-asignada' :
+                            estado === 'Con Procesos Activos' ? 'badge-procesos-activos' :
+                                'badge-no-asignada';
+                    var badge = `<span class="badge ${cls}">${escapeHtml(estado || '—')}</span>`;
 
                     var btn = '';
-                    if (!e.TieneRelacionEnVacante) {
-                        btn = `<button class="btn btn-sm btn-outline-success btn-asignar-estudiante" data-idusuario="${e.IdUsuario}">Asignar</button>`;
-                    } else if (est === 'retirada') {
-                        btn = `<button class="btn btn-sm btn-outline-success btn-reactivar-estudiante" data-idusuario="${e.IdUsuario}">Reactivar</button>`;
-                    } else if (!['rechazada', 'aprobada', 'finalizada'].includes(est)) {
-                        btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante" data-idusuario="${e.IdUsuario}">Retirar</button>`;
+                    if (e.TienePracticaActiva) {
+                       
+                        btn = `<button class="btn btn-sm btn-outline-secondary" disabled title="Ya tiene práctica activa">
+               <i class="fas fa-ban"></i> No disponible
+           </button>`;
+                    }
+                    else if (est === 'retirada') {
+                      
+                        btn = `<button class="btn btn-sm btn-verde-personalizado btn-reactivar-estudiante"
+                   data-idusuario="${e.IdUsuario}">
+               <i class="fas fa-redo"></i> Reactivar
+           </button>`;
+                    }
+                    else if (!['rechazada', 'aprobada', 'finalizada'].includes(est)) {
+                      
+                        btn = `<button class="btn btn-sm btn-outline-danger btn-retirar-estudiante"
+                   data-idusuario="${e.IdUsuario}">
+               <i class="fas fa-user-minus"></i> Retirar
+           </button>`;
+                    }
+                    else {
+                        
+                        btn = `<button class="btn btn-sm btn-verde-personalizado btn-asignar-estudiante"
+                   data-idusuario="${e.IdUsuario}">
+               <i class="fas fa-user-plus"></i> Asignar
+           </button>`;
                     }
 
                     tablaAsignar.row.add([

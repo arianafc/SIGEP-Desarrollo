@@ -371,12 +371,20 @@
     font-weight: bold;
 }
 
+.badge-en-proceso {
+    background-color: #F5B97A; /* igual que badge-en-progreso */
+    color: #2D594D;
+    font-size: 14px;
+    font-weight: bold;
+}
+
 
 .badge-aprobado,
 .badge-activo,
 .badge-inactivo,
 .badge-rezagado,
 .badge-en-progreso,
+.badge-en-proceso,
 .badge-en-curso,
 .badge-finalizada,
 .badge-retirada,
@@ -445,4 +453,15 @@
         margin-top: 10px;
     }
 }
-
+.badge-procesos-activos {
+    background-color: #F2C94C; /* dorado suave */
+    color: #2D594D; /* verde oscuro para contraste */
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    text-align: center;
+    min-width: 90px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
