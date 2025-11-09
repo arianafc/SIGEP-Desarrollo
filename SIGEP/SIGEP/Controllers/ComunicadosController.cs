@@ -14,7 +14,8 @@ namespace Sigep.UI.Controllers
     public class ComunicadosController : Controller
     {
         private readonly Utilitarios utilitarios = new Utilitarios();
-
+        
+        
         private readonly SIGEPEntities db = new SIGEPEntities();
 
         [FiltroSesion]
@@ -295,94 +296,82 @@ namespace Sigep.UI.Controllers
         public ActionResult EnviarCorreo(string Poblacion, string Asunto, string Mensaje, HttpPostedFileBase Archivo)
         {
             if (Session["IdRol"] == null) return new HttpStatusCodeResult(401);
-            
+
             if (string.IsNullOrWhiteSpace(Poblacion) || string.IsNullOrWhiteSpace(Asunto) || string.IsNullOrWhiteSpace(Mensaje))
                 return Json(new { ok = false, msg = "Datos incompletos." });
 
             try
             {
-                // Si hay adjunto, lo cargamos en memoria para reusarlo por destinatario
-                byte[] adjBytes = null;
-                string adjFilename = null;
-                string adjMediaType = null;
+                List<string> destinatarios;
 
-                if (Archivo != null && Archivo.ContentLength > 0)
+                using (var db = new SIGEPEntities())
                 {
-                    using (var br = new BinaryReader(Archivo.InputStream))
-                        adjBytes = br.ReadBytes(Archivo.ContentLength);
-                    adjFilename = Path.GetFileName(Archivo.FileName);
-                    adjMediaType = Archivo.ContentType;
+                    destinatarios = db.EmailsTB
+                        .Where(e => e.UsuariosTB.IdEstado == 1)
+                        .Where(e =>
+                            (Poblacion == "General" && e.UsuariosTB.RolesTB.Descripcion.ToLower() != "coordinador") ||
+                            (Poblacion == "Profesores" && e.UsuariosTB.RolesTB.Descripcion.ToLower() == "profesor") ||
+                            (Poblacion == "Estudiantes" && e.UsuariosTB.RolesTB.Descripcion.ToLower() == "estudiante") ||
+                            (Poblacion == "Egresados" && e.UsuariosTB.RolesTB.Descripcion.ToLower() == "egresado")
+                        )
+                        .Select(e => e.Email)
+                        .ToList();
                 }
 
-                var destinatarios = ObtenerDestinatarios(Poblacion);
                 if (!destinatarios.Any())
                     return Json(new { ok = false, msg = "No hay destinatarios activos para la población seleccionada." });
 
-                //var html = _utils.PlantillaComunicado(Asunto, Mensaje, null);
+           
+                string rutaAdjunto = null;
+                if (Archivo != null && Archivo.ContentLength > 0)
+                {
+                    var nombreArchivo = Path.GetFileName(Archivo.FileName);
+                    rutaAdjunto = Path.Combine(Server.MapPath("~/Temp"), nombreArchivo);
+                    Archivo.SaveAs(rutaAdjunto);
+                }
+                string cuerpoHtml = utilitarios.GenerarPlantillaCorreo(
+                    "Comunicado SIGEP",
+                    Mensaje
+                    );
 
+
+                int enviados = 0;
                 foreach (var correo in destinatarios)
                 {
-                    System.Net.Mail.Attachment adj = null;
-                    if (adjBytes != null)
-                        adj = new System.Net.Mail.Attachment(new MemoryStream(adjBytes), adjFilename, adjMediaType);
-
-                    // _utils.EnviarCorreo(correo, html, Asunto, adj);
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(rutaAdjunto))
+                        {
+                            bool ok = utilitarios.EnviarCorreoConAdjunto(correo, cuerpoHtml, Asunto, rutaAdjunto);
+                            if (ok) enviados++;
+                        }
+                        else
+                        {
+                            bool ok = utilitarios.EnviarCorreo(correo, cuerpoHtml, Asunto);
+                            if (ok) enviados++;
+                        }
+                    }
+                    catch
+                    {
+                       
+                    }
                 }
 
-                return Json(new { ok = true, msg = "Correos enviados exitosamente." });
+               
+                if (!string.IsNullOrEmpty(rutaAdjunto) && System.IO.File.Exists(rutaAdjunto))
+                    System.IO.File.Delete(rutaAdjunto);
+
+                return Json(new
+                {
+                    ok = true,
+                    msg = $"Correos enviados exitosamente ({enviados} de {destinatarios.Count})."
+                });
             }
             catch (Exception ex)
             {
                 return Json(new { ok = false, msg = utilitarios.ObtenerMensajeSQL(ex) ?? "Error al enviar correos." });
             }
         }
-
-        private System.Collections.Generic.List<string> ObtenerDestinatarios(string poblacion)
-        {
-            var p = (poblacion ?? "").Trim().ToLowerInvariant();
-
-            // Usuarios ACTIVOS (IdEstado = 1)
-            var q = db.UsuariosTB
-                      .AsNoTracking()
-                      .Where(u => u.IdEstado == 1);
-
-            // Filtrado por población usando IdRol (1 Estudiante, 3 Profesor, 4 Egresado)
-            switch (p)
-            {
-                case "profesores":
-                    q = q.Where(u => u.IdRol == 3);
-                    break;
-
-                case "estudiantes":
-                    // Si tus tablas de especialidad NO tienen IdEstado, quita esas condiciones.
-                    q = q.Where(u => u.IdRol == 1
-                                  && u.UsuarioEspecialidadTB.Any(ue =>
-                                         /* si tu relación tiene estado, déjalo así: */ ue.IdEstado == 1
-                                         /* y si EspecialidadesTB tiene estado: */     && ue.EspecialidadesTB.IdEstado == 1
-                                      ));
-                    break;
-
-                case "egresados":
-                    q = q.Where(u => u.IdRol == 4);
-                    break;
-
-                case "general":
-                default:
-                    // todos los usuarios activos
-                    break;
-            }
-
-            // Emails válidos (SIN IdEstado en EmailsTB)
-            var correos = q.SelectMany(u => u.EmailsTB)
-                           .Where(e => e.Email != null && e.Email != "")
-                           .Select(e => e.Email.Trim())
-                           .Where(e => e.Length > 0)
-                           .Distinct()
-                           .ToList();
-
-            return correos;
-        }
-
 
     }
 }

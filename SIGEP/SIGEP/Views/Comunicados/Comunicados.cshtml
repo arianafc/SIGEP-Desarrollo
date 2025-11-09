@@ -192,7 +192,7 @@
 
             @foreach (var c in Model.ListaComunicadosGeneral)
             {
-                <div class="col-md-4 d-flex" id="comunicado-@c.Id">
+                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
                     <div class="comunicado-card w-100">
                         <p><strong>@c.Titulo</strong></p>
                         <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
@@ -247,7 +247,7 @@
 
             @foreach (var c in Model.ListaComunicadosGeneral)
             {
-                <div class="col-md-4 d-flex" id="comunicado-@c.Id">
+                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
                     <div class="comunicado-card w-100">
                         <p><strong>@c.Titulo</strong></p>
                         <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
@@ -275,7 +275,6 @@
 
 
 </div>
-
 
 <!-- Modal Enviar Correo -->
 <div class="modal fade" id="modalEnviarCorreo" tabindex="-1" aria-labelledby="modalEnviarCorreoLabel" aria-hidden="true">
@@ -474,8 +473,11 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-warning btnEditarComunicado" data-bs-toggle="modal" data-bs-target="#modalEditarComunicado">Editar</button>
-                <button type="button" class="btn btn-danger btnEliminarComunicado" id="BtnEliminarComunicado">Eliminar</button>
+                @if (rol == 2)
+                {
+                    <button type="button" class="btn btn-warning btnEditarComunicado" data-bs-toggle="modal" data-bs-target="#modalEditarComunicado">Editar</button>
+                    <button type="button" class="btn btn-danger btnEliminarComunicado" id="BtnEliminarComunicado">Eliminar</button>
+                }
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>

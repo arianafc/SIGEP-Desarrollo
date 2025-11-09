@@ -1,5 +1,83 @@
 ﻿$(function () {
 
+    $("#btnEnviar").on("click", function () {
+
+        const poblacion = $("#correoPoblacion").val().trim();
+        const asunto = $("#correoAsunto").val().trim();
+        const mensaje = $("#correoMensaje").val().trim();
+        const archivo = $("#correoArchivo")[0].files[0];
+
+      
+        if (!poblacion || !asunto || !mensaje) {
+            Swal.fire("Campos incompletos", "Por favor complete todos los campos obligatorios.", "warning");
+            return;
+        }
+
+       
+        Swal.fire({
+            title: "¿Deseas enviar el correo?",
+            text: "El mensaje será enviado a la población seleccionada.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#2D594D",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, enviar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                let formData = new FormData();
+                formData.append("Poblacion", poblacion);
+                formData.append("Asunto", asunto);
+                formData.append("Mensaje", mensaje);
+
+                if (archivo && archivo.files && archivo.files.length > 0) {
+                    formData.append("Archivo", archivo.files[0]);
+                }
+
+                Swal.fire({
+                    title: "Enviando correos...",
+                    text: "Por favor espere mientras se envían los mensajes.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: '/Comunicados/EnviarCorreo',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        Swal.close();
+
+                        if (response.ok) {
+                            Swal.fire({
+                                title: "¡Enviado!",
+                                text: response.msg,
+                                icon: "success",
+                                timer: 2500,
+                                showConfirmButton: false
+                            });
+
+                            $("#formEnviarCorreo")[0].reset();
+                            $("#modalEnviarCorreo").modal("hide");
+                        } else {
+                            Swal.fire("Error", response.msg || "No se pudo enviar el correo.", "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.close();
+                        Swal.fire("Error", "Ocurrió un error al intentar enviar el correo.", "error");
+                    }
+                });
+            }
+        });
+    });
+
+
     $("#btnGuardarComunicado").click(function () {
         let formData = new FormData();
         formData.append("__RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());

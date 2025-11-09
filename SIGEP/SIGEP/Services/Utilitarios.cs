@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -11,6 +12,43 @@ namespace SIGEP.Services
 {
     public class Utilitarios
     {
+       
+        public bool EnviarCorreoConAdjunto(string destinatario, string mensaje, string asunto, string rutaAdjunto)
+        {
+            try
+            {
+                var remitente = ConfigurationManager.AppSettings["CorreoRemitente"];
+                var contrasena = ConfigurationManager.AppSettings["CorreoPassword"];
+
+                MailMessage mail = new MailMessage
+                {
+                    
+                    From = new MailAddress(remitente),
+                    Subject = asunto,
+                    Body = mensaje,
+                    IsBodyHtml = true
+                };
+
+                mail.To.Add(destinatario);
+
+                if (!string.IsNullOrEmpty(rutaAdjunto) && System.IO.File.Exists(rutaAdjunto))
+                    mail.Attachments.Add(new Attachment(rutaAdjunto));
+
+                SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587)
+                {
+                    Credentials = new NetworkCredential(remitente, contrasena),
+                    EnableSsl = true
+                };
+
+                smtp.Send(mail);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
 
         public bool EnviarCorreo(string destinatario, string mensaje, string asunto)
         {
@@ -71,5 +109,17 @@ namespace SIGEP.Services
             }
             return null;
         }
+
+        public string GenerarPlantillaCorreo(string titulo, string contenido)
+        {
+            string ruta = HttpContext.Current.Server.MapPath("~/Plantillas/PlantillaComunicados.html");
+            string html = File.ReadAllText(ruta);
+
+            html = html.Replace("{TITULO}", titulo);
+            html = html.Replace("{CONTENIDO}", contenido);
+
+            return html;
+        }
+
     }
 }
