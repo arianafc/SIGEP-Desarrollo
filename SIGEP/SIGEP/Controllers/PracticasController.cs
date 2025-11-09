@@ -970,6 +970,27 @@ namespace SIGEP.Controllers
             }
         }
 
+        [HttpGet]
+        public JsonResult ObtenerEstudiantesPracticas(int idUsuarioSesion)
+        {
+            try
+            {
+                var data = db.Database.SqlQuery<EstudiantePracticaVM>(
+                    "EXEC ObtenerEstudiantesPracticasSP @IdUsuarioSesion",
+                    new SqlParameter("@IdUsuarioSesion", idUsuarioSesion)
+                ).ToList();
+
+                return Json(new { ok = true, data }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, msg = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+
+
 
 
         // ==============================

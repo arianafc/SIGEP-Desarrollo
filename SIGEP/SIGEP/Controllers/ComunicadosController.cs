@@ -125,11 +125,11 @@ namespace Sigep.UI.Controllers
                 var destinatarios = ObtenerDestinatarios(DirigidoA);
                 if (destinatarios.Any())
                 {
-                    var html = _utils.PlantillaComunicado(Titulo, Descripcion, FechaAplicacion);
+                    //var html = _utils.PlantillaComunicado(Titulo, Descripcion, FechaAplicacion);
                     var asunto = $"[SIGEP] Comunicado - {Titulo}";
 
-                    foreach (var correo in destinatarios)
-                        _utils.EnviarCorreo(correo, html, asunto);
+                    //foreach (var correo in destinatarios)
+                        //_utils.EnviarCorreo(correo, html, asunto);
                 }
 
                 return Json(new { ok = true, msg = "Comunicado publicado y notificado." });
@@ -172,7 +172,7 @@ namespace Sigep.UI.Controllers
                 if (!destinatarios.Any())
                     return Json(new { ok = false, msg = "No hay destinatarios activos para la población seleccionada." });
 
-                var html = _utils.PlantillaComunicado(Asunto, Mensaje, null);
+                //var html = _utils.PlantillaComunicado(Asunto, Mensaje, null);
 
                 foreach (var correo in destinatarios)
                 {
@@ -180,7 +180,7 @@ namespace Sigep.UI.Controllers
                     if (adjBytes != null)
                         adj = new System.Net.Mail.Attachment(new MemoryStream(adjBytes), adjFilename, adjMediaType);
 
-                    _utils.EnviarCorreo(correo, html, Asunto, adj);
+                   // _utils.EnviarCorreo(correo, html, Asunto, adj);
                 }
 
                 return Json(new { ok = true, msg = "Correos enviados exitosamente." });

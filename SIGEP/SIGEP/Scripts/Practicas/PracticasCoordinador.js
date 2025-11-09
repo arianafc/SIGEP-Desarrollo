@@ -276,6 +276,7 @@
                     <td>${v.Especialidad}</td>
                     <td>${v.NumCupos}</td>
                     <td>${v.CuposOcupados}</td>
+                    <td>${v.EstadoPractica}</td> <!-- 👈 NUEVA COLUMNA -->
                     <td>${btn}</td>
                 </tr>
             `);
