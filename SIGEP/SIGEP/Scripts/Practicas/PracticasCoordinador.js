@@ -1,6 +1,61 @@
 ﻿$(function () {
     console.log("✅ PracticasCoordinador.js cargado correctamente");
 
+
+    // === Helper para mostrar badges según el estado de práctica ===
+    function badgeEstado(estadoOriginal) {
+        const estado = (estadoOriginal || '').normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+
+        const mapa = {
+            'en proceso de aplicacion': { cls: 'badge-en-proceso', txt: 'En proceso de Aplicación' },
+            'rechazada': { cls: 'badge-rechazada', txt: 'Rechazada' },
+            'asignada': { cls: 'badge-asignada', txt: 'Asignada' },
+            'aprobada': { cls: 'badge-aprobada', txt: 'Aprobada' },
+            'retirada': { cls: 'badge-retirada', txt: 'Retirada' },
+            'finalizada': { cls: 'badge-finalizada', txt: 'Finalizada' },
+            'rezagado': { cls: 'badge-rezagado', txt: 'Rezagado' },
+            'archivada': { cls: 'badge-archivado', txt: 'Archivada' },
+            'en curso': { cls: 'badge-en-curso', txt: 'En Curso' },
+            'sin proceso activo': { cls: 'badge-no-asignada', txt: 'Sin proceso activo' }
+        };
+
+        const info = mapa[estado] || { cls: 'badge-no-asignada', txt: estadoOriginal || 'Sin proceso activo' };
+        return `<span class="badge ${info.cls}">${info.txt}</span>`;
+    }
+
+    // === Recargar tabla de vacantes disponibles ===
+    function refrescarVacantes(idUsuario) {
+        $.getJSON(`/Practicas/ObtenerVacantesAsignar?idUsuario=${idUsuario}`, function (res) {
+            if (!res.ok) return Swal.fire("Error", "No se pudieron recargar las vacantes.", "error");
+
+            const tbody = $("#tablaVacantes tbody");
+            tbody.empty();
+
+            res.data.forEach(v => {
+                let btn = v.PuedeAsignar
+                    ? `<button class="btn btn-azul asignar" data-id="${v.IdVacante}">Asignar</button>`
+                    : `<button class="btn btn-rojo desasignar" data-id="${v.IdVacante}">Desasignar</button>`;
+
+                tbody.append(`
+                <tr>
+                    <td>${v.NombreVacante}</td>
+                    <td>${v.NombreEmpresa}</td>
+                    <td>${v.Especialidad}</td>
+                    <td>${v.NumCupos}</td>
+                    <td>${v.CuposOcupados}</td>
+                    <td class="text-center">${badgeEstado(v.EstadoPractica)}</td>
+                    <td>${btn}</td>
+                </tr>
+            `);
+            });
+        });
+    }
+
+
+
     const table = $('#miTabla').DataTable({
         responsive: true,
         processing: true,
@@ -276,7 +331,7 @@
                     <td>${v.Especialidad}</td>
                     <td>${v.NumCupos}</td>
                     <td>${v.CuposOcupados}</td>
-                    <td>${v.EstadoPractica}</td> <!-- 👈 NUEVA COLUMNA -->
+                    <td class="text-center">${badgeEstado(v.EstadoPractica)}</td>
                     <td>${btn}</td>
                 </tr>
             `);
