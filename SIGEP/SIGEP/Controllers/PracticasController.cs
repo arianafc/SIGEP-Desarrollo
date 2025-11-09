@@ -591,6 +591,9 @@ namespace SIGEP.Controllers
             public int CuposOcupados { get; set; }
             public DateTime? FechaCierre { get; set; }
             public string Requerimientos { get; set; }
+            public string Tipo { get; set; }                     
+            public string EstadoPractica { get; set; }          
+            public bool PuedeAsignar { get; set; }
         }
 
 
