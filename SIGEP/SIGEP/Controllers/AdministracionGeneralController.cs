@@ -9,7 +9,7 @@ namespace SIGEP.Web.Controllers
 {
     public class AdministracionGeneralController : Controller
     {
-        // Fuerza UTF-8 en todas las respuestas JSON de este controlador
+       
         protected override JsonResult Json(object data, string contentType, Encoding contentEncoding, JsonRequestBehavior behavior)
         {
             Response.ContentEncoding = Encoding.UTF8;

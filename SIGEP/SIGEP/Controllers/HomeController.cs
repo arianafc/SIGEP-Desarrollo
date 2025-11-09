@@ -15,25 +15,36 @@ namespace SIGEP.Controllers
     {
 
         Utilitarios utilitarios = new Utilitarios();
-        [HttpGet]
         [FiltroSesion]
+        [HttpGet]
         public ActionResult Index()
         {
             try { 
-                
+
+                if (Session["IdRol"] == null)
+                {
+                    return RedirectToAction("Login");
+                }
+
                 var Datos = new DashboardVM();
                 using (var dbContext = new SIGEPEntities())
                 {
-                    Datos.EstudiantesActivos = dbContext.UsuariosTB.Count(u => u.IdRol == 3 && u.IdEstado == 1);
+                    Datos.EstudiantesActivos = dbContext.UsuariosTB.Count(u => u.IdRol == 1 && u.IdEstado == 1);
                     Datos.EmpresasRegistradas = dbContext.EmpresasTB.Count(e => e.IdEstado == 1);
-                    Datos.EstudiantesConPracticasAsignadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 2);
-                    Datos.PracticasFinalizadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 3);
+                    Datos.EstudiantesConPracticasAsignadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 5);
+                    Datos.PracticasFinalizadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 8);
+                    if (Datos.EstudiantesActivos > 0)
+                    {
+                        Datos.PorcentajeEstudiantesConPractica = Math.Round(
+                            (double)Datos.EstudiantesConPracticasAsignadas / Datos.EstudiantesActivos * 100, 2
+                        );
+                    }
                     Datos.UltimasPracticasAsignadas = (from p in dbContext.PracticaEstudianteTB
                                                       join u in dbContext.UsuariosTB on p.IdUsuario equals u.IdUsuario
                                                       join v in dbContext.VacantesPracticasTB on p.IdVacante equals v.IdVacante
                                                       join emp in dbContext.EmpresasTB on v.IdEmpresa equals emp.IdEmpresa
                                                       join e in dbContext.EstadosTB on p.IdEstado equals e.IdEstado
-                                                      where p.IdEstado == 2
+                                                      where p.IdEstado == 5
                                                       orderby p.FechaAplicacion descending
                                                       select new PracticaEstudianteViewModel
                                                       {

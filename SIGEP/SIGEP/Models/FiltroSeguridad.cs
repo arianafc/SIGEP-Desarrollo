@@ -27,7 +27,7 @@ namespace SIGEP.Models
             if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "1")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
-                filterContext.Result = new RedirectResult("~/Home/Login");
+                filterContext.Result = new RedirectResult("~/Home/Index");
             }
             base.OnActionExecuting(filterContext);
         }
@@ -59,7 +59,7 @@ namespace SIGEP.Models
             var contexto = filterContext.HttpContext;
          
 
-            if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "2")
+            if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "3")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
                 filterContext.Result = new RedirectResult("~/Home/Index");
@@ -75,14 +75,13 @@ namespace SIGEP.Models
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var contexto = filterContext.HttpContext;
-            var rol = contexto.Session["IdRol"] as string; 
+       
 
-            if (contexto.Session.Count == 0 || string.IsNullOrEmpty(rol) || rol != "3")
+            if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "2")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
-                filterContext.Result = new RedirectResult("~/Home/Login");
+                filterContext.Result = new RedirectResult("~/Home/Index");
             }
-
             base.OnActionExecuting(filterContext);
         }
     }
@@ -99,7 +98,7 @@ namespace SIGEP.Models
             if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "4")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
-                filterContext.Result = new RedirectResult("~/Home/Login");
+                filterContext.Result = new RedirectResult("~/Home/Index");
             }
             base.OnActionExecuting(filterContext);
         }

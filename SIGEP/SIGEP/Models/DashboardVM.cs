@@ -17,7 +17,7 @@ namespace SIGEP.Models
 
         public List<PracticaEstudianteViewModel> UltimasPracticasAsignadas { get; set; }
 
-
+        public double PorcentajeEstudiantesConPractica { get; set; }
 
     }
 }
