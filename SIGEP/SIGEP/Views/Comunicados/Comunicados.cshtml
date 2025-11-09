@@ -1,7 +1,7 @@
-﻿@model IEnumerable<Sigep.Models.ComunicadoCardVM>
+﻿@model ComunicadosVM
 @{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
-    var rol = ViewBag.IdRol != null ? (int)ViewBag.IdRol : 0; 
+    var rol = ViewBag.IdRol != null ? (int)ViewBag.IdRol : 0;
 }
 
 @section Styles {
@@ -68,7 +68,7 @@
 
 <div class="comunicados-wrapper">
     <h2 class="titulo-pagina">Comunicados de Prácticas Profesionales</h2>
-
+    <!--Comunicados para coordinador (todos)-->
     @if (rol == 2)
     {<!-- Coordinador -->
         <div class="d-flex justify-content-end gap-3 mb-4">
@@ -79,34 +79,203 @@
                 <i class="bi bi-envelope-fill"></i> Enviar Email
             </button>
         </div>
-    }
 
-    <div class="row g-4" id="contenedorComunicados">
-        @foreach (var c in Model)
-        {
-            <div class="col-md-4 d-flex" id="comunicado-@c.Id">
-                <div class="comunicado-card w-100">
-                    <p><strong>@c.Titulo</strong></p>
-                    <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                    <div class="botones-acciones">
-                        <button class="btn-ver btn-abrir-comunicado"
-                                data-bs-toggle="modal"
-                                data-bs-target="#modalComunicadoUnico"
-                                data-id="@c.Id"
-                                data-titulo="@c.Titulo"
-                                data-descripcion="@c.Descripcion"
-                                data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                data-publicado="@c.PublicadoPor"
-                                data-dirigido="@c.DirigidoA">
-                            Abrir
-                        </button>
+        <div class="row g-4" id="contenedorComunicados">
+            @foreach (var c in Model.AllComunicados)
+            {
+                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                    <div class="comunicado-card ">
+                        <p><strong>@c.Titulo</strong></p>
+                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                        <div class="botones-acciones">
+                            <button class="btn-ver btn-abrir-comunicado"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalComunicadoUnico"
+                                    data-id="@c.Id"
+                                    data-titulo="@c.Titulo"
+                                    data-descripcion="@c.Descripcion"
+                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                    data-publicado="@c.PublicadoPor"
+                                    data-dirigido="@c.DirigidoA">
+                                Abrir
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
+
+    <!--Comunicados estudiante y general-->
+    @if (rol == 1)
+    {
+        <div class="row g-4" id="contenedorComunicados">
+            @foreach (var c in Model.ListaComunicadosEstudiantes)
+            {
+                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                    <div class="comunicado-card w-100">
+                        <p><strong>@c.Titulo</strong></p>
+                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                        <div class="botones-acciones">
+                            <button class="btn-ver btn-abrir-comunicado"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalComunicadoUnico"
+                                    data-id="@c.Id"
+                                    data-titulo="@c.Titulo"
+                                    data-descripcion="@c.Descripcion"
+                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                    data-publicado="@c.PublicadoPor"
+                                    data-dirigido="@c.DirigidoA">
+                                Abrir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @foreach (var c in Model.ListaComunicadosGeneral)
+            {
+                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                    <div class="comunicado-card w-100">
+                        <p><strong>@c.Titulo</strong></p>
+                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                        <div class="botones-acciones">
+                            <button class="btn-ver btn-abrir-comunicado"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalComunicadoUnico"
+                                    data-id="@c.Id"
+                                    data-titulo="@c.Titulo"
+                                    data-descripcion="@c.Descripcion"
+                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                    data-publicado="@c.PublicadoPor"
+                                    data-dirigido="@c.DirigidoA">
+                                Abrir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+        </div>
+    }
+    <!--Comunicados profe y general -->
+    @if (rol == 3)
+    {
+        <div class="row g-4" id="contenedorComunicados">
+            @foreach (var c in Model.ListaComunicadosProfesores)
+            {
+                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                    <div class="comunicado-card w-100">
+                        <p><strong>@c.Titulo</strong></p>
+                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                        <div class="botones-acciones">
+                            <button class="btn-ver btn-abrir-comunicado"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalComunicadoUnico"
+                                    data-id="@c.Id"
+                                    data-titulo="@c.Titulo"
+                                    data-descripcion="@c.Descripcion"
+                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                    data-publicado="@c.PublicadoPor"
+                                    data-dirigido="@c.DirigidoA">
+                                Abrir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @foreach (var c in Model.ListaComunicadosGeneral)
+            {
+                <div class="col-md-4 d-flex" id="comunicado-@c.Id">
+                    <div class="comunicado-card w-100">
+                        <p><strong>@c.Titulo</strong></p>
+                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                        <div class="botones-acciones">
+                            <button class="btn-ver btn-abrir-comunicado"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalComunicadoUnico"
+                                    data-id="@c.Id"
+                                    data-titulo="@c.Titulo"
+                                    data-descripcion="@c.Descripcion"
+                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                    data-publicado="@c.PublicadoPor"
+                                    data-dirigido="@c.DirigidoA">
+                                Abrir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+        </div>
+    }
+    <!--Comunicados egresado y general-->
+    @if (rol == 4)
+    {
+        <div class="row g-4" id="contenedorComunicados">
+            @foreach (var c in Model.ListaComunicadosEgresados)
+            {
+                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                    <div class="comunicado-card w-100">
+                        <p><strong>@c.Titulo</strong></p>
+                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                        <div class="botones-acciones">
+                            <button class="btn-ver btn-abrir-comunicado"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalComunicadoUnico"
+                                    data-id="@c.Id"
+                                    data-titulo="@c.Titulo"
+                                    data-descripcion="@c.Descripcion"
+                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                    data-publicado="@c.PublicadoPor"
+                                    data-dirigido="@c.DirigidoA">
+                                Abrir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @foreach (var c in Model.ListaComunicadosGeneral)
+            {
+                <div class="col-md-4 d-flex" id="comunicado-@c.Id">
+                    <div class="comunicado-card w-100">
+                        <p><strong>@c.Titulo</strong></p>
+                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                        <div class="botones-acciones">
+                            <button class="btn-ver btn-abrir-comunicado"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalComunicadoUnico"
+                                    data-id="@c.Id"
+                                    data-titulo="@c.Titulo"
+                                    data-descripcion="@c.Descripcion"
+                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                    data-publicado="@c.PublicadoPor"
+                                    data-dirigido="@c.DirigidoA">
+                                Abrir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+
+        </div>
+    }
+
+
 </div>
+
 
 <!-- Modal Enviar Correo -->
 <div class="modal fade" id="modalEnviarCorreo" tabindex="-1" aria-labelledby="modalEnviarCorreoLabel" aria-hidden="true">
@@ -157,48 +326,128 @@
         <div class="modal-content" style="border-radius:10px; background-color:#F9F9F9;">
             <div class="modal-header" style="background-color:#2D594D; color:white;">
                 <h5 class="modal-title" id="modalAgregarLabel">Agregar Comunicado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
+
             <div class="modal-body">
-                <form id="formComunicado">
+                <form id="formComunicado" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Título</label>
+                            <input type="text" class="form-control" id="TituloComunicado" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <textarea class="form-control" id="DescripcionComunicado" rows="5" required></textarea>
+                    </div>
+
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label"><strong>Título</strong></label>
-                            <input type="text" class="form-control" id="cTitulo" required />
+                            <label class="form-label fw-bold">Fecha de Publicación</label>
+                            <input type="text" class="form-control" id="FechaPublicacionComunicado"
+                                   value="@DateTime.Now.ToString("dd-MM-yyyy")" readonly>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label"><strong>Publicado por</strong></label>
-                            <input type="text" class="form-control" value="@Session["usuario"]" readonly />
+                            <label class="form-label fw-bold">Fecha Límite (si aplica)</label>
+                            <input type="date" class="form-control" id="FechaAplicacionComunicado">
                         </div>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label"><strong>Descripción</strong></label>
-                        <textarea class="form-control" id="cDescripcion" rows="5" required></textarea>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label"><strong>Fecha de Publicación</strong></label>
-                            <input type="text" class="form-control" value="@DateTime.Now.ToString("dd-MM-yyyy")" readonly />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"><strong>Fecha de Aplicación</strong></label>
-                            <input type="date" class="form-control" id="cFechaAplicacion" />
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>¿Quién puede visualizarlo?</strong></label>
-                        <select class="form-control" id="cDirigidoA" required>
+                        <label class="form-label fw-bold">¿Quién puede visualizarlo?</label>
+                        <select class="form-control" id="DirigidoAComunicado" required>
                             <option value="General">General</option>
                             <option value="Estudiantes">Estudiantes</option>
                             <option value="Profesores">Profesores</option>
                             <option value="Egresados">Egresados</option>
                         </select>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="color:#2D594D;">Documento adjunto</label>
+                        <input type="file" class="form-control" id="ArchivoDoc" name="archivo" multiple>
+                        <small class="text-muted">*Solo archivos .xls, .xlsx o .pdf</small>
+                    </div>
                 </form>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" id="btnGuardarComunicado" class="btn-ver">Guardar Comunicado</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Comunicado-->
+
+<div class="modal fade" id="modalEditarComunicado" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:10px; background-color:#F9F9F9;">
+            <div class="modal-header" style="background-color:#2D594D; color:white;">
+                <h5 class="modal-title" id="modalEditarLabel">Editar Comunicado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formEditarComunicado" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <!-- ID oculto -->
+                    <input type="hidden" id="IdComunicadoEditar" name="IdComunicado" />
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Título</label>
+                            <input type="text" class="form-control" id="TituloComunicadoEditar" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <textarea class="form-control" id="DescripcionComunicadoEditar" rows="5" required></textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha de Publicación</label>
+                            <input type="text" class="form-control" id="FechaPublicacionComunicadoEditar" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha Límite (si aplica)</label>
+                            <input type="date" class="form-control" id="FechaAplicacionComunicadoEditar">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">¿Quién puede visualizarlo?</label>
+                        <select class="form-control" id="DirigidoAComunicadoEditar" required>
+                            <option value="General">General</option>
+                            <option value="Estudiantes">Estudiantes</option>
+                            <option value="Profesores">Profesores</option>
+                            <option value="Egresados">Egresados</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" style="color:#2D594D;">Documentos adjuntos</label>
+                        <div id="documentosActuales" class="mb-2">     
+                            <p class="text-muted small">Cargando documentos...</p>
+                        </div>
+
+                        <input type="file" class="form-control" id="ArchivoDocEditar" name="archivo" multiple>
+                        <small class="text-muted">*Puedes subir nuevos archivos (.xls, .xlsx o .pdf)</small>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnActualizarComunicado" class="btn-ver btnActualizarComunicado">Guardar Cambios</button>
             </div>
         </div>
     </div>
@@ -217,9 +466,16 @@
                 <p><strong style="color:#2D594D;">Fecha de Publicación:</strong> <span id="comunicadoFecha"></span></p>
                 <p><strong style="color:#2D594D;">Publicado por:</strong> <span id="comunicadoPublicadoPor"></span></p>
                 <p><strong style="color:#2D594D;">Dirigido a:</strong> <span id="comunicadoDirigido"></span></p>
+                <hr />
+                <p><strong style="color:#2D594D;">Documentos asociados:</strong></p>
+                <div id="comunicadoDocumentos">
+                    <p>No hay documentos disponibles.</p>
+                </div>
             </div>
+
             <div class="modal-footer">
-                @* Si querés botón eliminar real, agregá endpoint en el controller *@
+                <button type="button" class="btn btn-warning btnEditarComunicado" data-bs-toggle="modal" data-bs-target="#modalEditarComunicado">Editar</button>
+                <button type="button" class="btn btn-danger btnEliminarComunicado" id="BtnEliminarComunicado">Eliminar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -227,100 +483,10 @@
 </div>
 
 @section Scripts {
+
     <script>
-  // Abrir modal detalle
-  document.querySelectorAll(".btn-abrir-comunicado").forEach(btn => {
-    btn.addEventListener("click", function () {
-      const t = this.dataset.titulo;
-      const d = this.dataset.descripcion;
-      const f = this.dataset.fecha;
-      const a = this.dataset.aplicacion;
-      const p = this.dataset.publicado;
-      const g = this.dataset.dirigido;
-      const id = this.dataset.id;
-
-      document.getElementById("modalComunicadoUnicoLabel").textContent = t;
-      document.getElementById("comunicadoDescripcion").textContent = d;
-      document.getElementById("comunicadoFecha").textContent = f;
-      document.getElementById("comunicadoAplicacion").textContent = (a && a !== "N/A") ? a : "No aplica";
-      document.getElementById("comunicadoPublicadoPor").textContent = p;
-      document.getElementById("comunicadoDirigido").textContent = g;
-    });
-  });
-
-  // Guardar Comunicado (AJAX) con token del formulario
-  document.getElementById("btnGuardarComunicado")?.addEventListener("click", function () {
-    const form = document.getElementById("formComunicado");
-    const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
-    const titulo = document.getElementById("cTitulo").value.trim();
-    const descripcion = document.getElementById("cDescripcion").value.trim();
-    const fa = document.getElementById("cFechaAplicacion").value; // yyyy-MM-dd o vacío
-    const dirigido = document.getElementById("cDirigidoA").value;
-
-    if (!titulo || !descripcion || !dirigido) {
-      Swal.fire({ icon:'warning', title:'Campos incompletos', confirmButtonColor:'#8CA653' });
-      return;
-    }
-
-    $.ajax({
-      url: '@Url.Action("CrearComunicado", "Comunicados")',
-      type: 'POST',
-      data: {
-        __RequestVerificationToken: token,
-        Titulo: titulo,
-        Descripcion: descripcion,
-        FechaAplicacion: fa,
-        DirigidoA: dirigido
-      },
-      success: function (r) {
-        if (r.ok) {
-          Swal.fire({ icon:'success', title:r.msg, timer:1800, showConfirmButton:false });
-          setTimeout(function(){ location.reload(); }, 1200);
-        } else {
-          Swal.fire({ icon:'error', title:r.msg || 'Error', confirmButtonColor:'#8CA653' });
-        }
-      },
-      error: function(){
-        Swal.fire({ icon:'error', title:'Error de comunicación', confirmButtonColor:'#8CA653' });
-      }
-    });
-  });
-
-  // Enviar correo (AJAX) — individual (no masivo)
-  document.getElementById("btnEnviar")?.addEventListener("click", function () {
-    const form = document.getElementById("formEnviarCorreo");
-    const pobl = document.getElementById("correoPoblacion").value;
-    const asunto = document.getElementById("correoAsunto").value.trim();
-    const msg = document.getElementById("correoMensaje").value.trim();
-
-    if (!pobl || !asunto || !msg) {
-      Swal.fire({ icon:'warning', title:'Campos incompletos', confirmButtonColor:'#8CA653' });
-      return;
-    }
-
-    const fd = new FormData(form);
-    $.ajax({
-      url: '@Url.Action("EnviarCorreo","Comunicados")',
-      type: 'POST',
-      data: fd,
-      processData: false,
-      contentType: false,
-      success: function(r){
-        if (r.ok) {
-          Swal.fire({ icon:'success', title:r.msg, timer:1800, showConfirmButton:false });
-          setTimeout(function(){
-            form.reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalEnviarCorreo'));
-            modal.hide();
-          }, 1200);
-        } else {
-          Swal.fire({ icon:'error', title:r.msg || 'Error', confirmButtonColor:'#8CA653' });
-        }
-      },
-      error: function(){
-        Swal.fire({ icon:'error', title:'Error de comunicación', confirmButtonColor:'#8CA653' });
-      }
-    });
-  });
+     const rolUsuario = @Session["IdRol"];
     </script>
+    <script src="~/Scripts/Comunicados/Comunicados.js"></script>
+
 }

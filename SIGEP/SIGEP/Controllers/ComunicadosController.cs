@@ -1,7 +1,9 @@
-﻿using Sigep.Models;            // ComunicadoCardVM
+﻿using Sigep.Models;
 using SIGEP.EF;
-using SIGEP.Services;          // Utilitarios (envío de correo + plantilla)
+using SIGEP.Models;
+using SIGEP.Services;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -11,108 +13,82 @@ namespace Sigep.UI.Controllers
 {
     public class ComunicadosController : Controller
     {
-        private readonly Utilitarios _utils = new Utilitarios();
+        private readonly Utilitarios utilitarios = new Utilitarios();
 
-        // Ajusta si tu contexto EF tiene otro nombre o namespace
         private readonly SIGEPEntities db = new SIGEPEntities();
 
-        /// <summary>
-        /// Solo Coordinador (IdRol = 2) puede crear/enviar comunicados.
-        /// </summary>
-        private bool CanManageComunicados()
-        {
-            var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
-            return rol == 2;
-        }
-
-        /// <summary>
-        /// Listado de comunicados visible según el rol del usuario (filtro en servidor).
-        /// </summary>
+        [FiltroSesion]
+        [HttpGet]
         public ActionResult Comunicados()
         {
-            if (Session["IdRol"] == null)
-                return RedirectToAction("Login", "Home");
+            var model = new ComunicadosVM();
+            ViewBag.IdRol = Session["IdRol"];
 
-            int idRol = Convert.ToInt32(Session["IdRol"]);
-            ViewBag.IdRol = idRol;
-
-            // Base: solo comunicados activos
-            var q = db.ComunicadosTB.Where(c => c.IdEstado == 1);
-
-            // Armamos la lista de poblaciones permitidas según el rol
-            // OJO: estos valores deben coincidir EXACTAMENTE con lo que guardás en c.Poblacion
-            // (si usás otras variantes de texto, añadilas aquí)
-            var permitidos = new System.Collections.Generic.List<string> { "General" };
-
-            switch (idRol)
+            using (var db = new SIGEPEntities())
             {
-                case 2: // Coordinador: ve TODO (no filtramos por población)
-                    break;
-
-                case 1: // Estudiante
-                    permitidos.Add("Estudiantes");
-                    q = q.Where(c => c.Poblacion != null && permitidos.Contains(c.Poblacion));
-                    break;
-
-                case 3: // Profesor
-                    permitidos.Add("Profesores");
-                    q = q.Where(c => c.Poblacion != null && permitidos.Contains(c.Poblacion));
-                    break;
-
-                case 4: // Egresado
-                    permitidos.Add("Egresados");
-                    q = q.Where(c => c.Poblacion != null && permitidos.Contains(c.Poblacion));
-                    break;
-
-                default:
-                    // Rol inválido: no verá nada
-                    q = q.Where(c => 1 == 0);
-                    break;
-            }
-
-            var model = q
-                .OrderByDescending(c => c.Fecha)
-                .Select(c => new ComunicadoCardVM
+                model.AllComunicados = db.ComunicadosTB.Where(c => c.IdEstado == 1).Select(c => new ComunicadoCardVM
                 {
                     Id = c.IdComunicado,
                     Titulo = c.Nombre,
                     FechaPublicacion = c.Fecha,
                     FechaAplicacion = c.FechaLimite,
                     Descripcion = c.Informacion,
-                    // Ajusta si tu navegación es distinta
-                    PublicadoPor = c.UsuariosTB.Nombre,
+                    PublicadoPor = c.UsuariosTB.Nombre + " " + c.UsuariosTB.Apellido1,
                     DirigidoA = c.Poblacion
-                })
-                .ToList();
+                }).OrderByDescending(c => c.FechaPublicacion).ToList();
+                model.ListaComunicadosGeneral = model.AllComunicados.Where(c => c.DirigidoA.ToLower() == "general").ToList();
+                model.ListaComunicadosEstudiantes = model.AllComunicados.Where(c => c.DirigidoA.ToLower() == "estudiantes").ToList();
+                model.ListaComunicadosProfesores = model.AllComunicados.Where(c => c.DirigidoA.ToLower() == "profesores").ToList();
+                model.ListaComunicadosEgresados = model.AllComunicados.Where(c => c.DirigidoA.ToLower() == "egresados").ToList();
+            }
+
+
+
 
             return View(model);
         }
 
+        [HttpPost]
+        public JsonResult EliminarComunicado(int IdComunicado)
+        {
+            try
+            {
+                using (var db = new SIGEPEntities())
+                {
+                    var comunicado = db.ComunicadosTB.Find(IdComunicado);
+                    if (comunicado == null)
+                        return Json(new { ok = false, msg = "Comunicado no encontrado." });
+                    comunicado.IdEstado = 2;
+                    db.SaveChanges();
+                    return Json(new { ok = true, msg = "Comunicado desactivado correctamente." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, msg = utilitarios.ObtenerMensajeSQL(ex) ?? "Error al eliminar el comunicado." });
+            }
+        }
 
-        /// <summary>
-        /// Crea un comunicado y notifica por correo a la población objetivo (emails uno por uno).
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CrearComunicado(string Titulo, string Descripcion, DateTime? FechaAplicacion, string DirigidoA)
+        public ActionResult CrearComunicado(string Titulo, string Descripcion, DateTime? FechaAplicacion, string DirigidoA, List<HttpPostedFileBase> archivos)
         {
-            if (Session["IdRol"] == null) return new HttpStatusCodeResult(401);
-            if (!CanManageComunicados()) return new HttpStatusCodeResult(403, "Sin permiso para gestionar comunicados.");
-
+      
             if (string.IsNullOrWhiteSpace(Titulo) || string.IsNullOrWhiteSpace(Descripcion) || string.IsNullOrWhiteSpace(DirigidoA))
                 return Json(new { ok = false, msg = "Datos incompletos." });
 
             try
             {
                 int idUsuarioCreador = 0;
-                if (Session["idUsuario"] != null) int.TryParse(Session["idUsuario"].ToString(), out idUsuarioCreador);
+                if (Session["idUsuario"] != null)
+                    int.TryParse(Session["idUsuario"].ToString(), out idUsuarioCreador);
 
                 var nuevo = new ComunicadosTB
                 {
                     Nombre = Titulo,
                     Informacion = Descripcion,
-                    Fecha = DateTime.Now.Date,
-                    Poblacion = DirigidoA, // "Estudiantes" | "Profesores" | "Egresados" | "General"
+                    Fecha = DateTime.Now,
+                    Poblacion = DirigidoA,
                     FechaLimite = FechaAplicacion,
                     IdUsuario = idUsuarioCreador,
                     IdEstado = 1
@@ -121,35 +97,205 @@ namespace Sigep.UI.Controllers
                 db.ComunicadosTB.Add(nuevo);
                 db.SaveChanges();
 
-                // Notificar (uno por uno) a usuarios activos de la población objetivo
-                var destinatarios = ObtenerDestinatarios(DirigidoA);
-                if (destinatarios.Any())
-                {
-                    //var html = _utils.PlantillaComunicado(Titulo, Descripcion, FechaAplicacion);
-                    var asunto = $"[SIGEP] Comunicado - {Titulo}";
+            
+                string carpetaDestino = @"C:\SIGEP\Comunicados";
+                if (!Directory.Exists(carpetaDestino))
+                    Directory.CreateDirectory(carpetaDestino);
 
-                    //foreach (var correo in destinatarios)
-                        //_utils.EnviarCorreo(correo, html, asunto);
+            
+                if (archivos != null && archivos.Count > 0)
+                {
+                    foreach (var archivo in archivos)
+                    {
+                        if (archivo != null && archivo.ContentLength > 0)
+                        {
+                            string ext = Path.GetExtension(archivo.FileName);
+                            string nombreArchivo = $"Comunicado{nuevo.IdComunicado}{ext}";
+                            string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
+
+                            archivo.SaveAs(rutaCompleta);
+
+                            var doc = new DocumentosTB
+                            {
+                                Documento = nombreArchivo,
+                                Tipo = ext,
+                                RutaArchivo = rutaCompleta,
+                                FechaSubida = DateTime.Now,
+                                IdUsuario = idUsuarioCreador,
+                                IdComunicado = nuevo.IdComunicado
+                            };
+
+                            db.DocumentosTB.Add(doc);
+                        }
+                    }
+
+                    db.SaveChanges();
                 }
 
-                return Json(new { ok = true, msg = "Comunicado publicado y notificado." });
+                return Json(new { ok = true, msg = "Comunicado publicado y documentos guardados correctamente." });
             }
             catch (Exception ex)
             {
-                return Json(new { ok = false, msg = _utils.ObtenerMensajeSQL(ex) ?? "Error al guardar el comunicado." });
+                return Json(new { ok = false, msg = utilitarios.ObtenerMensajeSQL(ex) ?? "Error al guardar el comunicado." });
             }
         }
 
-        /// <summary>
-        /// Envía correo a la población seleccionada (sin crear comunicado).
-        /// Adjunta archivo opcional y envía uno por uno (no masivo).
-        /// </summary>
+        [HttpPost]
+        public ActionResult EditarComunicado(
+                int IdComunicado,
+                string Titulo,
+                string Descripcion,
+                DateTime? FechaAplicacion,
+                string DirigidoA,
+                List<HttpPostedFileBase> archivos)
+        {
+            if (string.IsNullOrWhiteSpace(Titulo) || string.IsNullOrWhiteSpace(Descripcion) || string.IsNullOrWhiteSpace(DirigidoA))
+                return Json(new { ok = false, msg = "Datos incompletos." });
+
+            try
+            {
+                using (var db = new SIGEPEntities())
+                {
+                    var comunicado = db.ComunicadosTB.Find(IdComunicado);
+                    if (comunicado == null)
+                        return Json(new { ok = false, msg = "Comunicado no encontrado." });
+
+                    int idUsuarioCreador = 0;
+                    if (Session["idUsuario"] != null)
+                        int.TryParse(Session["idUsuario"].ToString(), out idUsuarioCreador);
+
+                   
+                    comunicado.Nombre = Titulo;
+                    comunicado.Informacion = Descripcion;
+                    comunicado.Poblacion = DirigidoA;
+                    comunicado.FechaLimite = FechaAplicacion;
+                    comunicado.Fecha = DateTime.Now;
+                    db.SaveChanges();
+
+                  
+                    string carpetaDestino = @"C:\SIGEP\Comunicados";
+                    if (!Directory.Exists(carpetaDestino))
+                        Directory.CreateDirectory(carpetaDestino);
+
+                  
+                    if (archivos != null && archivos.Count > 0)
+                    {
+                        foreach (var archivo in archivos)
+                        {
+                            if (archivo != null && archivo.ContentLength > 0)
+                            {
+                                string ext = Path.GetExtension(archivo.FileName);
+                                string nombreArchivoBase = $"Comunicado{comunicado.IdComunicado}{ext}";
+                                string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivoBase);
+
+                             
+                                if (System.IO.File.Exists(rutaCompleta))
+                                {
+                                    string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                                    string nombreArchivoConSufijo = $"Comunicado{comunicado.IdComunicado}_{timestamp}{ext}";
+                                    rutaCompleta = Path.Combine(carpetaDestino, nombreArchivoConSufijo);
+                                    nombreArchivoBase = nombreArchivoConSufijo;
+                                }
+
+                                
+                                archivo.SaveAs(rutaCompleta);
+
+                             
+                                var doc = new DocumentosTB
+                                {
+                                    Documento = nombreArchivoBase,
+                                    Tipo = ext,
+                                    RutaArchivo = rutaCompleta,
+                                    FechaSubida = DateTime.Now,
+                                    IdUsuario = idUsuarioCreador,
+                                    IdComunicado = comunicado.IdComunicado
+                                };
+
+                                db.DocumentosTB.Add(doc);
+                            }
+                        }
+
+                        db.SaveChanges();
+                    }
+
+                    return Json(new { ok = true, msg = "Comunicado actualizado correctamente." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, msg = utilitarios.ObtenerMensajeSQL(ex) ?? "Error al actualizar el comunicado." });
+            }
+        }
+
+
+        [HttpGet]
+        public JsonResult ObtenerDocumentos(int IdComunicado)
+        {
+            try
+            {
+                using (var db = new SIGEPEntities())
+                {
+                    var documentos = db.DocumentosTB
+                        .Where(d => d.IdComunicado == IdComunicado).AsEnumerable()
+                        .Select(d => new
+                        {
+                            IdDocumento = d.IdDocumento,
+                            Nombre = d.Documento,
+                            RutaArchivo = d.RutaArchivo,
+                            FechaSubida = d.FechaSubida.ToString("dd/MM/yyyy HH:mm")
+                        })
+                        .ToList();
+
+                    return Json(new
+                    {
+                        success = true,
+                        documentos = documentos
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Error al obtener los documentos: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var doc = dbContext.DocumentosTB.Find(idDocumento);
+                    if (doc == null)
+                        return Json(new { success = false, message = "Documento no encontrado" });
+
+                   
+                    if (System.IO.File.Exists(doc.RutaArchivo))
+                        System.IO.File.Delete(doc.RutaArchivo);
+
+                    dbContext.DocumentosTB.Remove(doc);
+                    dbContext.SaveChanges();
+
+                    return Json(new { success = true, message = "Documento eliminado correctamente" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+
         [HttpPost]
         public ActionResult EnviarCorreo(string Poblacion, string Asunto, string Mensaje, HttpPostedFileBase Archivo)
         {
             if (Session["IdRol"] == null) return new HttpStatusCodeResult(401);
-            if (!CanManageComunicados()) return new HttpStatusCodeResult(403, "Sin permiso para enviar correos.");
-
+            
             if (string.IsNullOrWhiteSpace(Poblacion) || string.IsNullOrWhiteSpace(Asunto) || string.IsNullOrWhiteSpace(Mensaje))
                 return Json(new { ok = false, msg = "Datos incompletos." });
 
@@ -180,21 +326,17 @@ namespace Sigep.UI.Controllers
                     if (adjBytes != null)
                         adj = new System.Net.Mail.Attachment(new MemoryStream(adjBytes), adjFilename, adjMediaType);
 
-                   // _utils.EnviarCorreo(correo, html, Asunto, adj);
+                    // _utils.EnviarCorreo(correo, html, Asunto, adj);
                 }
 
                 return Json(new { ok = true, msg = "Correos enviados exitosamente." });
             }
             catch (Exception ex)
             {
-                return Json(new { ok = false, msg = _utils.ObtenerMensajeSQL(ex) ?? "Error al enviar correos." });
+                return Json(new { ok = false, msg = utilitarios.ObtenerMensajeSQL(ex) ?? "Error al enviar correos." });
             }
         }
 
-        /// <summary>
-        /// Devuelve correos de usuarios activos según población:
-        /// Profesores: general; Estudiantes: general + especialidades activas; Egresados: general; General: todos activos.
-        /// </summary>
         private System.Collections.Generic.List<string> ObtenerDestinatarios(string poblacion)
         {
             var p = (poblacion ?? "").Trim().ToLowerInvariant();
