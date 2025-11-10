@@ -1,19 +1,16 @@
 ﻿$(function () {
 
     $("#btnEnviar").on("click", function () {
-
         const poblacion = $("#correoPoblacion").val().trim();
         const asunto = $("#correoAsunto").val().trim();
         const mensaje = $("#correoMensaje").val().trim();
-        const archivo = $("#correoArchivo")[0].files[0];
+        const archivos = $("#correoArchivo")[0].files;
 
-      
         if (!poblacion || !asunto || !mensaje) {
             Swal.fire("Campos incompletos", "Por favor complete todos los campos obligatorios.", "warning");
             return;
         }
 
-       
         Swal.fire({
             title: "¿Deseas enviar el correo?",
             text: "El mensaje será enviado a la población seleccionada.",
@@ -25,15 +22,20 @@
             cancelButtonText: "Cancelar"
         }).then((result) => {
             if (result.isConfirmed) {
-
                 let formData = new FormData();
                 formData.append("Poblacion", poblacion);
                 formData.append("Asunto", asunto);
                 formData.append("Mensaje", mensaje);
 
-                if (archivo && archivo.files && archivo.files.length > 0) {
-                    formData.append("Archivo", archivo.files[0]);
+                // ⬇️ Agregar los archivos con el nombre exacto "Archivos"
+                if (archivos && archivos.length > 0) {
+                    for (let i = 0; i < archivos.length; i++) {
+                        formData.append("Archivos", archivos[i]);
+                    }
                 }
+
+                // ⬇️ Agregar token antifalsificación
+                formData.append("__RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
 
                 Swal.fire({
                     title: "Enviando correos...",
@@ -68,15 +70,15 @@
                             Swal.fire("Error", response.msg || "No se pudo enviar el correo.", "error");
                         }
                     },
-                    error: function () {
+                    error: function (xhr) {
                         Swal.close();
+                        console.log(xhr.responseText);
                         Swal.fire("Error", "Ocurrió un error al intentar enviar el correo.", "error");
                     }
                 });
             }
         });
     });
-
 
     $("#btnGuardarComunicado").click(function () {
         let formData = new FormData();
@@ -91,6 +93,46 @@
             formData.append("archivos", files[i]);
         }
 
+        const fechaInput = $("#FechaAplicacionComunicado").val();
+        const Titulo = $("#TituloComunicado").val();
+        const Descripcion = $("#DescripcionComunicado").val();
+
+        if (!Titulo || !Descripcion) {
+            Swal.fire({
+                title: 'Error',
+                text: "Debes completar el título y la descripción.",
+                icon: 'info',
+                confirmButtonColor: '#2D594D'
+            });
+            return;
+        }
+
+        if (!fechaInput) {
+            Swal.fire({
+                title: 'Error',
+                text: "Debe seleccionar una fecha.",
+                icon: 'info',
+                confirmButtonColor: '#2D594D'
+            });
+            return;
+        }
+
+        const fechaSeleccionada = new Date(fechaInput);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        fechaSeleccionada.setHours(0, 0, 0, 0);
+
+        if (fechaSeleccionada < hoy) {
+            Swal.fire({
+                title: 'Error',
+                text: "La fecha límite no puede ser anterior al día de hoy.",
+                icon: 'info',
+                confirmButtonColor: '#2D594D'
+            });
+            return;
+        }
+
+      
         $.ajax({
             url: '/Comunicados/CrearComunicado',
             type: 'POST',
@@ -122,6 +164,8 @@
             }
         });
     });
+
+    
 
     $(document).on("click", ".btn-abrir-comunicado", function () {
         const id = $(this).data("id");

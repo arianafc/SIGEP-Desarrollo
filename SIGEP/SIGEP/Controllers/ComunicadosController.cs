@@ -293,10 +293,9 @@ namespace Sigep.UI.Controllers
 
 
         [HttpPost]
-        public ActionResult EnviarCorreo(string Poblacion, string Asunto, string Mensaje, HttpPostedFileBase Archivo)
+        public ActionResult EnviarCorreo(string Poblacion, string Asunto, string Mensaje, List<HttpPostedFileBase> Archivos)
         {
-            if (Session["IdRol"] == null) return new HttpStatusCodeResult(401);
-
+          
             if (string.IsNullOrWhiteSpace(Poblacion) || string.IsNullOrWhiteSpace(Asunto) || string.IsNullOrWhiteSpace(Mensaje))
                 return Json(new { ok = false, msg = "Datos incompletos." });
 
@@ -321,45 +320,45 @@ namespace Sigep.UI.Controllers
                 if (!destinatarios.Any())
                     return Json(new { ok = false, msg = "No hay destinatarios activos para la población seleccionada." });
 
-           
-                string rutaAdjunto = null;
-                if (Archivo != null && Archivo.ContentLength > 0)
+             
+                var rutasAdjuntos = new List<string>();
+                if (Archivos != null && Archivos.Any())
                 {
-                    var nombreArchivo = Path.GetFileName(Archivo.FileName);
-                    rutaAdjunto = Path.Combine(Server.MapPath("~/Temp"), nombreArchivo);
-                    Archivo.SaveAs(rutaAdjunto);
+                    foreach (var archivo in Archivos)
+                    {
+                        if (archivo != null && archivo.ContentLength > 0)
+                        {
+                            var nombreArchivo = Path.GetFileName(archivo.FileName);
+                            var ruta = Path.Combine(Server.MapPath("~/Temp"), nombreArchivo);
+                            archivo.SaveAs(ruta);
+                            rutasAdjuntos.Add(ruta);
+                        }
+                    }
                 }
-                string cuerpoHtml = utilitarios.GenerarPlantillaCorreo(
-                    "Comunicado SIGEP",
-                    Mensaje
-                    );
 
+                string cuerpoHtml = utilitarios.GenerarPlantillaCorreo("Comunicado SIGEP", Mensaje);
 
                 int enviados = 0;
                 foreach (var correo in destinatarios)
                 {
                     try
                     {
-                        if (!string.IsNullOrEmpty(rutaAdjunto))
-                        {
-                            bool ok = utilitarios.EnviarCorreoConAdjunto(correo, cuerpoHtml, Asunto, rutaAdjunto);
-                            if (ok) enviados++;
-                        }
+                        bool ok;
+                        if (rutasAdjuntos.Any())
+                            ok = utilitarios.EnviarCorreoConAdjuntos(correo, cuerpoHtml, Asunto, rutasAdjuntos);
                         else
-                        {
-                            bool ok = utilitarios.EnviarCorreo(correo, cuerpoHtml, Asunto);
-                            if (ok) enviados++;
-                        }
+                            ok = utilitarios.EnviarCorreo(correo, cuerpoHtml, Asunto);
+
+                        if (ok) enviados++;
                     }
-                    catch
-                    {
-                       
-                    }
+                    catch { }
                 }
 
-               
-                if (!string.IsNullOrEmpty(rutaAdjunto) && System.IO.File.Exists(rutaAdjunto))
-                    System.IO.File.Delete(rutaAdjunto);
+                foreach (var ruta in rutasAdjuntos)
+                {
+                    if (System.IO.File.Exists(ruta))
+                        System.IO.File.Delete(ruta);
+                }
 
                 return Json(new
                 {

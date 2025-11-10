@@ -12,39 +12,47 @@ namespace SIGEP.Services
 {
     public class Utilitarios
     {
-       
-        public bool EnviarCorreoConAdjunto(string destinatario, string mensaje, string asunto, string rutaAdjunto)
+
+        public bool EnviarCorreoConAdjuntos(string destinatario, string mensaje, string asunto, List<string> rutasAdjuntos)
         {
             try
             {
                 var remitente = ConfigurationManager.AppSettings["CorreoRemitente"];
                 var contrasena = ConfigurationManager.AppSettings["CorreoPassword"];
 
-                MailMessage mail = new MailMessage
+                using (MailMessage mail = new MailMessage())
                 {
+                    mail.From = new MailAddress(remitente);
+                    mail.To.Add(destinatario);
+                    mail.Subject = asunto;
+                    mail.Body = mensaje;
+                    mail.IsBodyHtml = true;
+
                     
-                    From = new MailAddress(remitente),
-                    Subject = asunto,
-                    Body = mensaje,
-                    IsBodyHtml = true
-                };
+                    foreach (var ruta in rutasAdjuntos)
+                    {
+                        if (System.IO.File.Exists(ruta))
+                        {
+                            Attachment adjunto = new Attachment(ruta);
+                            mail.Attachments.Add(adjunto);
+                        }
+                    }
 
-                mail.To.Add(destinatario);
+                    using (SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
+                    {
+                        smtp.Credentials = new NetworkCredential(remitente, contrasena);
+                        smtp.EnableSsl = true;
 
-                if (!string.IsNullOrEmpty(rutaAdjunto) && System.IO.File.Exists(rutaAdjunto))
-                    mail.Attachments.Add(new Attachment(rutaAdjunto));
+                        smtp.Send(mail); 
+                    }
+                }
 
-                SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587)
-                {
-                    Credentials = new NetworkCredential(remitente, contrasena),
-                    EnableSsl = true
-                };
-
-                smtp.Send(mail);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                
+                System.Diagnostics.Debug.WriteLine($"Error al enviar correo: {ex.Message}");
                 return false;
             }
         }
@@ -66,7 +74,7 @@ namespace SIGEP.Services
                     IsBodyHtml = true,
                 };
 
-                // Para Office 365
+             
                 SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587)
                 {
                     Credentials = new NetworkCredential(remitente, contrasena),
