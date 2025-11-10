@@ -188,11 +188,11 @@
                     orderable: false,
                     render: function (id, type, row) {
                         return `
-                            <button class="btn bg-transparent btn-editar-empresa" data-id="${id}" title="Editar">
-                                <i class="fas fa-edit icono-accion"></i>
+                            <button class="btn btn-accion editar btn-editar-empresa" data-id="${id}" title="Editar">
+                                <i class="fas fa-edit "></i>
                             </button>
-                            <a href="#" class="btn bg-transparent btn-eliminar-empresa" data-id="${id}" data-nombre="${row.NombreEmpresa}" title="Eliminar">
-                                <i class="fas fa-trash-alt icono-accion"></i>
+                            <a href="#" class="btn btn-accion toggle bg-transparent btn-eliminar-empresa" data-id="${id}" data-nombre="${row.NombreEmpresa}" title="Eliminar">
+                                <i class="fas fa-trash-alt "></i>
                             </a>`;
                     }
                 }

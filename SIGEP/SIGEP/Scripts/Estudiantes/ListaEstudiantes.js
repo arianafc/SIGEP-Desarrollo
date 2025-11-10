@@ -97,12 +97,12 @@
                     data: 'IdUsuario',
                     render: function (data, type, row) {
                         var html =
-                            '<button class="btn bg-transparent verPerfil" data-id="' + data + '" style="color:#2d594d" title="Ver perfil">' +
+                            '<button class="btn bg-transparent btn-accion verPerfil" data-id="' + data + '" style="color:#2d594d" title="Ver perfil">' +
                             '<i class="fas fa-eye"></i>' +
                             '</button>';
                         if (rol === 2 || rol === 3) {
                             html +=
-                                '<button class="btn bg-transparent btn-actualizar-estado" data-id="' + data + '" data-estado="' + (row.IdEstado || 0) + '" style="color:#2d594d" title="Actualizar estado">' +
+                                '<button class="btn bg-transparent btn-accion btn-actualizar-estado" data-id="' + data + '" data-estado="' + (row.IdEstado || 0) + '" style="color:#2d594d" title="Actualizar estado">' +
                                 '<i class="fas fa-sync-alt"></i>' +
                                 '</button>';
                         }
