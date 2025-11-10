@@ -30,10 +30,15 @@ BEGIN
         ee.Email as ContactoEmpresaEmail,
         te.Telefono as ContactoEmpresaTelefono,
         
-        -- Datos de la Práctica (AGREGADO IdPractica)
+        -- Datos de la Práctica
         p.IdPractica,
         p.FechaAplicacion,
-        est.Descripcion as EstadoPractica
+        est.Descripcion as EstadoPractica,
+        
+        -- Notas
+        n.Nota1,
+        n.Nota2,
+        n.NotaFinal
         
     FROM VacantesPracticasTB v
     INNER JOIN EmpresasTB e ON v.IdEmpresa = e.IdEmpresa
@@ -46,6 +51,7 @@ BEGIN
     LEFT JOIN EmailsTB eu ON u.IdUsuario = eu.IdUsuario
     LEFT JOIN EmailsTB ee ON e.IdEmpresa = ee.IdEmpresa  
     LEFT JOIN TelefonosTB te ON e.IdEmpresa = te.IdEmpresa
+    LEFT JOIN NotasEstudiantesTB n ON u.IdUsuario = n.IdUsuario
     WHERE v.IdVacante = @IdVacante
 END
 
@@ -352,6 +358,9 @@ BEGIN
     DECLARE @IdRol INT;
     SELECT @IdRol = IdRol FROM UsuariosTB WHERE IdUsuario = @IdProfesor;
     
+    -- Obtener el año actual
+    DECLARE @AnioActual INT = YEAR(GETDATE());
+    
     -- Si es coordinador (rol 2), mostrar TODOS los estudiantes
     IF @IdRol = 2
     BEGIN
@@ -378,13 +387,14 @@ BEGIN
         LEFT JOIN VacantesPracticasTB v ON p.IdVacante = v.IdVacante
         LEFT JOIN NotasEstudiantesTB n ON u.IdUsuario = n.IdUsuario
         INNER JOIN EstadosTB est ON p.IdEstado = est.IdEstado
-        WHERE u.IdRol = 1
-            AND u.IdEstado = 1
-            AND u.EstadoAcademico = 1
-            AND est.Descripcion = 'En Curso'
+        WHERE u.IdRol = 1 -- Estudiantes
+            AND u.IdEstado = 1 -- Activos
+            AND u.EstadoAcademico = 1 -- Solo aprobados académicamente
+            AND YEAR(p.FechaAplicacion) = @AnioActual -- Solo del año actual
+            AND est.Descripcion IN ('En Curso', 'Rezagada', 'Aprobada', 'Finalizada') -- Estados permitidos
         ORDER BY u.Nombre, u.Apellido1;
     END
-    ELSE -- Es profesor (rol 3), filtrar por especialidad
+    ELSE -- Es profesor (rol 3)
     BEGIN
         SELECT 
             u.IdUsuario,
@@ -412,7 +422,8 @@ BEGIN
         WHERE u.IdRol = 1
             AND u.IdEstado = 1
             AND u.EstadoAcademico = 1
-            AND est.Descripcion = 'En Curso'
+            AND YEAR(p.FechaAplicacion) = @AnioActual -- Solo del año actual
+            AND est.Descripcion IN ('En Curso', 'Rezagada', 'Aprobada', 'Finalizada') -- Estados permitidos
             AND EXISTS (
                 SELECT 1 
                 FROM UsuarioEspecialidadTB ue_prof
@@ -430,6 +441,9 @@ CREATE OR ALTER PROCEDURE [dbo].[ObtenerPerfilEstudianteSP]
 AS
 BEGIN
     SET NOCOUNT ON;
+    
+    -- Obtener el año actual
+    DECLARE @AnioActual INT = YEAR(GETDATE());
     
     SELECT 
         u.Nombre + ' ' + u.Apellido1 + ' ' + ISNULL(u.Apellido2, '') AS NombreCompleto,
@@ -454,8 +468,27 @@ BEGIN
     LEFT JOIN UsuarioEspecialidadTB ue ON u.IdUsuario = ue.IdUsuario AND ue.IdEstado = 1
     LEFT JOIN EspecialidadesTB e ON ue.IdEspecialidad = e.IdEspecialidad
     LEFT JOIN SeccionesTB s ON u.IdSeccion = s.IdSeccion
-    LEFT JOIN PracticaEstudianteTB pr ON u.IdUsuario = pr.IdUsuario 
-        AND pr.IdEstado = (SELECT IdEstado FROM EstadosTB WHERE Descripcion = 'En Curso')
+    -- Buscar práctica del año actual en estados válidos
+    LEFT JOIN (
+        SELECT TOP 1 
+            pt.IdUsuario,
+            pt.IdVacante,
+            pt.IdPractica,
+            pt.FechaAplicacion
+        FROM PracticaEstudianteTB pt
+        INNER JOIN EstadosTB est ON pt.IdEstado = est.IdEstado
+        WHERE pt.IdUsuario = @IdUsuario
+            AND YEAR(pt.FechaAplicacion) = @AnioActual
+            AND est.Descripcion IN ('En Curso', 'Rezagada', 'Aprobada', 'Finalizada')
+        ORDER BY 
+            CASE est.Descripcion
+                WHEN 'En Curso' THEN 1
+                WHEN 'Rezagada' THEN 2
+                WHEN 'Aprobada' THEN 3
+                WHEN 'Finalizada' THEN 4
+            END,
+            pt.FechaAplicacion DESC
+    ) pr ON u.IdUsuario = pr.IdUsuario
     LEFT JOIN VacantesPracticasTB v ON pr.IdVacante = v.IdVacante
     LEFT JOIN EmpresasTB emp ON v.IdEmpresa = emp.IdEmpresa
     LEFT JOIN TelefonosTB temp ON emp.IdEmpresa = temp.IdEmpresa
