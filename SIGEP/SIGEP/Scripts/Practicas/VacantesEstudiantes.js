@@ -612,6 +612,9 @@
         // =====================================================
         // 🔹 Desasignar desde modal Visualizar (BtnDesasignarPracticaEstudiante)
         // =====================================================
+        // =====================================================
+        // 🔹 Desasignar desde modal Visualizar (BtnDesasignarPracticaEstudiante)
+        // =====================================================
         $(document).on('click', '.BtnDesasignarPracticaEstudiante', function (e) {
             e.preventDefault();
 
@@ -631,28 +634,38 @@
 
             Swal.fire({
                 title: '¿Deseas desasignar esta práctica?',
-                text: `El estado de ${nombreEst || 'el estudiante'} se cambiará a "Retirada".`,
+                html: `
+            <p>El estado de <b>${escapeHtml(nombreEst || 'el estudiante')}</b> se cambiará a <b>"Retirada"</b>.</p>
+        `,
                 icon: 'warning',
                 input: 'textarea',
                 inputLabel: 'Comentario (opcional)',
-                inputPlaceholder: 'Escribe un comentario...',
+                inputPlaceholder: 'Escribe el motivo de la desasignación...',
+                inputAttributes: { maxlength: 500 },
                 showCancelButton: true,
                 confirmButtonText: 'Sí, desasignar',
                 cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2d594d',
                 allowOutsideClick: false,
-                confirmButtonColor: '#2d594d'
+                didOpen: () => {
+                    // 🔹 Asegura que el textarea reciba foco y no quede bloqueado por el modal
+                    const textarea = Swal.getInput();
+                    if (textarea) setTimeout(() => textarea.focus(), 150);
+                }
             }).then(result => {
                 if (!result.isConfirmed) {
                     if (modalInstance && modalInstance._focustrap) modalInstance._focustrap.activate();
                     return;
                 }
 
+                const comentario = (result.value || '').trim();
+
                 $.ajax({
                     url: CFG.urls.desasignarPractica,
                     type: 'POST',
                     data: {
                         idPractica,
-                        comentario: result.value || ''
+                        comentario // 👈 el comentario se envía tal cual al SP
                     },
                     success: function (res, status, xhr) {
                         if (redirSiLogin(res, xhr)) return;
@@ -665,7 +678,7 @@
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
-                                // Recargar listado de postulaciones
+                                // 🔁 Recargar listado de postulaciones
                                 $.getJSON(CFG.urls.obtenerPostulaciones, { idVacante }, r2 => {
                                     const $lista = $('#listaPostulaciones').empty();
                                     $('#mensajeSinPostulaciones').toggle(!r2.ok || !r2.data?.length);
@@ -680,25 +693,25 @@
 
                                             const btnDes = mostrarBoton
                                                 ? `<button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
-                                                           data-idpractica="${p.IdPractica}"
-                                                           data-nombre="${escapeHtml(p.NombreCompleto)}"
-                                                           title="Desasignar práctica"
-                                                           style="color:#2D594D;">
-                                                       <i class="fas fa-trash-alt"></i>
-                                                   </button>`
+                                               data-idpractica="${p.IdPractica}"
+                                               data-nombre="${escapeHtml(p.NombreCompleto)}"
+                                               title="Desasignar práctica"
+                                               style="color:#2D594D;">
+                                               <i class="fas fa-trash-alt"></i>
+                                           </button>`
                                                 : '';
 
                                             $lista.append(`
-                                                <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
-                                                    <div>
-                                                        <a href="${CFG.urls.visualizacionPostulacion}?idVacante=${p.IdVacante}&idUsuario=${p.IdUsuario}"
-                                                           class="text-decoration-none fw-bold"
-                                                           style="color:#2d594d;">
-                                                            ${escapeHtml(p.NombreCompleto)}
-                                                        </a>
-                                                    </div>
-                                                    <div class="d-flex align-items-center gap-2">${badge}${btnDes}</div>
-                                                </li>`);
+                                        <li class="d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                                            <div>
+                                                <a href="${CFG.urls.visualizacionPostulacion}?idVacante=${p.IdVacante}&idUsuario=${p.IdUsuario}"
+                                                   class="text-decoration-none fw-bold"
+                                                   style="color:#2d594d;">
+                                                    ${escapeHtml(p.NombreCompleto)}
+                                                </a>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2">${badge}${btnDes}</div>
+                                        </li>`);
                                         });
                                     }
 
@@ -724,6 +737,8 @@
                 });
             });
         });
+
+
 
     });
 })(jQuery);

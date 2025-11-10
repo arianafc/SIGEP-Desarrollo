@@ -12,9 +12,12 @@ namespace SIGEP.Models
         public string NombreCompleto { get; set; }
         public string Especialidad { get; set; }
         public bool EstadoAcademico { get; set; }
+        public string EstadoPostulacion { get; set; }
         public string EstadoPractica { get; set; }
         public string Vacante { get; set; }
         public string Empresa { get; set; }
         public string Tipo { get; set; }
+        public int IdVacanteUltima { get; set; }
+        public int IdPracticaVacante { get; set; }
     }
 }

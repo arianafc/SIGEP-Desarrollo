@@ -591,11 +591,13 @@ namespace SIGEP.Controllers
             public int CuposOcupados { get; set; }
             public DateTime? FechaCierre { get; set; }
             public string Requerimientos { get; set; }
-            public string Tipo { get; set; }                     
-            public string EstadoPractica { get; set; }          
-            public bool PuedeAsignar { get; set; }
+            public string Tipo { get; set; }
+            public string EstadoPractica { get; set; }
+            public int PuedeAsignar { get; set; }
+            public int IdPracticaVacante { get; set; }    // 🆕 requerido para el botón 🗑️
+            public string NombreCompleto { get; set; }    // 🆕 mostrado en modal
+            public string EstadoAcademicoDescripcion { get; set; }  // 🆕 usado en modal
         }
-
 
         // ==============================
         // ASIGNAR ESTUDIANTE A VACANTE 
@@ -1092,32 +1094,49 @@ namespace SIGEP.Controllers
             }
         }
 
+        [HttpGet]
         public ActionResult VistaVacantesProfesor()
         {
-            using (var db = new SIGEPEntities())
+            try
             {
-                var vacantes = db.VacantesPracticasTB
-                    .Include("EmpresasTB")
-                    .Include("ModalidadesTB")
-                    .Include("EstadosTB")
-                    .ToList();
+                // 🔒 Verificar sesión activa
+                if (Session["IdUsuario"] == null || Session["IdRol"] == null)
+                    return RedirectToAction("Login", "Home"); // si no hay sesión, al login
 
-                var usuarios = db.UsuariosTB
-                    .Select(u => new SelectListItem
-                    {
-                        Value = u.IdUsuario.ToString(),
-                        Text = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2
-                    }).ToList();
-                ViewBag.Usuarios = usuarios;
+                // 🔒 Validar que el rol sea profesor (IdRol == 3)
+                if (!int.TryParse(Session["IdRol"].ToString(), out int idRol) || idRol != 3)
+                    return RedirectToAction("Login", "Home"); // si no es profesor, también al login
 
+                using (var db = new SIGEPEntities())
+                {
+                    var vacantes = db.VacantesPracticasTB
+                        .Include("EmpresasTB")
+                        .Include("ModalidadesTB")
+                        .Include("EstadosTB")
+                        .ToList();
 
-                ViewBag.Modalidades = ObtenerModalidades();
-                ViewBag.Especialidades = ObtenerEspecialidades();
-                ViewBag.Estados = ObtenerEstadosVacante();
+                    var usuarios = db.UsuariosTB
+                        .Select(u => new SelectListItem
+                        {
+                            Value = u.IdUsuario.ToString(),
+                            Text = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2
+                        }).ToList();
 
-                return View(vacantes);
+                    ViewBag.Usuarios = usuarios;
+                    ViewBag.Modalidades = ObtenerModalidades();
+                    ViewBag.Especialidades = ObtenerEspecialidades();
+                    ViewBag.Estados = ObtenerEstadosVacante();
+
+                    return View(vacantes);
+                }
+            }
+            catch
+            {
+                // 🔄 Si algo falla con la sesión o base de datos, redirige al login
+                return RedirectToAction("Login", "Home");
             }
         }
+
 
 
         [HttpGet]
@@ -1899,11 +1918,86 @@ namespace SIGEP.Controllers
         //}
 
         [HttpPost]
-        
+
+        //public JsonResult DesasignarPractica(int idPractica, string comentario)
+        //{
+        //    try
+        //    {
+        //        if (Session["IdRol"] == null)
+        //            return Json(new { ok = false, msg = "Sesión expirada. Inicie sesión nuevamente." });
+
+        //        int rol = Convert.ToInt32(Session["IdRol"]);
+        //        if (rol != 2 && rol != 3)
+        //            return Json(new { ok = false, msg = "No tiene permisos para desasignar estudiantes." });
+
+        //        int idUsuarioSesion = Session["IdUsuario"] != null
+        //            ? Convert.ToInt32(Session["IdUsuario"])
+        //            : 0;
+
+        //        using (var db = new SIGEPEntities())
+        //        {
+        //            var practica = db.PracticaEstudianteTB
+        //                .Include("EstadosTB")
+        //                .FirstOrDefault(p => p.IdPractica == idPractica);
+
+        //            if (practica == null)
+        //                return Json(new { ok = false, msg = "No se encontró la práctica del estudiante." });
+
+        //            string estadoActual = practica.EstadosTB?.Descripcion?.Trim().ToLower() ?? "";
+
+        //            if (estadoActual != "asignada" && estadoActual != "en proceso de aplicacion")
+        //            {
+        //                return Json(new
+        //                {
+        //                    ok = false,
+        //                    msg = $"No se puede desasignar una práctica en estado '{estadoActual}'. Solo 'Asignada' o 'En proceso de aplicación'."
+        //                });
+        //            }
+
+        //            int idEstado = db.EstadosTB
+        //                .Where(e => e.Descripcion.Trim().ToLower() == "retirada")
+        //                .Select(e => e.IdEstado)
+        //                .FirstOrDefault();
+
+        //            if (idEstado == 0)
+        //                return Json(new { ok = false, msg = "No se encontró el estado 'Retirada'." });
+
+        //            db.Database.ExecuteSqlCommand(
+        //                "EXEC dbo.ActualizarEstadoPracticaSP @IdPractica, @IdEstado, @Comentario, @IdUsuarioSesion",
+        //                new SqlParameter("@IdPractica", idPractica),
+        //                new SqlParameter("@IdEstado", idEstado),
+        //                new SqlParameter("@Comentario", (object)comentario ?? DBNull.Value),
+        //                new SqlParameter("@IdUsuarioSesion", idUsuarioSesion)
+        //            );
+
+        //            db.AuditoriaGlobalTB.Add(new AuditoriaGlobalTB
+        //            {
+        //                IdUsuario = idUsuarioSesion,
+        //                TablaAfectada = "PracticaEstudianteTB",
+        //                IdRegistro = practica.IdPractica,
+        //                Accion = "Desasignar (Retirada)",
+        //                CampoAfectado = "IdEstado",
+        //                DatosAnteriores = estadoActual,
+        //                DatosNuevos = "retirada"
+        //            });
+        //            db.SaveChanges();
+
+        //            return Json(new { ok = true, msg = "✅ Estudiante desasignado correctamente (estado: Retirada)." });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { ok = false, msg = "❌ Error al desasignar: " + ex.Message });
+        //    }
+        //}
+
         public JsonResult DesasignarPractica(int idPractica, string comentario)
         {
             try
             {
+                if (idPractica <= 0)
+                    return Json(new { ok = false, msg = "Id de práctica inválido." });
+
                 if (Session["IdRol"] == null)
                     return Json(new { ok = false, msg = "Sesión expirada. Inicie sesión nuevamente." });
 
@@ -1924,21 +2018,29 @@ namespace SIGEP.Controllers
                     if (practica == null)
                         return Json(new { ok = false, msg = "No se encontró la práctica del estudiante." });
 
-                    string estadoActual = practica.EstadosTB?.Descripcion?.Trim().ToLower() ?? "";
+                    var desc = (practica.EstadosTB?.Descripcion ?? "").Trim().ToLower();
 
-                    if (estadoActual != "asignada" && estadoActual != "en proceso de aplicacion")
+                    // normalizar tildes rápido
+                    desc = desc
+                        .Replace("á", "a")
+                        .Replace("é", "e")
+                        .Replace("í", "i")
+                        .Replace("ó", "o")
+                        .Replace("ú", "u");
+
+                    if (desc != "asignada" && desc != "en proceso de aplicacion")
                     {
                         return Json(new
                         {
                             ok = false,
-                            msg = $"No se puede desasignar una práctica en estado '{estadoActual}'. Solo 'Asignada' o 'En proceso de aplicación'."
+                            msg = $"No se puede desasignar una práctica en estado '{practica.EstadosTB?.Descripcion}'. Solo 'Asignada' o 'En proceso de aplicación'."
                         });
                     }
 
                     int idEstado = db.EstadosTB
-                        .Where(e => e.Descripcion.Trim().ToLower() == "retirada")
-                        .Select(e => e.IdEstado)
-                        .FirstOrDefault();
+                         .Where(e => e.Descripcion.Trim().ToLower() == "retirada")
+                         .Select(e => e.IdEstado)
+                         .FirstOrDefault();
 
                     if (idEstado == 0)
                         return Json(new { ok = false, msg = "No se encontró el estado 'Retirada'." });
@@ -1958,7 +2060,7 @@ namespace SIGEP.Controllers
                         IdRegistro = practica.IdPractica,
                         Accion = "Desasignar (Retirada)",
                         CampoAfectado = "IdEstado",
-                        DatosAnteriores = estadoActual,
+                        DatosAnteriores = practica.EstadosTB?.Descripcion,
                         DatosNuevos = "retirada"
                     });
                     db.SaveChanges();
