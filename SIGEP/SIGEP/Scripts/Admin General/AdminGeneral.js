@@ -1,4 +1,12 @@
 ﻿(function () {
+    // Resaltar botón activo
+    document.querySelectorAll("button[data-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll("button[data-tab]").forEach(b => b.classList.remove("active-tab"));
+            btn.classList.add("active-tab");
+        });
+    });
+
     const BASE = '/AdministracionGeneral';
     const tabs = ['usuarios', 'especialidades', 'secciones'];
     let dtUsuarios, dtEspecialidades, dtSecciones;
@@ -18,6 +26,18 @@
         aria: { sortAscending: ": activar para ordenar ascendente", sortDescending: ": activar para ordenar descendente" }
     };
 
+    // === NUEVA FUNCIÓN PARA MOSTRAR BADGES DE ESTADO ===
+    function obtenerBadgeEstado(estado) {
+        if (!estado) return '';
+        const e = estado.toString().trim().toLowerCase();
+        if (e === 'activo')
+            return '<span class="estado-badge estado-activo">Activo</span>';
+        if (e === 'inactivo')
+            return '<span class="estado-badge estado-inactivo">Inactivo</span>';
+        return `<span class="estado-badge">${estado}</span>`;
+    }
+
+    // Mostrar pestaña seleccionada
     function show(tab) {
         tabs.forEach(t => {
             const el = document.getElementById(t);
@@ -63,7 +83,7 @@
                 { data: 'Cedula' },
                 { data: 'Email' },
                 { data: 'Rol' },
-                { data: 'Estado' },
+                { data: 'Estado', render: data => obtenerBadgeEstado(data) },
                 {
                     data: null,
                     orderable: false,
@@ -71,15 +91,15 @@
                         const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
                         const icon = row.IdEstado === 1 ? 'bi-person-slash' : 'bi-person-check';
                         return `
-              <a href="#" class="btn btn-sm btn-editar-rol-usuario"
-                 data-id="${row.IdUsuario}" data-nombre="${row.Nombre}"
-                 data-cedula="${row.Cedula}" data-email="${row.Email}"
-                 title="Editar rol"><i class="bi bi-person-gear"></i></a>
-              <a href="#" class="btn btn-sm btn-toggle-estado"
-                 data-id="${row.IdUsuario}" data-estado="${row.Estado}" data-nombre="${row.Nombre}"
-                 title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
-                 <i class="bi ${icon}"></i></a>
-            `;
+                            <a href="#" class="btn-accion editar btn btn-sm btn-editar-rol-usuario"
+                               data-id="${row.IdUsuario}" data-nombre="${row.Nombre}"
+                               data-cedula="${row.Cedula}" data-email="${row.Email}"
+                               title="Editar rol"><i class="bi bi-person-gear"></i></a>
+                            <a href="#" class="btn-accion toggle btn btn-sm btn-toggle-estado"
+                               data-id="${row.IdUsuario}" data-estado="${row.Estado}" data-nombre="${row.Nombre}"
+                               title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
+                               <i class="bi ${icon}"></i></a>
+                        `;
                     }
                 },
                 { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 }
@@ -147,32 +167,37 @@
             ajax: { url: `${BASE}/Especialidades`, dataSrc: 'data' },
             columns: [
                 { data: 'Nombre' },
-                { data: 'IdEstado', render: v => Number(v) === 1 ? 'Activo' : 'Inactivo' },  // NUEVA COLUMNA
+                { data: 'IdEstado', render: v => obtenerBadgeEstado(Number(v) === 1 ? 'Activo' : 'Inactivo') },
                 {
                     data: null,
                     orderable: false,
                     render: (row) => {
+                        const activo = Number(row.IdEstado) === 1;
                         const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
                         const icon = row.IdEstado === 1 ? 'bi-slash-circle' : 'bi-check-circle';
-                        return `
-            <a href="#" class="btn btn-sm btn-editar-especialidad"
-               data-id="${row.IdEspecialidad}" data-nombre="${row.Nombre}"
-               title="Editar"><i class="bi bi-pencil-square"></i></a>
-            <a href="#" class="btn btn-sm btn-toggle-especialidad"
-               data-id="${row.IdEspecialidad}" data-actual="${row.IdEstado}"
-               title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
-               <i class="bi ${icon}"></i></a>
-          `;
+                        const btnEditar = activo
+                            ? `<a href="#" class="btn btn-sm btn-accion editar btn-editar-seccion"
+                               data-id="${row.IdSeccion}" data-nombre="${row.Seccion}"
+                               title="Editar"><i class="bi bi-pencil-square"></i></a>`
+                            : '';
+
+                        const btnToggle = `
+                        <a href="#" class="btn btn-sm btn-accion toggle btn-toggle-seccion"
+                           data-id="${row.IdSeccion}" data-actual="${row.IdEstado}"
+                           title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
+                           <i class="bi ${icon}"></i></a>
+                    `;
+
+                        return `${btnEditar} ${btnToggle}`;
                     }
                 },
-                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 } // EstadoOrden
+                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 }
             ],
-            order: [[3, 'asc'], [0, 'asc']] // ordena por EstadoOrden, luego Nombre
+            order: [[3, 'asc'], [0, 'asc']]
         });
     }
 
-
-    // Crear (sin descripción)
+    // Crear especialidad
     $('#formCrearEspecialidad').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/CrearEspecialidad`, {
@@ -192,7 +217,7 @@
         $('#modalEditarEspecialidad').modal('show');
     });
 
-    // Editar (sin descripción)
+    // Editar especialidad
     $('#formEditarEspecialidad').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/EditarEspecialidad`, {
@@ -206,7 +231,7 @@
             .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo editar la especialidad.' }));
     });
 
-    // Toggle estado
+    // Cambiar estado especialidad
     $(document).on('click', '.btn-toggle-especialidad', function (e) {
         e.preventDefault();
         const id = $(this).data('id');
@@ -237,43 +262,45 @@
             ajax: { url: `${BASE}/Secciones`, dataSrc: 'data' },
             columns: [
                 { data: 'Seccion' },
-                { data: 'IdEstado', render: v => Number(v) === 1 ? 'Activo' : 'Inactivo' },  // NUEVA COLUMNA
+                { data: 'IdEstado', render: v => obtenerBadgeEstado(Number(v) === 1 ? 'Activo' : 'Inactivo') },
                 {
                     data: null,
                     orderable: false,
                     render: (row) => {
+                        const activo = Number(row.IdEstado) === 1;
                         const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
                         const icon = row.IdEstado === 1 ? 'bi-slash-circle' : 'bi-check-circle';
-                        return `
-            <a href="#" class="btn btn-sm btn-editar-seccion"
-               data-id="${row.IdSeccion}" data-nombre="${row.Seccion}"
-               title="Editar"><i class="bi bi-pencil-square"></i></a>
-            <a href="#" class="btn btn-sm btn-toggle-seccion"
-               data-id="${row.IdSeccion}" data-actual="${row.IdEstado}"
-               title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
-               <i class="bi ${icon}"></i></a>
-          `;
+                        const btnEditar = activo
+                            ? `<a href="#" class="btn btn-sm btn-accion editar btn-editar-seccion"
+                               data-id="${row.IdSeccion}" data-nombre="${row.Seccion}"
+                               title="Editar"><i class="bi bi-pencil-square"></i></a>`
+                            : '';
+
+                        const btnToggle = `
+                        <a href="#" class="btn btn-sm btn-accion toggle btn-toggle-seccion"
+                           data-id="${row.IdSeccion}" data-actual="${row.IdEstado}"
+                           title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
+                           <i class="bi ${icon}"></i></a>
+                    `;
+
+                        return `${btnEditar} ${btnToggle}`;
                     }
                 },
-                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 } // EstadoOrden
+                { data: 'IdEstado', visible: false, render: v => Number(v) === 1 ? 0 : 1 }
             ],
             order: [[3, 'asc'], [0, 'asc']]
         });
     }
 
-
-    // Crear (sin descripción)
+    // Crear sección
     $('#formCrearSeccion').on('submit', function (e) {
         e.preventDefault();
-
         $.ajax({
             url: `${BASE}/CrearSeccion`,
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
             dataType: 'json',
-            data: JSON.stringify({
-                nombreSeccion: $('#nombreSeccion').val().trim()
-            }),
+            data: JSON.stringify({ nombreSeccion: $('#nombreSeccion').val().trim() }),
             success: function (r) {
                 Swal.fire({
                     icon: r.ok ? 'success' : 'error',
@@ -296,7 +323,6 @@
         });
     });
 
-
     $(document).on('click', '.btn-editar-seccion', function (e) {
         e.preventDefault();
         $('#editarIdSeccion').val($(this).data('id'));
@@ -304,7 +330,6 @@
         $('#modalEditarSeccion').modal('show');
     });
 
-    // Editar (sin descripción)
     $('#formEditarSeccion').on('submit', function (e) {
         e.preventDefault();
         $.post(`${BASE}/EditarSeccion`, {
@@ -318,7 +343,6 @@
             .fail(() => Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo editar la sección.' }));
     });
 
-    // Toggle estado
     $(document).on('click', '.btn-toggle-seccion', function (e) {
         e.preventDefault();
         const id = $(this).data('id');
