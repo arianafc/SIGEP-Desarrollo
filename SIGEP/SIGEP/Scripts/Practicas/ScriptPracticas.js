@@ -151,27 +151,39 @@
                         icon: "success",
                         title: "Estado actualizado",
                         html: `<p>${response.message}</p>
-                               <small><strong>Nuevo estado:</strong> ${response.data?.estado || ''}</small>`,
+                               ${response.data?.estado ? '<small><strong>Nuevo estado:</strong> ' + response.data.estado + '</small>' : ''}`,
                         confirmButtonColor: "#2D594D"
                     }).then(() => {
                         $('#modalActualizarEstado').modal('hide');
                         window.location.reload();
                     });
                 } else {
+                    // Mostrar warning para validaciones de negocio
                     Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: response.message || "No se pudo actualizar el estado",
+                        icon: "warning",
+                        title: "No se puede actualizar",
+                        html: response.message || "No se pudo actualizar el estado",
+                        confirmButtonText: "Entendido",
                         confirmButtonColor: "#2D594D"
                     });
                 }
             },
             error: function (xhr, status, error) {
                 let errorMessage = "No se pudo actualizar el estado. Inténtalo de nuevo.";
-                if (xhr.status === 404) {
-                    errorMessage = "La función no está disponible. Contacta al administrador.";
-                } else if (xhr.status === 500) {
-                    errorMessage = "Error en el servidor. Inténtalo más tarde.";
+
+                // Intentar parsear respuesta JSON del servidor
+                try {
+                    let jsonResponse = JSON.parse(xhr.responseText);
+                    if (jsonResponse && jsonResponse.message) {
+                        errorMessage = jsonResponse.message;
+                    }
+                } catch (e) {
+                    // Si no es JSON, usar mensajes por código de estado
+                    if (xhr.status === 404) {
+                        errorMessage = "La función no está disponible. Contacta al administrador.";
+                    } else if (xhr.status === 500) {
+                        errorMessage = "Error en el servidor. Inténtalo más tarde.";
+                    }
                 }
 
                 Swal.fire({
