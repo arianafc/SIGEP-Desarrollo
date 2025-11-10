@@ -176,16 +176,31 @@ else
         <!-- Estado -->
         <div class="mt-4">
             <h4 style="color: #2D594D; font-weight: 600;">Estado Actual</h4>
-            @if (rol == 2 || rol == 3)
-            {
-                <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
+            @{
+                var estadoRaw = (Model?.EstadoPractica ?? "No disponible").Trim();
+                var estadoNorm = System.Text.RegularExpressions.Regex
+                    .Replace(
+                        (estadoRaw.ToLowerInvariant()).Normalize(System.Text.NormalizationForm.FormD),
+                        "\\p{IsCombiningDiacriticalMarks}+",
+                        string.Empty
+                    )
+                    .Replace("  ", " ")
+                    .Trim();
 
-            }
-            @if (rol == 1)
-            {
-                <span class="badge badge-asignada">@(Model?.EstadoPractica ?? "No disponible")</span>
+                var clase = "badge badge-no-asignada";
 
+                if (estadoNorm == "en proceso de aplicacion") { clase = "badge badge-en-progreso"; }
+                else if (estadoNorm == "rechazada") { clase = "badge badge-rechazada"; }
+                else if (estadoNorm == "asignada") { clase = "badge badge-asignada"; }
+                else if (estadoNorm == "aprobada" || estadoNorm == "aprobado") { clase = "badge badge-aprobada"; }
+                else if (estadoNorm == "retirada") { clase = "badge badge-retirada"; }
+                else if (estadoNorm == "finalizada") { clase = "badge badge-finalizada"; }
+                else if (estadoNorm == "rezagado") { clase = "badge badge-rezagado"; }
+                else if (estadoNorm == "archivado") { clase = "badge badge-archivado"; }
+                else if (estadoNorm == "en curso") { clase = "badge badge-en-curso"; }
+                else if (estadoNorm == "en progreso") { clase = "badge badge-en-progreso"; }
             }
+            <span class="@clase">@estadoRaw</span>
         </div>
 
         <!-- Botones -->

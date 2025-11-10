@@ -57,7 +57,7 @@
                             <li><strong>Fecha límite:</strong> ${formatFecha(v.FechaLimite)}</li>
                         </ul>
                         <div class="text-end">
-                            <button class="btn btn-cta btn-detalle" 
+                            <button class="btn btn-accion btn-cta btn-detalle" 
                                 data-id="${v.IdEmpleo}"
                                 data-nombre="${escapeHtml(v.NombrePuesto)}"
                                 data-empresa="${escapeHtml(v.Empresa)}"

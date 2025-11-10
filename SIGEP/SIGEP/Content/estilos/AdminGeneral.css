@@ -1,0 +1,160 @@
+﻿table.dataTable tbody tr {
+    background-color:#fff !important;
+    |
+}
+    .vacantes-wrapper button[data-tab] {
+    color: #2D594D;
+    font-weight: 600;
+    border: 2px solid #2D594D;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+
+    .vacantes-wrapper button[data-tab]:hover,
+    .vacantes-wrapper button[data-tab].active-tab {
+        background-color: #2D594D;
+        color: #fff;
+        transform: translateY(-3px);
+    }
+
+/* Sección activa (mostrar con animación suave) */
+.seccion-adm {
+    animation: fadeIn 0.4s ease;
+}
+
+
+    /* Encabezado de secciones */
+    .seccion-adm h3 {
+        color: #2D594D;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    /* Botones dentro de secciones (como “+ Nueva Especialidad”) */
+    .seccion-adm button.btn {
+        background-color: #2D594D;
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .seccion-adm button.btn:hover {
+            background-color: #768C46;
+            transform: scale(1.03);
+        }
+
+    /* Tarjetas contenedoras de tablas */
+    .seccion-adm .card {
+        border: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        background-color: #fff;
+    }
+
+/* Tablas */
+table.dataTable thead {
+    background-color: #2D594D;
+    color: white;
+    border-radius: 8px;
+}
+
+table.dataTable th,
+table.dataTable td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.dataTable th {
+    color: #fff !important;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #EAF2D8;
+}
+
+/* Modales */
+.modal-content {
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    background-color: #2D594D !important;
+    color: white !important;
+    border-bottom: none;
+}
+
+.modal-footer .btn {
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* Formulario dentro del modal */
+.modal-body label {
+    color: #2D594D;
+    font-weight: 600;
+}
+
+/* Transición visual entre tabs */
+.d-none {
+    display: none !important;
+}
+
+.estado-badge-admin {
+    font-weight: bold;
+    
+   
+    color: white;
+}
+
+
+.estado-activo {
+    background-color: #2D594D;
+  
+    border: 1px solid #2D594D;
+}
+
+.estado-inactivo {
+    background-color: #F8D7DA;
+    color: #842029;
+    
+}
+
+.acciones-tabla {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-accion {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-accion i {
+        font-size: .9rem;
+    }
+
+    .btn-accion.editar {
+        color: #2D594D;
+    }
+
+    .btn-accion.toggle {
+        color: #842029;
+    }
+
+    .btn-accion:hover {
+        transform: scale(1.15);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-accion.toggle:hover {
+        color: #842029;
+    }
+
+    .btn-accion.editar:hover {
+        color: #2D594D;
+    }

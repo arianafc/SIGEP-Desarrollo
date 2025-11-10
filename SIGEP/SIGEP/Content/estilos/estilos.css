@@ -864,8 +864,8 @@ body {
 
 .estado-badge {
     font-weight: bold;
-    padding: .5rem 1rem;
-    border-radius: 8px;
+    padding: .3rem;
+    border-radius: 3px;
     color: white;
 }
 

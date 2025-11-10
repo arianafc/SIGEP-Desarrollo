@@ -1146,7 +1146,6 @@ namespace SIGEP.Controllers
             {
                 using (var dbContext = new SIGEPEntities())
                 {
-
                     var datosPractica = dbContext.ObtenerVisualizacionPracticaSP(idVacante, idUsuario).FirstOrDefault();
 
                     if (datosPractica == null)
@@ -1155,14 +1154,13 @@ namespace SIGEP.Controllers
                         return View(new VacantePracticaVM());
                     }
 
-                    var notas = dbContext.NotasEstudiantesTB.FirstOrDefault(n => n.IdUsuario == idUsuario);
-
                     var estadosPermitidos = new List<string> {
-                                   "En Proceso de Aplicacion",
-                                   "Rechazada",
-                                   "Asignada",
-                                   "Retirada",
-                                   "En Curso" };
+                "En Proceso de Aplicacion",
+                "Rechazada",
+                "Asignada",
+                "Retirada",
+                "En Curso"
+            };
 
                     var viewModel = new VacantePracticaVM
                     {
@@ -1172,28 +1170,22 @@ namespace SIGEP.Controllers
                         Requerimientos = datosPractica.Requerimientos,
                         FechaMaxAplicacion = datosPractica.FechaMaxAplicacion,
                         ModalidadNombre = datosPractica.ModalidadNombre,
-
                         IdUsuario = datosPractica.IdUsuario,
                         EstudianteNombre = datosPractica.EstudianteNombre,
                         EstudianteCedula = datosPractica.EstudianteCedula,
                         EstudianteCorreo = datosPractica.EstudianteCorreo,
                         EstudianteEdad = datosPractica.EstudianteEdad,
                         EstudianteEspecialidad = datosPractica.EstudianteEspecialidad,
-
-
                         ContactoEmpresaNombre = datosPractica.ContactoEmpresaNombre,
                         ContactoEmpresaEmail = datosPractica.ContactoEmpresaEmail,
                         ContactoEmpresaTelefono = datosPractica.ContactoEmpresaTelefono,
-
                         IdPractica = datosPractica.IdPractica,
                         FechaAplicacion = datosPractica.FechaAplicacion,
                         EstadoPractica = datosPractica.EstadoPractica,
-
-                        Nota1 = notas?.Nota1,
-                        Nota2 = notas?.Nota2,
-                        NotaFinal = notas?.NotaFinal,
-
-
+                        // Ahora las notas vienen del SP
+                        Nota1 = datosPractica.Nota1,
+                        Nota2 = datosPractica.Nota2,
+                        NotaFinal = datosPractica.NotaFinal,
                         ListaEstados = dbContext.EstadosTB
                             .Where(e => estadosPermitidos.Contains(e.Descripcion))
                             .OrderBy(e => e.Descripcion)
@@ -1276,9 +1268,59 @@ namespace SIGEP.Controllers
 
                 using (var dbContext = new SIGEPEntities())
                 {
-
                     int idUsuarioSesion = Convert.ToInt32(Session["IdUsuario"]);
 
+                    // Obtener la práctica
+                    var practica = dbContext.PracticaEstudianteTB.FirstOrDefault(p => p.IdPractica == idPractica);
+
+                    if (practica == null)
+                    {
+                        return Json(new { success = false, message = "Práctica no encontrada" });
+                    }
+
+                    // VALIDACIÓN 1: Verificar estado académico del estudiante
+                    var estudiante = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == practica.IdUsuario);
+
+                    if (estudiante != null && estudiante.EstadoAcademico == false)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = "El estudiante no puede realizar ninguna práctica debido a que su estado académico es Rezagado. Por favor, contacte al coordinador académico."
+                        });
+                    }
+
+                    // VALIDACIÓN 2: Si se intenta asignar, verificar que no tenga otra práctica activa
+                    var estadoNuevo = dbContext.EstadosTB.FirstOrDefault(e => e.IdEstado == idEstado);
+
+                    if (estadoNuevo != null && estadoNuevo.Descripcion == "Asignada")
+                    {
+                        // Verificar si ya tiene una práctica en estados conflictivos
+                        var estadosConflictivos = new[] { "Asignada", "En Curso", "Aprobada", "Finalizada" };
+
+                        var practicaExistente = dbContext.PracticaEstudianteTB
+                            .Where(p => p.IdUsuario == practica.IdUsuario &&
+                                        p.IdPractica != idPractica)
+                            .Join(dbContext.EstadosTB,
+                                  p => p.IdEstado,
+                                  e => e.IdEstado,
+                                  (p, e) => new { Practica = p, Estado = e })
+                            .FirstOrDefault(x => estadosConflictivos.Contains(x.Estado.Descripcion));
+
+                        if (practicaExistente != null)
+                        {
+                            var vacante = dbContext.VacantesPracticasTB
+                                .FirstOrDefault(v => v.IdVacante == practicaExistente.Practica.IdVacante);
+
+                            return Json(new
+                            {
+                                success = false,
+                                message = $"El estudiante ya tiene una práctica en estado '{practicaExistente.Estado.Descripcion}' ({vacante?.Nombre ?? "Sin nombre"}). Si desea asignar otra práctica, primero debe retirar o finalizar la práctica actual."
+                            });
+                        }
+                    }
+
+                    // Ejecutar el SP para actualizar estado
                     var resultado = dbContext.ActualizarEstadoPracticaSP(
                         idPractica,
                         idEstado,
@@ -1291,6 +1333,7 @@ namespace SIGEP.Controllers
                         return Json(new { success = false, message = "No se encontró la práctica." });
                     }
 
+                    // Enviar correo de notificación
                     if (!string.IsNullOrEmpty(resultado.EstudianteCorreo))
                     {
                         try
@@ -1344,7 +1387,6 @@ namespace SIGEP.Controllers
                             mensaje.Append("</body>");
                             mensaje.Append("</html>");
 
-                            // Enviar correo usando tu método utilitario
                             bool correoEnviado = utilitarios.EnviarCorreo(
                                 resultado.EstudianteCorreo,
                                 mensaje.ToString(),
@@ -1382,7 +1424,6 @@ namespace SIGEP.Controllers
                         }
                         catch (Exception emailEx)
                         {
-                       
                             return Json(new
                             {
                                 success = true,

@@ -465,3 +465,34 @@
     min-width: 90px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+
+.btn-accion {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+   
+
+    .btn-accion.editar {
+        color: #2D594D;
+    }
+
+    .btn-accion.toggle {
+        color: #842029;
+    }
+
+    .btn-accion:hover {
+        transform: scale(1.15);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-accion.toggle:hover {
+        color: #842029;
+    }
+
+    .btn-accion.editar:hover {
+        color: #2D594D;
+    }

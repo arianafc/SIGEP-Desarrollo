@@ -208,7 +208,7 @@
                         const muted = inactivo ? 'opacity:0.35; cursor:not-allowed;' : '';
 
                         let acc = `
-                            <button class="btn bg-transparent btn-visualizar"
+                            <button class="btn bg-transparent btn-accion btn-visualizar"
                                     data-id="${data}"
                                     title="Visualizar"
                                     style="color:#2d594d">
@@ -218,7 +218,7 @@
                         if ((CFG.rol === 2 || CFG.rol === 3) &&
                             !(row.Nombre || '').includes('Práctica Autogestionada')) {
                             acc += `
-                                <button class="btn bg-transparent btn-asignar"
+                                <button class="btn bg-transparent btn-accion btn-asignar"
                                         data-id="${data}"
                                         style="color:#2d594d; ${muted}" ${dis}>
                                     <i class="fas fa-user-plus"></i>
@@ -227,14 +227,14 @@
 
                         if (CFG.rol === 2) {
                             acc += `
-                                <button class="btn bg-transparent btn-editar"
+                                <button class="btn bg-transparent btn-accion btn-editar"
                                         data-id="${data}"
                                         style="color:#2d594d; ${muted}" ${dis}>
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
-                                <button class="btn bg-transparent btn-eliminar"
+                                <button class="btn btn-accion toggle btn-eliminar"
                                         data-id="${data}"
-                                        style="color:#2d594d; ${muted}" ${dis}>
+                                        ; ${muted}" ${dis}>
                                     <i class="fas fa-archive"></i>
                                 </button>`;
                         }
@@ -288,7 +288,7 @@
                             const mostrarBoton = ['asignada', 'en proceso de aplicacion'].includes(estNorm);
 
                             const btnDes = mostrarBoton
-                                ? `<button class="btn bg-transparent BtnDesasignarPracticaEstudiante"
+                                ? `<button class="btn bg-transparent btn-accion toggle BtnDesasignarPracticaEstudiante"
                                            data-idpractica="${p.IdPractica}"
                                            data-nombre="${escapeHtml(p.NombreCompleto)}"
                                            title="Desasignar práctica"
