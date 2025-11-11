@@ -1,6 +1,14 @@
 ﻿$(function () {
     console.log("✅ PracticasCoordinador.js cargado correctamente");
 
+    if (window._PracticasScriptLoaded) {
+        console.warn("⚠️ PracticasCoordinador.js se está cargando más de una vez.");
+    } else {
+        window._PracticasScriptLoaded = true;
+        console.log("🟢 Script PracticasCoordinador.js cargado por primera vez.");
+    }
+
+
 
     // === Helper para mostrar badges según el estado de práctica ===
     function badgeEstado(estadoOriginal) {
@@ -90,7 +98,30 @@
         });
     });
 
+    console.log("🧩 Inicializando DataTable de prácticas");
 
+
+    // === FIX: prevenir duplicados de estudiantes en DataTable ===
+    if ($.fn.dataTable.isDataTable('#miTabla')) {
+        console.warn("⚠️ La tabla #miTabla ya estaba inicializada, se destruye para evitar duplicados");
+        $('#miTabla').DataTable().clear().destroy(); // elimina la anterior
+        $('#miTabla').empty(); // limpia el contenido de la tabla
+    }
+
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (settings.url.includes('/Practicas/ListarEstudiantesJson')) {
+                console.log("🚀 Llamada enviada a:", settings.url);
+            }
+        },
+        complete: function (xhr, status) {
+            if (xhr.responseJSON && xhr.responseJSON.data) {
+                console.log("✅ Respuesta recibida:", xhr.responseJSON.data.length, "registros");
+            } else {
+                console.warn("⚠️ No hubo data en la respuesta o error:", status);
+            }
+        }
+    });
 
 
     const table = $('#miTabla').DataTable({
@@ -99,6 +130,10 @@
         ajax: {
             url: '/Practicas/ListarEstudiantesJson',
             type: 'GET',
+            // 🔹 Evita caché del navegador y peticiones duplicadas
+            data: function (d) {
+                d._ts = new Date().getTime();
+            },
             dataSrc: 'data'
         },
         columns: [

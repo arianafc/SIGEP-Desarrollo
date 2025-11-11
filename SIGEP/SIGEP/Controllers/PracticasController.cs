@@ -1688,6 +1688,141 @@ namespace SIGEP.Controllers
             return View(); // la vista que te dejo abajo
         }
 
+        //   [HttpGet]
+        //   public JsonResult ListarEstudiantesJson(int? idVacante = null)
+        //   {
+        //       if (Session["IdUsuario"] == null)
+        //           return Json(new { data = new object[0] }, JsonRequestBehavior.AllowGet);
+
+        //       int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+        //       int idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+
+        //       List<EstudianteListadoVM> rows;
+
+        //       // ============================================================
+        //       // COORDINADOR Ver TODOS los estudiantes activos
+        //       // ============================================================
+        //       if (idRol == 2)
+        //       {
+        //           // 🔹 Obtener estudiantes activos
+        //           var estudiantes = (
+        //               from u in db.UsuariosTB
+        //               join r in db.RolesTB on u.IdRol equals r.IdRol
+        //               where r.Descripcion == "Estudiante" && u.EstadoAcademico == true
+        //               select new
+        //               {
+        //                   u.IdUsuario,
+        //                   u.Cedula,
+        //                   NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2
+        //               }
+        //           ).ToList();
+
+        //           // 🔹 Concatenar especialidades activas
+        //           var especialidadesPorUsuario = db.UsuarioEspecialidadTB
+        //               .Where(x => x.IdEstado == 1)
+        //               .Join(db.EspecialidadesTB, ue => ue.IdEspecialidad, esp => esp.IdEspecialidad,
+        //                   (ue, esp) => new { ue.IdUsuario, esp.Nombre })
+        //               .GroupBy(x => x.IdUsuario)
+        //               .ToDictionary(
+        //                   g => g.Key,
+        //                   g => string.Join(", ", g.Select(x => x.Nombre).Distinct())
+        //               );
+
+        //           // 🔹 Armar lista única de estudiantes
+        //           rows = estudiantes.Select(u =>
+        //           {
+        //               int? idPracticaActiva;
+        //               string estadoVacante;
+
+        //               var bucket = ClasificarEstadoPostulacion(u.IdUsuario, out idPracticaActiva, out estadoVacante);
+
+        //               string tipo = idPracticaActiva.HasValue
+        //                   ? db.PracticaEstudianteTB
+        //                       .Include("VacantesPracticasTB")
+        //                       .Where(p => p.IdPractica == idPracticaActiva)
+        //                       .Select(p => p.VacantesPracticasTB.Tipo)
+        //                       .FirstOrDefault() ?? "—"
+        //                   : "—";
+
+        //               return new EstudianteListadoVM
+        //               {
+        //                   IdUsuario = u.IdUsuario,
+        //                   Cedula = u.Cedula,
+        //                   Nombre = u.NombreCompleto,
+        //                   Especialidad = especialidadesPorUsuario.ContainsKey(u.IdUsuario)
+        //                       ? especialidadesPorUsuario[u.IdUsuario]
+        //                       : "—",
+        //                   Telefono = db.TelefonosTB
+        //                       .Where(t => t.IdUsuario == u.IdUsuario)
+        //                       .Select(t => t.Telefono)
+        //                       .FirstOrDefault(),
+        //                   EstadoPostulacion = bucket,
+        //                   Empresa = UltimaEmpresa(u.IdUsuario),
+        //                   Tipo = tipo,
+        //                   IdPracticaVacante = idPracticaActiva,
+        //                   EstadoVacante = estadoVacante,
+        //                   IdVacanteUltima = UltimaVacanteId(u.IdUsuario),
+        //                   TieneRelacionEnVacante = idPracticaActiva.HasValue
+        //               };
+        //           }).GroupBy(x => x.IdUsuario)
+        //             .Select(g => g.First())
+        //             .OrderBy(x => x.Nombre)
+        //             .ToList();
+        //       }
+        //       // ============================================================
+        //       // PROFESOR  Usa SP con especialidades asignadas
+        //       // ============================================================
+        //       else
+        //       {
+        //           var lista = db.ObtenerEstudiantesProfesorSP(idUsuario, idVacante).ToList();
+
+        //           rows = lista.Select(x =>
+        //           {
+        //               var tipoVacante = db.PracticaEstudianteTB
+        //                   .Include("VacantesPracticasTB")
+        //                   .Where(p => p.IdPractica == x.IdPracticaVacante)
+        //                   .Select(p => p.VacantesPracticasTB.Tipo)
+        //                   .FirstOrDefault() ?? "—";
+
+        //               return new EstudianteListadoVM
+        //               {
+        //                   IdUsuario = x.IdUsuario,
+        //                   Cedula = x.Cedula,
+        //                   Nombre = x.Nombre,
+        //                   Especialidad = x.Especialidad,
+        //                   Telefono = db.TelefonosTB
+        //                       .Where(t => t.IdUsuario == x.IdUsuario)
+        //                       .Select(t => t.Telefono)
+        //                       .FirstOrDefault(),
+        //                   EstadoPostulacion = x.EstadoPractica,
+        //                   Empresa = UltimaEmpresa(x.IdUsuario),
+        //                   TieneRelacionEnVacante = (x.TieneRelacionEnVacante ?? false) || (x.IdPracticaVacante != null),
+        //                   Tipo = tipoVacante,
+        //                   IdPracticaVacante = x.IdPracticaVacante,
+        //                   EstadoVacante = x.EstadoVacante,
+        //                   IdVacanteUltima = UltimaVacanteId(x.IdUsuario)
+        //               };
+        //           }).ToList();
+        //       }
+
+        //       rows = rows
+        //.GroupBy(r => r.IdUsuario)
+        //.Select(g =>
+        //{
+        //    var primero = g.First();
+        //    primero.Especialidad = string.Join(", ",
+        //        g.Select(x => x.Especialidad)
+        //         .Where(e => !string.IsNullOrEmpty(e))
+        //         .Distinct());
+        //    return primero;
+        //})
+        //.OrderBy(r => r.Nombre)
+        //.ToList();
+
+
+        //       return Json(new { data = rows }, JsonRequestBehavior.AllowGet);
+        //   }
+
         [HttpGet]
         public JsonResult ListarEstudiantesJson(int? idVacante = null)
         {
@@ -1697,14 +1832,14 @@ namespace SIGEP.Controllers
             int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
             int idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
 
-            List<EstudianteListadoVM> rows;
+            // 🔹 Inicializar variable para evitar error de compilación
+            List<EstudianteListadoVM> rows = new List<EstudianteListadoVM>();
 
             // ============================================================
-            // COORDINADOR Ver TODOS los estudiantes activos
+            // COORDINADOR: Ver TODOS los estudiantes activos
             // ============================================================
             if (idRol == 2)
             {
-                // 🔹 Obtener estudiantes activos
                 var estudiantes = (
                     from u in db.UsuariosTB
                     join r in db.RolesTB on u.IdRol equals r.IdRol
@@ -1715,9 +1850,11 @@ namespace SIGEP.Controllers
                         u.Cedula,
                         NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2
                     }
-                ).ToList();
+                ).ToList()
+                 .GroupBy(u => u.IdUsuario)
+                 .Select(g => g.First())
+                 .ToList();
 
-                // 🔹 Concatenar especialidades activas
                 var especialidadesPorUsuario = db.UsuarioEspecialidadTB
                     .Where(x => x.IdEstado == 1)
                     .Join(db.EspecialidadesTB, ue => ue.IdEspecialidad, esp => esp.IdEspecialidad,
@@ -1728,12 +1865,10 @@ namespace SIGEP.Controllers
                         g => string.Join(", ", g.Select(x => x.Nombre).Distinct())
                     );
 
-                // 🔹 Armar lista única de estudiantes
                 rows = estudiantes.Select(u =>
                 {
                     int? idPracticaActiva;
                     string estadoVacante;
-
                     var bucket = ClasificarEstadoPostulacion(u.IdUsuario, out idPracticaActiva, out estadoVacante);
 
                     string tipo = idPracticaActiva.HasValue
@@ -1764,62 +1899,58 @@ namespace SIGEP.Controllers
                         IdVacanteUltima = UltimaVacanteId(u.IdUsuario),
                         TieneRelacionEnVacante = idPracticaActiva.HasValue
                     };
-                }).GroupBy(x => x.IdUsuario)
-                  .Select(g => g.First())
-                  .OrderBy(x => x.Nombre)
-                  .ToList();
+                })
+                .OrderBy(x => x.Nombre)
+                .ToList();
+
+
             }
             // ============================================================
-            // PROFESOR  Usa SP con especialidades asignadas
+            // PROFESOR: Usa SP con especialidades asignadas
             // ============================================================
-            else
+            else if (idRol == 3)
             {
-                var lista = db.ObtenerEstudiantesProfesorSP(idUsuario, idVacante).ToList();
-
-                rows = lista.Select(x =>
-                {
-                    var tipoVacante = db.PracticaEstudianteTB
-                        .Include("VacantesPracticasTB")
-                        .Where(p => p.IdPractica == x.IdPracticaVacante)
-                        .Select(p => p.VacantesPracticasTB.Tipo)
-                        .FirstOrDefault() ?? "—";
-
-                    return new EstudianteListadoVM
+                var lista = db.ObtenerEstudiantesProfesorSP(idUsuario, idVacante)
+                    .AsEnumerable()
+                    .GroupBy(x => x.IdUsuario)
+                    .Select(g =>
                     {
-                        IdUsuario = x.IdUsuario,
-                        Cedula = x.Cedula,
-                        Nombre = x.Nombre,
-                        Especialidad = x.Especialidad,
-                        Telefono = db.TelefonosTB
-                            .Where(t => t.IdUsuario == x.IdUsuario)
-                            .Select(t => t.Telefono)
-                            .FirstOrDefault(),
-                        EstadoPostulacion = x.EstadoPractica,
-                        Empresa = UltimaEmpresa(x.IdUsuario),
-                        TieneRelacionEnVacante = (x.TieneRelacionEnVacante ?? false) || (x.IdPracticaVacante != null),
-                        Tipo = tipoVacante,
-                        IdPracticaVacante = x.IdPracticaVacante,
-                        EstadoVacante = x.EstadoVacante,
-                        IdVacanteUltima = UltimaVacanteId(x.IdUsuario)
-                    };
-                }).ToList();
+                        var primero = g.OrderByDescending(x => x.IdPracticaVacante).First();
+                        var tipoVacante = db.PracticaEstudianteTB
+                            .Include("VacantesPracticasTB")
+                            .Where(p => p.IdPractica == primero.IdPracticaVacante)
+                            .Select(p => p.VacantesPracticasTB.Tipo)
+                            .FirstOrDefault() ?? "—";
+
+                        return new EstudianteListadoVM
+                        {
+                            IdUsuario = primero.IdUsuario,
+                            Cedula = primero.Cedula,
+                            Nombre = primero.Nombre,
+                            Especialidad = string.Join(", ", g.Select(x => x.Especialidad).Distinct()),
+                            Telefono = db.TelefonosTB
+                                .Where(t => t.IdUsuario == primero.IdUsuario)
+                                .Select(t => t.Telefono)
+                                .FirstOrDefault(),
+                            EstadoPostulacion = primero.EstadoPractica,
+                            Empresa = UltimaEmpresa(primero.IdUsuario),
+                            TieneRelacionEnVacante = g.Any(x => x.TieneRelacionEnVacante == true || x.IdPracticaVacante != null),
+                            Tipo = tipoVacante,
+                            IdPracticaVacante = primero.IdPracticaVacante,
+                            EstadoVacante = primero.EstadoVacante,
+                            IdVacanteUltima = UltimaVacanteId(primero.IdUsuario)
+                        };
+                    })
+                    .OrderBy(x => x.Nombre)
+                    .ToList();
+
+               rows = lista
+    .GroupBy(x => new { x.Cedula, x.Nombre }) // agrupa por nombre y cédula
+    .Select(g => g.First()) // se queda con la fila más reciente
+    .ToList();
             }
 
-            rows = rows
-     .GroupBy(r => r.IdUsuario)
-     .Select(g =>
-     {
-         var primero = g.First();
-         primero.Especialidad = string.Join(", ",
-             g.Select(x => x.Especialidad)
-              .Where(e => !string.IsNullOrEmpty(e))
-              .Distinct());
-         return primero;
-     })
-     .OrderBy(r => r.Nombre)
-     .ToList();
-
-
+            // ✅ Ya no se reagrupa otra vez (evita duplicados artificiales)
             return Json(new { data = rows }, JsonRequestBehavior.AllowGet);
         }
 
