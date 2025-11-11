@@ -156,8 +156,6 @@ function cargarPerfilEstudiante(idUsuario) {
 
 // Función para llenar el modal de perfil
 function llenarModalPerfil(perfil) {
-    console.log('Datos recibidos:', perfil);
-
     // Información Personal
     var inputs = $('#modalPerfil .modal-body input[readonly]');
 
@@ -177,10 +175,13 @@ function llenarModalPerfil(perfil) {
     $(inputs[6]).val(perfil.Edad ? perfil.Edad + ' años' : '');
     $(inputs[7]).val(perfil.Seccion || '');
 
-    // Información de la práctica - Solo enlace
     var practicaContainer = $('#infoPracticaContainer').empty();
 
     if (perfil.NombreEmpresa && perfil.IdVacante && perfil.IdUsuario) {
+        var estadoActual = perfil.EstadoPractica || 'En Curso';
+        var estadoNormalizado = normalizarEstado(estadoActual);
+        var claseBadge = obtenerClaseBadge(estadoNormalizado);
+
         var urlVisualizacion = '/Practicas/VisualizacionPostulacion?idVacante=' + perfil.IdVacante + '&idUsuario=' + perfil.IdUsuario;
 
         practicaContainer.html(`
@@ -189,7 +190,7 @@ function llenarModalPerfil(perfil) {
                    class="d-flex justify-content-between align-items-center p-3 text-decoration-none"
                    style="background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #2D594D; color: #2D594D;">
                     <span style="font-weight: 600;">${perfil.NombreEmpresa}</span>
-                    <span class="badge badge-en-curso">En Curso</span>
+                    <span class="badge ${claseBadge}">${estadoActual}</span>
                 </a>
             </div>
         `);
@@ -483,35 +484,20 @@ $(document).on('input', '#inputNota1, #inputNota2', function () {
 // Función para guardar nota
 function guardarNota() {
     var idUsuario = $('#btnGuardarNota').data('idusuario');
-    var nota1Input = $('#inputNota1').val();
-    var nota2Input = $('#inputNota2').val();
+    var nota1 = parseFloat($('#inputNota1').val());
+    var nota2 = parseFloat($('#inputNota2').val());
 
-    // Validar que al menos una nota esté ingresada
-    if (nota1Input === '' && nota2Input === '') {
-        Swal.fire('Advertencia', 'Debe ingresar al menos una nota', 'warning');
-        return;
-    }
-
-    // Convertir a valores numéricos o null
-    var nota1 = nota1Input !== '' ? parseFloat(nota1Input) : null;
-    var nota2 = nota2Input !== '' ? parseFloat(nota2Input) : null;
-
-    // Validar rangos solo si la nota fue ingresada
-    if (nota1 !== null && (nota1 < 0 || nota1 > 100)) {
+    if (isNaN(nota1) || nota1 < 0 || nota1 > 100) {
         Swal.fire('Advertencia', 'La Nota 1 debe estar entre 0 y 100', 'warning');
         return;
     }
 
-    if (nota2 !== null && (nota2 < 0 || nota2 > 100)) {
+    if (isNaN(nota2) || nota2 < 0 || nota2 > 100) {
         Swal.fire('Advertencia', 'La Nota 2 debe estar entre 0 y 100', 'warning');
         return;
     }
 
-    // Calcular nota final solo si ambas notas existen
-    var notaFinal = null;
-    if (nota1 !== null && nota2 !== null) {
-        notaFinal = (nota1 + nota2) / 2;
-    }
+    var notaFinal = (nota1 + nota2) / 2;
 
     $.ajax({
         url: '/Evaluacion/GuardarNota',
@@ -533,7 +519,14 @@ function guardarNota() {
                 });
 
                 $('#modalNota').modal('hide');
-                $('#miTabla').DataTable().ajax.reload();
+
+                // Recargar el DataTable
+                $('#miTabla').DataTable().ajax.reload(null, false);
+
+                // Si el modal de perfil está abierto Y hay un estado nuevo, actualizar el badge
+                if ($('#modalPerfil').hasClass('show') && response.estadoPractica) {
+                    actualizarBadgeEstado(response.estadoPractica);
+                }
             } else {
                 Swal.fire('Error', response.message, 'error');
             }
@@ -542,6 +535,44 @@ function guardarNota() {
             Swal.fire('Error', 'No se pudo guardar la nota', 'error');
         }
     });
+}
+
+// Nueva función para actualizar el badge en el modal de perfil
+function actualizarBadgeEstado(nuevoEstado) {
+    var estadoNormalizado = normalizarEstado(nuevoEstado);
+    var claseBadge = obtenerClaseBadge(estadoNormalizado);
+
+    // Buscar y actualizar el badge en el modal de perfil
+    $('#infoPracticaContainer .badge').removeClass().addClass('badge ' + claseBadge).text(nuevoEstado);
+}
+
+// Función auxiliar para normalizar el estado
+function normalizarEstado(estado) {
+    return estado.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+}
+
+// Función auxiliar para obtener la clase del badge
+function obtenerClaseBadge(estadoNormalizado) {
+    const clases = {
+        'en proceso de aplicacion': 'badge-en-progreso',
+        'rechazada': 'badge-rechazada',
+        'asignada': 'badge-asignada',
+        'aprobada': 'badge-aprobada',
+        'aprobado': 'badge-aprobada',
+        'retirada': 'badge-retirada',
+        'finalizada': 'badge-finalizada',
+        'rezagado': 'badge-rezagado',
+        'rezagada': 'badge-rezagado',
+        'archivado': 'badge-archivado',
+        'en curso': 'badge-en-curso',
+        'en progreso': 'badge-en-progreso',
+        'pendiente de aprobacion': 'badge-pendiente'
+    };
+
+    return clases[estadoNormalizado] || 'badge-secondary';
 }
 
 // Función para abrir modal de nota

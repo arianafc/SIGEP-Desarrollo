@@ -91,7 +91,8 @@ namespace SIGEP.Controllers
                             Seccion = perfil.Seccion,
                             NombreEmpresa = perfil.NombreEmpresa,
                             TelefonoEmpresa = perfil.TelefonoEmpresa,
-                            IdVacante = perfil.IdVacante,      
+                            IdVacante = perfil.IdVacante,    
+                            EstadoPractica = perfil.EstadoPractica,
                             IdUsuario = perfil.IdUsuario,      
                             Comentarios = comentarios
                         }
@@ -170,13 +171,11 @@ namespace SIGEP.Controllers
 
                 int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
 
-                // Validar que al menos una nota esté ingresada
                 if (nota1 == null && nota2 == null)
                 {
                     return Json(new { success = false, message = "Debe ingresar al menos una nota" });
                 }
 
-                // Validaciones de rango
                 if (nota1 != null && (nota1 < 0 || nota1 > 100))
                 {
                     return Json(new { success = false, message = "La Nota 1 debe estar entre 0 y 100" });
@@ -189,7 +188,6 @@ namespace SIGEP.Controllers
 
                 using (var dbContext = new SIGEPEntities())
                 {
-                    // Verificar si ya existe un registro de notas
                     var notaExistente = dbContext.NotasEstudiantesTB.FirstOrDefault(n => n.IdUsuario == idUsuario);
 
                     decimal? notaFinalCalculada = null;
@@ -233,86 +231,71 @@ namespace SIGEP.Controllers
 
                     dbContext.SaveChanges();
 
-                    // ===== CAMBIO AUTOMÁTICO DE ESTADO =====
+                    // Cambio automático de estado
                     string mensajeEstado = "";
+                    string estadoActual = null;
 
                     if (notaFinalCalculada.HasValue)
                     {
-                        // Obtener el año actual
                         int anioActual = DateTime.Now.Year;
+                        var estadosPermitidos = new[] { "En Curso", "Rezagado", "Aprobada" };
 
-                        // Buscar práctica del año actual en estados que permiten cambio de nota
-                        var estadosPermitidos = new[] { "En Curso", "Rezagada", "Aprobada" };
-
-                        var practicaActual = dbContext.PracticaEstudianteTB
-                            .Where(p => p.IdUsuario == idUsuario)
-                            .Join(dbContext.EstadosTB,
-                                  p => p.IdEstado,
-                                  e => e.IdEstado,
-                                  (p, e) => new { Practica = p, Estado = e })
-                            .Where(x => estadosPermitidos.Contains(x.Estado.Descripcion))
-                            .Where(x => x.Practica.FechaAplicacion.Year == anioActual)
-                            .OrderByDescending(x => x.Practica.FechaAplicacion)
-                            .FirstOrDefault();
+                        var practicaActual = (from p in dbContext.PracticaEstudianteTB
+                                              join e in dbContext.EstadosTB on p.IdEstado equals e.IdEstado
+                                              where p.IdUsuario == idUsuario
+                                                 && estadosPermitidos.Contains(e.Descripcion)
+                                                 && p.FechaAplicacion.Year == anioActual
+                                              orderby p.FechaAplicacion descending
+                                              select new { Practica = p, Estado = e })
+                                             .FirstOrDefault();
 
                         if (practicaActual != null)
                         {
-                            int nuevoIdEstado;
                             string nuevoEstado;
+                            int nuevoIdEstado;
 
                             if (notaFinalCalculada >= 70)
                             {
-                                var estadoAprobada = dbContext.EstadosTB
-                                    .FirstOrDefault(e => e.Descripcion == "Aprobada");
-
-                                if (estadoAprobada != null)
+                                nuevoEstado = "Aprobada";
+                                var estado = dbContext.EstadosTB.FirstOrDefault(e => e.Descripcion == nuevoEstado);
+                                if (estado == null)
                                 {
-                                    nuevoIdEstado = estadoAprobada.IdEstado;
-                                    nuevoEstado = "Aprobada";
+                                    return Json(new { success = true, message = $"Nota guardada pero no se encontró el estado '{nuevoEstado}'" });
                                 }
-                                else
-                                {
-                                    return Json(new { success = true, message = "Nota guardada pero no se pudo actualizar el estado" });
-                                }
+                                nuevoIdEstado = estado.IdEstado;
                             }
                             else
                             {
-                                var estadoRezagada = dbContext.EstadosTB
-                                    .FirstOrDefault(e => e.Descripcion == "Rezagada");
-
-                                if (estadoRezagada != null)
+                                nuevoEstado = "Rezagado";
+                                var estado = dbContext.EstadosTB.FirstOrDefault(e => e.Descripcion == nuevoEstado);
+                                if (estado == null)
                                 {
-                                    nuevoIdEstado = estadoRezagada.IdEstado;
-                                    nuevoEstado = "Rezagada";
+                                    return Json(new { success = true, message = $"Nota guardada pero no se encontró el estado '{nuevoEstado}'" });
                                 }
-                                else
-                                {
-                                    return Json(new { success = true, message = "Nota guardada pero no se pudo actualizar el estado" });
-                                }
+                                nuevoIdEstado = estado.IdEstado;
                             }
 
-                            // Solo actualizar si el estado cambió
                             if (practicaActual.Practica.IdEstado != nuevoIdEstado)
                             {
                                 practicaActual.Practica.IdEstado = nuevoIdEstado;
 
                                 var comentarioAuto = new ComentariosPracticaTB
                                 {
-                                    Comentario = $"Estado actualizado automáticamente a '{nuevoEstado}' por calificación final de {notaFinalCalculada.Value:F2}",
+                                    Comentario = $"Estado actualizado automáticamente a '{nuevoEstado}' por modificación de calificación final a {notaFinalCalculada.Value:F2}",
                                     Fecha = DateTime.Now,
                                     IdUsuario = idProfesor,
                                     IdPractica = practicaActual.Practica.IdPractica,
                                     Tipo = "Sistema"
                                 };
                                 dbContext.ComentariosPracticaTB.Add(comentarioAuto);
-
                                 dbContext.SaveChanges();
 
                                 mensajeEstado = $" Estado de la práctica actualizado a '{nuevoEstado}'.";
+                                estadoActual = nuevoEstado;
                             }
                             else
                             {
-                                mensajeEstado = $" (El estado ya era '{nuevoEstado}')";
+                                estadoActual = nuevoEstado;
                             }
                         }
                     }
@@ -331,12 +314,17 @@ namespace SIGEP.Controllers
                         mensaje = "Nota 2 registrada correctamente. Ingrese Nota 1 para calcular la nota final.";
                     }
 
-                    return Json(new { success = true, message = mensaje });
+                    return Json(new
+                    {
+                        success = true,
+                        message = mensaje,
+                        estadoPractica = estadoActual,
+                        notaFinal = notaFinalCalculada
+                    });
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en GuardarNota: {ex.Message}");
                 return Json(new { success = false, message = "Error al guardar la nota: " + ex.Message });
             }
         }

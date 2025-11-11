@@ -49,7 +49,7 @@ namespace SIGEP.Controllers
             {
                 using (var db = new SIGEPEntities())
                 {
-                    
+
                     var vacantesQuery = db.VacantesPracticasTB
                         .AsNoTracking()
                         .Select(v => new
@@ -66,7 +66,7 @@ namespace SIGEP.Controllers
                             v.Descripcion
                         });
 
-                   
+
                     if (idEstado > 0)
                         vacantesQuery = vacantesQuery.Where(v => v.IdEstado == idEstado);
                     if (idModalidad > 0)
@@ -74,7 +74,7 @@ namespace SIGEP.Controllers
 
                     var vacantes = vacantesQuery.ToList();
 
-                   
+
                     if (idEspecialidad > 0)
                     {
                         var idsFiltrados = db.EspecialidadesVacantesTB
@@ -86,12 +86,12 @@ namespace SIGEP.Controllers
                         vacantes = vacantes.Where(v => idsFiltrados.Contains(v.IdVacante)).ToList();
                     }
 
-                  
+
                     var empresas = db.EmpresasTB.ToDictionary(x => x.IdEmpresa, x => x.NombreEmpresa);
                     var modalidades = db.ModalidadesTB.ToDictionary(x => x.IdModalidad, x => x.Descripcion);
                     var estados = db.EstadosTB.ToDictionary(x => x.IdEstado, x => x.Descripcion);
 
-               
+
                     var especialidadesPorVacante = db.EspecialidadesVacantesTB
                         .Join(db.EspecialidadesTB,
                               ev => ev.IdEspecialidad,
@@ -103,12 +103,12 @@ namespace SIGEP.Controllers
                             g => string.Join(", ", g.Select(x => x.Nombre).Distinct())
                         );
 
-                 
+
                     var postuladosPorVacante = db.PracticaEstudianteTB
                         .GroupBy(p => p.IdVacante)
                         .ToDictionary(g => g.Key, g => g.Select(p => p.IdUsuario).Distinct().Count());
 
-             
+
                     var result = vacantes
                         .GroupBy(v => v.IdVacante)
                         .Select(g => g.First())
@@ -550,8 +550,8 @@ namespace SIGEP.Controllers
             public bool EstadoAcademico { get; set; }
             public string EstadoPractica { get; set; }
             public bool TienePracticaActiva { get; set; }
-            public string EstadoVacante { get; set; } 
-            public bool TieneRelacionEnVacante { get; set; } 
+            public string EstadoVacante { get; set; }
+            public bool TieneRelacionEnVacante { get; set; }
         }
 
         [HttpGet]
@@ -561,7 +561,7 @@ namespace SIGEP.Controllers
             {
                 try
                 {
-                   
+
                     if (Session["IdUsuario"] == null)
                         return Json(new { ok = false, message = "Sesión expirada." }, JsonRequestBehavior.AllowGet);
 
@@ -929,7 +929,7 @@ namespace SIGEP.Controllers
 
                     string estadoActual = practica.EstadosTB?.Descripcion?.Trim().ToLower() ?? "";
 
-                    
+
                     if (estadoActual != "en proceso de aplicacion" && estadoActual != "asignada")
                     {
                         return Json(new
@@ -939,17 +939,17 @@ namespace SIGEP.Controllers
                         }, JsonRequestBehavior.AllowGet);
                     }
 
-                
+
                     var estadoRetirada = db.EstadosTB.FirstOrDefault(e => e.Descripcion.Trim().ToLower() == "retirada");
                     if (estadoRetirada == null)
                         return Json(new { ok = false, mensaje = "No existe el estado 'Retirada' en la BD." }, JsonRequestBehavior.AllowGet);
 
-             
+
                     practica.IdEstado = estadoRetirada.IdEstado;
                     practica.FechaAplicacion = DateTime.Now;
                     db.SaveChanges();
 
-                  
+
                     if (Session["IdUsuario"] != null)
                     {
                         int idUsuarioSesion = Convert.ToInt32(Session["IdUsuario"]);
@@ -1083,7 +1083,7 @@ namespace SIGEP.Controllers
         {
             using (var db = new SIGEPEntities())
             {
-                
+
                 var ubicacion = (from e in db.EmpresasTB
                                  join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
                                  from d in jd.DefaultIfEmpty()
@@ -1469,7 +1469,7 @@ namespace SIGEP.Controllers
             ViewBag.Modalidades = ObtenerModalidades();
             ViewBag.Estados = ObtenerEstados();
 
-            return View(); 
+            return View();
         }
 
         [HttpGet]
@@ -1944,10 +1944,10 @@ namespace SIGEP.Controllers
                     .OrderBy(x => x.Nombre)
                     .ToList();
 
-               rows = lista
-    .GroupBy(x => new { x.Cedula, x.Nombre }) // agrupa por nombre y cédula
-    .Select(g => g.First()) // se queda con la fila más reciente
-    .ToList();
+                rows = lista
+     .GroupBy(x => new { x.Cedula, x.Nombre }) // agrupa por nombre y cédula
+     .Select(g => g.First()) // se queda con la fila más reciente
+     .ToList();
             }
 
             // ✅ Ya no se reagrupa otra vez (evita duplicados artificiales)
@@ -1961,7 +1961,7 @@ namespace SIGEP.Controllers
             "En Curso",
             "Asignada",
             "Pendiente de Aprobación", "Pendiente de Aprobacion",
-            "Aprobada" 
+            "Aprobada"
         };
 
         private string ClasificarEstadoPostulacion(int idUsuario, out int? idPracticaActiva, out string estadoVacante)
@@ -1969,7 +1969,7 @@ namespace SIGEP.Controllers
             idPracticaActiva = null;
             estadoVacante = null;
 
-           
+
             var practicas = db.PracticaEstudianteTB
                 .Include("EstadosTB")
                 .Where(p => p.IdUsuario == idUsuario)
@@ -1977,17 +1977,17 @@ namespace SIGEP.Controllers
                 .ThenByDescending(p => p.IdPractica)
                 .ToList();
 
-           
+
             if (!practicas.Any())
                 return "Sin proceso activo";
 
-            
+
             var ultima = practicas.First();
             var desc = (ultima.EstadosTB?.Descripcion ?? "").Trim();
             estadoVacante = desc;
             idPracticaActiva = ultima.IdPractica;
 
-           
+
             if (string.IsNullOrEmpty(desc))
                 return "Sin proceso activo";
 
@@ -2256,7 +2256,7 @@ namespace SIGEP.Controllers
         {
             try
             {
-                int idEstado = EstadoIdPorDescripcion(new[] { nuevoEstado }); 
+                int idEstado = EstadoIdPorDescripcion(new[] { nuevoEstado });
                 var u = db.UsuariosTB.Find(idUsuario);
                 if (u == null) return Json(new { ok = false, msg = "Usuario no encontrado." });
 
@@ -2374,11 +2374,11 @@ namespace SIGEP.Controllers
                         return Json(new { success = false, message = "La modalidad seleccionada no es válida" });
                     }
 
-                    
+
                     var estadoActivo = dbContext.EstadosTB.FirstOrDefault(e => e.IdEstado == 1);
                     if (estadoActivo == null)
                     {
-                       
+
                         var nuevoEstado = new EstadosTB { Descripcion = "Activo" };
                         dbContext.EstadosTB.Add(nuevoEstado);
                         dbContext.SaveChanges();
@@ -2393,7 +2393,7 @@ namespace SIGEP.Controllers
                         dbContext.SaveChanges();
                     }
 
-                  
+
                     var canton = dbContext.CantonesTB.FirstOrDefault(c => c.Nombre == model.Canton && c.IdProvincia == provincia.IdProvincia);
                     if (canton == null)
                     {
@@ -2410,7 +2410,7 @@ namespace SIGEP.Controllers
                         dbContext.SaveChanges();
                     }
 
-                  
+
                     var direccion = new DireccionesTB
                     {
                         DireccionExacta = model.DireccionExacta.Trim(),
@@ -2421,7 +2421,7 @@ namespace SIGEP.Controllers
                     dbContext.DireccionesTB.Add(direccion);
                     dbContext.SaveChanges();
 
-                   
+
                     var empresa = new EmpresasTB
                     {
                         NombreEmpresa = model.NombreEmpresa.Trim(),
@@ -2458,7 +2458,7 @@ namespace SIGEP.Controllers
                     dbContext.VacantesPracticasTB.Add(vacante);
                     dbContext.SaveChanges();
 
-                    
+
                     var especialidadVacante = new EspecialidadesVacantesTB
                     {
                         IdEspecialidad = especialidadEstudiante,
@@ -2467,7 +2467,7 @@ namespace SIGEP.Controllers
                     dbContext.EspecialidadesVacantesTB.Add(especialidadVacante);
                     dbContext.SaveChanges();
 
-                   
+
                     var practica = new PracticaEstudianteTB
                     {
                         IdVacante = vacante.IdVacante,
@@ -2478,7 +2478,7 @@ namespace SIGEP.Controllers
 
                     dbContext.PracticaEstudianteTB.Add(practica);
 
-                   
+
                     var email = new EmailsTB
                     {
                         IdEmpresa = empresa.IdEmpresa,
@@ -2504,7 +2504,7 @@ namespace SIGEP.Controllers
             }
             catch (Exception ex)
             {
-             
+
                 System.Diagnostics.Debug.WriteLine($"Error en RegistrarAutogestion: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"StackTrace: {ex.StackTrace}");
 
