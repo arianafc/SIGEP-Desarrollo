@@ -247,7 +247,7 @@ BEGIN
             ELSE CAST(0 AS BIT)
         END as EsAutogestionada,
         CASE 
-            WHEN est.Descripcion IN ('En Curso', 'Aprobada', 'Finalizada', 'Rezagada') THEN CAST(1 AS BIT)
+            WHEN est.Descripcion IN ('En Curso', 'Aprobada', 'Finalizada', 'Rezagado') THEN CAST(1 AS BIT)
             ELSE CAST(0 AS BIT)
         END as MostrarNotas,
         n.Nota1,
@@ -391,7 +391,7 @@ BEGIN
             AND u.IdEstado = 1 -- Activos
             AND u.EstadoAcademico = 1 -- Solo aprobados académicamente
             AND YEAR(p.FechaAplicacion) = @AnioActual -- Solo del año actual
-            AND est.Descripcion IN ('En Curso', 'Rezagada', 'Aprobada', 'Finalizada') -- Estados permitidos
+            AND est.Descripcion IN ('En Curso', 'Rezagado', 'Aprobada', 'Finalizada') -- Estados permitidos
         ORDER BY u.Nombre, u.Apellido1;
     END
     ELSE -- Es profesor (rol 3)
@@ -423,7 +423,7 @@ BEGIN
             AND u.IdEstado = 1
             AND u.EstadoAcademico = 1
             AND YEAR(p.FechaAplicacion) = @AnioActual -- Solo del año actual
-            AND est.Descripcion IN ('En Curso', 'Rezagada', 'Aprobada', 'Finalizada') -- Estados permitidos
+            AND est.Descripcion IN ('En Curso', 'Rezagado', 'Aprobada', 'Finalizada') -- Estados permitidos
             AND EXISTS (
                 SELECT 1 
                 FROM UsuarioEspecialidadTB ue_prof
@@ -442,7 +442,6 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Obtener el año actual
     DECLARE @AnioActual INT = YEAR(GETDATE());
     
     SELECT 
@@ -457,7 +456,8 @@ BEGIN
         emp.NombreEmpresa,
         temp.Telefono AS TelefonoEmpresa,
         pr.IdVacante,
-        pr.IdUsuario
+        pr.IdUsuario,
+        est.Descripcion AS EstadoPractica 
     FROM UsuariosTB u
     LEFT JOIN EmailsTB em ON u.IdUsuario = em.IdUsuario
     LEFT JOIN TelefonosTB t ON u.IdUsuario = t.IdUsuario
@@ -468,27 +468,28 @@ BEGIN
     LEFT JOIN UsuarioEspecialidadTB ue ON u.IdUsuario = ue.IdUsuario AND ue.IdEstado = 1
     LEFT JOIN EspecialidadesTB e ON ue.IdEspecialidad = e.IdEspecialidad
     LEFT JOIN SeccionesTB s ON u.IdSeccion = s.IdSeccion
-    -- Buscar práctica del año actual en estados válidos
     LEFT JOIN (
         SELECT TOP 1 
             pt.IdUsuario,
             pt.IdVacante,
             pt.IdPractica,
-            pt.FechaAplicacion
+            pt.FechaAplicacion,
+            pt.IdEstado 
         FROM PracticaEstudianteTB pt
         INNER JOIN EstadosTB est ON pt.IdEstado = est.IdEstado
         WHERE pt.IdUsuario = @IdUsuario
             AND YEAR(pt.FechaAplicacion) = @AnioActual
-            AND est.Descripcion IN ('En Curso', 'Rezagada', 'Aprobada', 'Finalizada')
+            AND est.Descripcion IN ('En Curso', 'Rezagado', 'Aprobada', 'Finalizada')
         ORDER BY 
             CASE est.Descripcion
                 WHEN 'En Curso' THEN 1
-                WHEN 'Rezagada' THEN 2
+                WHEN 'Rezagado' THEN 2
                 WHEN 'Aprobada' THEN 3
                 WHEN 'Finalizada' THEN 4
             END,
             pt.FechaAplicacion DESC
     ) pr ON u.IdUsuario = pr.IdUsuario
+    LEFT JOIN EstadosTB est ON pr.IdEstado = est.IdEstado
     LEFT JOIN VacantesPracticasTB v ON pr.IdVacante = v.IdVacante
     LEFT JOIN EmpresasTB emp ON v.IdEmpresa = emp.IdEmpresa
     LEFT JOIN TelefonosTB temp ON emp.IdEmpresa = temp.IdEmpresa
