@@ -92,7 +92,7 @@ namespace SIGEP.Controllers
                             NombreEmpresa = perfil.NombreEmpresa,
                             TelefonoEmpresa = perfil.TelefonoEmpresa,
                             IdVacante = perfil.IdVacante,    
-                            EstadoPractica = perfil.EstadoPractica,
+                            //EstadoPractica = perfil.EstadoPractica,
                             IdUsuario = perfil.IdUsuario,      
                             Comentarios = comentarios
                         }

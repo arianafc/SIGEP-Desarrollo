@@ -355,6 +355,89 @@
             });
         });
 
+       
+        // =====================================================
+        // Mantener el modal abierto al navegar con “Atrás”
+        // =====================================================
+        let navegandoInternamente = false;
+        const modalEl = document.getElementById("modalPerfil");
+        const modalPerfil = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+        window.addEventListener("popstate", function (event) {
+            const hash = window.location.hash || "";
+            const esPerfil = hash.startsWith("#perfil-");
+
+            if (navegandoInternamente) {
+                navegandoInternamente = false;
+
+                event.stopImmediatePropagation();
+                if (!modalEl.classList.contains("show")) {
+                    modalPerfil.show();
+                }
+                return;
+            }
+
+            if (esPerfil) {
+                const idUsuario = hash.replace("#perfil-", "");
+                $.ajax({
+                    url: CFG.urls.detalle,
+                    type: "GET",
+                    data: { id: idUsuario },
+                    success: function (html) {
+                        $("#perfilBody").html(html);
+                        if (!modalEl.classList.contains("show")) {
+                            modalPerfil.show();
+                        }
+                    },
+                    error: function () {
+                        $("#perfilBody").html('<div class="alert alert-danger">Error al recargar el perfil.</div>');
+                        if (!modalEl.classList.contains("show")) {
+                            modalPerfil.show();
+                        }
+                    }
+                });
+            } else {
+              
+                if (modalEl.classList.contains("show")) {
+                    history.pushState({ modalAbierto: true }, "", "#perfil-abierto");
+                    event.stopImmediatePropagation();
+                    modalPerfil.show();
+                }
+            }
+        });
+
+        
+        $(document).on("click", ".verPerfil", function () {
+            const id = $(this).data("id");
+            history.pushState({ vista: "perfil", id }, "", "#perfil-" + id);
+        });
+
+      
+        $(document).on("click", "#perfilBody a", function (e) {
+            const href = $(this).attr("href") || "";
+            if (href.toLowerCase().includes("postulaciones")) {
+                navegandoInternamente = true;
+
+            
+                modalEl.setAttribute("data-no-cerrar", "1");
+                setTimeout(() => modalEl.removeAttribute("data-no-cerrar"), 1500);
+            }
+        });
+
+      
+        modalEl.addEventListener("hide.bs.modal", function (e) {
+            if (modalEl.hasAttribute("data-no-cerrar")) {
+                e.preventDefault();
+            } else {
+                
+                if (!navegandoInternamente && window.location.hash.startsWith("#perfil-")) {
+                    history.replaceState(null, "", window.location.pathname);
+                }
+            }
+        });
+
+        
+
 
     });
 })(jQuery);

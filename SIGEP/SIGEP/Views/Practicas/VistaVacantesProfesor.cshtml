@@ -10,7 +10,7 @@
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-filter"></i>
+                <i class="fas fa-filter"></i> Filtros
             </button>
             <div class="dropdown-menu p-3" style="min-width: 300px;">
                 <div class="mb-2">
@@ -39,7 +39,6 @@
                         }
                     </select>
                 </div>
-               
             </div>
         </div>
     </div>
@@ -47,7 +46,7 @@
     <div class="vacantes-lista"></div>
 </section>
 
-<!-- MODAL VISUALIZAR -->
+<!-- MODAL VISUALIZAR VACANTE -->
 <div class="modal fade" id="modalVisualizar" tabindex="-1" aria-labelledby="modalVisualizarLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
@@ -59,10 +58,10 @@
 
             <div class="modal-body px-4">
                 <section class="vacante-detalle bg-transparent">
-                    <h2 id="vis-Nombre" class="vacante-titulo"></h2>
+                    <h2 id="vis-Nombre" class="vacante-titulo mb-3"></h2>
                     <p class="vacante-empresa"><strong>Empresa:</strong> <span id="vis-Empresa"></span></p>
 
-                    <div class="vacante-info">
+                    <div class="vacante-info mb-4">
                         <p><strong>Descripción:</strong> <span id="vis-Descripcion"></span></p>
                         <p><strong>Requisitos:</strong> <span id="vis-Requisitos"></span></p>
                         <p><strong>Modalidad:</strong> <span id="vis-Modalidad"></span></p>
@@ -71,22 +70,33 @@
                     </div>
 
                     <hr />
-                    <h5 class="section-title">Información de Contacto</h5>
-                    <p><strong>Nombre:</strong> <span id="vis-NombreContacto"></span></p>
-                    <p><strong>Teléfonos:</strong> <span id="vis-Telefonos"></span></p>
-                    <p><strong>Email(s):</strong> <span id="vis-Emails"></span></p>
+                    <h5 class="section-title mb-3">Información de Contacto</h5>
+                    <div class="mb-3">
+                        <p><strong>Nombre:</strong> <span id="vis-NombreContacto"></span></p>
+                        <p><strong>Teléfonos:</strong> <span id="vis-Telefonos"></span></p>
+                        <p><strong>Email(s):</strong> <span id="vis-Emails"></span></p>
+                    </div>
 
                     <hr />
-                    <div class="mb-4">
-                        <h5 class="section-title">Aplicaciones</h5>
+                    <!-- 🔹 SECCIÓN POSTULACIONES con formato igual que DetalleEstudiante -->
+                    <div class="mb-4 mt-4">
+                        <h5 class="section-title mb-3">Postulaciones / Asignaciones</h5>
 
-                        <ul class="list-group" id="listaPostulaciones"></ul>
+                        <ul class="list-group mb-3" id="listaPostulaciones" style="background-color:#fff; border:1px solid #ddd; border-radius:12px; padding:15px;">
+                            @* Se rellena dinámicamente desde JS *@
+                        </ul>
 
-                        <span id="mensajeSinAsignados" class="text-muted" style="display: none;">
-                            Ningún estudiante asignado aún
-                        </span>
+                        <p id="mensajeSinAsignados" class="text-muted text-center mt-3" style="display:none;">
+                            No hay estudiantes postulados o asignados aún.
+                        </p>
+                    
                     </div>
+
                 </section>
+            </div>
+
+            <div class="modal-footer px-4">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
@@ -118,26 +128,27 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-
             </div>
         </div>
     </div>
 </div>
-@section Scripts {
+
+@section scripts {
     <script>
-    window.VacantesProfesorCfg = {
-      urls: {
-        getVacantesProfesor: '@Url.Action("GetVacantesProfesor","Practicas")',
-        login: '@Url.Action("Login","Home")',
-        detalle: '@Url.Action("Detalle","Practicas")',
-        obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones","Practicas")',
-        obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar","Practicas")',
-        asignarEstudiante: '@Url.Action("AsignarEstudiante","Practicas")',
-        retirarEstudiante: '@Url.Action("RetirarEstudiante","Practicas")',
-            visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion","Practicas")',
-         agregarComentario: '/Practicas/AgregarComentario',
-      }
-    };
+        window.VacantesProfesorCfg = {
+            urls: {
+                getVacantesProfesor: '@Url.Action("GetVacantesProfesor","Practicas")',
+                login: '@Url.Action("Login","Home")',
+                detalle: '@Url.Action("Detalle","Practicas")',
+                obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones","Practicas")',
+                obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar","Practicas")',
+                asignarEstudiante: '@Url.Action("AsignarEstudiante","Practicas")',
+                retirarEstudiante: '@Url.Action("RetirarEstudiante","Practicas")',
+                visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion","Practicas")',
+                agregarComentario: '/Practicas/AgregarComentario'
+            }
+        };
     </script>
+
     <script src="~/Scripts/Practicas/VistaVacantesProfesor.js?v=@DateTime.Now.Ticks"></script>
 }

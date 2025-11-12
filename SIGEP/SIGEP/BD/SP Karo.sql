@@ -387,6 +387,130 @@ GO
 
 --SP actualizados 9-11-25
 
+--USE SIGEP;
+--GO
+
+--CREATE OR ALTER PROCEDURE [dbo].[ObtenerVacantesAsignarSP]
+--    @IdUsuario INT
+--AS
+--BEGIN
+--    SET NOCOUNT ON;
+
+--    -- 1️⃣ Especialidades activas del estudiante
+--    DECLARE @EspecialidadesEst TABLE (IdEspecialidad INT);
+--    INSERT INTO @EspecialidadesEst (IdEspecialidad)
+--    SELECT DISTINCT IdEspecialidad
+--    FROM UsuarioEspecialidadTB
+--    WHERE IdUsuario = @IdUsuario
+--      AND IdEstado = 1;
+
+--    -- 2️⃣ Estados que ocupan cupos reales
+--    DECLARE @EstadosOcupados TABLE (IdEstado INT);
+--    INSERT INTO @EstadosOcupados (IdEstado)
+--    SELECT IdEstado
+--    FROM EstadosTB
+--    WHERE LOWER(LTRIM(RTRIM(Descripcion))) IN (
+--        'asignada','en curso','aprobada','finalizada','rezagado'
+--    );
+
+--    -- 3️⃣ Consulta principal
+--    SELECT
+--        v.IdVacante,
+--        LTRIM(RTRIM(v.Nombre)) AS NombreVacante,
+--        emp.NombreEmpresa,
+--        (
+--            SELECT TOP 1 esp.Nombre
+--            FROM EspecialidadesVacantesTB ev
+--            INNER JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ev.IdEspecialidad
+--            WHERE ev.IdVacante = v.IdVacante
+--              AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
+--        ) AS Especialidad,
+--        v.NumCupos,
+
+--        -- Cupos ocupados (solo prácticas activas)
+--        (
+--            SELECT COUNT(*)
+--            FROM PracticaEstudianteTB p
+--            WHERE p.IdVacante = v.IdVacante
+--              AND p.IdEstado IN (SELECT IdEstado FROM @EstadosOcupados)
+--        ) AS CuposOcupados,
+
+--        v.FechaCierre,
+--        v.Requerimientos,
+--        v.Tipo,
+
+--        -- Estado del estudiante en ESTA vacante
+--        ISNULL((
+--            SELECT TOP 1 LTRIM(RTRIM(e2.Descripcion))
+--            FROM PracticaEstudianteTB p2
+--            INNER JOIN EstadosTB e2 ON e2.IdEstado = p2.IdEstado
+--            WHERE p2.IdUsuario = @IdUsuario
+--              AND p2.IdVacante = v.IdVacante
+--            ORDER BY p2.IdPractica DESC
+--        ), 'Sin proceso activo') AS EstadoPractica,
+
+--        -- ID de la práctica para esta vacante (necesario para botón eliminar)
+--        ISNULL((
+--            SELECT TOP 1 p3.IdPractica
+--            FROM PracticaEstudianteTB p3
+--            WHERE p3.IdUsuario = @IdUsuario
+--              AND p3.IdVacante = v.IdVacante
+--            ORDER BY p3.IdPractica DESC
+--        ), 0) AS IdPracticaVacante,
+
+--        -- Puede asignar: 1 = sí, 0 = no (ya tiene práctica activa)
+--        -- Puede asignar: 1 = sí, 0 = no
+--CASE 
+--    WHEN EXISTS (
+--        SELECT 1 
+--        FROM PracticaEstudianteTB p4
+--        INNER JOIN EstadosTB e4 ON e4.IdEstado = p4.IdEstado
+--        WHERE p4.IdUsuario = @IdUsuario
+--          AND p4.IdVacante <> v.IdVacante   -- 🔹 evita bloquearse con su misma vacante
+--          AND LOWER(LTRIM(RTRIM(e4.Descripcion))) IN (
+--              'en curso','asignada','aprobada','finalizada','rezagado'
+--          )
+--    ) THEN 0  -- ya tiene activa en otra → deshabilitado
+--    ELSE 1    -- puede asignar
+--END AS PuedeAsignar,
+
+
+--        -- Nombre completo
+--        (SELECT CONCAT(u.Nombre, ' ', u.Apellido1, ' ', u.Apellido2)
+--         FROM UsuariosTB u WHERE u.IdUsuario = @IdUsuario) AS NombreCompleto,
+
+--        -- Estado académico (bit → texto)
+--        CASE WHEN (SELECT EstadoAcademico FROM UsuariosTB WHERE IdUsuario = @IdUsuario) = 1
+--            THEN 'Activo' ELSE 'Inactivo' END AS EstadoAcademicoDescripcion
+
+--    FROM VacantesPracticasTB v
+--    INNER JOIN EmpresasTB emp ON emp.IdEmpresa = v.IdEmpresa
+
+--    WHERE 
+--(
+--    v.IdEstado IN (1, 5)
+--    AND EXISTS (
+--        SELECT 1
+--        FROM EspecialidadesVacantesTB ev
+--        WHERE ev.IdVacante = v.IdVacante
+--          AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
+--    )
+--)
+--OR 
+--(
+--    EXISTS (
+--        SELECT 1
+--        FROM PracticaEstudianteTB p
+--        WHERE p.IdUsuario = @IdUsuario
+--          AND p.IdVacante = v.IdVacante
+--          AND p.IdEstado IN (3,5,6,8,9,11) -- En proceso / Asignada / En curso / Finalizada / Rezagado / Aprobada
+--    )
+--)
+
+--    ORDER BY v.Nombre;
+--END;
+--GO
+--11-11-25
 USE SIGEP;
 GO
 
@@ -418,13 +542,16 @@ BEGIN
         v.IdVacante,
         LTRIM(RTRIM(v.Nombre)) AS NombreVacante,
         emp.NombreEmpresa,
-        (
+
+        -- Especialidad o guion si no tiene
+        ISNULL((
             SELECT TOP 1 esp.Nombre
             FROM EspecialidadesVacantesTB ev
             INNER JOIN EspecialidadesTB esp ON esp.IdEspecialidad = ev.IdEspecialidad
             WHERE ev.IdVacante = v.IdVacante
               AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
-        ) AS Especialidad,
+        ), '—') AS Especialidad,
+
         v.NumCupos,
 
         -- Cupos ocupados (solo prácticas activas)
@@ -438,6 +565,20 @@ BEGIN
         v.FechaCierre,
         v.Requerimientos,
         v.Tipo,
+
+        -- 🔹 Nuevo campo: mensaje si es autogestionada
+        CASE 
+            WHEN v.Tipo IS NOT NULL AND LOWER(LTRIM(RTRIM(v.Tipo))) = 'autogestionada'
+                 AND EXISTS (
+                     SELECT 1 
+                     FROM PracticaEstudianteTB p
+                     WHERE p.IdUsuario = @IdUsuario
+                       AND p.IdVacante = v.IdVacante
+                       AND p.IdEstado IN (3,5,6,8,9,11)
+                 )
+            THEN 'Autogestionada'
+            ELSE NULL
+        END AS TipoMensaje,
 
         -- Estado del estudiante en ESTA vacante
         ISNULL((
@@ -458,37 +599,53 @@ BEGIN
             ORDER BY p3.IdPractica DESC
         ), 0) AS IdPracticaVacante,
 
-        -- Puede asignar: 1 = sí, 0 = no (ya tiene práctica activa)
+        -- Puede asignar: 1 = sí, 0 = no
         CASE 
             WHEN EXISTS (
-                SELECT 1
+                SELECT 1 
                 FROM PracticaEstudianteTB p4
                 INNER JOIN EstadosTB e4 ON e4.IdEstado = p4.IdEstado
                 WHERE p4.IdUsuario = @IdUsuario
+                  AND p4.IdVacante <> v.IdVacante
                   AND LOWER(LTRIM(RTRIM(e4.Descripcion))) IN (
                       'en curso','asignada','aprobada','finalizada','rezagado'
                   )
-            ) THEN 0 ELSE 1
+            ) THEN 0  
+            ELSE 1    
         END AS PuedeAsignar,
 
-        -- Nombre completo
+        -- Nombre completo del estudiante
         (SELECT CONCAT(u.Nombre, ' ', u.Apellido1, ' ', u.Apellido2)
          FROM UsuariosTB u WHERE u.IdUsuario = @IdUsuario) AS NombreCompleto,
 
-        -- Estado académico (bit → texto)
+        -- Estado académico
         CASE WHEN (SELECT EstadoAcademico FROM UsuariosTB WHERE IdUsuario = @IdUsuario) = 1
             THEN 'Activo' ELSE 'Inactivo' END AS EstadoAcademicoDescripcion
 
     FROM VacantesPracticasTB v
     INNER JOIN EmpresasTB emp ON emp.IdEmpresa = v.IdEmpresa
 
-    WHERE v.IdEstado IN (1, 5)  -- Activas o Disponibles
-      AND EXISTS (
-          SELECT 1
-          FROM EspecialidadesVacantesTB ev
-          WHERE ev.IdVacante = v.IdVacante
-            AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
-      )
+    WHERE 
+    (
+        v.IdEstado IN (1, 5)
+        AND EXISTS (
+            SELECT 1
+            FROM EspecialidadesVacantesTB ev
+            WHERE ev.IdVacante = v.IdVacante
+              AND ev.IdEspecialidad IN (SELECT IdEspecialidad FROM @EspecialidadesEst)
+        )
+    )
+    OR 
+    (
+        EXISTS (
+            SELECT 1
+            FROM PracticaEstudianteTB p
+            WHERE p.IdUsuario = @IdUsuario
+              AND p.IdVacante = v.IdVacante
+              AND p.IdEstado IN (3,5,6,8,9,11)
+        )
+    )
+
     ORDER BY v.Nombre;
 END;
 GO
@@ -869,6 +1026,18 @@ BEGIN
             ORDER BY p5.IdPractica DESC
         ), '—') AS Tipo,
 
+		CASE 
+    WHEN (
+        SELECT TOP 1 LOWER(LTRIM(RTRIM(v4.Tipo)))
+        FROM PracticaEstudianteTB p8
+        INNER JOIN VacantesPracticasTB v4 ON v4.IdVacante = p8.IdVacante
+        WHERE p8.IdUsuario = u.IdUsuario
+        ORDER BY p8.IdPractica DESC
+    ) = 'autogestionada'
+    THEN 'Autogestionada'
+    ELSE NULL
+END AS TipoMensaje,
+
         ISNULL((
             SELECT TOP 1 p6.IdVacante
             FROM PracticaEstudianteTB p6
@@ -915,5 +1084,150 @@ BEGIN
             SELECT 1 FROM PracticaEstudianteTB pe WHERE pe.IdUsuario = u.IdUsuario
         )
     ORDER BY NombreCompleto;
+END;
+GO
+
+
+--11-11-25
+USE SIGEP;
+GO
+
+CREATE OR ALTER PROCEDURE [dbo].[AsignarEstudianteSP]
+    @IdVacante INT,
+    @IdUsuario INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @NumCupos INT, @Ocupados INT, @IdEstadoEnProceso INT, @IdEstadoAsignada INT, @IdEstadoRetirada INT;
+
+    -- 1️⃣ Obtener información de la vacante
+    SELECT @NumCupos = NumCupos
+    FROM VacantesPracticasTB
+    WHERE IdVacante = @IdVacante;
+
+    IF @NumCupos IS NULL
+    BEGIN
+        SELECT 0 AS ok, 'No se encontró la vacante seleccionada.' AS message;
+        RETURN;
+    END;
+
+    -- 2️⃣ Contar cupos ocupados (solo los estados activos)
+    SELECT @Ocupados = COUNT(*)
+    FROM PracticaEstudianteTB
+    WHERE IdVacante = @IdVacante
+      AND IdEstado IN (5, 6, 8, 9, 11); -- Asignada, Aprobada, En curso, Finalizada, Rezagado
+
+    IF @Ocupados >= @NumCupos
+    BEGIN
+        SELECT 0 AS ok, CONCAT('No es posible asignar más estudiantes. Todos los cupos (', @NumCupos, ') ya están ocupados.') AS message;
+        RETURN;
+    END;
+
+    -- 3️⃣ Verificar si el estudiante ya tiene una práctica activa en otra vacante
+    IF EXISTS (
+        SELECT 1
+        FROM PracticaEstudianteTB p
+        INNER JOIN EstadosTB e ON e.IdEstado = p.IdEstado
+        WHERE p.IdUsuario = @IdUsuario
+          AND p.IdVacante <> @IdVacante
+          AND LOWER(LTRIM(RTRIM(e.Descripcion))) IN ('asignada','aprobada','en curso','finalizada','rezagado')
+    )
+    BEGIN
+        SELECT 0 AS ok, 'El estudiante ya tiene una práctica activa en otra vacante.' AS message;
+        RETURN;
+    END;
+
+    -- 4️⃣ Estados base
+    SELECT 
+        @IdEstadoEnProceso = IdEstado
+    FROM EstadosTB WHERE LOWER(LTRIM(RTRIM(Descripcion))) = 'en proceso de aplicacion';
+
+    SELECT 
+        @IdEstadoAsignada = IdEstado
+    FROM EstadosTB WHERE LOWER(LTRIM(RTRIM(Descripcion))) = 'asignada';
+
+    SELECT 
+        @IdEstadoRetirada = IdEstado
+    FROM EstadosTB WHERE LOWER(LTRIM(RTRIM(Descripcion))) = 'retirada';
+
+    IF @IdEstadoEnProceso IS NULL OR @IdEstadoAsignada IS NULL OR @IdEstadoRetirada IS NULL
+    BEGIN
+        SELECT 0 AS ok, 'No se encontraron los estados requeridos en EstadosTB.' AS message;
+        RETURN;
+    END;
+
+    -- 5️⃣ Buscar el último registro del estudiante para esta vacante
+    DECLARE @IdPractica INT, @IdEstadoActual INT;
+    SELECT TOP 1 
+        @IdPractica = IdPractica,
+        @IdEstadoActual = IdEstado
+    FROM PracticaEstudianteTB
+    WHERE IdUsuario = @IdUsuario
+      AND IdVacante = @IdVacante
+    ORDER BY IdPractica DESC;
+
+    DECLARE @EstadoActual NVARCHAR(100);
+    SELECT @EstadoActual = LOWER(LTRIM(RTRIM(Descripcion))) 
+    FROM EstadosTB 
+    WHERE IdEstado = @IdEstadoActual;
+
+    -- 🚀 Lógica de asignación
+
+    -- ➤ Si no existe registro: insertar "En proceso"
+    IF @IdPractica IS NULL
+    BEGIN
+        INSERT INTO PracticaEstudianteTB (IdVacante, IdUsuario, IdEstado, FechaAplicacion)
+        VALUES (@IdVacante, @IdUsuario, @IdEstadoEnProceso, GETDATE());
+
+        SELECT 1 AS ok, 'Estudiante agregado en estado "En proceso de Aplicación".' AS message;
+        RETURN;
+    END;
+
+    -- ➤ Si estaba "retirada" → reactivar a "En proceso"
+    IF @EstadoActual = 'retirada'
+    BEGIN
+        UPDATE PracticaEstudianteTB
+        SET IdEstado = @IdEstadoEnProceso,
+            FechaAplicacion = GETDATE()
+        WHERE IdPractica = @IdPractica;
+
+        SELECT 1 AS ok, 'Estudiante reactivado en estado "En proceso de Aplicación".' AS message;
+        RETURN;
+    END;
+
+    -- ➤ Si estaba "en proceso de aplicacion" → pasa a "asignada"
+    IF @EstadoActual = 'en proceso de aplicacion'
+    BEGIN
+        UPDATE PracticaEstudianteTB
+        SET IdEstado = @IdEstadoAsignada,
+            FechaAplicacion = GETDATE()
+        WHERE IdPractica = @IdPractica;
+
+        SELECT 1 AS ok, 'Estado actualizado a "Asignada".' AS message;
+        RETURN;
+    END;
+
+    -- ➤ Si ya está "asignada" → no permitir duplicado
+    IF @EstadoActual = 'asignada'
+    BEGIN
+        SELECT 0 AS ok, 'El estudiante ya está asignado en esta vacante.' AS message;
+        RETURN;
+    END;
+
+    -- ➤ Estados finales (no se reasignan)
+    IF @EstadoActual IN ('aprobada','en curso','finalizada','rezagado')
+    BEGIN
+        SELECT 0 AS ok, CONCAT('No se puede reasignar porque la práctica está en estado "', @EstadoActual, '".') AS message;
+        RETURN;
+    END;
+
+    -- ➤ Otros estados → pasarlo a "En proceso"
+    UPDATE PracticaEstudianteTB
+    SET IdEstado = @IdEstadoEnProceso,
+        FechaAplicacion = GETDATE()
+    WHERE IdPractica = @IdPractica;
+
+    SELECT 1 AS ok, 'Estudiante agregado en estado "En proceso de Aplicación".' AS message;
 END;
 GO
