@@ -31,6 +31,7 @@
                 .toLowerCase().replace(/\s+/g, ' ').trim();
 
             var mapa = {
+                'con procesos activos': { cls: 'badge-procesos-activos', txt: 'Con Procesos Activos' },
                 'en proceso de aplicacion': { cls: 'badge-en-progreso', txt: 'En proceso de Aplicación' },
                 'rechazada': { cls: 'badge-rechazada', txt: 'Rechazada' },
                 'asignada': { cls: 'badge-asignada', txt: 'Asignada' },
@@ -40,13 +41,13 @@
                 'rezagado': { cls: 'badge-rezagado', txt: 'Rezagado' },
                 'archivado': { cls: 'badge-archivado', txt: 'Archivado' },
                 'en curso': { cls: 'badge-en-curso', txt: 'En Curso' },
-               
                 'en progreso': { cls: 'badge-en-progreso', txt: 'En progreso' }
             };
 
             var info = mapa[est] || { cls: 'badge-no-asignada', txt: (estadoOriginal || 'No Asignada') };
             return '<span class="badge ' + info.cls + '">' + info.txt + '</span>';
         }
+
 
         // ===============================
         // DataTable PRINCIPAL
@@ -81,17 +82,36 @@
                 },
 
                 {
+                    
                     data: 'EstadoPractica',
                     render: function (data) {
-                        var text = (data || '').toString().trim();
-                        if (!text || /^no asignada$/i.test(text) || /^sin practica$/i.test(
-                            text.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                        )) {
-                            return '<span class="badge badge-no-asignada">No Asignada</span>';
+                        var estado = (data || '').toString().trim().toLowerCase();
+
+                        // Lista de estados que consideramos "procesos activos"
+                        var procesosActivos = [
+                            'asignada',
+                            'en curso',
+                            'en proceso de aplicacion',
+                            'aprobada',
+                            'rechazada',
+                            'retirada',
+                            'finalizada',
+                            'rezagado',
+                            'archivado',
+                            'en progreso'
+                        ];
+
+                        // Si el estado contiene alguno de los "activos"
+                        var tieneProcesoActivo = procesosActivos.some(e => estado.includes(e));
+
+                        if (tieneProcesoActivo) {
+                            return '<span class="badge badge-procesos-activos">Con Procesos Activos</span>';
+                        } else {
+                            return '<span class="badge badge-no-asignada">Sin Procesos Activos</span>';
                         }
-                        return badgeEstado(text);
                     }
                 },
+
                 {
                     
                     data: 'IdUsuario',
@@ -317,6 +337,7 @@
                                         table.ajax.reload(null, false);
                                     }
                                 });
+
                             } else {
                                 Swal.fire("Error", res.msg || "No se pudo desasignar", "error");
                             }

@@ -496,3 +496,20 @@
     .btn-accion.editar:hover {
         color: #2D594D;
     }
+
+.btn-asignar-estudiante:hover i {
+    color: #146c43 !important;
+    transform: scale(1.1);
+    transition: all 0.15s ease;
+}
+
+.btn-retirar-estudiante:hover i {
+    color: #b02a37 !important;
+    transform: scale(1.1);
+    transition: all 0.15s ease;
+}
+
+.btn-bloqueado:hover i {
+    transform: scale(1.05);
+    transition: all 0.15s ease;
+}

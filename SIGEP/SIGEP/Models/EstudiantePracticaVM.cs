@@ -10,14 +10,17 @@ namespace SIGEP.Models
         public int IdUsuario { get; set; }
         public string Cedula { get; set; }
         public string NombreCompleto { get; set; }
+        public string Nombre { get; set; }
         public string Especialidad { get; set; }
         public bool EstadoAcademico { get; set; }
         public string EstadoPostulacion { get; set; }
         public string EstadoPractica { get; set; }
+        public string EstadoVacante { get; set; }
         public string Vacante { get; set; }
         public string Empresa { get; set; }
         public string Tipo { get; set; }
         public int IdVacanteUltima { get; set; }
         public int IdPracticaVacante { get; set; }
+        public string TipoMensaje { get; set; }
     }
 }
