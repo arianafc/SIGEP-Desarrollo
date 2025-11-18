@@ -160,7 +160,7 @@ namespace SIGEP.Controllers
         }
 
         [HttpPost]
-        public JsonResult GuardarNota(int idUsuario, decimal? nota1, decimal? nota2, decimal? notaFinal)
+        public JsonResult GuardarNota(int idUsuario, string nota1Str, string nota2Str)
         {
             try
             {
@@ -171,11 +171,27 @@ namespace SIGEP.Controllers
 
                 int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
 
-                if (nota1 == null && nota2 == null)
+                // Convertir strings a decimal nullable
+                decimal? nota1 = null;
+                decimal? nota2 = null;
+
+                if (!string.IsNullOrWhiteSpace(nota1Str))
                 {
-                    return Json(new { success = false, message = "Debe ingresar al menos una nota" });
+                    if (decimal.TryParse(nota1Str, out decimal n1))
+                    {
+                        nota1 = n1;
+                    }
                 }
 
+                if (!string.IsNullOrWhiteSpace(nota2Str))
+                {
+                    if (decimal.TryParse(nota2Str, out decimal n2))
+                    {
+                        nota2 = n2;
+                    }
+                }
+
+                // Validaciones de rango solo para notas que no son null
                 if (nota1 != null && (nota1 < 0 || nota1 > 100))
                 {
                     return Json(new { success = false, message = "La Nota 1 debe estar entre 0 y 100" });
@@ -194,8 +210,8 @@ namespace SIGEP.Controllers
 
                     if (notaExistente != null)
                     {
-                        if (nota1 != null) notaExistente.Nota1 = nota1;
-                        if (nota2 != null) notaExistente.Nota2 = nota2;
+                        notaExistente.Nota1 = nota1;
+                        notaExistente.Nota2 = nota2;
 
                         if (notaExistente.Nota1 != null && notaExistente.Nota2 != null)
                         {
@@ -212,6 +228,13 @@ namespace SIGEP.Controllers
                     }
                     else
                     {
+                        decimal? notaFinal = null;
+                        if (nota1 != null && nota2 != null)
+                        {
+                            notaFinal = (nota1 + nota2) / 2;
+                            notaFinalCalculada = notaFinal;
+                        }
+
                         var nuevaNota = new NotasEstudiantesTB
                         {
                             IdUsuario = idUsuario,
@@ -222,11 +245,6 @@ namespace SIGEP.Controllers
                             IdProfesor = idProfesor
                         };
                         dbContext.NotasEstudiantesTB.Add(nuevaNota);
-
-                        if (nota1 != null && nota2 != null)
-                        {
-                            notaFinalCalculada = notaFinal;
-                        }
                     }
 
                     dbContext.SaveChanges();
@@ -238,7 +256,7 @@ namespace SIGEP.Controllers
                     if (notaFinalCalculada.HasValue)
                     {
                         int anioActual = DateTime.Now.Year;
-                        var estadosPermitidos = new[] { "En Curso", "Rezagado", "Aprobada" };
+                        var estadosPermitidos = new[] { "En Curso", "Rezagado", "Aprobada", "Finalizada" };
 
                         var practicaActual = (from p in dbContext.PracticaEstudianteTB
                                               join e in dbContext.EstadosTB on p.IdEstado equals e.IdEstado
@@ -277,11 +295,12 @@ namespace SIGEP.Controllers
 
                             if (practicaActual.Practica.IdEstado != nuevoIdEstado)
                             {
+                                string estadoAnterior = practicaActual.Estado.Descripcion;
                                 practicaActual.Practica.IdEstado = nuevoIdEstado;
 
                                 var comentarioAuto = new ComentariosPracticaTB
                                 {
-                                    Comentario = $"Estado actualizado automáticamente a '{nuevoEstado}' por modificación de calificación final a {notaFinalCalculada.Value:F2}",
+                                    Comentario = $"Estado actualizado de '{estadoAnterior}' a '{nuevoEstado}' por modificación de calificación final a {notaFinalCalculada.Value:F2}",
                                     Fecha = DateTime.Now,
                                     IdUsuario = idProfesor,
                                     IdPractica = practicaActual.Practica.IdPractica,
@@ -290,28 +309,33 @@ namespace SIGEP.Controllers
                                 dbContext.ComentariosPracticaTB.Add(comentarioAuto);
                                 dbContext.SaveChanges();
 
-                                mensajeEstado = $" Estado de la práctica actualizado a '{nuevoEstado}'.";
+                                mensajeEstado = $" Estado actualizado de '{estadoAnterior}' a '{nuevoEstado}'.";
                                 estadoActual = nuevoEstado;
                             }
                             else
                             {
-                                estadoActual = nuevoEstado;
+                                estadoActual = practicaActual.Estado.Descripcion;
                             }
                         }
                     }
 
-                    string mensaje = "Nota registrada correctamente";
+                    // Mensajes personalizados
+                    string mensaje = "Nota actualizada correctamente";
                     if (nota1 != null && nota2 != null)
                     {
                         mensaje = "Notas registradas correctamente. Nota final calculada." + mensajeEstado;
                     }
-                    else if (nota1 != null)
+                    else if (nota1 != null && nota2 == null)
                     {
-                        mensaje = "Nota 1 registrada correctamente. Ingrese Nota 2 para calcular la nota final.";
+                        mensaje = "Nota 1 registrada. Ingrese Nota 2 para calcular la nota final.";
                     }
-                    else if (nota2 != null)
+                    else if (nota1 == null && nota2 != null)
                     {
-                        mensaje = "Nota 2 registrada correctamente. Ingrese Nota 1 para calcular la nota final.";
+                        mensaje = "Nota 2 registrada. Ingrese Nota 1 para calcular la nota final.";
+                    }
+                    else if (nota1 == null && nota2 == null)
+                    {
+                        mensaje = "Notas eliminadas correctamente.";
                     }
 
                     return Json(new

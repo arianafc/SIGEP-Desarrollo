@@ -465,13 +465,20 @@ function calcularNotaFinal() {
     var nota1 = $('#inputNota1').val();
     var nota2 = $('#inputNota2').val();
 
-    // Solo calcular si ambas notas tienen valor (incluyendo cero)
+    // Solo calcular si AMBAS notas tienen valor
     if (nota1 !== '' && nota2 !== '') {
         var n1 = parseFloat(nota1);
         var n2 = parseFloat(nota2);
-        var notaFinal = (n1 + n2) / 2;
-        $('#inputNotaFinal').val(notaFinal.toFixed(2));
+
+        // Validar que sean números válidos
+        if (!isNaN(n1) && !isNaN(n2)) {
+            var notaFinal = (n1 + n2) / 2;
+            $('#inputNotaFinal').val(notaFinal.toFixed(2));
+        } else {
+            $('#inputNotaFinal').val('');
+        }
     } else {
+        // Si falta alguna nota, limpiar nota final
         $('#inputNotaFinal').val('');
     }
 }
@@ -484,46 +491,31 @@ $(document).on('input', '#inputNota1, #inputNota2', function () {
 // Función para guardar nota
 function guardarNota() {
     var idUsuario = $('#btnGuardarNota').data('idusuario');
-    var nota1 = parseFloat($('#inputNota1').val());
-    var nota2 = parseFloat($('#inputNota2').val());
-
-    if (isNaN(nota1) || nota1 < 0 || nota1 > 100) {
-        Swal.fire('Advertencia', 'La Nota 1 debe estar entre 0 y 100', 'warning');
-        return;
-    }
-
-    if (isNaN(nota2) || nota2 < 0 || nota2 > 100) {
-        Swal.fire('Advertencia', 'La Nota 2 debe estar entre 0 y 100', 'warning');
-        return;
-    }
-
-    var notaFinal = (nota1 + nota2) / 2;
+    var nota1Input = $('#inputNota1').val();
+    var nota2Input = $('#inputNota2').val();
 
     $.ajax({
         url: '/Evaluacion/GuardarNota',
         type: 'POST',
         data: {
             idUsuario: idUsuario,
-            nota1: nota1,
-            nota2: nota2,
-            notaFinal: notaFinal
+            nota1Str: nota1Input,
+            nota2Str: nota2Input
         },
         success: function (response) {
+            console.log('Response:', response);
             if (response.success) {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Nota registrada correctamente',
+                    title: 'Nota actualizada',
                     text: response.message,
                     timer: 2000,
                     showConfirmButton: false
                 });
 
                 $('#modalNota').modal('hide');
-
-                // Recargar el DataTable
                 $('#miTabla').DataTable().ajax.reload(null, false);
 
-                // Si el modal de perfil está abierto Y hay un estado nuevo, actualizar el badge
                 if ($('#modalPerfil').hasClass('show') && response.estadoPractica) {
                     actualizarBadgeEstado(response.estadoPractica);
                 }
@@ -536,6 +528,7 @@ function guardarNota() {
         }
     });
 }
+
 
 // Nueva función para actualizar el badge en el modal de perfil
 function actualizarBadgeEstado(nuevoEstado) {
