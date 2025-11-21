@@ -1,0 +1,196 @@
+﻿/* ==================== ESTILOS PARA TABLA EMPRESAS ==================== */
+
+/* Fondo blanco en filas */
+table.dataTable tbody tr {
+    background-color: #fff !important;
+}
+
+/* Encabezado de tabla */
+table.dataTable thead {
+    background-color: #2D594D;
+    color: white;
+}
+
+table.dataTable th,
+table.dataTable td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.dataTable th {
+    color: #fff !important;
+}
+
+/* Hover en filas */
+table.dataTable tbody tr:hover {
+    background-color: #EAF2D8;
+}
+
+/* Tarjeta contenedora de tabla */
+.card.rounded-5 {
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    background-color: #fff;
+}
+
+/* ==================== BOTONES DE ACCIONES EN TABLA ==================== */
+.btn-accion {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+    .btn-accion i {
+        font-size: 0.9rem;
+    }
+
+    /* Botón editar */
+    .btn-accion.btn-editar-empresa {
+        color: #2D594D;
+    }
+
+        .btn-accion.btn-editar-empresa:hover {
+            color: #2D594D;
+            transform: scale(1.15);
+        }
+
+    /* Botón eliminar */
+    .btn-accion.btn-eliminar-empresa {
+        color: #842029;
+    }
+
+        .btn-accion.btn-eliminar-empresa:hover {
+            color: #842029;
+            transform: scale(1.15);
+        }
+
+/* ==================== BOTÓN NUEVA EMPRESA ==================== */
+.btn-nuevo {
+    background-color: #2d594d !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+    .btn-nuevo:hover {
+        background-color: #244738 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+/* ==================== TÍTULO ==================== */
+.vacantes-titulo {
+    color: #2D594D;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* ==================== MODALES ==================== */
+.section-title {
+    color: #2D594D;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #8CA653;
+    padding-bottom: .5rem;
+}
+
+.CerrarModal {
+    background-color: #2d594d;
+    color: white;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+    .CerrarModal:hover {
+        background-color: #244738;
+        transform: scale(1.03);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .btn-accion {
+        padding: 4px;
+    }
+
+        .btn-accion i {
+            font-size: 0.8rem;
+        }
+
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.85rem;
+        padding: 8px 4px;
+    }
+
+    .card.rounded-5 {
+        padding: 1rem !important;
+    }
+
+    .btn-nuevo {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.75rem;
+        padding: 6px 2px;
+    }
+
+    .btn-accion i {
+        font-size: 0.75rem;
+    }
+
+    .btn-nuevo {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+}
+
+/* ==================== ANIMACIÓN ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card.rounded-5 {
+    animation: fadeIn 0.4s ease;
+}
+
+/* ==================== AJUSTES ESPECÍFICOS PARA TABLA ==================== */
+table.dataTable th:last-child,
+table.dataTable td:last-child {
+    min-width: 120px;
+}
+
+table.dataTable td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+@media (max-width: 768px) {
+    table.dataTable td {
+        white-space: normal;
+        max-width: 150px;
+    }
+}

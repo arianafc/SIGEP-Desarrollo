@@ -374,6 +374,7 @@
     <Content Include="Content\estilos\Images\logo-light-text.png" />
     <Content Include="Content\estilos\Images\logo-text.png" />
     <Content Include="Content\estilos\Images\logoSIGEP.png" />
+    <Content Include="Content\estilos\VacantesEstudiantes.css" />
     <Content Include="Content\icons\crypto-icons\cryptocoins-colors.css" />
     <Content Include="Content\icons\crypto-icons\cryptocoins.css" />
     <Content Include="Content\icons\flag-icon-css\flag-icon.min.css" />
@@ -393,6 +394,9 @@
     <Content Include="Content\imagenes\CTP_BG.jpg" />
     <Content Include="Content\imagenes\HPcolegio.jpg" />
     <Content Include="Content\imagenes\HPcolegio.jpg.jpg" />
+    <Content Include="Content\ListaEmpresas.css" />
+    <Content Include="Content\ListaEstudiantes.css" />
+    <Content Include="Content\PracticasCoordinador.css" />
     <Content Include="Content\style.css" />
     <Content Include="EF\Model1.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

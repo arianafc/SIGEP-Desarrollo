@@ -1,0 +1,290 @@
+﻿/* ==================== ESTILOS PARA TABLA VACANTES ESTUDIANTES ==================== */
+
+/* Fondo blanco en filas */
+table.dataTable tbody tr {
+    background-color: #fff !important;
+}
+
+/* Encabezado de tabla */
+table.dataTable thead {
+    background-color: #2D594D;
+    color: white;
+}
+
+table.dataTable th,
+table.dataTable td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.dataTable th {
+    color: #fff !important;
+}
+
+/* Hover en filas */
+table.dataTable tbody tr:hover {
+    background-color: #EAF2D8;
+}
+
+/* Tarjeta contenedora de tabla */
+.card.rounded-5 {
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    background-color: #fff;
+}
+
+/* ==================== BOTONES DE ACCIONES EN TABLA ==================== */
+.btn-accion {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+    .btn-accion i {
+        font-size: 0.9rem;
+    }
+
+    /* Botón visualizar */
+    .btn-accion.btn-visualizar {
+        color: #2D594D;
+    }
+
+        .btn-accion.btn-visualizar:hover {
+            color: #2D594D;
+            transform: scale(1.15);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+    /* Botón asignar */
+    .btn-accion.btn-asignar {
+        color: #2D594D;
+    }
+
+        .btn-accion.btn-asignar:hover {
+            color: #2D594D;
+            transform: scale(1.15);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+    /* Botón editar */
+    .btn-accion.btn-editar {
+        color: #2D594D;
+    }
+
+        .btn-accion.btn-editar:hover {
+            color: #2D594D;
+            transform: scale(1.15);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+    /* Botón eliminar/archivar */
+    .btn-accion.btn-eliminar,
+    .btn-accion.toggle {
+        color: #842029;
+    }
+
+        .btn-accion.btn-eliminar:hover,
+        .btn-accion.toggle:hover {
+            color: #842029;
+            transform: scale(1.15);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+/* Botones en modal asignar */
+.btn-asignar-estudiante {
+    color: #198754;
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-asignar-estudiante:hover {
+        transform: scale(1.15);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+.btn-retirar-estudiante {
+    color: #dc3545;
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-retirar-estudiante:hover {
+        transform: scale(1.15);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+.btn-bloqueado {
+    color: #6c757d;
+    background: none;
+    border: none;
+    cursor: not-allowed;
+}
+
+/* Botón desasignar en lista de postulaciones */
+.BtnDesasignarPracticaEstudiante {
+    color: #2D594D;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+    .BtnDesasignarPracticaEstudiante:hover {
+        transform: scale(1.15);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+/* ==================== BADGES DE ESTADO ==================== */
+/* Los badges ya están definidos en site.css, aquí solo ajustamos detalles específicos si es necesario */
+
+/* Asegurar que todos los badges tengan el formato correcto */
+.badge-asignada,
+.badge-no-asignada,
+.badge-desasignada,
+.badge-aprobado,
+.badge-activo,
+.badge-inactivo,
+.badge-rezagado,
+.badge-en-progreso,
+.badge-en-proceso,
+.badge-archivado,
+.badge-en-curso,
+.badge-rechazada,
+.badge-finalizada,
+.badge-retirada,
+.badge-aprobada,
+.badge-procesos-activos {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 90px;
+}
+
+/* ==================== TABLA MODAL ASIGNAR ==================== */
+#miTablaAsignar {
+    width: 100%;
+}
+
+    #miTablaAsignar thead {
+        background-color: #2D594D;
+        color: white;
+    }
+
+    #miTablaAsignar th {
+        color: #fff !important;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    #miTablaAsignar tbody tr {
+        background-color: #fff;
+    }
+
+        #miTablaAsignar tbody tr:hover {
+            background-color: #EAF2D8;
+        }
+
+    #miTablaAsignar td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+/* ==================== LISTA DE POSTULACIONES ==================== */
+#listaPostulaciones {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    #listaPostulaciones li {
+        background-color: #fff;
+        transition: background-color 0.2s ease;
+    }
+
+        #listaPostulaciones li:hover {
+            background-color: #EAF2D8;
+        }
+
+    #listaPostulaciones a {
+        color: #2D594D;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        #listaPostulaciones a:hover {
+            text-decoration: underline;
+        }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .btn-accion {
+        padding: 4px;
+    }
+
+        .btn-accion i {
+            font-size: 0.8rem;
+        }
+
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.85rem;
+        padding: 8px 4px;
+    }
+
+    .card.rounded-5 {
+        padding: 1rem !important;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.75rem;
+        padding: 6px 2px;
+    }
+
+    .btn-accion i {
+        font-size: 0.75rem;
+    }
+
+    #miTablaAsignar th,
+    #miTablaAsignar td {
+        font-size: 0.75rem;
+        padding: 6px 2px;
+    }
+}
+
+/* ==================== ANIMACIÓN ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card.rounded-5 {
+    animation: fadeIn 0.4s ease;
+}

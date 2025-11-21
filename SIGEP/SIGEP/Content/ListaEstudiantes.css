@@ -1,0 +1,175 @@
+﻿/* ==================== SOLO ESTILOS PARA LA TABLA ==================== */
+
+/* Fondo blanco en filas */
+table.dataTable tbody tr {
+    background-color: #fff !important;
+}
+
+/* Encabezado de tabla */
+table.dataTable thead {
+    background-color: #2D594D;
+    color: white;
+}
+
+table.dataTable th,
+table.dataTable td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.dataTable th {
+    color: #fff !important;
+}
+
+/* Hover en filas */
+table.dataTable tbody tr:hover {
+    background-color: #EAF2D8;
+}
+
+/* Tarjeta contenedora de tabla */
+.card.rounded-5 {
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    background-color: #fff;
+}
+
+/* ==================== BOTONES DE ACCIONES EN TABLA ==================== */
+.acciones-tabla {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-accion {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+    .btn-accion i {
+        font-size: 0.9rem;
+    }
+
+    .btn-accion.ver {
+        color: #2D594D;
+    }
+
+    .btn-accion.editar {
+        color: #768C46;
+    }
+
+    .btn-accion.eliminar,
+    .btn-accion.toggle {
+        color: #842029;
+    }
+
+    .btn-accion:hover {
+        transform: scale(1.15);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-accion.ver:hover {
+        color: #2D594D;
+    }
+
+    .btn-accion.editar:hover {
+        color: #768C46;
+    }
+
+    .btn-accion.eliminar:hover,
+    .btn-accion.toggle:hover {
+        color: #842029;
+    }
+
+/* ==================== BADGES DE ESTADO ==================== */
+.estado-badge,
+.estado-badge-admin {
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 6px;
+    color: white;
+    display: inline-block;
+}
+
+.estado-activo {
+    background-color: #2D594D;
+    border: 1px solid #2D594D;
+}
+
+.estado-inactivo {
+    background-color: #F8D7DA;
+    color: #842029;
+    border: 1px solid #842029;
+}
+
+.estado-en-practica {
+    background-color: #2D594D;
+    border: 1px solid #2D594D;
+}
+
+.estado-sin-practica {
+    background-color: #F8D7DA;
+    color: #842029;
+    border: 1px solid #842029;
+}
+
+.estado-pendiente {
+    background-color: #FFF3CD;
+    color: #856404;
+    border: 1px solid #856404;
+}
+
+/* ==================== RESPONSIVE DATATABLE ==================== */
+@media (max-width: 768px) {
+    .acciones-tabla {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .btn-accion {
+        padding: 4px;
+    }
+
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.85rem;
+        padding: 8px 4px;
+    }
+
+    .card.rounded-5 {
+        padding: 1rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.75rem;
+        padding: 6px 2px;
+    }
+
+    .btn-accion i {
+        font-size: 0.8rem;
+    }
+}
+
+/* ==================== ANIMACIÓN DE TABLA ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card.rounded-5 {
+    animation: fadeIn 0.4s ease;
+}

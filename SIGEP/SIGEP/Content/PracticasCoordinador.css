@@ -1,0 +1,365 @@
+﻿/* ==================== ESTILOS PARA TABLA PRÁCTICAS COORDINADOR ==================== */
+
+/* Fondo blanco en filas */
+table.dataTable tbody tr {
+    background-color: #fff !important;
+}
+
+/* Encabezado de tabla */
+table.dataTable thead {
+    background-color: #2D594D;
+    color: white;
+}
+
+table.dataTable th,
+table.dataTable td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.dataTable th {
+    color: #fff !important;
+}
+
+/* Hover en filas */
+table.dataTable tbody tr:hover {
+    background-color: #EAF2D8;
+}
+
+/* Tarjeta contenedora de tabla */
+.card.rounded-5 {
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    background-color: #fff;
+}
+
+/* ==================== BOTONES DE ACCIONES EN TABLA PRINCIPAL ==================== */
+/* Los enlaces <a> que actúan como botones en el DataTable */
+a.btn-ver,
+a.btn-asignar,
+a.btn-cambiar-estado,
+a.btn-desasignar {
+    display: inline-block;
+    border: none;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    a.btn-ver i,
+    a.btn-asignar i,
+    a.btn-cambiar-estado i,
+    a.btn-desasignar i {
+        font-size: 0.9rem;
+    }
+
+/* Botón ver */
+a.btn-ver {
+    color: #2D594D;
+}
+
+    a.btn-ver:hover {
+        color: #2D594D;
+        transform: scale(1.15);
+    }
+
+/* Botón asignar */
+a.btn-asignar {
+    color: #2D594D;
+}
+
+    a.btn-asignar:hover {
+        color: #2D594D;
+        transform: scale(1.15);
+    }
+
+/* Botón cambiar estado */
+a.btn-cambiar-estado {
+    color: #768C46;
+}
+
+    a.btn-cambiar-estado:hover {
+        color: #768C46;
+        transform: scale(1.15);
+    }
+
+/* Botón desasignar */
+a.btn-desasignar {
+    color: #842029;
+}
+
+    a.btn-desasignar:hover {
+        color: #842029;
+        transform: scale(1.15);
+    }
+
+/* ==================== BOTONES EN MODAL ASIGNAR ==================== */
+.btn-asignar-estudiante {
+    color: #198754;
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+    .btn-asignar-estudiante i {
+        font-size: 0.9rem;
+    }
+
+    .btn-asignar-estudiante:hover {
+        color: #198754;
+        transform: scale(1.15);
+    }
+
+.btn-retirar-estudiante {
+    color: #dc3545;
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+    .btn-retirar-estudiante i {
+        font-size: 0.9rem;
+    }
+
+    .btn-retirar-estudiante:hover {
+        color: #dc3545;
+        transform: scale(1.15);
+    }
+
+.btn-bloqueado {
+    color: #6c757d;
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: not-allowed;
+}
+
+    .btn-bloqueado i {
+        font-size: 0.9rem;
+    }
+
+    .btn-bloqueado:hover {
+        color: #6c757d;
+        transform: scale(1.05);
+    }
+
+/* ==================== BADGES DE ESTADO ==================== */
+.badge-asignada,
+.badge-no-asignada,
+.badge-desasignada,
+.badge-aprobado,
+.badge-activo,
+.badge-inactivo,
+.badge-rezagado,
+.badge-en-progreso,
+.badge-en-proceso,
+.badge-archivado,
+.badge-en-curso,
+.badge-rechazada,
+.badge-finalizada,
+.badge-retirada,
+.badge-aprobada,
+.badge-procesos-activos {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 90px;
+}
+
+/* ==================== TABLA MODAL ASIGNAR ==================== */
+#miTablaAsignar {
+    width: 100%;
+}
+
+    #miTablaAsignar thead {
+        background-color: #2D594D;
+        color: white;
+    }
+
+    #miTablaAsignar th {
+        color: #fff !important;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    #miTablaAsignar tbody tr {
+        background-color: #fff;
+    }
+
+        #miTablaAsignar tbody tr:hover {
+            background-color: #EAF2D8;
+        }
+
+    #miTablaAsignar td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+/* ==================== BOTONES DE PROCESO (Iniciar/Finalizar) ==================== */
+.btn-verde-personalizado,
+.btn-verde-claro {
+    transition: all 0.3s ease;
+}
+
+    .btn-verde-personalizado:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-verde-claro:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    a.btn-ver,
+    a.btn-asignar,
+    a.btn-cambiar-estado,
+    a.btn-desasignar,
+    .btn-asignar-estudiante,
+    .btn-retirar-estudiante,
+    .btn-bloqueado {
+        padding: 4px;
+    }
+
+        a.btn-ver i,
+        a.btn-asignar i,
+        a.btn-cambiar-estado i,
+        a.btn-desasignar i,
+        .btn-asignar-estudiante i,
+        .btn-retirar-estudiante i,
+        .btn-bloqueado i {
+            font-size: 0.8rem;
+        }
+
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.85rem;
+        padding: 8px 4px;
+    }
+
+    .card.rounded-5 {
+        padding: 1rem !important;
+    }
+
+    .badge-asignada,
+    .badge-no-asignada,
+    .badge-desasignada,
+    .badge-aprobado,
+    .badge-activo,
+    .badge-inactivo,
+    .badge-rezagado,
+    .badge-en-progreso,
+    .badge-en-proceso,
+    .badge-archivado,
+    .badge-en-curso,
+    .badge-rechazada,
+    .badge-finalizada,
+    .badge-retirada,
+    .badge-aprobada,
+    .badge-procesos-activos {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        min-width: 75px;
+    }
+
+    .btn-verde-personalizado,
+    .btn-verde-claro {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.75rem;
+        padding: 6px 2px;
+    }
+
+    a.btn-ver i,
+    a.btn-asignar i,
+    a.btn-cambiar-estado i,
+    a.btn-desasignar i {
+        font-size: 0.75rem;
+    }
+
+    #miTablaAsignar th,
+    #miTablaAsignar td {
+        font-size: 0.75rem;
+        padding: 6px 2px;
+    }
+
+    .btn-verde-personalizado,
+    .btn-verde-claro {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* ==================== ANIMACIÓN ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card.rounded-5 {
+    animation: fadeIn 0.4s ease;
+}
+
+/* ==================== FILTROS DROPDOWN ==================== */
+.dropdown-menu label {
+    color: #2D594D;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.dropdown-menu .form-control {
+    border-radius: 6px;
+}
+
+/* ==================== AJUSTES ESPECÍFICOS PARA RESPONSIVE ==================== */
+table.dataTable th:last-child,
+table.dataTable td:last-child {
+    min-width: 140px;
+}
+
+table.dataTable td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+@media (max-width: 768px) {
+    table.dataTable td {
+        white-space: normal;
+        max-width: 150px;
+    }
+}

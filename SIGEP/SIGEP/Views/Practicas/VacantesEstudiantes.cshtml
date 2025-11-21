@@ -4,6 +4,9 @@
     var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, , 2=Coord, 3=Prof 4=Egr
 }
 
+@section styles {
+    <link href="~/Content/estilos/VacantesEstudiantes.css" rel="stylesheet" />
+}
 
 <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
     Vacantes @DateTime.Now.Year
@@ -16,7 +19,6 @@
             + Registrar
         </button>
     }
-
 
     <div class="dropdown">
         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -340,9 +342,9 @@
             <div class="modal-body px-4">
                 <div class="mb-4 card rounded-5 p-3">
                     <h5 class="section-title">Seleccionar Estudiante para Asignar</h5>
-                    <table id="miTablaAsignar" class="display nowrap w-100">
-                        <thead class="table-light">
-                            <tr style="text-align: center;">
+                    <table id="miTablaAsignar" class="display responsive nowrap w-100">
+                        <thead>
+                            <tr>
                                 <th>Nombre</th>
                                 <th>Cédula</th>
                                 <th>Especialidad</th>
@@ -350,7 +352,7 @@
                                 <th>Acción</th>
                             </tr>
                         </thead>
-                        <tbody><!-- dinámico --></tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
@@ -371,7 +373,7 @@
             eliminar: '@Url.Action("Eliminar", "Practicas")',
             obtenerPostulaciones: '@Url.Action("ObtenerPostulaciones", "Practicas")',
             asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
-            retirarEstudiante: '@Url.Action("RetirarEstudiante", "Practicas")', 
+            retirarEstudiante: '@Url.Action("RetirarEstudiante", "Practicas")',
             desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
             obtenerEstudiantesAsignar: '@Url.Action("ObtenerEstudiantesAsignar", "Practicas")',
             visualizacionPostulacion: '@Url.Action("VisualizacionPostulacion", "Practicas")',
@@ -383,4 +385,3 @@
     </script>
     <script src="~/Scripts/Practicas/VacantesEstudiantes.js"></script>
 }
-

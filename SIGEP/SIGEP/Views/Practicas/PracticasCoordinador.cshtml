@@ -1,9 +1,12 @@
 ﻿@{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Listado de Estudiantes";
-    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 👈 ESTA LÍNEA
+    var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
 }
 
+@section styles {
+    <link href="~/Content/PracticasCoordinador.css" rel="stylesheet" />
+}
 
 <h2 class="vacantes-titulo titulo-principal text-center">
     Proceso de Prácticas @DateTime.Now.Year
@@ -48,8 +51,7 @@
     </div>
 
     <!-- BOTONES DE PROCESO -->
-    <!-- BOTONES DE PROCESO -->
-    @if (idRol == 2)  // 👈 Solo el coordinador los ve
+    @if (idRol == 2)
     {
         <div>
             <button id="btnIniciarPracticas" class="btn-verde-personalizado me-2">
@@ -60,125 +62,116 @@
             </button>
         </div>
     }
+</div>
 
-    <!-- TABLA -->
-    <div class="card rounded-5 p-3">
-        <table id="miTabla" class="display responsive nowrap w-100">
-            <thead>
-                <tr>
-                    <th>Cédula</th>
-                    <th>Nombre</th>
-                    <th>Especialidad</th>
-                    <th>Teléfono</th>
-                    <th>Estado de Postulación</th>
-                    <th>Empresa</th>
-                    <th>Tipo</th>
-                    <th style="width:140px;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+<!-- TABLA -->
+<div class="card rounded-5 p-3">
+    <table id="miTabla" class="display responsive nowrap w-100">
+        <thead>
+            <tr>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Teléfono</th>
+                <th>Estado de Postulación</th>
+                <th>Empresa</th>
+                <th>Tipo</th>
+                <th style="width:140px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
-    <!-- Modal de asignación -->
-    <!-- Modal de asignación -->
-    <div class="modal fade" id="modalAsignar" tabindex="-1" aria-labelledby="modalAsignarLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-                <div class="modal-header" style="background-color: #2D594D; color: white;">
-                    <h5 class="modal-title">Asignar Estudiante a Vacante</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+<!-- Modal de asignación -->
+<div class="modal fade" id="modalAsignar" tabindex="-1" aria-labelledby="modalAsignarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
+            <div class="modal-header" style="background-color: #2D594D; color: white;">
+                <h5 class="modal-title">Asignar Estudiante a Vacante</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body px-4">
+                <div class="mb-4 card rounded-5 p-3">
+                    <h5 class="section-title mb-3">Vacantes disponibles</h5>
+                    <table id="miTablaAsignar" class="display responsive nowrap w-100">
+                        <thead>
+                            <tr>
+                                <th>Vacante</th>
+                                <th>Empresa</th>
+                                <th>Especialidad</th>
+                                <th>Cupos</th>
+                                <th>Ocupados</th>
+                                <th>Estado práctica</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                <div class="modal-body px-4">
-                    <div class="mb-4 card rounded-5 p-3">
-                        <h5 class="section-title mb-3">Vacantes disponibles</h5>
-                        <table id="miTablaAsignar" class="display nowrap w-100">
-                            <thead class="table-light">
-                                <tr style="text-align:center;">
-                                    <th>Vacante</th>
-                                    <th>Empresa</th>
-                                    <th>Especialidad</th>
-                                    <th>Cupos</th>
-                                    <th>Ocupados</th>
-                                    <th>Estado práctica</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer px-4">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
+            </div>
+            <div class="modal-footer px-4">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
+</div>
 
+@section Scripts {
+    <!-- Script principal del módulo -->
+    <script src="~/Scripts/Practicas/PracticasCoordinador.js"></script>
 
+    <script>
+    // Función para recargar la tabla principal ===
+    function recargarTabla() {
+        if ($.fn.dataTable.isDataTable('#miTabla')) {
+            const table = $('#miTabla').DataTable();
+            //table.ajax.reload(null, false);
+            console.log("🔄 Tabla de prácticas recargada correctamente");
+        }
+    }
 
-
-
-    @section Scripts {
-        <!-- Script principal del módulo -->
-        <script src="~/Scripts/Practicas/PracticasCoordinador.js"></script>
-
-        <script>
-        // === 🔄 Función para recargar la tabla principal ===
-        function recargarTabla() {
-            if ($.fn.dataTable.isDataTable('#miTabla')) {
-                const table = $('#miTabla').DataTable();
-                //table.ajax.reload(null, false);
-                console.log("🔄 Tabla de prácticas recargada correctamente");
-            }
+    // Control de recarga y eventos de visibilidad ===
+    $(document).ready(function () {
+        if (performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+            console.log("📦 Navegación desde caché detectada → forzando recarga completa");
+            location.reload(true);
+        } else {
+            recargarTabla();
         }
 
-        // === ⚙️ Control de recarga y eventos de visibilidad ===
-        $(document).ready(function () {
-            if (performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
-                console.log("📦 Navegación desde caché detectada → forzando recarga completa");
-                location.reload(true);
-            } else {
-                recargarTabla();
-            }
-
-            document.addEventListener("visibilitychange", function () {
-                if (document.visibilityState === "visible") {
-                    recargarTabla();
-                }
-            });
-
-            window.addEventListener('pageshow', function (event) {
-                if (event.persisted) {
-                    console.log("♻️ Página cargada desde caché → recargando");
-                    location.reload(true);
-                } else {
-                    recargarTabla();
-                }
-            });
-
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('refresh') === 'true') {
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible") {
                 recargarTabla();
             }
         });
 
-        // === 🌐 Configuración global del módulo de prácticas ===
-        window.PracticasCfg = {
-            urls: {
-                obtenerEstudiantesPracticas: '@Url.Action("ObtenerEstudiantesPracticas", "Practicas")',
-                obtenerVacantesAsignar: '@Url.Action("ObtenerVacantesAsignar", "Practicas")',
-                asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
-                desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
-                retirarEstudiante: '@Url.Action("RetirarEstudiante", "Practicas")'
-            },
-            rol: @idRol,  // ✅ mantiene tu variable de sesión actual
-            idUsuarioSesion: @(Session["IdUsuario"] ?? 0)
-        };
-        </script>
-    }
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                console.log("♻️ Página cargada desde caché → recargando");
+                location.reload(true);
+            } else {
+                recargarTabla();
+            }
+        });
 
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('refresh') === 'true') {
+            recargarTabla();
+        }
+    });
 
-
-
-
+    // Configuración global del módulo de prácticas ===
+    window.PracticasCfg = {
+        urls: {
+            obtenerEstudiantesPracticas: '@Url.Action("ObtenerEstudiantesPracticas", "Practicas")',
+            obtenerVacantesAsignar: '@Url.Action("ObtenerVacantesAsignar", "Practicas")',
+            asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
+            desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
+            retirarEstudiante: '@Url.Action("RetirarEstudiante", "Practicas")'
+        },
+        rol: @idRol,
+        idUsuarioSesion: @(Session["IdUsuario"] ?? 0)
+    };
+    </script>
+}

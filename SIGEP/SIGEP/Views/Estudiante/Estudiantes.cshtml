@@ -4,11 +4,13 @@
     var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, 3=Prof, 2=Coord, 4=Egr
 }
 
+@section styles {
+    <link href="~/Content/ListaEstudiantes.css" rel="stylesheet" />
+}
 
 <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
     @(idRol == 2 ? "Estudiantes" : idRol == 3 ? "Mis Estudiantes" : "Estudiantes") @DateTime.Now.Year
 </h2>
-
 
 <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
     <div class="dropdown">
@@ -44,12 +46,10 @@
             }
         </div>
     </div>
-
-
 </div>
 
-<div class="card rounded-5 p-3 table-responsive">
-    <table id="tablaEstudiantes" class="display nowrap w-100">
+<div class="card rounded-5 p-3">
+    <table id="tablaEstudiantes" class="display responsive nowrap w-100">
         <thead>
             <tr>
                 <th>Cédula</th>
@@ -61,6 +61,7 @@
                 <th>Acciones</th>
             </tr>
         </thead>
+        <tbody></tbody>
     </table>
 </div>
 
@@ -123,16 +124,13 @@
                 detalle: '@Url.Action("Detalle","Estudiante")',
                 actualizarEstado: '@Url.Action("ActualizarEstado","Estudiante")',
                 eliminarDocumento: '@Url.Action("EliminarDocumento","Estudiante")',
-                desasignarPractica: '@Url.Action("DesasignarPractica","Practicas")',  // ✅ Actualizado
+                desasignarPractica: '@Url.Action("DesasignarPractica","Practicas")',
                 login: '@Url.Action("Login","Home")'
             }
         };
     </script>
 
     <script src="~/Scripts/Estudiantes/ListaEstudiantes.js?v=@DateTime.Now.Ticks"></script>
-
-
-   
 }
 
 

@@ -3,12 +3,16 @@
     ViewBag.Title = "Listado de Empresas";
 }
 
-<h2 class="vacantes-titulo titulo-principal">Empresas Registradas</h2>
+@section styles {
+    <link href="~/Content/ListaEmpresas.css" rel="stylesheet" />
+}
+
+<h2 class="vacantes-titulo titulo-principal text-center">Empresas Registradas</h2>
 
 <button data-bs-toggle="modal" data-bs-target="#ModalAgregarEmpresa"
         class="btn-cta btn-nuevo"
         style="margin-bottom: 25px;">
-    + Nueva Empresa
+    <i class="fas fa-plus"></i> Nueva Empresa
 </button>
 
 <div class="card rounded-5 p-3">
@@ -188,11 +192,11 @@
                     orderable: false,
                     render: function (id, type, row) {
                         return `
-                            <button class="btn btn-accion editar btn-editar-empresa" data-id="${id}" title="Editar">
-                                <i class="fas fa-edit "></i>
+                            <button class="btn-accion btn-editar-empresa" data-id="${id}" title="Editar">
+                                <i class="fas fa-edit"></i>
                             </button>
-                            <a href="#" class="btn btn-accion toggle bg-transparent btn-eliminar-empresa" data-id="${id}" data-nombre="${row.NombreEmpresa}" title="Eliminar">
-                                <i class="fas fa-trash-alt "></i>
+                            <a href="#" class="btn-accion btn-eliminar-empresa" data-id="${id}" data-nombre="${row.NombreEmpresa}" title="Eliminar">
+                                <i class="fas fa-trash-alt"></i>
                             </a>`;
                     }
                 }
