@@ -1474,6 +1474,124 @@ namespace SIGEP.Controllers
             return View();
         }
 
+        //[HttpGet]
+        //public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0, int idEspecialidad = 0)
+        //{
+        //    using (var db = new SIGEPEntities())
+        //    {
+        //        if (Session["IdUsuario"] == null)
+        //            return Json(new { ok = false, message = "Sesión expirada." }, JsonRequestBehavior.AllowGet);
+
+        //        int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
+
+        //        // 1) Especialidad(es) del profesor
+        //        List<int> especialidadesProfesor = new List<int>();
+        //        if (Session["IdEspecialidad"] != null)
+        //        {
+        //            especialidadesProfesor.Add(Convert.ToInt32(Session["IdEspecialidad"]));
+        //        }
+        //        else
+        //        {
+        //            especialidadesProfesor = db.UsuarioEspecialidadTB
+        //                .Where(ue => ue.IdUsuario == idProfesor && ue.IdEstado == 1)
+        //                .Select(ue => ue.IdEspecialidad)
+        //                .ToList();
+        //        }
+
+        //        if (!especialidadesProfesor.Any())
+        //            return Json(new { ok = true, data = new object[0] }, JsonRequestBehavior.AllowGet);
+
+        //        string estadoNorm = (estado ?? "").Trim().ToLower();
+        //        string autog = "autogestionada";
+
+        //        // 2) Query base (con todos los joins originales)
+        //        var q =
+        //            from v in db.VacantesPracticasTB
+
+        //            join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
+        //            from e in je.DefaultIfEmpty()
+
+        //            join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
+        //            from d in jd.DefaultIfEmpty()
+
+        //            join es in db.EstadosTB on v.IdEstado equals es.IdEstado
+
+        //            join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante
+        //            join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad
+
+        //            join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
+        //            from m in jm.DefaultIfEmpty()
+
+        //            where especialidadesProfesor.Contains(ev.IdEspecialidad)
+        //            select new
+        //            {
+        //                v.IdVacante,
+        //                v.Nombre,
+        //                v.IdEmpresa,
+        //                EmpresaNombre = e != null ? e.NombreEmpresa : "",
+        //                v.Requerimientos,
+        //                v.FechaMaxAplicacion,
+        //                v.NumCupos,
+        //                v.FechaCierre,
+        //                v.Descripcion,
+        //                IdModalidad = v.IdModalidad ?? 0,
+        //                ModalidadNombre = m != null ? m.Descripcion : "",
+        //                IdEspecialidad = ev.IdEspecialidad,
+        //                EspecialidadNombre = sp != null ? sp.Nombre : "",
+        //                v.IdEstado,
+        //                EstadoNombre = es != null ? es.Descripcion : "",
+
+        //                EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante),
+
+        //                TipoVacante = v.Tipo
+        //            };
+
+        //        // 3) Excluir Autogestionadas (compatibles con EF)
+        //        q = q.Where(x =>
+        //            ((x.EstadoNombre ?? "").ToLower() != autog) &&
+        //            ((x.TipoVacante ?? "").ToLower() != autog)
+        //        );
+
+        //        // 4) Filtros de UI (compatibles con EF)
+        //        if (!string.IsNullOrEmpty(estadoNorm))
+        //            q = q.Where(x => (x.EstadoNombre ?? "").ToLower() == estadoNorm);
+
+        //        if (idModalidad > 0)
+        //            q = q.Where(x => x.IdModalidad == idModalidad);
+
+        //        if (idEspecialidad > 0)
+        //            q = q.Where(x => x.IdEspecialidad == idEspecialidad);
+
+        //        // 5) Materializar + fechas ISO
+        //        var list = q
+        //            .OrderByDescending(x => x.IdVacante)
+        //            .ToList();
+
+        //        var data = list.Select(x => new
+        //        {
+        //            x.IdVacante,
+        //            x.Nombre,
+        //            x.IdEmpresa,
+        //            x.EmpresaNombre,
+        //            x.Requerimientos,
+        //            FechaMaxAplicacion = x.FechaMaxAplicacion.HasValue ? x.FechaMaxAplicacion.Value.ToString("o") : null,
+        //            NumCupos = x.NumCupos ?? 0,
+        //            FechaCierre = x.FechaCierre.HasValue ? x.FechaCierre.Value.ToString("o") : null,
+        //            x.Descripcion,
+        //            x.IdModalidad,
+        //            x.ModalidadNombre,
+        //            x.IdEspecialidad,
+        //            x.EspecialidadNombre,
+        //            x.IdEstado,
+        //            x.EstadoNombre,
+        //            x.EstudiantesPostulados
+        //            // DireccionExacta = x.DireccionExacta  // si decides exponerla
+        //        });
+
+        //        return Json(new { ok = true, data }, JsonRequestBehavior.AllowGet);
+        //    }
+        //}
+
         [HttpGet]
         public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0, int idEspecialidad = 0)
         {
@@ -1484,7 +1602,7 @@ namespace SIGEP.Controllers
 
                 int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
 
-                // 1) Especialidad(es) del profesor
+                // 1️⃣ Especialidad(es) del profesor
                 List<int> especialidadesProfesor = new List<int>();
                 if (Session["IdEspecialidad"] != null)
                 {
@@ -1504,15 +1622,17 @@ namespace SIGEP.Controllers
                 string estadoNorm = (estado ?? "").Trim().ToLower();
                 string autog = "autogestionada";
 
-                // 2) Query base (con todos los joins originales)
+                // 2️⃣ 🔹 ESTADOS QUE OCUPAN CUPO (aplicaciones reales)
+                // IMPORTANTE: Estado 3 (En proceso de Aplicación) NO está aquí
+                var estadosOcupanCupo = new[] { 5, 6, 8, 9, 11 };
+                // 5=Asignada, 6=Aprobada, 8=Finalizada, 9=Rezagado, 11=En Curso
+
+                // 3️⃣ Query base
                 var q =
                     from v in db.VacantesPracticasTB
 
                     join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
                     from e in je.DefaultIfEmpty()
-
-                    join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
-                    from d in jd.DefaultIfEmpty()
 
                     join es in db.EstadosTB on v.IdEstado equals es.IdEstado
 
@@ -1540,19 +1660,28 @@ namespace SIGEP.Controllers
                         EspecialidadNombre = sp != null ? sp.Nombre : "",
                         v.IdEstado,
                         EstadoNombre = es != null ? es.Descripcion : "",
+                        TipoVacante = v.Tipo,
 
-                        EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante),
-
-                        TipoVacante = v.Tipo
+                        // 🔹 CONTEO CORRECTO: Solo estados que ocupan cupo
+                        // Excluye: En proceso de Aplicación (3), Rechazada (4), Retirada (7)
+                        EstudiantesPostulados = (
+                            from p in db.PracticaEstudianteTB
+                            join ue in db.UsuarioEspecialidadTB on p.IdUsuario equals ue.IdUsuario
+                            where p.IdVacante == v.IdVacante
+                               && estadosOcupanCupo.Contains(p.IdEstado)  // 🔥 Solo estados activos
+                               && ue.IdEspecialidad == ev.IdEspecialidad
+                               && ue.IdEstado == 1  // Especialidad activa
+                            select p.IdUsuario
+                        ).Distinct().Count()
                     };
 
-                // 3) Excluir Autogestionadas (compatibles con EF)
+                // 4️⃣ Excluir Autogestionadas
                 q = q.Where(x =>
                     ((x.EstadoNombre ?? "").ToLower() != autog) &&
                     ((x.TipoVacante ?? "").ToLower() != autog)
                 );
 
-                // 4) Filtros de UI (compatibles con EF)
+                // 5️⃣ Filtros de UI
                 if (!string.IsNullOrEmpty(estadoNorm))
                     q = q.Where(x => (x.EstadoNombre ?? "").ToLower() == estadoNorm);
 
@@ -1562,10 +1691,8 @@ namespace SIGEP.Controllers
                 if (idEspecialidad > 0)
                     q = q.Where(x => x.IdEspecialidad == idEspecialidad);
 
-                // 5) Materializar + fechas ISO
-                var list = q
-                    .OrderByDescending(x => x.IdVacante)
-                    .ToList();
+                // 6️⃣ Materializar + formatear fechas
+                var list = q.OrderByDescending(x => x.IdVacante).ToList();
 
                 var data = list.Select(x => new
                 {
@@ -1574,9 +1701,13 @@ namespace SIGEP.Controllers
                     x.IdEmpresa,
                     x.EmpresaNombre,
                     x.Requerimientos,
-                    FechaMaxAplicacion = x.FechaMaxAplicacion.HasValue ? x.FechaMaxAplicacion.Value.ToString("o") : null,
+                    FechaMaxAplicacion = x.FechaMaxAplicacion.HasValue
+                        ? x.FechaMaxAplicacion.Value.ToString("o")
+                        : null,
                     NumCupos = x.NumCupos ?? 0,
-                    FechaCierre = x.FechaCierre.HasValue ? x.FechaCierre.Value.ToString("o") : null,
+                    FechaCierre = x.FechaCierre.HasValue
+                        ? x.FechaCierre.Value.ToString("o")
+                        : null,
                     x.Descripcion,
                     x.IdModalidad,
                     x.ModalidadNombre,
@@ -1584,14 +1715,12 @@ namespace SIGEP.Controllers
                     x.EspecialidadNombre,
                     x.IdEstado,
                     x.EstadoNombre,
-                    x.EstudiantesPostulados
-                    // DireccionExacta = x.DireccionExacta  // si decides exponerla
+                    x.EstudiantesPostulados  // ✅ Ahora excluye "En proceso de Aplicación"
                 });
 
                 return Json(new { ok = true, data }, JsonRequestBehavior.AllowGet);
             }
         }
-
 
         [HttpGet]
         public ActionResult MiPractica()

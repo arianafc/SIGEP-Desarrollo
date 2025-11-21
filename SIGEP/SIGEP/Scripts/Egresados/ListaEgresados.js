@@ -10,14 +10,15 @@
 
 function inicializarTabla() {
     $("#miTabla").DataTable({
-        dom: '<"d-flex justify-content-between mb-2"Bf>rt<"d-flex justify-content-between mt-3"lip>',
+        // El 'f' es el campo de búsqueda (filter/search)
+        // B = botones, f = búsqueda, r = processing, t = tabla, i = info, l = length, p = paginación
+        dom: '<"d-flex justify-content-between align-items-center mb-3"Bf>rt<"d-flex justify-content-between align-items-center mt-3"lip>',
         buttons: [
             {
                 extend: 'excelHtml5',
                 text: '<i class="fas fa-file-excel"></i> Exportar a Excel',
                 className: 'btn btn-verde-personalizado btn-sm'
             },
-            
             {
                 extend: 'print',
                 text: '<i class="fas fa-print"></i> Imprimir',
@@ -43,8 +44,8 @@ function inicializarTabla() {
 function cargarEgresados() {
     var idEspecialidad = $("#ddlEspecialidad").val() || 0;
     var anio = $("#ddlAnio").val() || 0;
-
     var tabla = $("#miTabla").DataTable();
+
     tabla.clear().draw();
 
     $.ajax({
@@ -72,4 +73,3 @@ function cargarEgresados() {
         }
     });
 }
-

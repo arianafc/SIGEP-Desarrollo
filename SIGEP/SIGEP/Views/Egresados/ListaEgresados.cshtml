@@ -4,20 +4,23 @@
     var idRol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0; // 1=Est, 2=Coord, 3=Prof, 4=Egr
 }
 
+@section styles {
+    <link href="~/Content/ListaEgresados.css" rel="stylesheet" />
+}
+
 @if (idRol == 2)
 {
-    <h2 class="vacantes-titulo titulo-principal d-flex justify-content-center align-items-center">
+    <h2 class="vacantes-titulo titulo-principal text-center mb-4">
         Listado de Egresados
     </h2>
 
     <!-- Filtros con estilo uniforme -->
-    <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-3 align-items-center">
+    <div class="d-flex justify-content-between mb-3 align-items-center">
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="filtroDropdown"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-filter"></i>
+                <i class="fas fa-filter"></i> Filtros
             </button>
-
             <div class="dropdown-menu p-3" style="min-width: 300px;">
                 <div class="mb-2">
                     <label>Especialidad</label>
@@ -29,7 +32,6 @@
                         }
                     </select>
                 </div>
-
                 <div class="mb-2">
                     <label>Año de Generación</label>
                     <select id="ddlAnio" class="form-control">
@@ -59,7 +61,6 @@
             <tbody></tbody>
         </table>
     </div>
-
 
     @section Scripts {
         <script src="~/Scripts/Egresados/ListaEgresados.js?v=@DateTime.Now.Ticks"></script>

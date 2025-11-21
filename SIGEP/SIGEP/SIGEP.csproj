@@ -394,6 +394,7 @@
     <Content Include="Content\imagenes\CTP_BG.jpg" />
     <Content Include="Content\imagenes\HPcolegio.jpg" />
     <Content Include="Content\imagenes\HPcolegio.jpg.jpg" />
+    <Content Include="Content\ListaEgresados.css" />
     <Content Include="Content\ListaEmpresas.css" />
     <Content Include="Content\ListaEstudiantes.css" />
     <Content Include="Content\PracticasCoordinador.css" />

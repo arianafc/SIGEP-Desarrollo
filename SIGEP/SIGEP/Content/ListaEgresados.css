@@ -1,0 +1,223 @@
+﻿/* ==================== ESTILOS PARA TABLA EGRESADOS ==================== */
+
+/* Fondo blanco en filas */
+table.dataTable tbody tr {
+    background-color: #fff !important;
+}
+
+/* Encabezado de tabla */
+table.dataTable thead {
+    background-color: #2D594D;
+    color: white;
+}
+
+table.dataTable th,
+table.dataTable td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.dataTable th {
+    color: #fff !important;
+}
+
+/* Hover en filas */
+table.dataTable tbody tr:hover {
+    background-color: #EAF2D8;
+}
+
+/* Tarjeta contenedora de tabla */
+.card.rounded-5 {
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    background-color: #fff;
+}
+
+/* ==================== TÍTULO ==================== */
+.vacantes-titulo {
+    color: #2D594D;
+    font-weight: 600;
+}
+
+/* ==================== FILTROS DROPDOWN ==================== */
+.dropdown-menu label {
+    color: #2D594D;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.dropdown-menu .form-control {
+    border-radius: 6px;
+}
+
+.btn-outline-secondary {
+    color: #2D594D;
+    border-color: #2D594D;
+}
+
+    .btn-outline-secondary:hover {
+        background-color: #2D594D;
+        border-color: #2D594D;
+        color: white;
+    }
+
+    .btn-outline-secondary i {
+        font-size: 1rem;
+    }
+
+/* ==================== CAMPO DE BÚSQUEDA DATATABLES ==================== */
+.dataTables_wrapper .dataTables_filter {
+    float: none;
+    text-align: right;
+}
+
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 6px 12px;
+        margin-left: 0.5em;
+    }
+
+        .dataTables_wrapper .dataTables_filter input:focus {
+            outline: none;
+            border-color: #2D594D;
+            box-shadow: 0 0 0 0.2rem rgba(45, 89, 77, 0.25);
+        }
+
+    .dataTables_wrapper .dataTables_filter label {
+        color: #2D594D;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+/* ==================== BOTONES DATATABLES ==================== */
+.dt-buttons {
+    float: left;
+}
+
+.btn-verde-personalizado {
+    background-color: #2d594d !important;
+    color: white !important;
+    border: none !important;
+    padding: 6px 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+}
+
+    .btn-verde-personalizado:hover {
+        background-color: #244738 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-verde-personalizado i {
+        margin-right: 5px;
+    }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.85rem;
+        padding: 8px 4px;
+    }
+
+    .card.rounded-5 {
+        padding: 1rem !important;
+    }
+
+    .dropdown-menu {
+        min-width: 250px !important;
+    }
+
+    .vacantes-titulo {
+        font-size: 1.5rem;
+    }
+
+    /* Ajustar búsqueda y botones en móvil */
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+        .dataTables_wrapper .dataTables_filter input {
+            width: 100%;
+            margin-left: 0;
+            margin-top: 5px;
+        }
+
+    .dt-buttons {
+        float: none;
+        margin-bottom: 10px;
+    }
+
+    .btn-verde-personalizado {
+        font-size: 0.85rem;
+        padding: 5px 10px;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 576px) {
+    table.dataTable th,
+    table.dataTable td {
+        font-size: 0.75rem;
+        padding: 6px 2px;
+    }
+
+    .dropdown-menu {
+        min-width: 200px !important;
+    }
+
+    .vacantes-titulo {
+        font-size: 1.25rem;
+    }
+}
+
+/* ==================== ANIMACIÓN ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card.rounded-5 {
+    animation: fadeIn 0.4s ease;
+}
+
+/* ==================== AJUSTES ESPECÍFICOS PARA TABLA ==================== */
+table.dataTable td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+@media (max-width: 768px) {
+    table.dataTable td {
+        white-space: normal;
+        max-width: 150px;
+    }
+}
+
+/* ==================== ALERT (Sin permisos) ==================== */
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+    .alert-danger h4 {
+        color: #721c24;
+        font-weight: 600;
+    }
