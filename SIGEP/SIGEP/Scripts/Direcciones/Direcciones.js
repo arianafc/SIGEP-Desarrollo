@@ -21,22 +21,13 @@ async function cargarJSONDirecciones() {
     }
 }
 
-/**
- * Busca el "grupo" de selects (provincia, cantón, distrito) relacionados,
- * partiendo de uno de ellos (provincia o cantón).
- * 
- * Estrategia:
- * - Subimos al ancestro más cercano que sea <form> o un contenedor
- *   (row / card / .modal-body, etc).
- * - Dentro de ese contenedor buscamos ddl-provincia / ddl-canton / ddl-distrito.
- */
 function obtenerGrupoSelects(select) {
     if (!select) return {};
 
-    // Ancestro que agrupa el formulario (puedes ajustar este selector si ocupas)
+ 
     let contenedor = select.closest('form');
     if (!contenedor) {
-        // fallback por si no está dentro de un form
+   
         contenedor = select.closest('.modal-content') ||
             select.closest('.row') ||
             document;
@@ -69,7 +60,7 @@ function cargarCantones(provinciaSelectEl) {
     const provinciaNombre = provinciaSelect.value;
     console.log('Provincia seleccionada:', provinciaNombre);
 
-    // Limpiar cantones y distritos
+   
     cantonSelect.innerHTML = '<option value="">Seleccione un cantón</option>';
     distritoSelect.innerHTML = '<option value="">Seleccione un distrito</option>';
 
@@ -77,8 +68,7 @@ function cargarCantones(provinciaSelectEl) {
         return;
     }
 
-    const provincias = direccionesData.provincias || direccionesData.Provincias || direccionesData; // por si cambia la raíz
-
+    const provincias = direccionesData.provincias || direccionesData.Provincias || direccionesData; 
     const provinciaKey = Object.keys(provincias).find(
         key => provincias[key].nombre === provinciaNombre
     );
@@ -172,9 +162,9 @@ function cargarDistritos(cantonSelectEl) {
     });
 }
 
-// Cargar JSON cuando el DOM esté listo
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', cargarJSONDirecciones);
 } else {
     cargarJSONDirecciones();
 }
+

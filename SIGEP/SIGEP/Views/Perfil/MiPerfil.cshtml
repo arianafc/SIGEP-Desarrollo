@@ -11,59 +11,7 @@
 }
 
 @section Styles {
-    <style>
-
-        body {
-            background-color: #F2F2F2;
-            font-family: 'Rubik', sans-serif;
-        }
-
-        .perfil-wrapper {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .info-box {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .perfil-icon {
-            width: 120px;
-            height: 120px;
-            background-color: #2D594D;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 50px;
-            margin: 0 auto 2rem auto;
-        }
-
-        .section-title {
-            color: #2D594D;
-            font-weight: 600;
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #8CA653;
-            padding-bottom: .5rem;
-        }
-
-        .form-group label {
-            font-weight: 500;
-            color: #2D594D;
-        }
-
-        .form-control {
-            background-color: #ffffff;
-            border: 1px solid #8CA653;
-            border-radius: 6px;
-        }
-    </style>
+    <link href="~/Content/estilos/MiPerfil.css" rel="stylesheet" />
 }
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -166,7 +114,12 @@
                             "San José","Alajuela","Cartago","Heredia","Guanacaste","Puntarenas","Limón"
                         }, Model.provincia),
                         "Seleccione una provincia",
-                        new { @class = "form-control", onchange = "cargarCantones()", required = "required" }
+                        new
+                            {
+                                @class = "form-control ddl-provincia",
+                            onchange = "cargarCantones(this)",
+                            required = "required"
+                        }
                     )
                 </div>
 
@@ -175,7 +128,12 @@
                     @Html.DropDownListFor(m => m.canton,
                         new SelectList(Enumerable.Empty<string>(), Model.canton),
                         "Seleccione un cantón",
-                        new { @class = "form-control", onchange = "cargarDistritos()", required = "required" }
+                        new
+                            {
+                            @class = "form-control ddl-canton",
+                            onchange = "cargarDistritos(this)",
+                            required = "required"
+                        }
                     )
                 </div>
 
@@ -184,7 +142,11 @@
                     @Html.DropDownListFor(m => m.distrito,
                         new SelectList(Enumerable.Empty<string>(), Model.distrito),
                         "Seleccione un distrito",
-                        new { @class = "form-control", required = "required" }
+                        new
+                            {
+                            @class = "form-control ddl-distrito",
+                            required = "required"
+                        }
                     )
                 </div>
 
@@ -455,7 +417,7 @@
                                     <td>@encargados.Parentesco</td>
                                     <td>@encargados.Ocupacion</td>
                                     <td>@encargados.LugarTrabajo</td>
-                                 
+
                                     <td>
                                         @if (encargados.IdEstado == 1)
                                         {
@@ -676,7 +638,7 @@
             <!-- Body -->
             <div class="modal-body">
                 <div class="list-group" id="listaDocumentos">
-                   
+
                 </div>
             </div>
         </div>
@@ -685,8 +647,17 @@
 
 
 @section scripts {
-    <script src="~/Scripts/Practicas/Autogestion.js"></script>
+    <script src="~/Scripts/Direcciones/Direcciones.js"></script>
+    <script src="~/Scripts/Perfil/CargarDireccionesPerfil.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            inicializarDireccionDesdeModelo(
+                '@Model.provincia',
+                '@Model.canton',
+                '@Model.distrito'
+            );
+        });
+    </script>
     <script src="~/Scripts/Perfil/Perfil.js"></script>
-
 }
 

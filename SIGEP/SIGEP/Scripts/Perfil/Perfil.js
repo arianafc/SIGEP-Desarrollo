@@ -1,5 +1,5 @@
 ﻿$(function () {
-
+    
     $('#btnSubirDoc').on('click', function () {
         var archivo = $('#ArchivoDoc')[0].files[0];
         var idUsuario = $('#IdUsuarioDoc').val();
