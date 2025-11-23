@@ -361,3 +361,23 @@ END
 GO
 
 
+CREATE OR ALTER PROCEDURE ObtenerBolsaEmpleoSP
+AS
+BEGIN
+    
+    SELECT B.IdEmpleo, B.Empresa, B.IdEstado, B.Descripcion, B.Requisitos, B.FechaPublicacion, B.FechaLimite, B.IdDireccion, B.AreaAfin, D.DireccionExacta,
+    D.IdDistrito, Di.Nombre as Distrito, M.Descripcion as Modalidad, p.IdProvincia, P.Nombre as Provincia, C.IdCanton, C.Nombre as Canton, M.IdModalidad
+    FROM BolsaEmpleoTB B
+    LEFT JOIN DireccionesTB D
+    ON B.IdDireccion = D.IdDireccion
+    LEFT JOIN DistritosTB Di
+    ON D.IdDistrito = Di.IdDistrito
+    LEFT JOIN CantonesTB C
+    ON di.IdCanton = c.IdCanton
+    LEFT JOIN ProvinciasTB P
+    ON C.IdProvincia = P.IdProvincia
+    LEFT JOIN ModalidadesTB M
+    ON M.IdModalidad = B.IdModalidad
+
+
+END
