@@ -201,9 +201,9 @@
         }
 
         // Validar teléfono (solo números y mínimo 8 dígitos)
-        var telefonoPattern = /^\d{8,}$/;
+        var telefonoPattern = /^\d{8}$/;
         if (!telefonoPattern.test(data.telefono)) {
-            Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+            Swal.fire('Error', 'Ingrese un número de teléfono válido (8 dígitos).', 'error');
             return;
         }
 
@@ -266,9 +266,10 @@
         }
 
         // Validar teléfono (solo números y mínimo 8 dígitos)
-        var telefonoPattern = /^\d{8,}$/;
+        var telefonoPattern = /^\d{8}$/;
+
         if (!telefonoPattern.test(data.Telefono)) {
-            Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+            Swal.fire('Error', 'Ingrese un número de teléfono válido (8 dígitos).', 'error');
             return;
         }
 
@@ -518,14 +519,6 @@ $('#CedulaNuevoEncargado').on('blur', function () {
             } else {
                 // Si no existe, limpia el formulario
                 $('#NombreNuevoEncargado, #Apellido1NuevoEncargado, #Apellido2NuevoEncargado, #TelefonoNuevoEncargado, #CorreoNuevoEncargado, #ParentescoNuevoEncargado, #OcupacionNuevoEncargado, #ResidenciaNuevoEncargado').val('');
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No encontrado',
-                    text: 'No existe un encargado con esa cédula. Puede registrarlo nuevo.',
-                    timer: 2500,
-                    showConfirmButton: false
-                });
             }
         },
         error: function () {
@@ -576,9 +569,9 @@ $('#ActualizarPerfil').on('submit', function (e) {
     }
 
     // Validar teléfono (solo números y mínimo 8 dígitos)
-    var telefonoPattern = /^\d{8,}$/;
+    var telefonoPattern = /^\d{8}$/;
     if (!telefonoPattern.test(telefono)) {
-        Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+        Swal.fire('Error', 'Ingrese un número de teléfono válido (8 dígitos).', 'error');
         return;
     }
     // Confirmación antes de enviar
