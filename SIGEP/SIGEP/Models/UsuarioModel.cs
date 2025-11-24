@@ -34,7 +34,6 @@ namespace SIGEP.Models
         public string NombreSeccion { get; set; }
         public List<SeccionesTB> ListaSecciones { get; set; }
         public List<EspecialidadesTB> ListaEspecialidades { get; set; }
-
         public string Padecimiento { get; set; }
 
         public string Alergia { get; set; }
@@ -73,5 +72,8 @@ namespace SIGEP.Models
         public string EmpresaActual{ get; set; }
 
         public string PuestoActual { get; set; }
+
+
+        public List<UsuarioEspecialidadModel> ListaEspecialidadesUsuario { get; set; }
     }
 }

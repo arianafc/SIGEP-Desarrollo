@@ -7,6 +7,7 @@
     var usuario = Session["IdUsuario"] != null ? Convert.ToInt32(Session["IdUsuario"]) : 0;
     var NombreCompleto = $"{Session["Nombre"] ?? ""} {Session["Apellido1"] ?? ""}";
     var encargado = Model.ListaEncargadoMostrar?.FirstOrDefault();
+    var especialidades = Model.ListaEspecialidadesUsuario;
 
 }
 
@@ -190,7 +191,7 @@
 
 
 
-        @if (rol == 1 || rol == 4)
+        @if (rol != 2)
         {
             <h5 class="section-title">INFORMACIÓN ACADÉMICA</h5>
 
@@ -202,21 +203,21 @@
 
                     <div class=" form-group">
                         @Html.DropDownListFor(
-        model => model.IdEspecialidad,
-        new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre", Model.IdEspecialidad),
-        "Seleccione una especialidad",
-        new { @class = "form-control" }
-      )
+          model => model.IdEspecialidad,
+          new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre", Model.IdEspecialidad),
+          "Seleccione una especialidad",
+          new { @class = "form-control" }
+        )
                     </div>
 
                     <div class="form-group">
                         <label>Sección</label>
                         @Html.DropDownListFor(
-                              model => model.IdSeccion,
-                              new SelectList(Model.ListaSecciones, "IdSeccion", "Seccion", Model.IdSeccion),
-                              "Seleccione una sección",
-                              new { @class = "form-control" }
-                          )
+                                model => model.IdSeccion,
+                                new SelectList(Model.ListaSecciones, "IdSeccion", "Seccion", Model.IdSeccion),
+                                "Seleccione una sección",
+                                new { @class = "form-control" }
+                            )
                     </div>
 
 
@@ -229,96 +230,162 @@
 
             }
 
-
-            if (rol == 4)
+            if (rol == 3)
             {
-                using (Html.BeginForm("ActualizarInformacionAcademica", "Perfil", FormMethod.Post, new { @id = "ActualizarInfoAcademicaForm", @class = "row" }))
+                if (especialidades != null)
                 {
+                    <table class="table table-hover align-middle">
+                        <thead class=" text-center" style="background-color: #dddddd">
+                            <tr>
+                                <th>Especialidad</th>
+                                <th>Acciones</th>
+                            </tr>
 
-                    <div class="col-md-6 form-group">
-                        <label>Carrera</label>
-                        @Html.TextBoxFor(m => m.Carrera, new { @class = "form-control" })
-                    </div>
-                    <div class="col-md-6 form-group">
-                        <label>Año De Graduación</label>
-                        @Html.TextBoxFor(m => m.AnnoGraduacion, new { @class = "form-control", @type = "number" })
-                    </div>
-                    <div class="col-md-12 form-group">
-                        <label>Título</label>
-                        @Html.TextBoxFor(m => m.TituloObtenido, new { @class = "form-control" })
+                        <tbody class="text-center">
+
+                            @foreach (var u in especialidades)
+                            {
+                                <tr>
+                                    <td>@u.Nombre</td>
+                                    <td>
+                                        @if (@u.IdEstado == 1)
+                                        {
+                                            <!-- ACTIVA: mostrar Editar + Desactivar -->
+                                            <button class="btn btn-sm btn-primary btnEditarEspecialidad"
+                                                    style="background-color: #8CA653; color: white; border: none; border-radius: 2px"
+                                                    data-idusuarioespecialidad="@u.IdUsuarioEspecialidad"
+                                                    data-idespecialidad="@u.IdEspecialidad">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm"
+                                                    style="background-color: brown; color: white; border: none; border-radius: 2px"
+                                                    onclick="cambiarEstadoEspecialidad(@u.IdUsuarioEspecialidad)">
+                                                <i class="fas fa-toggle-off"></i> @* desactivar *@
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <!-- INACTIVA: solo Activar -->
+                                            <button type="button"
+                                                    class="btn btn-success btn-sm"
+                                                    style="background-color: #2D594D; color: white; border: none; border-radius: 2px"
+                                                    onclick="cambiarEstadoEspecialidad(@u.IdUsuarioEspecialidad)">
+                                                <i class="fas fa-toggle-on"></i> @* activar *@
+                                            </button>
+                                        }
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="action-buttons mt-3 col-md-12 form-group">
+                            <button type="button" class="btn btn-primary" id="BtnAgregarEspecialidad" data-bs-toggle="modal" data-bs-target="#modalAgregarEspecialidad">
+                                <i class="fas fa-plus me-2"></i> Agregar Especialidad
+                            </button>
+                        </div>
+
                     </div>
 
-                    <div class="action-buttons mt-3 mb-4">
-                        <button type="submit" id="btnActualizarAcademica">
-                            <i class="fas fa-edit me-2"></i> Actualizar Información Académica
-                        </button>
-                    </div>
+
+
                 }
 
+
+
+
+                if (rol == 4)
+                {
+                    using (Html.BeginForm("ActualizarInformacionAcademica", "Perfil", FormMethod.Post, new { @id = "ActualizarInfoAcademicaForm", @class = "row" }))
+                    {
+
+                        <div class="col-md-6 form-group">
+                            <label>Carrera</label>
+                            @Html.TextBoxFor(m => m.Carrera, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Año De Graduación</label>
+                            @Html.TextBoxFor(m => m.AnnoGraduacion, new { @class = "form-control", @type = "number" })
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>Título</label>
+                            @Html.TextBoxFor(m => m.TituloObtenido, new { @class = "form-control" })
+                        </div>
+
+                        <div class="action-buttons mt-3 mb-4">
+                            <button type="submit" id="btnActualizarAcademica">
+                                <i class="fas fa-edit me-2"></i> Actualizar Información Académica
+                            </button>
+                        </div>
+                    }
+
+                }
+
+                if (rol == 1)
+                {
+                    <!-- CONTACTO EMERGENCIA -->
+                    <h5 class="section-title">ENCARGADOS</h5>
+                    if (encargado != null)
+                    {
+                        <div class="row mb-3 p-3 rounded">
+                            <div class="col-md-6 form-group">
+                                <label>Cédula</label>
+                                <input type="text" class="form-control" value="@encargado.Cedula" readonly />
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label>Nombre y Apellidos</label>
+                                <input type="text" class="form-control" value="@encargado.Nombre" readonly />
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label>Teléfono</label>
+                                <input type="text" class="form-control" value="@encargado.Telefono" readonly />
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label>Parentesco</label>
+                                <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label>Residencia o Trabajo</label>
+                                <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label>Ocupación</label>
+                                <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
+                            </div>
+
+
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No hay encargado registrado.</p>
+                    }
+
+                    <div class="row">
+                        <div class="action-buttons mt-3 col-md-6 form-group">
+                            <button type="button" class="btn btn-primary" id="BtnVerEncargadosModal" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
+                                <i class="fas fa-plus me-2"></i> Agregar Encargado
+                            </button>
+                        </div>
+                        <div class="action-buttons mt-3 col-md-6 form-group">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
+                                <i class="fas fa-eye me-2"></i> Ver Encargados
+                            </button>
+                        </div>
+                    </div>
+
+                }
             }
-
-
-
         }
-        @if (rol == 1)
-        {
-            <!-- CONTACTO EMERGENCIA -->
-            <h5 class="section-title">ENCARGADOS</h5>
-            if (encargado != null)
-            {
-                <div class="row mb-3 p-3 rounded">
-                    <div class="col-md-6 form-group">
-                        <label>Cédula</label>
-                        <input type="text" class="form-control" value="@encargado.Cedula" readonly />
-                    </div>
 
-                    <div class="col-md-6 form-group">
-                        <label>Nombre y Apellidos</label>
-                        <input type="text" class="form-control" value="@encargado.Nombre" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Teléfono</label>
-                        <input type="text" class="form-control" value="@encargado.Telefono" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Parentesco</label>
-                        <input type="text" class="form-control" value="@encargado.Parentesco" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Residencia o Trabajo</label>
-                        <input type="text" class="form-control" value="@encargado.LugarTrabajo" readonly />
-                    </div>
-
-                    <div class="col-md-6 form-group">
-                        <label>Ocupación</label>
-                        <input type="text" class="form-control" value="@encargado.Ocupacion" readonly />
-                    </div>
-
-
-                </div>
-            }
-            else
-            {
-                <p class="text-muted">No hay encargado registrado.</p>
-            }
-
-            <div class="row">
-                <div class="action-buttons mt-3 col-md-6 form-group">
-                    <button type="button" class="btn btn-primary" id="BtnVerEncargadosModal" data-bs-toggle="modal" data-bs-target="#modalAgregarEncargado">
-                        <i class="fas fa-plus me-2"></i> Agregar Encargado
-                    </button>
-                </div>
-                <div class="action-buttons mt-3 col-md-6 form-group">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalVerEncargados">
-                        <i class="fas fa-eye me-2"></i> Ver Encargados
-                    </button>
-                </div>
-            </div>
-
-        }
         @if (rol == 4)
         {
 
@@ -374,6 +441,84 @@
                 </div>
             }
         }
+    </div>
+</div>
+
+
+
+
+<!--Modal par actualizar especialidad profe-->
+<div class="modal fade" id="modalEditarEspecialidad" tabindex="-1" aria-labelledby="modalEditarEspecialidadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+            <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title text-white" id="modalEditarEspecialidadLabel">Editar Especialidad</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" id="IdUsuarioEspecialidadEditar" />
+
+                    <div class="row">
+                        <div class="form-group">
+                            @* Reutilizamos la misma lista de especialidades *@
+                            @Html.DropDownList(
+                                "IdEspecialidadEditar",
+                                new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre"),
+                                "Seleccione una especialidad",
+                                new { @class = "form-control", id = "IdEspecialidadEditar" }
+                            )
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnActualizarEspecialidad" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--Modal para agregar especialidad profesor-->
+
+<div class="modal fade" id="modalAgregarEspecialidad" tabindex="-1" aria-labelledby="modalAgregarEspecialidad" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 10px; background-color: #F2F2F2;">
+
+            <!-- Header -->
+            <div class="modal-header" style="background-color: #2D594D; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title text-white" id="modalAgregarEncargadoLabel">Agregar Nueva Especialidad</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class=" form-group">
+                            @Html.DropDownListFor(
+              model => model.IdEspecialidad,
+              new SelectList(Model.ListaEspecialidades, "IdEspecialidad", "Nombre", Model.IdEspecialidad),
+              "Seleccione una especialidad",
+              new { @class = "form-control" }
+            )
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer" style="background-color: #F2F2F2; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                <button type="button" class="btn btn-secondary" style="background-color: #A0A0A0; border: none;" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnGuardarEspecialidad" class="btn" style="background-color: #2D594D; color: white; border: none;">Guardar Especialidad</button>
+            </div>
+        </div>
     </div>
 </div>
 
