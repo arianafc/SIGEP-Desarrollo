@@ -381,3 +381,50 @@ BEGIN
 
 
 END
+
+------SP Historico
+USE [SIGEP]
+GO
+
+/****** Object:  StoredProcedure [dbo].[HistoricoPracticasSP]    Script Date: 24/11/2025 18:36:50 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE OR ALTER   PROCEDURE [dbo].[HistoricoPracticasSP]
+AS
+BEGIN
+
+SELECT 
+    P.IdPractica, 
+    P.IdVacante, 
+    P.IdUsuario, 
+    U.Nombre,
+    U.Apellido1,
+    U.Apellido2,
+    P.FechaAplicacion, 
+    P.IdEstado, 
+    V.Nombre AS NombreVacante,
+    V.Requerimientos, 
+    V.FechaMaxAplicacion, 
+    V.NumCupos, 
+    V.FechaCierre, 
+    V.Descripcion,
+    V.Tipo, 
+    M.Descripcion AS Modalidad, 
+    EV.IdEspecialidad, 
+    E.Nombre AS Especialidad
+FROM PracticaEstudianteTB P
+INNER JOIN VacantesPracticasTB V ON P.IdVacante = V.IdVacante
+INNER JOIN ModalidadesTB M ON V.IdModalidad = M.IdModalidad
+LEFT JOIN EspecialidadesVacantesTB EV ON EV.IdVacante = P.IdVacante
+INNER JOIN EspecialidadesTB E ON E.IdEspecialidad = EV.IdEspecialidad
+INNER JOIN UsuariosTB U ON P.IdUsuario = U.IdUsuario
+WHERE P.FechaAplicacion IS NOT NULL
+  AND YEAR(P.FechaAplicacion) < YEAR(GETDATE());
+END;
+GO
+
+
