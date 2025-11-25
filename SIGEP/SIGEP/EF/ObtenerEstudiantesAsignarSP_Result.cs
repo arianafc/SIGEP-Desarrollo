@@ -11,19 +11,17 @@ namespace SIGEP.EF
 {
     using System;
     
-    public partial class ObtenerPerfilEstudianteSP_Result
+    public partial class ObtenerEstudiantesAsignarSP_Result
     {
+        public int IdUsuario { get; set; }
+        public string Cedula { get; set; }
         public string NombreCompleto { get; set; }
-        public string Correo { get; set; }
-        public string Telefono { get; set; }
-        public string Direccion { get; set; }
-        public string Sexo { get; set; }
         public string Especialidad { get; set; }
-        public Nullable<int> Edad { get; set; }
-        public string Seccion { get; set; }
-        public string NombreEmpresa { get; set; }
-        public string TelefonoEmpresa { get; set; }
-        public Nullable<int> IdVacante { get; set; }
-        public Nullable<int> IdUsuario { get; set; }
+        public bool EstadoAcademico { get; set; }
+        public string EstadoPractica { get; set; }
+        public string EstadoVacante { get; set; }
+        public int IdPracticaVacante { get; set; }
+        public Nullable<bool> TieneRelacionEnVacante { get; set; }
+        public Nullable<bool> TienePracticaActiva { get; set; }
     }
 }

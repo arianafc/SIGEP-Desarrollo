@@ -188,6 +188,11 @@ GO
 
 USE SIGEP;
 GO
+
+
+--11-11-25
+USE SIGEP;
+GO
 CREATE OR ALTER PROCEDURE FinalizarPracticasSP
     @IdUsuarioCoordinador INT
 AS
@@ -199,17 +204,20 @@ BEGIN
         @idEstadoRezagado   INT,
         @idEstadoFinalizada INT,
         @idEstadoArchivado  INT,
-        @idRolEgresado      INT;
+        @idRolEgresado      INT,
+        @idRolEstudiante    INT;
 
+    -- Obtener IDs de estados y roles
     SELECT @idEstadoAprobada   = IdEstado FROM EstadosTB WHERE Descripcion = 'Aprobada';
     SELECT @idEstadoRezagado   = IdEstado FROM EstadosTB WHERE Descripcion = 'Rezagado';
     SELECT @idEstadoFinalizada = IdEstado FROM EstadosTB WHERE Descripcion = 'Finalizada';
     SELECT @idEstadoArchivado  = IdEstado FROM EstadosTB WHERE Descripcion = 'Archivado';
-    SELECT @idRolEgresado      = IdRol    FROM RolesTB   WHERE Descripcion = 'Egresado';
+    SELECT @idRolEgresado      = IdRol FROM RolesTB WHERE Descripcion = 'Egresado';
+    SELECT @idRolEstudiante    = IdRol FROM RolesTB WHERE Descripcion = 'Estudiante';
 
     IF @idEstadoAprobada IS NULL OR @idEstadoRezagado IS NULL 
        OR @idEstadoFinalizada IS NULL OR @idEstadoArchivado IS NULL 
-       OR @idRolEgresado IS NULL
+       OR @idRolEgresado IS NULL OR @idRolEstudiante IS NULL
     BEGIN
         RAISERROR('Faltan estados o roles requeridos. Verifique EstadosTB y RolesTB.', 16, 1);
         RETURN;
@@ -219,54 +227,60 @@ BEGIN
         BEGIN TRAN;
 
         --------------------------------------------------------
-        -- 1️⃣ Cambiar prácticas en Aprobada o Rezagado → Finalizada
+        -- Solo las prácticas APROBADAS → Finalizada
+        --    Las REZAGADAS se mantienen como Rezagado
         --------------------------------------------------------
         UPDATE p
         SET p.IdEstado = @idEstadoFinalizada,
             p.FechaAplicacion = GETDATE()
         FROM PracticaEstudianteTB p
-        WHERE p.IdEstado IN (@idEstadoAprobada, @idEstadoRezagado);
+        WHERE p.IdEstado = @idEstadoAprobada;
 
         --------------------------------------------------------
-        -- 2️⃣ Archivar vacantes que ya tuvieron prácticas
+        -- 2️ TODAS las vacantes → Archivado (tengan o no prácticas)
         --------------------------------------------------------
-        UPDATE v
-        SET v.IdEstado = @idEstadoArchivado
-        FROM VacantesPracticasTB v
-        WHERE EXISTS (
-            SELECT 1 FROM PracticaEstudianteTB p WHERE p.IdVacante = v.IdVacante
-        );
+        UPDATE VacantesPracticasTB
+        SET IdEstado = @idEstadoArchivado
+        WHERE IdEstado != @idEstadoArchivado;
 
         --------------------------------------------------------
-        -- 3️⃣ Pasar estudiantes aprobados a Rol Egresado
-        --     Solo si tienen práctica aprobada finalizada y no están rezagados
+        -- 3️ Estudiantes con práctica FINALIZADA (aprobados) → Egresado
         --------------------------------------------------------
         UPDATE u
         SET u.IdRol = @idRolEgresado
         FROM UsuariosTB u
-        WHERE 
-            u.EstadoAcademico = 1
-            AND EXISTS (
-                SELECT 1 
-                FROM PracticaEstudianteTB p
-                WHERE p.IdUsuario = u.IdUsuario
-                  AND p.IdEstado = @idEstadoFinalizada
-                  AND EXISTS (
-                      SELECT 1
-                      FROM PracticaEstudianteTB p2
-                      WHERE p2.IdUsuario = u.IdUsuario
-                        AND p2.IdEstado = @idEstadoAprobada
-                  )
-            )
-            AND NOT EXISTS (
-                SELECT 1 
-                FROM PracticaEstudianteTB p3
-                WHERE p3.IdUsuario = u.IdUsuario
-                  AND p3.IdEstado = @idEstadoRezagado
-            );
+        WHERE u.EstadoAcademico = 1
+          AND EXISTS (
+              SELECT 1 
+              FROM PracticaEstudianteTB p
+              WHERE p.IdUsuario = u.IdUsuario
+                AND p.IdEstado = @idEstadoFinalizada
+          )
+          -- Verificar que NO tenga prácticas rezagadas
+          AND NOT EXISTS (
+              SELECT 1 
+              FROM PracticaEstudianteTB p2
+              WHERE p2.IdUsuario = u.IdUsuario
+                AND p2.IdEstado = @idEstadoRezagado
+          );
 
         --------------------------------------------------------
-        -- 4️⃣ Auditoría de finalización
+        -- 4️ Estudiantes con práctica REZAGADA → Mantener como Estudiante
+        --------------------------------------------------------
+        UPDATE u
+        SET u.IdRol = @idRolEstudiante,
+            u.EstadoAcademico = 1  -- Activos para reasignación
+        FROM UsuariosTB u
+        WHERE EXISTS (
+            SELECT 1 
+            FROM PracticaEstudianteTB p
+            WHERE p.IdUsuario = u.IdUsuario
+              AND p.IdEstado = @idEstadoRezagado
+        )
+        AND u.IdRol != @idRolEgresado;
+
+        --------------------------------------------------------
+        -- 5️⃣ Auditoría de prácticas finalizadas (aprobadas)
         --------------------------------------------------------
         INSERT INTO AuditoriaGlobalTB 
             (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
@@ -279,7 +293,7 @@ BEGIN
             CONCAT(
                 'Estudiante: ', u.Nombre, ' ', u.Apellido1, ' ', u.Apellido2,
                 ' | Cédula: ', u.Cedula,
-                ' | Estado anterior: ', eAnt.Descripcion,
+                ' | Estado anterior: Aprobada',
                 ' | Empresa: ', ISNULL(emp.NombreEmpresa, 'Sin empresa')
             ),
             'Finalizada'
@@ -287,11 +301,31 @@ BEGIN
         INNER JOIN UsuariosTB u ON u.IdUsuario = p.IdUsuario
         LEFT JOIN VacantesPracticasTB v ON v.IdVacante = p.IdVacante
         LEFT JOIN EmpresasTB emp ON emp.IdEmpresa = v.IdEmpresa
-        LEFT JOIN EstadosTB eAnt ON eAnt.IdEstado IN (@idEstadoAprobada, @idEstadoRezagado)
         WHERE p.IdEstado = @idEstadoFinalizada;
 
         --------------------------------------------------------
-        -- 5️⃣ Auditoría de cambio de rol
+        -- 6️ Auditoría de vacantes archivadas
+        --------------------------------------------------------
+        INSERT INTO AuditoriaGlobalTB 
+            (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
+        SELECT DISTINCT 
+            @IdUsuarioCoordinador, 
+            'VacantesPracticasTB', 
+            v.IdVacante,
+            'Archivado de vacantes', 
+            'IdEstado',
+            CONCAT(
+                'Vacante: ', v.Nombre,
+                ' | Empresa: ', emp.NombreEmpresa,
+                ' | Cupos: ', v.NumCupos
+            ),
+            'Archivado'
+        FROM VacantesPracticasTB v
+        INNER JOIN EmpresasTB emp ON emp.IdEmpresa = v.IdEmpresa
+        WHERE v.IdEstado = @idEstadoArchivado;
+
+        --------------------------------------------------------
+        -- 7️ Auditoría de cambio de rol a Egresado
         --------------------------------------------------------
         INSERT INTO AuditoriaGlobalTB 
             (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
@@ -302,10 +336,39 @@ BEGIN
             'Cambio de rol por finalización', 
             'IdRol',
             CONCAT('Estudiante: ', u.Nombre, ' ', u.Apellido1, ' ', u.Apellido2, 
-                   ' | Cédula: ', u.Cedula),
+                   ' | Cédula: ', u.Cedula,
+                   ' | Resultado: Aprobado'),
             'Egresado'
         FROM UsuariosTB u
-        WHERE u.IdRol = @idRolEgresado;
+        WHERE u.IdRol = @idRolEgresado
+          AND EXISTS (
+              SELECT 1 FROM PracticaEstudianteTB p 
+              WHERE p.IdUsuario = u.IdUsuario 
+                AND p.IdEstado = @idEstadoFinalizada
+          );
+
+        --------------------------------------------------------
+        -- 8️ Auditoría de estudiantes rezagados
+        --------------------------------------------------------
+        INSERT INTO AuditoriaGlobalTB 
+            (IdUsuario, TablaAfectada, IdRegistro, Accion, CampoAfectado, DatosAnteriores, DatosNuevos)
+        SELECT DISTINCT 
+            @IdUsuarioCoordinador, 
+            'UsuariosTB', 
+            u.IdUsuario,
+            'Mantener como estudiante por rezago', 
+            'IdRol',
+            CONCAT('Estudiante: ', u.Nombre, ' ', u.Apellido1, ' ', u.Apellido2, 
+                   ' | Cédula: ', u.Cedula,
+                   ' | Resultado: Rezagado - debe repetir'),
+            'Estudiante'
+        FROM UsuariosTB u
+        WHERE u.IdRol = @idRolEstudiante
+          AND EXISTS (
+              SELECT 1 FROM PracticaEstudianteTB p 
+              WHERE p.IdUsuario = u.IdUsuario 
+                AND p.IdEstado = @idEstadoRezagado
+          );
 
         COMMIT TRAN;
     END TRY
@@ -316,9 +379,6 @@ BEGIN
 END;
 GO
 
---11-11-25
-USE SIGEP;
-GO
 
 CREATE OR ALTER PROCEDURE [dbo].[ObtenerVacantesAsignarSP]
     @IdUsuario INT
@@ -759,9 +819,7 @@ CREATE OR ALTER PROCEDURE [dbo].[AsignarEstudianteSP]
 AS
 BEGIN
     SET NOCOUNT ON;
-
     DECLARE @NumCupos INT, @Ocupados INT, @IdEstadoEnProceso INT, @IdEstadoAsignada INT, @IdEstadoRetirada INT;
-
    
     SELECT @NumCupos = NumCupos
     FROM VacantesPracticasTB
@@ -772,7 +830,6 @@ BEGIN
         SELECT 0 AS ok, 'No se encontró la vacante seleccionada.' AS message;
         RETURN;
     END;
-
   
     SELECT @Ocupados = COUNT(*)
     FROM PracticaEstudianteTB
@@ -792,24 +849,21 @@ BEGIN
         INNER JOIN EstadosTB e ON e.IdEstado = p.IdEstado
         WHERE p.IdUsuario = @IdUsuario
           AND p.IdVacante <> @IdVacante
-          AND LOWER(LTRIM(RTRIM(e.Descripcion))) IN ('asignada','aprobada','en curso','finalizada','rezagado')
+          AND LOWER(LTRIM(RTRIM(e.Descripcion))) IN ('asignada','aprobada','en curso')
+          
     )
     BEGIN
         SELECT 0 AS ok, 'El estudiante ya tiene una práctica activa en otra vacante.' AS message;
         RETURN;
     END;
-
    
-    SELECT 
-        @IdEstadoEnProceso = IdEstado
+    SELECT @IdEstadoEnProceso = IdEstado
     FROM EstadosTB WHERE LOWER(LTRIM(RTRIM(Descripcion))) = 'en proceso de aplicacion';
 
-    SELECT 
-        @IdEstadoAsignada = IdEstado
+    SELECT @IdEstadoAsignada = IdEstado
     FROM EstadosTB WHERE LOWER(LTRIM(RTRIM(Descripcion))) = 'asignada';
 
-    SELECT 
-        @IdEstadoRetirada = IdEstado
+    SELECT @IdEstadoRetirada = IdEstado
     FROM EstadosTB WHERE LOWER(LTRIM(RTRIM(Descripcion))) = 'retirada';
 
     IF @IdEstadoEnProceso IS NULL OR @IdEstadoAsignada IS NULL OR @IdEstadoRetirada IS NULL
@@ -817,7 +871,6 @@ BEGIN
         SELECT 0 AS ok, 'No se encontraron los estados requeridos en EstadosTB.' AS message;
         RETURN;
     END;
-
     
     DECLARE @IdPractica INT, @IdEstadoActual INT;
     SELECT TOP 1 
@@ -833,6 +886,7 @@ BEGIN
     FROM EstadosTB 
     WHERE IdEstado = @IdEstadoActual;
 
+    -- CASO 1: No tiene práctica previa en esta vacante
     IF @IdPractica IS NULL
     BEGIN
         INSERT INTO PracticaEstudianteTB (IdVacante, IdUsuario, IdEstado, FechaAplicacion)
@@ -841,8 +895,8 @@ BEGIN
         SELECT 1 AS ok, 'Estudiante agregado en estado "En proceso de Aplicación".' AS message;
         RETURN;
     END;
-
    
+    -- CASO 2: Reactivar si está retirada
     IF @EstadoActual = 'retirada'
     BEGIN
         UPDATE PracticaEstudianteTB
@@ -853,8 +907,8 @@ BEGIN
         SELECT 1 AS ok, 'Estudiante reactivado en estado "En proceso de Aplicación".' AS message;
         RETURN;
     END;
-
     
+    -- CASO 3: Avanzar de "en proceso" a "asignada"
     IF @EstadoActual = 'en proceso de aplicacion'
     BEGIN
         UPDATE PracticaEstudianteTB
@@ -865,27 +919,68 @@ BEGIN
         SELECT 1 AS ok, 'Estado actualizado a "Asignada".' AS message;
         RETURN;
     END;
-
     
+    -- CASO 4: Ya está asignada
     IF @EstadoActual = 'asignada'
     BEGIN
         SELECT 0 AS ok, 'El estudiante ya está asignado en esta vacante.' AS message;
         RETURN;
     END;
-
     
-    IF @EstadoActual IN ('aprobada','en curso','finalizada','rezagado')
+   
+    IF @EstadoActual IN ('finalizada','rezagado')
+    BEGIN
+        
+        INSERT INTO PracticaEstudianteTB (IdVacante, IdUsuario, IdEstado, FechaAplicacion)
+        VALUES (@IdVacante, @IdUsuario, @IdEstadoEnProceso, GETDATE());
+
+        SELECT 1 AS ok, 'Nueva práctica creada en estado "En proceso de Aplicación". La práctica anterior se mantiene como historial.' AS message;
+        RETURN;
+    END;
+
+    -- CASO 5: Bloquear solo si está en curso o aprobada 
+    IF @EstadoActual IN ('aprobada','en curso')
     BEGIN
         SELECT 0 AS ok, CONCAT('No se puede reasignar porque la práctica está en estado "', @EstadoActual, '".') AS message;
         RETURN;
     END;
-
   
+    
     UPDATE PracticaEstudianteTB
     SET IdEstado = @IdEstadoEnProceso,
         FechaAplicacion = GETDATE()
     WHERE IdPractica = @IdPractica;
 
     SELECT 1 AS ok, 'Estudiante agregado en estado "En proceso de Aplicación".' AS message;
+END;
+GO
+
+--25-11-25
+USE SIGEP;
+GO
+
+CREATE OR ALTER PROCEDURE ObtenerEmpresasActivasSP
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @idEstadoActivo INT;
+
+    -- Obtener el ID del estado "Activo"
+    SELECT @idEstadoActivo = IdEstado 
+    FROM EstadosTB 
+    WHERE LOWER(LTRIM(RTRIM(Descripcion))) = 'activo';
+
+    -- Si no existe, usar 1 como fallback
+    IF @idEstadoActivo IS NULL
+        SET @idEstadoActivo = 1;
+
+    -- Retornar solo empresas activas
+    SELECT 
+        IdEmpresa,
+        NombreEmpresa
+    FROM EmpresasTB
+    WHERE IdEstado = @idEstadoActivo
+    ORDER BY NombreEmpresa;
 END;
 GO

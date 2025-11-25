@@ -10,16 +10,14 @@
 namespace SIGEP.EF
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class FormacionAcademicaTB
+    public partial class ObtenerDocumentosEvaluacionSP_Result
     {
-        public int IdFormacion { get; set; }
-        public int IdUsuario { get; set; }
-        public string Carrera { get; set; }
-        public string Titulo { get; set; }
-        public Nullable<int> AnnoGraduacion { get; set; }
-    
-        public virtual UsuariosTB UsuariosTB { get; set; }
+        public int IdDocumento { get; set; }
+        public string Documento { get; set; }
+        public string Tipo { get; set; }
+        public string RutaArchivo { get; set; }
+        public System.DateTime FechaSubida { get; set; }
+        public string Extension { get; set; }
     }
 }

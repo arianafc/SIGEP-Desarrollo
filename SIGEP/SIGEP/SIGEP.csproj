@@ -325,6 +325,7 @@
     <Compile Include="Models\CorreoDTO.cs" />
     <Compile Include="Models\DashboardVM.cs" />
     <Compile Include="Models\DocumentoDTO.cs" />
+    <Compile Include="Models\EmpresaDTO.cs" />
     <Compile Include="Models\EncargadoDTO.cs" />
     <Compile Include="Models\EnvioCorreosModel.cs" />
     <Compile Include="Models\EstudianteDetalleDTO.cs" />
