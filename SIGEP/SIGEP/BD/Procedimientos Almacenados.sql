@@ -361,3 +361,70 @@ END
 GO
 
 
+CREATE OR ALTER PROCEDURE ObtenerBolsaEmpleoSP
+AS
+BEGIN
+    
+    SELECT B.IdEmpleo, B.Empresa, B.IdEstado, B.Descripcion, B.Requisitos, B.FechaPublicacion, B.FechaLimite, B.IdDireccion, B.AreaAfin, D.DireccionExacta,
+    D.IdDistrito, Di.Nombre as Distrito, M.Descripcion as Modalidad, p.IdProvincia, P.Nombre as Provincia, C.IdCanton, C.Nombre as Canton, M.IdModalidad
+    FROM BolsaEmpleoTB B
+    LEFT JOIN DireccionesTB D
+    ON B.IdDireccion = D.IdDireccion
+    LEFT JOIN DistritosTB Di
+    ON D.IdDistrito = Di.IdDistrito
+    LEFT JOIN CantonesTB C
+    ON di.IdCanton = c.IdCanton
+    LEFT JOIN ProvinciasTB P
+    ON C.IdProvincia = P.IdProvincia
+    LEFT JOIN ModalidadesTB M
+    ON M.IdModalidad = B.IdModalidad
+
+
+END
+
+------SP Historico
+USE [SIGEP]
+GO
+
+/****** Object:  StoredProcedure [dbo].[HistoricoPracticasSP]    Script Date: 24/11/2025 18:36:50 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE OR ALTER   PROCEDURE [dbo].[HistoricoPracticasSP]
+AS
+BEGIN
+
+SELECT 
+    P.IdPractica, 
+    P.IdVacante, 
+    P.IdUsuario, 
+    U.Nombre,
+    U.Apellido1,
+    U.Apellido2,
+    P.FechaAplicacion, 
+    P.IdEstado, 
+    V.Nombre AS NombreVacante,
+    V.Requerimientos, 
+    V.FechaMaxAplicacion, 
+    V.NumCupos, 
+    V.FechaCierre, 
+    V.Descripcion,
+    V.Tipo, 
+    M.Descripcion AS Modalidad, 
+    EV.IdEspecialidad, 
+    E.Nombre AS Especialidad
+FROM PracticaEstudianteTB P
+INNER JOIN VacantesPracticasTB V ON P.IdVacante = V.IdVacante
+INNER JOIN ModalidadesTB M ON V.IdModalidad = M.IdModalidad
+LEFT JOIN EspecialidadesVacantesTB EV ON EV.IdVacante = P.IdVacante
+INNER JOIN EspecialidadesTB E ON E.IdEspecialidad = EV.IdEspecialidad
+INNER JOIN UsuariosTB U ON P.IdUsuario = U.IdUsuario
+WHERE P.FechaAplicacion IS NOT NULL
+  AND YEAR(P.FechaAplicacion) < YEAR(GETDATE());
+END;
+GO
+
+

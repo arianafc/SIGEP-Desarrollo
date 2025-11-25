@@ -74,22 +74,20 @@ namespace SIGEP.Controllers
         {
             try
             {
-                // Estado "Activo"
-                var estadoActivo = db.EstadosTB.FirstOrDefault(e => e.Descripcion.Trim().ToLower() == "activo");
+                var estadoActivo = db.EstadosTB
+                    .FirstOrDefault(e => e.Descripcion.Trim().ToLower() == "activo");
                 int idEstadoActivo = estadoActivo != null ? estadoActivo.IdEstado : 0;
 
-                var query = from e in db.EmpleosTB
-                            join b in db.BolsaEmpleoTB on e.IdEmpleo equals b.IdEmpleo
+                var query = from b in db.BolsaEmpleoTB
                             join m in db.ModalidadesTB on b.IdModalidad equals m.IdModalidad
-                            join est in db.EstadosTB on e.IdEstado equals est.IdEstado
-                            where e.IdEstado == idEstadoActivo
-                               && (string.IsNullOrEmpty(area) || b.AreaAfin == area)
-                               && (!idModalidad.HasValue || b.IdModalidad == idModalidad.Value)
+                            join est in db.EstadosTB on b.IdEstado equals est.IdEstado
+                            where b.IdEstado == idEstadoActivo
+                                  && (string.IsNullOrEmpty(area) || b.AreaAfin == area)
+                                  && (!idModalidad.HasValue || b.IdModalidad == idModalidad.Value)
                             orderby b.FechaPublicacion descending
                             select new
                             {
-                                e.IdEmpleo,
-                                e.NombrePuesto,
+                                b.IdEmpleo,
                                 Empresa = b.Empresa,
                                 b.Descripcion,
                                 b.Requisitos,
@@ -114,7 +112,6 @@ namespace SIGEP.Controllers
                 var resultado = lista.Select(x => new
                 {
                     x.IdEmpleo,
-                    x.NombrePuesto,
                     x.Empresa,
                     x.Descripcion,
                     x.Requisitos,
@@ -136,5 +133,6 @@ namespace SIGEP.Controllers
                 }, JsonRequestBehavior.AllowGet);
             }
         }
+
     }
 }

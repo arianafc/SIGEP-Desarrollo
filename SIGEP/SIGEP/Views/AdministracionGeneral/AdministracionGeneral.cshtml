@@ -14,28 +14,30 @@
 <meta charset="utf-8">
 <section class="vacantes-wrapper container">
     <h2 class="vacantes-titulo titulo-principal">Administración General</h2>
-
-    <div class="row gy-3 mb-4">
-        <div class="col-md-4">
-            <button class="btn w-100 py-3 rounded-4" data-tab="usuarios">
-                <i class="bi bi-people me-2 bold"></i> Gestión de Usuarios
-            </button>
-        </div>
-        <div class="col-md-4">
-            <button class="btn w-100 py-3 rounded-4" data-tab="especialidades">
-                <i class="bi bi-wrench me-2 bold"></i> Gestión de Especialidades
-            </button>
-        </div>
-        <div class="col-md-4">
-            <button class="btn w-100 py-3 rounded-4" data-tab="secciones">
-                <i class="bi bi-layers me-2 bold"></i> Gestión de Secciones
-            </button>
+    <div class="vacantes-wrapper">
+        <div class="row gy-3 mb-4">
+            <div class="col-md-4">
+                <button class="btn w-100 py-3 rounded-4 tab-btn usuarios" data-tab="usuarios">
+                    <i class="bi bi-people me-2 bold"></i> Gestión de Usuarios
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn w-100 py-3 rounded-4 tab-btn especialidades" data-tab="especialidades">
+                    <i class="bi bi-wrench me-2 bold"></i> Gestión de Especialidades
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn w-100 py-3 rounded-4 tab-btn secciones" data-tab="secciones">
+                    <i class="bi bi-layers me-2 bold"></i> Gestión de Secciones
+                </button>
+            </div>
         </div>
     </div>
 
+
+
     <!-- ===================== USUARIOS ===================== -->
     <div id="usuarios" class="seccion-adm @clsUsuarios">
-        <h3 class="text-center bold">Gestión de Usuarios</h3>
         <div class="row mb-3">
             <div class="col-md-4">
                 <label for="filtroRol" class="form-label">Filtrar por rol:</label>
@@ -68,7 +70,6 @@
 
     <!-- ================== ESPECIALIDADES ================== -->
     <div id="especialidades" class="seccion-adm @clsEspecialidades">
-        <h3 class="text-center">Especialidades Registradas</h3>
         <button type="button" class="btn mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearEspecialidad">
             + Nueva Especialidad
         </button>
@@ -89,7 +90,6 @@
 
     <!-- ===================== SECCIONES ===================== -->
     <div id="secciones" class="seccion-adm @clsSecciones">
-        <h3 class="text-center">Secciones Registradas</h3>
         <button type="button" class="btn mb-3" data-bs-toggle="modal" data-bs-target="#modalCrearSeccion">
             + Nueva Sección
         </button>

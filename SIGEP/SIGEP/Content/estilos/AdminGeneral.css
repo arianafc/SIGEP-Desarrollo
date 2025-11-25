@@ -2,25 +2,87 @@
     background-color:#fff !important;
     |
 }
-    .vacantes-wrapper button[data-tab] {
-    color: #2D594D;
-    font-weight: 600;
-    border: 2px solid #2D594D;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+:root {
+    --c-terracota: #BE6E46;
+    --c-azul-oscuro: #162657;
+    --c-verde-oscuro: #2D594D;
+    --c-turquesa: #48A9A6;
+    --c-verde-claro: #A3BFA8;
 }
 
-    .vacantes-wrapper button[data-tab]:hover,
-    .vacantes-wrapper button[data-tab].active-tab {
-        background-color: #2D594D;
-        color: #fff;
-        transform: translateY(-3px);
+/* Base */
+.vacantes-wrapper .tab-btn {
+    color: var(--c-verde-oscuro);
+    font-weight: 600;
+    border: 2px solid var(--c-verde-oscuro);
+    background-color: #ffffff;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    letter-spacing: .02em;
+}
+
+    .vacantes-wrapper .tab-btn i {
+        font-size: 1.1rem;
     }
 
-/* Sección activa (mostrar con animación suave) */
-.seccion-adm {
-    animation: fadeIn 0.4s ease;
-}
+    /* Estados generales: siempre texto blanco en hover/activo */
+    .vacantes-wrapper .tab-btn:hover,
+    .vacantes-wrapper .tab-btn.active-tab {
+        color: #fff; /* 👈 texto blanco */
+        transform: translateY(-3px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    }
+
+    .vacantes-wrapper .tab-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+    }
+
+    /* Usuarios: azul oscuro */
+    .vacantes-wrapper .tab-btn.usuarios {
+        border-color: var(--c-azul-oscuro);
+        color: var(--c-azul-oscuro);
+    }
+
+        .vacantes-wrapper .tab-btn.usuarios:hover,
+        .vacantes-wrapper .tab-btn.usuarios.active-tab {
+            background-color: var(--c-azul-oscuro);
+            border-color: var(--c-azul-oscuro);
+            color: #fff; /* asegura blanco */
+        }
+
+    /* Especialidades: terracota */
+    .vacantes-wrapper .tab-btn.especialidades {
+        border-color: var(--c-terracota);
+        color: var(--c-terracota);
+    }
+
+        .vacantes-wrapper .tab-btn.especialidades:hover,
+        .vacantes-wrapper .tab-btn.especialidades.active-tab {
+            background-color: var(--c-terracota);
+            border-color: var(--c-terracota);
+            color: #fff;
+        }
+
+    /* Secciones: turquesa */
+    .vacantes-wrapper .tab-btn.secciones {
+        border-color: var(--c-turquesa);
+        color: var(--c-turquesa);
+    }
+
+        .vacantes-wrapper .tab-btn.secciones:hover,
+        .vacantes-wrapper .tab-btn.secciones.active-tab {
+            background-color: var(--c-turquesa);
+            border-color: var(--c-turquesa);
+            color: #fff;
+        }
+
+    /* Secciones: turquesa como base y verde oscuro en hover */
+    .vacantes-wrapper .tab-btn.sec
+    /* Sección activa (mostrar con animación suave) */
+    .seccion-adm {
+        animation: fadeIn 0.4s ease;
+    }
 
 
     /* Encabezado de secciones */

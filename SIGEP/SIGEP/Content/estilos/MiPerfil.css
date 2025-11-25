@@ -1,0 +1,51 @@
+﻿
+body {
+    background-color: #F2F2F2 !important;
+    font-family: 'Rubik', sans-serif !important;
+}
+
+.perfil-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.info-box {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.perfil-icon {
+    width: 120px;
+    height: 120px;
+    background-color: #2D594D;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 50px;
+    margin: 0 auto 2rem auto;
+}
+
+.section-title {
+    color: #2D594D;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #8CA653;
+    padding-bottom: .5rem;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #2D594D;
+}
+
+.form-control {
+    background-color: #ffffff;
+    border: 1px solid #8CA653;
+    border-radius: 6px;
+}

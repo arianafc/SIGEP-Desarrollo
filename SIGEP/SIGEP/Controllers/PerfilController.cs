@@ -1,8 +1,10 @@
-﻿using SIGEP.EF;
+﻿using Antlr.Runtime.Misc;
+using SIGEP.EF;
 using SIGEP.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI;
@@ -17,15 +19,21 @@ namespace SIGEP.Controllers
         {
             try
             {
+                
                 var Usuario = new UsuarioModel();
 
                 using (var dbContext = new SIGEPEntities())
                 {
+
+                  
+
+
                     // ===============================
                     // VALIDAR SESIÓN
                     // ===============================
                     var cedula = Session["Cedula"]?.ToString();
                     var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
+                   
 
                     if (string.IsNullOrEmpty(cedula))
                     {
@@ -89,6 +97,7 @@ namespace SIGEP.Controllers
                         Usuario.DireccionExacta = direccion.DireccionExacta ?? "";
                     }
 
+
                     // ===============================
                     // INFORMACIÓN GENERAL DEL USUARIO
                     // ===============================
@@ -107,6 +116,7 @@ namespace SIGEP.Controllers
                     Usuario.Nacionalidad = usuarioData.Nacionalidad ?? "";
                     Usuario.Sexo = usuarioData.Sexo ?? "";
 
+                 
                     // ===============================
                     // CORREOS
                     // ===============================
@@ -155,6 +165,35 @@ namespace SIGEP.Controllers
                     // ===============================
                     Usuario.ListaSecciones = dbContext.SeccionesTB.ToList();
                     Usuario.ListaEspecialidades = dbContext.EspecialidadesTB.ToList();
+
+                    var lista = dbContext.UsuarioEspecialidadTB
+                        .Where(u => u.IdUsuario == IdUsuario)
+                        .Join(
+                            dbContext.EspecialidadesTB,
+                            u => u.IdEspecialidad,
+                            e => e.IdEspecialidad,
+                            (u, e) => new
+                            {
+                                u.IdEspecialidad,
+                                u.IdUsuario,
+                                u.IdUsuarioEspecialidad,
+                                e.Nombre,
+                                u.IdEstado
+                            }
+                        )
+                        .ToList();
+
+                    Usuario.ListaEspecialidadesUsuario = lista
+                        .Select(enc => new UsuarioEspecialidadModel
+                        {
+                            IdEspecialidad = enc.IdEspecialidad,
+                            IdUsuario = enc.IdUsuario,
+                            IdUsuarioEspecialidad = enc.IdUsuarioEspecialidad,
+                            Nombre = enc.Nombre  ,
+                            IdEstado = enc.IdEstado
+                        })
+                        .ToList();
+
 
                     Usuario.ListaEncargados = Encargados.Select(enc => new EncargadoDTO
                     {
@@ -939,7 +978,218 @@ namespace SIGEP.Controllers
                 return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
-        
+
+        [HttpPost]
+        public ActionResult CambioEstadoEspecialidad(int IdUsuarioEspecialidad)
+        {
+            try
+            {
+                using (var db = new SIGEPEntities())
+                {
+                    var especialidad = db.UsuarioEspecialidadTB
+                                         .FirstOrDefault(e => e.IdUsuarioEspecialidad == IdUsuarioEspecialidad);
+
+                    if (especialidad == null)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            msg = "No se encontró la especialidad seleccionada."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    if (especialidad.IdEstado == 1)
+                    {
+                        especialidad.IdEstado = 2;
+                        db.SaveChanges();
+
+                        return Json(new
+                        {
+                            success = true,
+                            msg = "Especialidad desactivada correctamente."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+                    else if (especialidad.IdEstado == 2)
+                    {
+                        especialidad.IdEstado = 1;
+                        db.SaveChanges();
+
+                        return Json(new
+                        {
+                            success = true,
+                            msg = "Especialidad activada correctamente."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+
+                 
+                    return Json(new
+                    {
+                        success = false,
+                        msg = "El estado actual de la especialidad no es válido para cambiar."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    msg = "Error: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        [HttpPost]
+        public ActionResult AgregarEspeciaidad(int IdEspecialidad)
+        {
+            try
+            {
+              
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        msg = "La sesión ha expirado. Vuelva a iniciar sesión."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                int idUsuario;
+                if (!int.TryParse(Session["IdUsuario"].ToString(), out idUsuario))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        msg = "Usuario inválido en sesión."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                using (var db = new SIGEPEntities())
+                {
+                 
+                    var existeEspecialidad = db.UsuarioEspecialidadTB
+                        .FirstOrDefault(e =>
+                            e.IdEspecialidad == IdEspecialidad &&
+                            e.IdEstado == 1 &&
+                            e.IdUsuario == idUsuario);
+
+                    if (existeEspecialidad != null)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            msg = "Lo sentimos. Ya tienes esta especialidad registrada."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+
+                 
+                    var usuarioEspecialidad = new UsuarioEspecialidadTB
+                    {
+                        IdEspecialidad = IdEspecialidad,
+                        IdUsuario = idUsuario,
+                        IdEstado = 1
+                    };
+
+                    db.UsuarioEspecialidadTB.Add(usuarioEspecialidad);
+                    db.SaveChanges();
+
+                    return Json(new
+                    {
+                        success = true,
+                        msg = "Especialidad agregada con éxito."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    msg = "Error: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        [HttpPost]
+        public ActionResult ActualizarEspecialidad(int IdEspecialidadUsuario, int IdEspecialidad)
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        msg = "La sesión ha expirado. Vuelva a iniciar sesión."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                int idUsuario;
+                if (!int.TryParse(Session["IdUsuario"].ToString(), out idUsuario))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        msg = "Usuario inválido en sesión."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                using (var db = new SIGEPEntities())
+                {
+                   
+                    var especialidad = db.UsuarioEspecialidadTB
+                        .FirstOrDefault(e => e.IdUsuarioEspecialidad == IdEspecialidadUsuario);
+
+                    if (especialidad == null)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            msg = "No se encontró la especialidad a actualizar."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+
+                    var especialidadRegistrada = db.UsuarioEspecialidadTB
+                        .FirstOrDefault(e =>
+                            e.IdEspecialidad == IdEspecialidad &&
+                            e.IdEstado == 1 &&
+                            e.IdUsuario == idUsuario &&
+                            e.IdUsuarioEspecialidad != IdEspecialidadUsuario 
+                        );
+
+                    if (especialidadRegistrada != null)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            msg = "Ya existe un registro asociado a esta especialidad."
+                        }, JsonRequestBehavior.AllowGet);
+                    }
+
+                  
+                    especialidad.IdEspecialidad = IdEspecialidad;
+                    db.SaveChanges();
+
+                    return Json(new
+                    {
+                        success = true,
+                        msg = "Especialidad actualizada correctamente."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    msg = "Error: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
 
         [HttpPost]
         public JsonResult EliminarDocumento(int idDocumento)

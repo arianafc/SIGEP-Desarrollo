@@ -1,5 +1,179 @@
 ﻿$(function () {
 
+    $(document).on('click', '.btnEditarEspecialidad', function () {
+        const idUsuarioEspecialidad = $(this).data('idusuarioespecialidad');
+        const idEspecialidadActual = $(this).data('idespecialidad');
+
+        if (!idUsuarioEspecialidad) {
+            Swal.fire('Error', 'No se pudo identificar la especialidad a editar.', 'error');
+            return;
+        }
+
+        $('#IdUsuarioEspecialidadEditar').val(idUsuarioEspecialidad);
+        $('#IdEspecialidadEditar').val(idEspecialidadActual);
+
+        // Abrir modal
+        const modalEditar = new bootstrap.Modal(document.getElementById('modalEditarEspecialidad'));
+        modalEditar.show();
+    });
+
+    $('#btnActualizarEspecialidad').on('click', function () {
+
+        const idUsuarioEspecialidad = $('#IdUsuarioEspecialidadEditar').val();
+        const idEspecialidad = $('#IdEspecialidadEditar').val();
+
+        if (!idUsuarioEspecialidad) {
+            Swal.fire('Error', 'No se encontró la especialidad seleccionada.', 'error');
+            return;
+        }
+
+        if (!idEspecialidad) {
+            Swal.fire('Campo requerido', 'Por favor seleccione una especialidad.', 'warning');
+            return;
+        }
+
+        $.ajax({
+            url: '/Perfil/ActualizarEspecialidad',
+            type: 'POST',
+            data: {
+                IdEspecialidadUsuario: idUsuarioEspecialidad,
+                IdEspecialidad: idEspecialidad
+            },
+            beforeSend: function () {
+                Swal.fire({
+                    title: 'Guardando cambios...',
+                    text: 'Por favor espere.',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+            },
+            success: function (res) {
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Especialidad actualizada',
+                        text: res.msg || 'La especialidad se actualizó correctamente.'
+                    }).then(() => {
+                        const modal = document.getElementById('modalEditarEspecialidad');
+                        if (modal) {
+                            const modalInstance = bootstrap.Modal.getInstance(modal) ||
+                                new bootstrap.Modal(modal);
+                            modalInstance.hide();
+                        }
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Atención', res.msg || 'No se pudo actualizar la especialidad.', 'warning');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+                Swal.fire('Error', 'Ocurrió un error al comunicarse con el servidor.', 'error');
+            }
+        });
+    });
+
+
+    $('#btnGuardarEspecialidad').on('click', function () {
+
+        const ddl = $('#IdEspecialidad'); 
+        const idEspecialidad = ddl.val();
+
+        if (!idEspecialidad) {
+            Swal.fire('Campo requerido', 'Por favor seleccione una especialidad.', 'warning');
+            return;
+        }
+
+        $.ajax({
+            url: '/Perfil/AgregarEspeciaidad',
+            type: 'POST',
+            data: { IdEspecialidad: idEspecialidad },
+            beforeSend: function () {
+                Swal.fire({
+                    title: 'Guardando...',
+                    text: 'Por favor espere.',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+            },
+            success: function (res) {
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Listo',
+                        text: res.msg || 'Especialidad agregada con éxito.'
+                    }).then(() => {
+                        
+                        const modal = document.getElementById('modalAgregarEspecialidad');
+                        if (modal) {
+                            const modalInstance = bootstrap.Modal.getInstance(modal) ||
+                                new bootstrap.Modal(modal);
+                            modalInstance.hide();
+                        }
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Atención', res.msg || 'No se pudo agregar la especialidad.', 'warning');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+                Swal.fire('Error', 'Ocurrió un error al comunicarse con el servidor.', 'error');
+            }
+        });
+    });
+
+    window.cambiarEstadoEspecialidad = function (idUsuarioEspecialidad) {
+
+        if (!idUsuarioEspecialidad) {
+            Swal.fire('Error', 'No se pudo identificar la especialidad.', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: 'Se cambiará el estado de esta especialidad.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: '/Perfil/CambioEstadoEspecialidad',
+                type: 'POST',
+                data: { IdUsuarioEspecialidad: idUsuarioEspecialidad },
+                beforeSend: function () {
+                    Swal.fire({
+                        title: 'Procesando...',
+                        text: 'Por favor espere.',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+                },
+                success: function (res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Listo',
+                            text: res.msg || 'Estado de la especialidad actualizado.'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Atención', res.msg || 'No se pudo cambiar el estado.', 'warning');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    Swal.fire('Error', 'Ocurrió un error al comunicarse con el servidor.', 'error');
+                }
+            });
+        });
+    };
+
     $('#btnSubirDoc').on('click', function () {
         var archivo = $('#ArchivoDoc')[0].files[0];
         var idUsuario = $('#IdUsuarioDoc').val();
@@ -201,9 +375,9 @@
         }
 
         // Validar teléfono (solo números y mínimo 8 dígitos)
-        var telefonoPattern = /^\d{8,}$/;
+        var telefonoPattern = /^\d{8}$/;
         if (!telefonoPattern.test(data.telefono)) {
-            Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+            Swal.fire('Error', 'Ingrese un número de teléfono válido (8 dígitos).', 'error');
             return;
         }
 
@@ -266,9 +440,10 @@
         }
 
         // Validar teléfono (solo números y mínimo 8 dígitos)
-        var telefonoPattern = /^\d{8,}$/;
+        var telefonoPattern = /^\d{8}$/;
+
         if (!telefonoPattern.test(data.Telefono)) {
-            Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+            Swal.fire('Error', 'Ingrese un número de teléfono válido (8 dígitos).', 'error');
             return;
         }
 
@@ -518,14 +693,6 @@ $('#CedulaNuevoEncargado').on('blur', function () {
             } else {
                 // Si no existe, limpia el formulario
                 $('#NombreNuevoEncargado, #Apellido1NuevoEncargado, #Apellido2NuevoEncargado, #TelefonoNuevoEncargado, #CorreoNuevoEncargado, #ParentescoNuevoEncargado, #OcupacionNuevoEncargado, #ResidenciaNuevoEncargado').val('');
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'No encontrado',
-                    text: 'No existe un encargado con esa cédula. Puede registrarlo nuevo.',
-                    timer: 2500,
-                    showConfirmButton: false
-                });
             }
         },
         error: function () {
@@ -576,9 +743,9 @@ $('#ActualizarPerfil').on('submit', function (e) {
     }
 
     // Validar teléfono (solo números y mínimo 8 dígitos)
-    var telefonoPattern = /^\d{8,}$/;
+    var telefonoPattern = /^\d{8}$/;
     if (!telefonoPattern.test(telefono)) {
-        Swal.fire('Error', 'Ingrese un número de teléfono válido (mínimo 8 dígitos).', 'error');
+        Swal.fire('Error', 'Ingrese un número de teléfono válido (8 dígitos).', 'error');
         return;
     }
     // Confirmación antes de enviar

@@ -1,0 +1,182 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    ViewBag.Title = "Histórico de Prácticas";
+}
+
+@section styles {
+    <link href="~/Content/estilos/AdminGeneral.css" rel="stylesheet" />
+
+    <style>
+        .historico-wrapper {
+            margin-top: 20px;
+        }
+
+        .historico-acciones .btn {
+            border-radius: 20px;
+            padding: 12px;
+            font-weight: 600;
+        }
+
+        .table th {
+            font-weight: bold !important;
+        }
+
+        @@media print {
+            .historico-acciones,
+            nav,
+            .navbar,
+            footer,
+            #tablaHistorico_filter,
+            #tablaHistorico_paginate {
+                display: none !important;
+            }
+
+            body {
+                background: #ffffff !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+            }
+        }
+    </style>
+}
+
+<section class="container historico-wrapper">
+
+    <h2 class="vacantes-titulo titulo-principal text-center mb-4">Histórico de Prácticas</h2>
+
+    <div class="row historico-acciones mb-4">
+        <div class="col-md-6 mb-2">
+            <button type="button"
+                    class="btn btn-outline-secondary w-100"
+                    onclick="window.print()">
+                <i class="bi bi-file-earmark-pdf me-2"></i> Imprimir / Guardar PDF
+            </button>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <a href="@Url.Action("ExportarExcel", "Historico")"
+               class="btn btn-outline-success w-100">
+                <i class="bi bi-file-earmark-excel me-2"></i> Descargar Excel
+            </a>
+        </div>
+    </div>
+
+    <div class="card rounded-4 p-4 shadow-sm">
+        <div class="table-responsive">
+            <table id="tablaHistorico" class="display nowrap w-100">
+                <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Especialidad</th>
+                        <th>Vacante</th>
+                        <th>Modalidad</th>
+                        <th>Tipo</th>
+                        <th>Fecha Aplicación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var x in Model)
+                    {
+                        <tr>
+                            <td>@x.NombreCompleto</td>
+                            <td>@x.Especialidad</td>
+                            <td>@x.NombreVacante</td>
+                            <td>@x.Modalidad</td>
+                            <td>@x.Tipo</td>
+                            <td>@x.FechaAplicacion.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">
+                                <button type="button"
+                                        class="btn btn-link text-decoration-none ver-comentarios"
+                                        data-idusuario="@x.IdUsuario"
+                                        title="Ver comentarios del estudiante">
+                                    <i class="bi bi-eye fs-5 text-secondary"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="modalComentarios" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header rounded-top-4" style="background-color:#2D594D;color:#fff;">
+                <h5 class="modal-title">
+                    <i class="bi bi-chat-dots me-2"></i> COMENTARIOS
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Comentario</th>
+                            <th>Autor</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyComentarios">
+                    </tbody>
+                </table>
+                <div id="sinComentarios" class="text-center text-muted d-none">
+                    No hay comentarios registrados para este estudiante.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn CerrarModal" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if ($.fn.DataTable) {
+                $('#tablaHistorico').DataTable({
+                    responsive: true,
+                    language: {
+                        url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+                    },
+                    order: [[6, "desc"]]
+                });
+            }
+
+            $(document).on('click', '.ver-comentarios', function () {
+                var idUsuario = $(this).data('idusuario');
+
+                $('#tbodyComentarios').empty();
+                $('#sinComentarios').addClass('d-none');
+
+                $.getJSON('@Url.Action("ObtenerComentarios", "Historico")',
+                    { idUsuario: idUsuario },
+                    function (data) {
+                        if (data && data.length > 0) {
+                            $.each(data, function (i, c) {
+                                var fila = '<tr>' +
+                                    '<td>' + c.comentario + '</td>' +
+                                    '<td>' + c.autor + '</td>' +
+                                    '<td>' + c.fecha + '</td>' +
+                                    '</tr>';
+                                $('#tbodyComentarios').append(fila);
+                            });
+                        } else {
+                            $('#sinComentarios').removeClass('d-none');
+                        }
+
+                        var modalEl = document.getElementById('modalComentarios');
+                        var modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    });
+            });
+        });
+    </script>
+}
