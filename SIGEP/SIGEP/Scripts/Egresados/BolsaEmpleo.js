@@ -170,7 +170,7 @@ $(function () {
         const provincia = btn.getAttribute('data-provincia') || '';
         const canton = btn.getAttribute('data-canton') || '';
         const distrito = btn.getAttribute('data-distrito') || '';
-
+        const nombrePuesto = btn.getAttribute('data-nombrepuesto') || '';
 
         const IdDireccionInput = document.getElementById('IdDireccionEditar');
         const idInput = document.getElementById('IdEmpleoEditar');
@@ -184,7 +184,7 @@ $(function () {
         const distritoSelect = document.getElementById('DistritoEmpleoEditar');
         const direccionInput = document.getElementById('DireccionBolsaEmpleoEditar');
         const areaAfinInput = document.getElementById('AreaAfinEmpleoEditar');
-
+        const nombrePuestoInput = document.getElementById('NombrePuestoEmpleoEditar');
      
         if (idInput) idInput.value = idEmpleo;
         if (nombreInput) nombreInput.value = empresa;
@@ -194,7 +194,8 @@ $(function () {
         if (direccionInput) direccionInput.value = direccion;
         if (areaAfinInput) areaAfinInput.value = areaAfin;
         if (IdDireccionInput) IdDireccionInput.value = IdDireccion;
-       
+        if (nombrePuestoInput) nombrePuestoInput.value = nombrePuesto;
+
         if (modalidadSelect) {
             modalidadSelect.value = idModalidad;
         }
@@ -247,12 +248,18 @@ $(function () {
         const distrito = document.getElementById('DistritoEmpleo');
         const direccionExacta = document.getElementById('DireccionBolsaEmpleo');
         const areaAfin = document.getElementById('AreaAfinEmpleo');
-
+        const nombrePuesto = document.getElementById('NombrePuestoEmpleo');
      
 
         if (!nombre || !nombre.value.trim()) {
             Swal.fire('Campo requerido', 'Por favor indique el nombre de la empresa.', 'warning');
             if (nombre) nombre.focus();
+            return;
+        }
+
+        if (!nombrePuesto || !nombrePuesto.value.trim()) {
+            Swal.fire('Campo requerido', 'Por favor indique el nombre del puesto.', 'warning');
+            if (nombrePuesto) nombrePuesto.focus();
             return;
         }
 

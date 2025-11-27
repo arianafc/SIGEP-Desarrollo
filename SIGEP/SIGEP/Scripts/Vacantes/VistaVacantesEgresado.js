@@ -46,15 +46,14 @@
                 var card = `
                     <article class="vacante-card" data-area="${escapeHtml(v.AreaAfin || '')}">
                         <header class="vacante-header">
-                            <h3 class="vacante-titulo">${escapeHtml(v.NombrePuesto)}</h3>
-                            <span class="vacante-empresa">${escapeHtml(v.Empresa || '')}</span>
+                         
+                          
                         </header>
                         <ul class="vacante-detalles">
-                            <li><strong>Requisitos:</strong> ${escapeHtml(v.Requisitos || '')}</li>
-                            <li><strong>Modalidad:</strong> ${escapeHtml(v.Modalidad || '')}</li>
-                            <li><strong>Área profesional:</strong> ${escapeHtml(v.AreaAfin || '')}</li>
+                              <h3 class="vacante-titulo">${escapeHtml(v.NombrePuesto)}</h3>
+                         <li><strong>Empresa:</strong> ${escapeHtml(v.Empresa)}</li>
                             <li><strong>Fecha publicación:</strong> ${formatFecha(v.FechaPublicacion)}</li>
-                            <li><strong>Fecha límite:</strong> ${formatFecha(v.FechaLimite)}</li>
+                         
                         </ul>
                         <div class="text-end">
                             <button class="btn btn-accion btn-cta btn-detalle" 
@@ -76,7 +75,7 @@
         }
 
         // === Modal Detalle ===
-        $(document).on('click', '.btn-detalle', function () {
+        $(document).on('click', '.btn-detalle btn-ver', function () {
             var d = $(this).data();
             $('#vis-Nombre').text(d.nombre || '');
             $('#vis-Empresa').text(d.empresa || '');
@@ -87,6 +86,7 @@
             $('#vis-FechaPublicacion').text(formatFecha(d.fechaPublicacion));
             $('#vis-FechaLimite').text(formatFecha(d.fechaLimite));
             $('#modalVisualizar').modal('show');
+            $('#vis-NombrePuesto').text(d.NombrePuesto || '');
         });
 
     });

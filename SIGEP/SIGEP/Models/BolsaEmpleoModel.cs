@@ -13,6 +13,7 @@ namespace SIGEP.Models
 
         public string Descripcion { get; set; }
 
+        public string NombrePuesto { get; set; }
         public string Requisitos { get; set; }
 
         public DateTime FechaPublicacion { get; set; }
