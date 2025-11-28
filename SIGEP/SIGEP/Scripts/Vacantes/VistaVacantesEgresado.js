@@ -46,17 +46,17 @@
                 var card = `
                     <article class="vacante-card" data-area="${escapeHtml(v.AreaAfin || '')}">
                         <header class="vacante-header">
-                         
-                          
+                       <h5 class="vacante-titulo">${escapeHtml(v.NombrePuesto)}</h5>
                         </header>
+                     
                         <ul class="vacante-detalles">
-                              <h3 class="vacante-titulo">${escapeHtml(v.NombrePuesto)}</h3>
+                             
                          <li><strong>Empresa:</strong> ${escapeHtml(v.Empresa)}</li>
                             <li><strong>Fecha publicación:</strong> ${formatFecha(v.FechaPublicacion)}</li>
                          
                         </ul>
                         <div class="text-end">
-                            <button class="btn btn-accion btn-cta btn-detalle" 
+                            <button class="btn-detalle btn-ver btn btn-cta " 
                                 data-id="${v.IdEmpleo}"
                                 data-nombre="${escapeHtml(v.NombrePuesto)}"
                                 data-empresa="${escapeHtml(v.Empresa)}"
@@ -65,7 +65,8 @@
                                 data-modalidad="${escapeHtml(v.Modalidad)}"
                                 data-area="${escapeHtml(v.AreaAfin)}"
                                 data-fecha-publicacion="${v.FechaPublicacion}"
-                                data-fecha-limite="${v.FechaLimite}">
+                                data-fecha-limite="${v.FechaLimite}"
+                                data-NombrePuesto="${escapeHtml(v.NombrePuesto)}">
                                 Ver más
                             </button>
                         </div>
@@ -75,8 +76,11 @@
         }
 
         // === Modal Detalle ===
-        $(document).on('click', '.btn-detalle btn-ver', function () {
+        // === Modal Detalle ===
+        $(document).on('click', '.btn-detalle.btn-ver', function () {
+          
             var d = $(this).data();
+
             $('#vis-Nombre').text(d.nombre || '');
             $('#vis-Empresa').text(d.empresa || '');
             $('#vis-Descripcion').text(d.descripcion || '');
@@ -85,9 +89,11 @@
             $('#vis-Area').text(d.area || '');
             $('#vis-FechaPublicacion').text(formatFecha(d.fechaPublicacion));
             $('#vis-FechaLimite').text(formatFecha(d.fechaLimite));
-            $('#modalVisualizar').modal('show');
             $('#vis-NombrePuesto').text(d.NombrePuesto || '');
+
+            $('#modalVisualizar').modal('show');
         });
+
 
     });
 })(jQuery);

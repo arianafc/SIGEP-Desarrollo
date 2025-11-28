@@ -95,6 +95,7 @@ namespace SIGEP.Controllers
                                 b.AreaAfin,
                                 b.FechaPublicacion,
                                 b.FechaLimite,
+                                b.NombrePuesto,
                                 Estado = est.Descripcion
                             };
 
@@ -117,6 +118,7 @@ namespace SIGEP.Controllers
                     x.Requisitos,
                     x.Modalidad,
                     x.AreaAfin,
+                    x.NombrePuesto,
                     FechaPublicacion = x.FechaPublicacion.ToString("yyyy-MM-dd"),
                     FechaLimite = x.FechaLimite.ToString("yyyy-MM-dd"),
                     x.Estado

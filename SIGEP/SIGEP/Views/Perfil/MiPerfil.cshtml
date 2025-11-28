@@ -295,12 +295,12 @@
                 }
 
 
+            }
 
-
-                if (rol == 4)
+            if (rol == 4)
+            {
+                using (Html.BeginForm("ActualizarInformacionAcademica", "Perfil", FormMethod.Post, new { @id = "ActualizarInfoAcademicaForm", @class = "row" }))
                 {
-                    using (Html.BeginForm("ActualizarInformacionAcademica", "Perfil", FormMethod.Post, new { @id = "ActualizarInfoAcademicaForm", @class = "row" }))
-                    {
 
                         <div class="col-md-6 form-group">
                             <label>Carrera</label>
