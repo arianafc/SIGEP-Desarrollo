@@ -5,6 +5,11 @@
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     ViewBag.Title = "Vacantes - Prácticas";
     var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
+
+    // Validar si es del año actual
+    int anioActual = DateTime.Now.Year;
+    int anioPractica = Model.FechaAplicacion.HasValue ? Model.FechaAplicacion.Value.Year : 0;
+    bool esAnioActual = anioPractica == anioActual;
 }
 
 
@@ -203,45 +208,76 @@ else
             <span class="@clase">@estadoRaw</span>
         </div>
 
-        <!-- Botones -->
-        <div class="mt-4 action-buttons">
-            <div class="row top-buttons">
-                <div class="col-md-6">
-                    <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalAgregarComentario">
-                        Agregar Comentario
-                    </button>
-                </div>
-                @if (rol == 2 || rol == 3)
-                {
+
+        @if (esAnioActual)
+        {
+            <!-- Botones -->
+            <div class="mt-4 action-buttons">
+                <div class="row top-buttons">
                     <div class="col-md-6">
-                        <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalActualizarEstado">
-                            Actualizar Estado
+                        <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalAgregarComentario">
+                            Agregar Comentario
                         </button>
                     </div>
-                }
+                    @if (rol == 2 || rol == 3)
+                    {
+                        <div class="col-md-6">
+                            <button type="button" class="btn-verde-personalizado w-100" data-bs-toggle="modal" data-bs-target="#modalActualizarEstado">
+                                Actualizar Estado
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>}
+        else
+        {
+            <br>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Esta práctica corresponde al año @anioPractica. Solo se permite visualización.
             </div>
-        </div>
+        }
 
         <!-- evaluaciones -->
         @if (Model?.EstadoPractica == "En Curso" ||
              Model?.EstadoPractica == "Aprobada" ||
              Model?.EstadoPractica == "Finalizada" ||
-             Model?.EstadoPractica == "Rezagada")
+             Model?.EstadoPractica == "Rezagado")
         {
-            <div class="mb-4">
-                <h5 class="section-title">Evaluación y Notas</h5>
-                <div class="row">
-                    <div class="col-md-4 form-group mb-3">
-                        <label>Nota 1</label>
-                        <input type="text" class="form-control" value="@(Model.Nota1?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #f8f9fa;">
+            <div class="notas-readonly-card">
+                <div class="notas-readonly-titulo">
+                    <i class="bi bi-lock-fill"></i>
+                    Evaluaciones de la Práctica
+                </div>
+
+                <div class="row g-3">
+                    <!-- Nota 1 -->
+                    <div class="col-md-4">
+                        <div class="nota-readonly-item">
+                            <span class="nota-readonly-label">Nota 1</span>
+                            <span class="nota-readonly-valor @(Model.Nota1 == null ? "sin-calificar" : "")">
+                                @(Model.Nota1?.ToString("F2") ?? "Sin nota")
+                            </span>
+                        </div>
                     </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label>Nota 2</label>
-                        <input type="text" class="form-control" value="@(Model.Nota2?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #f8f9fa;">
+
+                    <!-- Nota 2 -->
+                    <div class="col-md-4">
+                        <div class="nota-readonly-item">
+                            <span class="nota-readonly-label">Nota 2</span>
+                            <span class="nota-readonly-valor @(Model.Nota2 == null ? "sin-calificar" : "")">
+                                @(Model.Nota2?.ToString("F2") ?? "Sin nota")
+                            </span>
+                        </div>
                     </div>
-                    <div class="col-md-4 form-group mb-3">
-                        <label>Nota Final (Promedio)</label>
-                        <input type="text" class="form-control" value="@(Model.NotaFinal?.ToString("0.00") ?? "Sin calificar")" readonly style="background-color: #e3f2fd; font-weight: bold;">
+
+                    <!-- Nota Final -->
+                    <div class="col-md-4">
+                        <div class="nota-readonly-item nota-readonly-final">
+                            <span class="nota-readonly-label">Nota Final</span>
+                            <span class="nota-readonly-valor @(Model.NotaFinal == null ? "sin-calificar" : "")">
+                                @(Model.NotaFinal?.ToString("F2") ?? "Sin nota")
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

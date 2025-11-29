@@ -15,6 +15,7 @@ namespace SIGEP.Controllers
             {
                 return RedirectToAction("Login", "Home");
             }
+
             return View();
         }
 
@@ -92,7 +93,7 @@ namespace SIGEP.Controllers
                             NombreEmpresa = perfil.NombreEmpresa,
                             TelefonoEmpresa = perfil.TelefonoEmpresa,
                             IdVacante = perfil.IdVacante,    
-                            //EstadoPractica = perfil.EstadoPractica,
+                            EstadoPractica = perfil.EstadoPractica,
                             IdUsuario = perfil.IdUsuario,      
                             Comentarios = comentarios
                         }
@@ -650,6 +651,57 @@ namespace SIGEP.Controllers
                     success = false,
                     message = "Error al eliminar el documento: " + ex.Message
                 });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerEspecialidades()
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
+
+                int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+                int idRol = Convert.ToInt32(Session["IdRol"]);
+
+                using (var db = new SIGEPEntities())
+                {
+                    List<object> especialidades = new List<object>();
+
+                    if (idRol == 3) // Profesor
+                    {
+                        var especialidadProfesor = (from ue in db.UsuarioEspecialidadTB
+                                                    join e in db.EspecialidadesTB on ue.IdEspecialidad equals e.IdEspecialidad
+                                                    where ue.IdUsuario == idUsuario && ue.IdEstado == 1
+                                                    select new { e.Nombre })
+                                                   .FirstOrDefault();
+
+                        if (especialidadProfesor != null)
+                        {
+                            especialidades.Add(new { Value = especialidadProfesor.Nombre, Text = especialidadProfesor.Nombre });
+                        }
+                    }
+                    else // Coordinador o Admin
+                    {
+                        especialidades.Add(new { Value = "", Text = "-- Todas las especialidades --" });
+
+                        var lista = db.EspecialidadesTB
+                            .OrderBy(e => e.Nombre)
+                            .Select(e => new { Value = e.Nombre, Text = e.Nombre })
+                            .ToList();
+
+                        especialidades.AddRange(lista.Cast<object>());
+                    }
+
+                    return Json(new { success = true, especialidades = especialidades }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
     }
