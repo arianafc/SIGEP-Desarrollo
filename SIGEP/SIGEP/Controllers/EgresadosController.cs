@@ -133,6 +133,7 @@ namespace SIGEP.Controllers
                 {
                     IdEmpleo = o.IdEmpleo,
                     Empresa = o.Empresa,
+                    NombrePuesto = o.NombrePuesto,
                     Descripcion = o.Descripcion,
                     Requisitos = o.Requisitos,
                     FechaPublicacion = o.FechaPublicacion,
@@ -200,6 +201,7 @@ namespace SIGEP.Controllers
                         IdEstado = idEstadoPublicado,
                         AreaAfin = model.AreaAfin,
                         IdDireccion = idDireccion,
+                        NombrePuesto = model.NombrePuesto,
                         IdModalidad = model.IdModalidad
                     };
 
@@ -268,6 +270,7 @@ namespace SIGEP.Controllers
                     empleo.FechaLimite = model.FechaLimite;
                     empleo.AreaAfin = model.AreaAfin;
                     empleo.IdDireccion = idDireccion;
+                    empleo.NombrePuesto = model.NombrePuesto;
                     empleo.IdModalidad = model.IdModalidad;
                     db.SaveChanges();
                     tx.Commit();

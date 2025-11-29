@@ -42,143 +42,6 @@ namespace SIGEP.Controllers
         }
 
 
-        //[HttpGet]
-        //public JsonResult GetVacantes(int idEstado = 0, int idEspecialidad = 0, int idModalidad = 0)
-        //{
-        //    try
-        //    {
-        //        using (var db = new SIGEPEntities())
-        //        {
-
-        //            var vacantesQuery = db.VacantesPracticasTB
-        //                .AsNoTracking()
-        //                .Select(v => new
-        //                {
-        //                    v.IdVacante,
-        //                    v.Nombre,
-        //                    v.IdEmpresa,
-        //                    v.Requerimientos,
-        //                    v.FechaMaxAplicacion,
-        //                    v.NumCupos,
-        //                    v.FechaCierre,
-        //                    v.IdModalidad,
-        //                    v.IdEstado,
-        //                    v.Descripcion
-        //                });
-
-
-        //            if (idEstado > 0)
-        //                vacantesQuery = vacantesQuery.Where(v => v.IdEstado == idEstado);
-        //            if (idModalidad > 0)
-        //                vacantesQuery = vacantesQuery.Where(v => v.IdModalidad == idModalidad);
-
-        //            var vacantes = vacantesQuery.ToList();
-
-
-        //            if (idEspecialidad > 0)
-        //            {
-        //                var idsFiltrados = db.EspecialidadesVacantesTB
-        //                    .Where(ev => ev.IdEspecialidad == idEspecialidad)
-        //                    .Select(ev => ev.IdVacante)
-        //                    .Distinct()
-        //                    .ToList();
-
-        //                vacantes = vacantes.Where(v => idsFiltrados.Contains(v.IdVacante)).ToList();
-        //            }
-
-
-        //            var empresas = db.EmpresasTB.ToDictionary(x => x.IdEmpresa, x => x.NombreEmpresa);
-        //            var modalidades = db.ModalidadesTB.ToDictionary(x => x.IdModalidad, x => x.Descripcion);
-        //            var estados = db.EstadosTB.ToDictionary(x => x.IdEstado, x => x.Descripcion);
-
-
-        //            var especialidadesPorVacante = db.EspecialidadesVacantesTB
-        //                .Join(db.EspecialidadesTB,
-        //                      ev => ev.IdEspecialidad,
-        //                      esp => esp.IdEspecialidad,
-        //                      (ev, esp) => new { ev.IdVacante, esp.Nombre })
-        //                .GroupBy(x => x.IdVacante)
-        //                .ToDictionary(
-        //                    g => g.Key,
-        //                    g => string.Join(", ", g.Select(x => x.Nombre).Distinct())
-        //                );
-
-
-
-        //            // ================================
-        //            // 🔹 Cálculo de postulados válidos
-        //            // ================================
-        //            // Estados que cuentan como "Postulado": 3,5,6,8,9,11
-        //            var estadosPostulados = new[] { 5, 6, 8, 9, 11 };
-
-        //            var postuladosPorVacante = (
-        //                from p in db.PracticaEstudianteTB
-        //                join ue in db.UsuarioEspecialidadTB on p.IdUsuario equals ue.IdUsuario
-        //                join ev in db.EspecialidadesVacantesTB on p.IdVacante equals ev.IdVacante
-        //                where estadosPostulados.Contains(p.IdEstado)
-        //                      && ue.IdEspecialidad == ev.IdEspecialidad
-        //                      && ue.IdEstado == 1 // solo especialidades activas
-        //                group p by p.IdVacante into g
-        //                select new
-        //                {
-        //                    IdVacante = g.Key,
-        //                    Conteo = g.Select(x => x.IdUsuario).Distinct().Count()
-        //                }
-        //            ).ToDictionary(x => x.IdVacante, x => x.Conteo);
-
-        //            // ================================
-        //            // 🔹 Cálculo de cupos ocupados
-        //            // ================================
-        //            // Estados que ocupan cupo: 5,6,8,9,11
-        //            var estadosOcupandoCupo = new[] { 5, 6, 8, 9, 11 };
-
-        //            var cuposOcupadosPorVacante = db.PracticaEstudianteTB
-        //                .Where(p => estadosOcupandoCupo.Contains(p.IdEstado))
-        //                .GroupBy(p => p.IdVacante)
-        //                .ToDictionary(g => g.Key, g => g.Count());
-
-        //            var result = vacantes
-        //                .GroupBy(v => v.IdVacante)
-        //                .Select(g => g.First())
-        //                .Select(v => new
-        //                {
-        //                    v.IdVacante,
-        //                    v.Nombre,
-        //                    v.IdEmpresa,
-        //                    EmpresaNombre = empresas.ContainsKey(v.IdEmpresa) ? empresas[v.IdEmpresa] : "—",
-        //                    v.Requerimientos,
-        //                    FechaMaxAplicacion = v.FechaMaxAplicacion?.ToString("yyyy-MM-dd"),
-        //                    NumCupos = v.NumCupos ?? 0,
-        //                    FechaCierre = v.FechaCierre?.ToString("yyyy-MM-dd"),
-        //                    v.IdModalidad,
-        //                    ModalidadNombre = modalidades.ContainsKey(v.IdModalidad ?? 0)
-        //                        ? modalidades[v.IdModalidad ?? 0]
-        //                        : "—",
-        //                    v.Descripcion,
-        //                    v.IdEstado,
-        //                    EstadoNombre = estados.ContainsKey(v.IdEstado) ? estados[v.IdEstado] : "—",
-        //                    EspecialidadNombre = especialidadesPorVacante.ContainsKey(v.IdVacante)
-        //                        ? especialidadesPorVacante[v.IdVacante]
-        //                        : "—",
-        //                    NumPostulados = postuladosPorVacante.ContainsKey(v.IdVacante)
-        //                        ? postuladosPorVacante[v.IdVacante]
-        //                        : 0,
-        //                                                CuposOcupados = cuposOcupadosPorVacante.ContainsKey(v.IdVacante)
-        //                        ? cuposOcupadosPorVacante[v.IdVacante]
-        //                        : 0
-        //                })
-        //                .OrderByDescending(v => v.IdVacante)
-        //                .ToList();
-
-        //            return Json(new { data = result }, JsonRequestBehavior.AllowGet);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { data = new object[0], ok = false, error = ex.Message },
-        //                    JsonRequestBehavior.AllowGet);
-        //    }
-        //}
         // ==============================
         // 🔹 GET VACANTES (LISTADO PRINCIPAL)
         // ==============================
@@ -1036,13 +899,15 @@ namespace SIGEP.Controllers
         {
             using (var db = new SIGEPEntities())
             {
-                return db.EmpresasTB
-                         .OrderBy(e => e.NombreEmpresa)
-                         .Select(e => new SelectListItem
-                         {
-                             Value = e.IdEmpresa.ToString(),
-                             Text = e.NombreEmpresa
-                         }).ToList();
+                var empresas = db.Database.SqlQuery<EmpresaDTO>(
+                    "EXEC ObtenerEmpresasActivasSP"
+                ).ToList();
+
+                return empresas.Select(e => new SelectListItem
+                {
+                    Value = e.IdEmpresa.ToString(),
+                    Text = e.NombreEmpresa
+                }).ToList();
             }
         }
 
@@ -1474,123 +1339,7 @@ namespace SIGEP.Controllers
             return View();
         }
 
-        //[HttpGet]
-        //public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0, int idEspecialidad = 0)
-        //{
-        //    using (var db = new SIGEPEntities())
-        //    {
-        //        if (Session["IdUsuario"] == null)
-        //            return Json(new { ok = false, message = "Sesión expirada." }, JsonRequestBehavior.AllowGet);
-
-        //        int idProfesor = Convert.ToInt32(Session["IdUsuario"]);
-
-        //        // 1) Especialidad(es) del profesor
-        //        List<int> especialidadesProfesor = new List<int>();
-        //        if (Session["IdEspecialidad"] != null)
-        //        {
-        //            especialidadesProfesor.Add(Convert.ToInt32(Session["IdEspecialidad"]));
-        //        }
-        //        else
-        //        {
-        //            especialidadesProfesor = db.UsuarioEspecialidadTB
-        //                .Where(ue => ue.IdUsuario == idProfesor && ue.IdEstado == 1)
-        //                .Select(ue => ue.IdEspecialidad)
-        //                .ToList();
-        //        }
-
-        //        if (!especialidadesProfesor.Any())
-        //            return Json(new { ok = true, data = new object[0] }, JsonRequestBehavior.AllowGet);
-
-        //        string estadoNorm = (estado ?? "").Trim().ToLower();
-        //        string autog = "autogestionada";
-
-        //        // 2) Query base (con todos los joins originales)
-        //        var q =
-        //            from v in db.VacantesPracticasTB
-
-        //            join e in db.EmpresasTB on v.IdEmpresa equals e.IdEmpresa into je
-        //            from e in je.DefaultIfEmpty()
-
-        //            join d in db.DireccionesTB on e.IdDireccion equals d.IdDireccion into jd
-        //            from d in jd.DefaultIfEmpty()
-
-        //            join es in db.EstadosTB on v.IdEstado equals es.IdEstado
-
-        //            join ev in db.EspecialidadesVacantesTB on v.IdVacante equals ev.IdVacante
-        //            join sp in db.EspecialidadesTB on ev.IdEspecialidad equals sp.IdEspecialidad
-
-        //            join m in db.ModalidadesTB on v.IdModalidad equals m.IdModalidad into jm
-        //            from m in jm.DefaultIfEmpty()
-
-        //            where especialidadesProfesor.Contains(ev.IdEspecialidad)
-        //            select new
-        //            {
-        //                v.IdVacante,
-        //                v.Nombre,
-        //                v.IdEmpresa,
-        //                EmpresaNombre = e != null ? e.NombreEmpresa : "",
-        //                v.Requerimientos,
-        //                v.FechaMaxAplicacion,
-        //                v.NumCupos,
-        //                v.FechaCierre,
-        //                v.Descripcion,
-        //                IdModalidad = v.IdModalidad ?? 0,
-        //                ModalidadNombre = m != null ? m.Descripcion : "",
-        //                IdEspecialidad = ev.IdEspecialidad,
-        //                EspecialidadNombre = sp != null ? sp.Nombre : "",
-        //                v.IdEstado,
-        //                EstadoNombre = es != null ? es.Descripcion : "",
-
-        //                EstudiantesPostulados = db.PracticaEstudianteTB.Count(p => p.IdVacante == v.IdVacante),
-
-        //                TipoVacante = v.Tipo
-        //            };
-
-        //        // 3) Excluir Autogestionadas (compatibles con EF)
-        //        q = q.Where(x =>
-        //            ((x.EstadoNombre ?? "").ToLower() != autog) &&
-        //            ((x.TipoVacante ?? "").ToLower() != autog)
-        //        );
-
-        //        // 4) Filtros de UI (compatibles con EF)
-        //        if (!string.IsNullOrEmpty(estadoNorm))
-        //            q = q.Where(x => (x.EstadoNombre ?? "").ToLower() == estadoNorm);
-
-        //        if (idModalidad > 0)
-        //            q = q.Where(x => x.IdModalidad == idModalidad);
-
-        //        if (idEspecialidad > 0)
-        //            q = q.Where(x => x.IdEspecialidad == idEspecialidad);
-
-        //        // 5) Materializar + fechas ISO
-        //        var list = q
-        //            .OrderByDescending(x => x.IdVacante)
-        //            .ToList();
-
-        //        var data = list.Select(x => new
-        //        {
-        //            x.IdVacante,
-        //            x.Nombre,
-        //            x.IdEmpresa,
-        //            x.EmpresaNombre,
-        //            x.Requerimientos,
-        //            FechaMaxAplicacion = x.FechaMaxAplicacion.HasValue ? x.FechaMaxAplicacion.Value.ToString("o") : null,
-        //            NumCupos = x.NumCupos ?? 0,
-        //            FechaCierre = x.FechaCierre.HasValue ? x.FechaCierre.Value.ToString("o") : null,
-        //            x.Descripcion,
-        //            x.IdModalidad,
-        //            x.ModalidadNombre,
-        //            x.IdEspecialidad,
-        //            x.EspecialidadNombre,
-        //            x.IdEstado,
-        //            x.EstadoNombre,
-        //            x.EstudiantesPostulados
-        //            // DireccionExacta = x.DireccionExacta  // si decides exponerla
-        //        });
-
-        //        return Json(new { ok = true, data }, JsonRequestBehavior.AllowGet);
-        //    }
-        //}
+       
 
         [HttpGet]
         public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0, int idEspecialidad = 0)
@@ -1622,12 +1371,9 @@ namespace SIGEP.Controllers
                 string estadoNorm = (estado ?? "").Trim().ToLower();
                 string autog = "autogestionada";
 
-                // 2️⃣ 🔹 ESTADOS QUE OCUPAN CUPO (aplicaciones reales)
-                // IMPORTANTE: Estado 3 (En proceso de Aplicación) NO está aquí
+                
                 var estadosOcupanCupo = new[] { 5, 6, 8, 9, 11 };
-                // 5=Asignada, 6=Aprobada, 8=Finalizada, 9=Rezagado, 11=En Curso
-
-                // 3️⃣ Query base
+                
                 var q =
                     from v in db.VacantesPracticasTB
 

@@ -586,3 +586,42 @@
         font-size: 1.75rem;
     }
 }
+/* Botón verde personalizado - con animación */
+.btn-verde-personalizado {
+    background-color: #2d594d !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+}
+
+    .btn-verde-personalizado:hover {
+        background-color: #244738 !important;
+        transform: scale(1.03) !important;
+        box-shadow: 0 8px 16px rgba(45, 89, 77, 0.25) !important;
+        color: white !important;
+    }
+
+/* Botón rojo personalizado - con animación igual al verde */
+.btn-rojo-personalizado {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+}
+
+    .btn-rojo-personalizado:hover {
+        background-color: #c82333 !important;
+        transform: scale(1.03) !important;
+        box-shadow: 0 8px 16px rgba(220, 53, 69, 0.25) !important;
+        color: white !important;
+    }

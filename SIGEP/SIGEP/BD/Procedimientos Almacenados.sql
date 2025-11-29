@@ -365,7 +365,7 @@ CREATE OR ALTER PROCEDURE ObtenerBolsaEmpleoSP
 AS
 BEGIN
     
-    SELECT B.IdEmpleo, B.Empresa, B.IdEstado, B.Descripcion, B.Requisitos, B.FechaPublicacion, B.FechaLimite, B.IdDireccion, B.AreaAfin, D.DireccionExacta,
+    SELECT B.IdEmpleo, B.Empresa, B.NombrePuesto, B.IdEstado, B.Descripcion, B.Requisitos, B.FechaPublicacion, B.FechaLimite, B.IdDireccion, B.AreaAfin, D.DireccionExacta,
     D.IdDistrito, Di.Nombre as Distrito, M.Descripcion as Modalidad, p.IdProvincia, P.Nombre as Provincia, C.IdCanton, C.Nombre as Canton, M.IdModalidad
     FROM BolsaEmpleoTB B
     LEFT JOIN DireccionesTB D

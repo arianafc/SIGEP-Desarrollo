@@ -134,6 +134,7 @@
     <Compile Include="Controllers\EmpresaController.cs" />
     <Compile Include="Controllers\EstudianteController.cs" />
     <Compile Include="Controllers\EvaluacionController.cs" />
+    <Compile Include="Controllers\HistoricoController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PerfilController.cs" />
     <Compile Include="Controllers\PracticasController.cs" />
@@ -156,9 +157,6 @@
     <Compile Include="EF\ComentariosPracticaTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="EF\ComentariosPracticaTB_Backup_20251030.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
     <Compile Include="EF\ComunicadosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -172,9 +170,6 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\EmailsTB.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="EF\EmpleosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\EmpresasTB.cs">
@@ -199,6 +194,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\GuardarNotaEstudianteSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\HistoricoPracticasSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\InformacionLaboralTB.cs">
@@ -231,6 +229,9 @@
     <Compile Include="EF\NotasEstudiantesTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="EF\ObtenerBolsaEmpleoSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="EF\ObtenerComentariosEstudianteSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -241,6 +242,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\ObtenerDocumentosPerfilSP_Result.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="EF\ObtenerEmpresasActivasSP_Result.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="EF\ObtenerEncargadosUsuarioSP_Result.cs">
@@ -276,9 +280,6 @@
     <Compile Include="EF\PracticaEstudianteTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="EF\PracticaEstudianteTB_Backup_20251030.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
     <Compile Include="EF\ProvinciasTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -306,13 +307,7 @@
     <Compile Include="EF\UsuariosTB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="EF\UsuariosTB_Backup_20251030.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
     <Compile Include="EF\VacantesPracticasTB.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="EF\VacantesPracticasTB_Backup_20251030.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
@@ -320,11 +315,14 @@
     </Compile>
     <Compile Include="Models\AsignarEstudianteResult.cs" />
     <Compile Include="Models\Autenticacion.cs" />
+    <Compile Include="Models\BolsaEmpleoModel.cs" />
+    <Compile Include="Models\BolsaEmpleoVM.cs" />
     <Compile Include="Models\ComunicadoCardVM.cs" />
     <Compile Include="Models\ComunicadosVM.cs" />
     <Compile Include="Models\CorreoDTO.cs" />
     <Compile Include="Models\DashboardVM.cs" />
     <Compile Include="Models\DocumentoDTO.cs" />
+    <Compile Include="Models\EmpresaDTO.cs" />
     <Compile Include="Models\EncargadoDTO.cs" />
     <Compile Include="Models\EnvioCorreosModel.cs" />
     <Compile Include="Models\EstudianteDetalleDTO.cs" />
@@ -335,6 +333,7 @@
     <Compile Include="Models\FiltroSeguridad.cs" />
     <Compile Include="Models\MisPostulacionesVM.cs" />
     <Compile Include="Models\PracticaEstudianteViewModel.cs" />
+    <Compile Include="Models\UsuarioEspecialidadModel.cs" />
     <Compile Include="Models\UsuarioModel.cs" />
     <Compile Include="Models\VacantePracticaDTO.cs" />
     <Compile Include="Models\VacantePracticaVM.cs" />
@@ -479,6 +478,8 @@
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\Comunicados\Comunicados.js" />
     <Content Include="Scripts\DataTable\dataTables.js" />
+    <Content Include="Scripts\Direcciones\Direcciones.js" />
+    <Content Include="Scripts\Egresados\BolsaEmpleo.js" />
     <Content Include="Scripts\Egresados\ListaEgresados.js" />
     <Content Include="Scripts\Estudiantes\ListaEstudiantes.js" />
     <Content Include="Scripts\Evaluacion\Evaluacion.js" />
@@ -537,6 +538,8 @@
     <Content Include="Views\Vacantes\ListaVacantesEgresado.cshtml" />
     <Content Include="Views\Comunicados\Comunicados.cshtml" />
     <Content Include="Temp\Johnny%27s recommendation letter.pdf" />
+    <Content Include="Views\Historico\HistoricoPracticas.cshtml" />
+    <Content Include="Views\Egresados\BolsaEmpleo.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

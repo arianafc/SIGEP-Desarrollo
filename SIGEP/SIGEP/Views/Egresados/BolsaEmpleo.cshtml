@@ -59,6 +59,7 @@
         <thead>
             <tr>
                 <th>Empresa</th>
+                <th>Puesto</th>
                 <th>Descripción</th>
                 <th>Requisitos</th>
                 <th>Fecha de Publicación</th>
@@ -73,6 +74,7 @@
             {
                 <tr>
                     <td>@vacante.Empresa</td>
+                    <td>@vacante.NombrePuesto</td>
                     <td>@vacante.Descripcion</td>
                     <td>@vacante.Requisitos</td>
                     <td>@vacante.FechaPublicacion.ToString("dd/MM/yyyy")</td>
@@ -95,6 +97,7 @@
                             <button class="btn-accion btn-editar-empresa"
                                     data-iddireccion="@vacante.IdDireccion"
                                     data-id="@vacante.IdEmpleo"
+                                    data-nombrepuesto="@vacante.NombrePuesto"
                                     data-empresa="@vacante.Empresa"
                                     data-descripcion="@vacante.Descripcion"
                                     data-requisitos="@vacante.Requisitos"
@@ -163,23 +166,27 @@
                                     }
                                 </select>
                             </div>
+
                             <div class="col-md-6 form-group mb-3">
                                 <label>Descripción</label>
-                                <textarea name="Descripcion" class="form-control" id="DescripcionEmpleo" ></textarea>
+                                <textarea name="Descripcion" class="form-control" id="DescripcionEmpleo"></textarea>
                             </div>
                             <div class="col-md-6 form-group mb-3">
                                 <label>Requisitos</label>
-                                <textarea name="Requisitos" class="form-control" id="RequisitosEmpleo" ></textarea>
+                                <textarea name="Requisitos" class="form-control" id="RequisitosEmpleo"></textarea>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label>Nombre Puesto</label>
+                                <input name="NombrePuesto" class="form-control" id="NombrePuestoEmpleo"></input>
                             </div>
                             <div class="col-md-6 form-group mb-3">
                                 <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
-                                <input type="date" name="FechaLimite" id="FechaLimiteEmpleo" class="form-control"  />
+                                <input type="date" name="FechaLimite" id="FechaLimiteEmpleo" class="form-control" />
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Provincia <span class="text-danger">*</span></label>
                                 <select name="Provincia"
-                                        class="form-control ddl-provincia" id="ProvinciaEmpleo" onchange="cargarCantones(this)"
-                                       >
+                                        class="form-control ddl-provincia" id="ProvinciaEmpleo" onchange="cargarCantones(this)">
                                     <option value="">Seleccione una provincia</option>
                                     <option value="San José">San José</option>
                                     <option value="Alajuela">Alajuela</option>
@@ -194,8 +201,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Cantón <span class="text-danger">*</span></label>
                                 <select name="Canton"
-                                        class="form-control ddl-canton" id="CantonEmpleo" onchange="cargarDistritos(this)"
-                                       >
+                                        class="form-control ddl-canton" id="CantonEmpleo" onchange="cargarDistritos(this)">
                                     <option value="">Seleccione un cantón</option>
                                 </select>
                             </div>
@@ -203,14 +209,13 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Distrito <span class="text-danger">*</span></label>
                                 <select name="Distrito"
-                                        class="form-control ddl-distrito" id="DistritoEmpleo"
-                                       >
+                                        class="form-control ddl-distrito" id="DistritoEmpleo">
                                     <option value="">Seleccione un distrito</option>
                                 </select>
                             </div>
 
 
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
                                 <input name="DireccionExacta" class="form-control" id="DireccionBolsaEmpleo" />
                             </div>
@@ -250,11 +255,11 @@
                             <input type="hidden" name="IdDireccion" id="IdDireccionEditar" />
                             <div class="col-md-6 form-group mb-3">
                                 <label>Empresa <span class="text-danger">*</span></label>
-                                <input type="text" name="Empresa" class="form-control" placeholder="Ejemplo: Align Technology" id="NombreEmpleoEditar"  />
+                                <input type="text" name="Empresa" class="form-control" placeholder="Ejemplo: Align Technology" id="NombreEmpleoEditar" />
                             </div>
                             <div class="col-md-6 form-group mb-3">
                                 <label>Modalidad <span class="text-danger">*</span></label>
-                                <select name="IdModalidad" class="form-select OpcionesVacantes w-100" id="IdModalidadEmpleoEditar" style="font-size:14px" >
+                                <select name="IdModalidad" class="form-select OpcionesVacantes w-100" id="IdModalidadEmpleoEditar" style="font-size:14px">
                                     <option value="">-- Seleccione modalidad --</option>
                                     @foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
                                     {
@@ -264,15 +269,19 @@
                             </div>
                             <div class="col-md-6 form-group mb-3">
                                 <label>Descripción</label>
-                                <textarea name="Descripcion" class="form-control" id="DescripcionEmpleoEditar" ></textarea>
+                                <textarea name="Descripcion" class="form-control" id="DescripcionEmpleoEditar"></textarea>
                             </div>
                             <div class="col-md-6 form-group mb-3">
                                 <label>Requisitos</label>
                                 <textarea name="Requisitos" class="form-control" id="RequisitosEmpleoEditar"></textarea>
                             </div>
                             <div class="col-md-6 form-group mb-3">
+                                <label>Nombre Puesto</label>
+                                <input name="NombrePuesto" class="form-control" id="NombrePuestoEmpleoEditar"></input>
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
                                 <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
-                                <input type="date" name="FechaLimite" id="FechaLimiteEmpleoEditar" class="form-control"  />
+                                <input type="date" name="FechaLimite" id="FechaLimiteEmpleoEditar" class="form-control" />
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Provincia <span class="text-danger">*</span></label>
@@ -309,7 +318,7 @@
                             </div>
 
 
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Dirección Exacta <span class="text-danger">*</span></label>
                                 <input name="DireccionExacta" class="form-control" id="DireccionBolsaEmpleoEditar" />
                             </div>
@@ -327,94 +336,6 @@
             <div class="modal-footer px-4">
                 <button id="btnGuardarVacante" type="submit" form="formEditarEmpleo" class="btn CerrarModal">Guardar y Publicar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- MODAL VISUALIZAR -->
-<div class="modal fade" id="modalVisualizarVacante" tabindex="-1" aria-labelledby="modalVisualizarVacanteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content" style="border-radius: 12px; background-color: #F2F2F2; color: #2D594D;">
-            <div class="modal-header" style="background-color: #2D594D; color: white;">
-                <h5 class="modal-title">Visualizar Vacante</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body px-4">
-                <div class="mb-4">
-                    <h5 class="section-title">Información General</h5>
-                    <div class="row">
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Nombre de la Vacante <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="vis-Nombre" readonly>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Empresa <span class="text-danger">*</span></label>
-                            <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Empresa" disabled>
-                                <option value="">-- Seleccione empresa --</option>
-                                @*@foreach (var em in ViewBag.Empresas as List<SelectListItem>)
-                                    {
-                                        <option value="@em.Value">@em.Text</option>
-                                    }*@
-                            </select>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Lugar / Ubicación <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="vis-Ubicacion" readonly>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Especialidad <span class="text-danger">*</span></label>
-                            <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Especialidad" disabled>
-                                <option value="">-- Seleccione especialidad --</option>
-                                @*@foreach (var e in ViewBag.Especialidades as List<SelectListItem>)
-                                    {
-                                        <option value="@e.Value">@e.Text</option>
-                                    }*@
-                            </select>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Cantidad de Cupos <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="vis-NumCupos" readonly>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Modalidad <span class="text-danger">*</span></label>
-                            <select class="form-select OpcionesVacantes w-100" style="font-size:14px" id="vis-Modalidad" disabled>
-                                <option value="">-- Seleccione modalidad --</option>
-                                @*@if (ViewBag.Modalidades != null)
-                                    {
-                                        foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
-                                        {
-                                            <option value="@m.Value">@m.Text</option>
-                                        }
-                                    }*@
-                            </select>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Fecha Límite de Aplicación <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="vis-FechaAplicacion" readonly>
-                        </div>
-                        <div class="col-md-6 form-group mb-3">
-                            <label>Fecha de Cierre <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="vis-FechaCierre" readonly>
-                        </div>
-                        <div class="col-12 form-group mb-3">
-                            <label>Requisitos <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="vis-Requerimientos" rows="3" readonly></textarea>
-                        </div>
-                        <div class="col-12 form-group mb-3">
-                            <label>Descripción <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="vis-Descripcion" rows="3" readonly></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- LISTADO DE POSTULACIONES -->
-                <div class="mb-4">
-                    <h5 class="section-title mb-3">Postulaciones</h5>
-                    <ul id="listaPostulaciones" class="list-group mb-3"></ul>
-                    <p id="mensajeSinPostulaciones" class="text-muted">No hay postulaciones registradas.</p>
-                </div>
             </div>
         </div>
     </div>
