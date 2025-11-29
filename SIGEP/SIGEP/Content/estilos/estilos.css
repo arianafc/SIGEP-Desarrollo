@@ -7,6 +7,58 @@ body {
     font-family: 'Rubik', sans-serif;
 }
 
+
+/* Color del texto e íconos dentro de la sección expandida */
+.expanded-section .sidebar-link,
+.expanded-section .sidebar-link .hide-menu,
+.expanded-section .sidebar-link i {
+    color: #2E4859 !important;
+}
+
+    /* Hover con un tono un poco más oscuro para mantener coherencia */
+    .expanded-section .sidebar-link:hover,
+    .expanded-section .sidebar-link:hover .hide-menu,
+    .expanded-section .sidebar-link:hover i {
+        color: #2D594D !important;
+        transform: translateX(3px);
+    }
+
+
+
+.logo-text-sigep {
+    font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #2D594D;
+    position: relative;
+}
+
+   
+    .logo-text-sigep::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -4px;
+        width: 60%;
+        height: 2px;
+        background-color: #2E5659;
+        border-radius: 999px;
+        opacity: 0.7;
+    }
+
+
+.logo:hover .logo-text-sigep {
+    color: #234145;
+}
+
+    .logo:hover .logo-text-sigep::after {
+        width: 100%;
+        opacity: 1;
+        transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    }
+
 /* Títulos primarios */.titulo-principal {
     font-family: 'Rubik', sans-serif;
     /*font-size: 30px;*/

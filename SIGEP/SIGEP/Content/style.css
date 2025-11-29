@@ -7958,7 +7958,7 @@ Notify
         .topbar .top-navbar .navbar-header .navbar-brand .logo-icon {
           margin-right: 5px; }
         .topbar .top-navbar .navbar-header .navbar-brand .sidebartoggler {
-          color: #fff; }
+          color: #2d594d; }
     .topbar .top-navbar .navbar-nav > .nav-item > .nav-link {
       padding: 0px 15px;
       font-size: 0.875rem;
@@ -7975,9 +7975,10 @@ Notify
         background: rgba(0, 0, 0, 0.03); }
   .topbar .user-dd, .topbar .mailbox {
     min-width: 280px; }
-  .topbar .nav-toggler, .topbar .topbartoggler {
-    color: #fff;
-    padding: 0 15px; }
+    .topbar .nav-toggler, .topbar .topbartoggler {
+        color: #2d594d;
+        padding: 0 15px;
+    }
 
 .search-box .app-search {
   z-index: 110;
@@ -8236,7 +8237,8 @@ sidebar navigation
         align-items: center;
         line-height: 30px;
         margin-top: 10px;
-        color: #2d594d;
+        color: #2E5659;
+        font-weight: 600;
         text-transform: uppercase;
     }
     .sidebar-nav ul .nav-small-cap i {
@@ -8274,7 +8276,6 @@ Down arrow
     height: 7px;
     border-width: 1px 0 0 1px;
     border-style: solid;
-    border-color: #fff;
     margin-left: 10px;
     -webkit-transform: rotate(135deg) translate(0, -50%);
     -ms-transform: rotate(135deg) translate(0, -50%);
