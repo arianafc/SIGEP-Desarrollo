@@ -1,0 +1,103 @@
+﻿
+#FechaNacimiento {
+    font-size: 0.95rem;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+    #FechaNacimiento:focus {
+        outline: none;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+/* Contenedor del datepicker */
+.ui-datepicker {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border-radius: 0.75rem !important;
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    padding: 0.75rem !important;
+}
+
+/* Encabezado (mes / año) */
+.ui-datepicker-header {
+    background: #2d594d !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+/* Flechas de navegación */
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    top: 0.4rem !important;
+    border-radius: 999px !important;
+    width: 1.8rem !important;
+    height: 1.8rem !important;
+}
+
+.ui-datepicker .ui-datepicker-prev-hover,
+.ui-datepicker .ui-datepicker-next-hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tabla de días */
+.ui-datepicker table {
+    margin: 0.5rem 0 0 0 !important;
+    width: 100%;
+    font-size: 0.8rem;
+}
+
+.ui-datepicker th {
+    padding: 0.25rem 0 !important;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+/* Celdas de días */
+.ui-datepicker td {
+    padding: 0;
+}
+
+    .ui-datepicker td a,
+    .ui-datepicker td span {
+        display: block;
+        padding: 0.35rem 0;
+        text-align: center;
+        border-radius: 999px;
+        border: none !important;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    /* Día normal */
+    .ui-datepicker td a {
+        color: #212529 !important;
+    }
+
+        /* Hover */
+        .ui-datepicker td a:hover {
+            background: #e9f2ff !important;
+        }
+
+/* Día seleccionado */
+.ui-datepicker .ui-state-active {
+    background: #2d594d !important;
+    color: #fff !important;
+}
+
+/* Día actual */
+.ui-datepicker .ui-state-highlight {
+    background: #e0f0ff !important;
+    color: #0d6efd !important;
+}
+
+/* Dropdowns de mes/año */
+.ui-datepicker select.ui-datepicker-month,
+.ui-datepicker select.ui-datepicker-year {
+    border-radius: 0.5rem;
+    border: none;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.75rem;
+    margin: 0 0.25rem;
+}

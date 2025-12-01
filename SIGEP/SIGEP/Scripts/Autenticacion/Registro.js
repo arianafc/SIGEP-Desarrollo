@@ -1,13 +1,14 @@
 ﻿$(function () {
 
-    // Inicializar datepicker
     $("#FechaNacimiento").datepicker({
         dateFormat: "yy-mm-dd",
         changeMonth: true,
         changeYear: true,
-        yearRange: "1900:" + new Date().getFullYear(), // Desde 1900 hasta el año actual
-        defaultDate: "-17Y" // Fecha por defecto: hace 17 años
+        yearRange: "1900:" + new Date().getFullYear(),
+        defaultDate: "-17y", 
+        showAnim: "fadeIn"  
     });
+
 
     // Toggle de contraseña
     document.querySelectorAll('.toggle-password').forEach(function (toggle) {
