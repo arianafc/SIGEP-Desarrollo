@@ -13,8 +13,10 @@ namespace SIGEP.Controllers
 {
     public class PerfilController : Controller
     {
-        [HttpGet]
+
         [FiltroSesion]
+        [HttpGet]
+     
         public ActionResult MiPerfil()
         {
             try

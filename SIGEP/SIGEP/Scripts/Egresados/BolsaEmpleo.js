@@ -155,7 +155,7 @@ $(function () {
     });
 
     document.addEventListener('click', function (e) {
-        const btn = e.target.closest('.btn-editar-empresa');
+        const btn = e.target.closest('.btn-editar-empleo');
         if (!btn) return;
 
         const IdDireccion = btn.getAttribute('data-IdDireccion');
@@ -379,7 +379,7 @@ $(function () {
     });
 
   
-        $(document).on('click', '.btn-eliminar-empresa', function (e) {
+        $(document).on('click', '.btn-eliminar-empleo', function (e) {
             e.preventDefault();
 
             const idEmpleo = $(this).data('id');

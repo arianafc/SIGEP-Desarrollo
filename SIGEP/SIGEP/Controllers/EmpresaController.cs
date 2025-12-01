@@ -1,4 +1,7 @@
-﻿using SIGEP.EF;
+﻿using Microsoft.Ajax.Utilities;
+using SIGEP.EF;
+using SIGEP.Models;
+using SIGEP.Services;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -7,15 +10,17 @@ using System.Web.Mvc;
 
 namespace TuProyecto.Controllers
 {
+    [FiltroSesion]
     public class EmpresaController : Controller
     {
         private SIGEPEntities db = new SIGEPEntities();
+        Utilitarios utilitarios = new Utilitarios();
 
         // ===========================
         // Helpers
         // ===========================
         private async Task<int> GetEstadoIdAsync(string descripcion, int fallback = 1)
-        {
+        { 
             var estado = await db.EstadosTB
                                  .Where(e => e.Descripcion == descripcion)
                                  .Select(e => e.IdEstado)
@@ -42,16 +47,21 @@ namespace TuProyecto.Controllers
         // ===========================
         // Vista principal
         // ===========================
+        [FiltroSesion]
+        [FiltroCoordinador]
         [HttpGet]
         public ActionResult ListaEmpresas()
         {
-            // Carga la vista tal cual la tienes; la tabla se llenará por AJAX con GetEmpresas.
+
+
+          
             return View();
         }
 
         // ===========================
         // Listado para DataTable (AJAX)
         // ===========================
+        
         [HttpGet]
         public async Task<JsonResult> GetEmpresas()
         {
@@ -94,22 +104,7 @@ namespace TuProyecto.Controllers
             {
                 var activoId = await GetEstadoIdAsync("Activo", 1);
 
-                // 1) Direccion (opcional)
-                int? idDistrito = await ResolveDistritoIdAsync(vm.Provincia, vm.Canton, vm.Distrito);
-                int? idDireccion = null;
-
-                if (!string.IsNullOrWhiteSpace(vm.Direccion) || idDistrito != null)
-                {
-                    var dir = new DireccionesTB
-                    {
-                        DireccionExacta = vm.Direccion ?? "",
-                        IdEstado = activoId,
-                        IdDistrito = idDistrito ?? 1 // fallback
-                    };
-                    db.DireccionesTB.Add(dir);
-                    await db.SaveChangesAsync();
-                    idDireccion = dir.IdDireccion;
-                }
+                var idDireccion = utilitarios.ObtenerOCrearDireccion(db, vm.Provincia, vm.Canton, vm.Distrito, vm.Direccion, 0);
 
                 // 2) Empresa
                 var emp = new EmpresasTB
@@ -118,7 +113,7 @@ namespace TuProyecto.Controllers
                     NombreContacto = vm.NombreContacto,
                     IdDireccion = idDireccion,
                     AreasAfines = vm.Areas,
-                    IdEstado = activoId
+                    IdEstado = activoId 
                 };
                 db.EmpresasTB.Add(emp);
                 await db.SaveChangesAsync();
@@ -198,40 +193,33 @@ namespace TuProyecto.Controllers
             try
             {
                 var emp = await db.EmpresasTB.FindAsync(vm.IdEmpresa);
+             
                 if (emp == null) return Json(new { ok = false, msg = "No existe." });
 
-                // Actualizar/crear dirección si corresponde
-                int? idDistrito = await ResolveDistritoIdAsync(vm.Provincia, vm.Canton, vm.Distrito);
-                if (!string.IsNullOrWhiteSpace(vm.Direccion) || idDistrito != null)
+                var IdDireccion = 0;
+
+                if (emp.IdDireccion != null)
                 {
-                    if (emp.IdDireccion == null)
-                    {
-                        var activo = await GetEstadoIdAsync("Activo", 1);
-                        var dir = new DireccionesTB
-                        {
-                            DireccionExacta = vm.Direccion ?? "",
-                            IdEstado = activo,
-                            IdDistrito = idDistrito ?? 1
-                        };
-                        db.DireccionesTB.Add(dir);
-                        await db.SaveChangesAsync();
-                        emp.IdDireccion = dir.IdDireccion;
-                    }
-                    else
-                    {
-                        var dir = await db.DireccionesTB.FindAsync(emp.IdDireccion);
-                        if (dir != null)
-                        {
-                            dir.DireccionExacta = vm.Direccion ?? dir.DireccionExacta;
-                            if (idDistrito != null) dir.IdDistrito = idDistrito.Value;
-                        }
-                    }
+                     IdDireccion = (int)emp.IdDireccion;
+                } else
+                {
+                    IdDireccion = 0;
                 }
+
+                    int idDireccion = utilitarios.ObtenerOCrearDireccion(
+                           db,
+                          vm.Provincia,
+                          vm.Canton,
+                         vm.Distrito,
+                         vm.Direccion,
+                         IdDireccion
+                       );
 
                 // Empresa
                 emp.NombreEmpresa = vm.NombreEmpresa;
                 emp.NombreContacto = vm.NombreContacto;
                 emp.AreasAfines = vm.Areas;
+                emp.IdDireccion = idDireccion;
 
                 // Email (uno principal)
                 var email = await db.EmailsTB.FirstOrDefaultAsync(x => x.IdEmpresa == emp.IdEmpresa);
@@ -358,6 +346,8 @@ namespace TuProyecto.Controllers
         public string Distrito { get; set; }
         public string Direccion { get; set; }
         public string Areas { get; set; }
+
+        public int IdDireccion { get; set; }
     }
 
     public class EmpresaEditVM : EmpresaCreateVM

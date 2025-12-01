@@ -1,5 +1,7 @@
-﻿using SIGEP.EF;
+﻿using Microsoft.Ajax.Utilities;
+using SIGEP.EF;
 using SIGEP.Models;
+using SIGEP.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,7 @@ namespace SIGEP.Controllers
     public class EgresadosController : Controller
     {
         private SIGEPEntities db = new SIGEPEntities();
+        Utilitarios utilitarios = new Utilitarios();
 
         [HttpGet]
         public ActionResult ListaEgresados()
@@ -181,7 +184,7 @@ namespace SIGEP.Controllers
                     int idEstadoPublicado = 1;
 
 
-                    int idDireccion = ObtenerOCrearDireccion(
+                    int idDireccion = utilitarios.ObtenerOCrearDireccion(
                         db,
                         model.Provincia,
                         model.Canton,
@@ -256,7 +259,7 @@ namespace SIGEP.Controllers
                             msg = "El empleo no existe."
                         }, JsonRequestBehavior.AllowGet);
                     }
-                    int idDireccion = ObtenerOCrearDireccion(
+                    int idDireccion = utilitarios.ObtenerOCrearDireccion(
                         db,
                         model.Provincia,
                         model.Canton,
@@ -328,106 +331,6 @@ namespace SIGEP.Controllers
 
         }
 
-
-
-        private int ObtenerOCrearDireccion(
-     SIGEPEntities db,
-     string nombreProvincia,
-     string nombreCanton,
-     string nombreDistrito,
-     string direccionExacta,
-     int idDireccion // 0 o negativo si es NUEVA dirección
- )
-        {
-            if (string.IsNullOrWhiteSpace(nombreProvincia))
-                throw new ArgumentException("La provincia es requerida.");
-
-            if (string.IsNullOrWhiteSpace(nombreCanton))
-                throw new ArgumentException("El cantón es requerido.");
-
-            if (string.IsNullOrWhiteSpace(nombreDistrito))
-                throw new ArgumentException("El distrito es requerido.");
-
-            if (string.IsNullOrWhiteSpace(direccionExacta))
-                throw new ArgumentException("La dirección exacta es requerida.");
-
-            // 1. Provincia
-            var provincia = db.ProvinciasTB
-                              .FirstOrDefault(p => p.Nombre == nombreProvincia);
-
-            if (provincia == null)
-            {
-                provincia = new ProvinciasTB
-                {
-                    Nombre = nombreProvincia
-                };
-                db.ProvinciasTB.Add(provincia);
-                db.SaveChanges();
-            }
-
-            // 2. Cantón
-            var canton = db.CantonesTB
-                           .FirstOrDefault(c => c.Nombre == nombreCanton
-                                             && c.IdProvincia == provincia.IdProvincia);
-
-            if (canton == null)
-            {
-                canton = new CantonesTB
-                {
-                    Nombre = nombreCanton,
-                    IdProvincia = provincia.IdProvincia
-                };
-                db.CantonesTB.Add(canton);
-                db.SaveChanges();
-            }
-
-            // 3. Distrito
-            var distrito = db.DistritosTB
-                             .FirstOrDefault(d => d.Nombre == nombreDistrito
-                                               && d.IdCanton == canton.IdCanton);
-
-            if (distrito == null)
-            {
-                distrito = new DistritosTB
-                {
-                    Nombre = nombreDistrito,
-                    IdCanton = canton.IdCanton
-                };
-                db.DistritosTB.Add(distrito);
-                db.SaveChanges();
-            }
-
-            DireccionesTB direccion = null;
-
-          
-            if (idDireccion > 0)
-            {
-                direccion = db.DireccionesTB
-                              .FirstOrDefault(di => di.IdDireccion == idDireccion);
-
-                if (direccion != null)
-                {
-                    direccion.DireccionExacta = direccionExacta;
-                    direccion.IdDistrito = distrito.IdDistrito;
-                    
-                    db.SaveChanges();
-                    return direccion.IdDireccion;
-                }
-            }
-
-           
-            direccion = new DireccionesTB
-            {
-                IdDistrito = distrito.IdDistrito,
-                DireccionExacta = direccionExacta,
-                IdEstado = 1
-            };
-
-            db.DireccionesTB.Add(direccion);
-            db.SaveChanges();
-
-            return direccion.IdDireccion;
-        }
 
 
     }
