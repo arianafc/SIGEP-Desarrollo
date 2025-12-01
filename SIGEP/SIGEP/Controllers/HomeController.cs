@@ -29,16 +29,23 @@ namespace SIGEP.Controllers
                 var Datos = new DashboardVM();
                 using (var dbContext = new SIGEPEntities())
                 {
+                    var totalEstudiantesEstado1 = dbContext.UsuariosTB
+                        .Count(u => u.IdEstado == 1 && u.IdRol == 1);
+                    var estudiantesConPracticaAsignada = dbContext.PracticaEstudianteTB
+                        .Count(p => p.IdEstado == 5);
                     Datos.EstudiantesActivos = dbContext.UsuariosTB.Count(u => u.IdRol == 1 && u.IdEstado == 1);
                     Datos.EmpresasRegistradas = dbContext.EmpresasTB.Count(e => e.IdEstado == 1);
-                    Datos.EstudiantesConPracticasAsignadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 5);
-                    Datos.PracticasFinalizadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 8);
-                    if (Datos.EstudiantesActivos > 0)
+                    if (totalEstudiantesEstado1 > 0)
                     {
-                        Datos.PorcentajeEstudiantesConPractica = Math.Round(
-                            (double)Datos.EstudiantesConPracticasAsignadas / Datos.EstudiantesActivos * 100, 2
-                        );
+                        Datos.PorcentajeEstudiantesConPractica =
+                            (estudiantesConPracticaAsignada * 100.0) / totalEstudiantesEstado1;
                     }
+                    else
+                    {
+                        Datos.PorcentajeEstudiantesConPractica = 0;
+                    }
+                    Datos.PracticasFinalizadas = dbContext.PracticaEstudianteTB.Count(p => p.IdEstado == 8);
+                   
                     Datos.UltimasPracticasAsignadas = (from p in dbContext.PracticaEstudianteTB
                                                       join u in dbContext.UsuariosTB on p.IdUsuario equals u.IdUsuario
                                                       join v in dbContext.VacantesPracticasTB on p.IdVacante equals v.IdVacante
