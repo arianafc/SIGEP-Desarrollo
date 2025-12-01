@@ -1,4 +1,5 @@
 ﻿using SIGEP.EF;
+using SIGEP.Models;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -7,6 +8,8 @@ using System.Web.Mvc;
 
 namespace TuProyecto.Controllers
 {
+    [FiltroSesion]
+    [FiltroUsuarioAdmin]
     public class EmpresaController : Controller
     {
         private SIGEPEntities db = new SIGEPEntities();
@@ -45,7 +48,11 @@ namespace TuProyecto.Controllers
         [HttpGet]
         public ActionResult ListaEmpresas()
         {
-            // Carga la vista tal cual la tienes; la tabla se llenará por AJAX con GetEmpresas.
+            if (Session["IdUsuario"] == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
             return View();
         }
 
@@ -55,30 +62,42 @@ namespace TuProyecto.Controllers
         [HttpGet]
         public async Task<JsonResult> GetEmpresas()
         {
-            var activoId = await GetEstadoIdAsync("Activo", 1);
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
 
-            var data = await (from emp in db.EmpresasTB
-                              where emp.IdEstado == activoId
-                              join dir in db.DireccionesTB on emp.IdDireccion equals dir.IdDireccion into d0
-                              from dir in d0.DefaultIfEmpty()
-                              join dis in db.DistritosTB on dir.IdDistrito equals dis.IdDistrito into d1
-                              from dis in d1.DefaultIfEmpty()
-                              join can in db.CantonesTB on dis.IdCanton equals can.IdCanton into d2
-                              from can in d2.DefaultIfEmpty()
-                              join pro in db.ProvinciasTB on can.IdProvincia equals pro.IdProvincia into d3
-                              from pro in d3.DefaultIfEmpty()
-                              select new EmpresaListVM
-                              {
-                                  IdEmpresa = emp.IdEmpresa,
-                                  NombreEmpresa = emp.NombreEmpresa,
-                                  AreasAfines = emp.AreasAfines,
-                                  Ubicacion = (pro.Nombre ?? "") +
-                                              (can.Nombre != null ? ", " + can.Nombre : "") +
-                                              (dis.Nombre != null ? ", " + dis.Nombre : ""),
-                                  HistorialVacantes = db.VacantesPracticasTB.Count(v => v.IdEmpresa == emp.IdEmpresa)
-                              }).ToListAsync();
+                var activoId = await GetEstadoIdAsync("Activo", 1);
 
-            return Json(new { data }, JsonRequestBehavior.AllowGet);
+                var data = await (from emp in db.EmpresasTB
+                                  where emp.IdEstado == activoId
+                                  join dir in db.DireccionesTB on emp.IdDireccion equals dir.IdDireccion into d0
+                                  from dir in d0.DefaultIfEmpty()
+                                  join dis in db.DistritosTB on dir.IdDistrito equals dis.IdDistrito into d1
+                                  from dis in d1.DefaultIfEmpty()
+                                  join can in db.CantonesTB on dis.IdCanton equals can.IdCanton into d2
+                                  from can in d2.DefaultIfEmpty()
+                                  join pro in db.ProvinciasTB on can.IdProvincia equals pro.IdProvincia into d3
+                                  from pro in d3.DefaultIfEmpty()
+                                  select new EmpresaListVM
+                                  {
+                                      IdEmpresa = emp.IdEmpresa,
+                                      NombreEmpresa = emp.NombreEmpresa,
+                                      AreasAfines = emp.AreasAfines,
+                                      Ubicacion = (pro.Nombre ?? "") +
+                                                  (can.Nombre != null ? ", " + can.Nombre : "") +
+                                                  (dis.Nombre != null ? ", " + dis.Nombre : ""),
+                                      HistorialVacantes = db.VacantesPracticasTB.Count(v => v.IdEmpresa == emp.IdEmpresa)
+                                  }).ToListAsync();
+
+                return Json(new { data }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         // ===========================
@@ -87,11 +106,16 @@ namespace TuProyecto.Controllers
         [HttpPost]
         public async Task<JsonResult> CrearEmpresa(EmpresaCreateVM vm)
         {
-            if (!ModelState.IsValid)
-                return Json(new { ok = false, msg = "Datos incompletos." });
-
             try
             {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { ok = false, msg = "Sesión expirada" });
+                }
+
+                if (!ModelState.IsValid)
+                    return Json(new { ok = false, msg = "Datos incompletos." });
+
                 var activoId = await GetEstadoIdAsync("Activo", 1);
 
                 // 1) Direccion (opcional)
@@ -156,34 +180,46 @@ namespace TuProyecto.Controllers
         [HttpGet]
         public async Task<JsonResult> GetEmpresa(int id)
         {
-            var emp = await (from e in db.EmpresasTB
-                             where e.IdEmpresa == id
-                             join dir in db.DireccionesTB on e.IdDireccion equals dir.IdDireccion into d0
-                             from dir in d0.DefaultIfEmpty()
-                             join dis in db.DistritosTB on dir.IdDistrito equals dis.IdDistrito into d1
-                             from dis in d1.DefaultIfEmpty()
-                             join can in db.CantonesTB on dis.IdCanton equals can.IdCanton into d2
-                             from can in d2.DefaultIfEmpty()
-                             join pro in db.ProvinciasTB on can.IdProvincia equals pro.IdProvincia into d3
-                             from pro in d3.DefaultIfEmpty()
-                             select new EmpresaEditVM
-                             {
-                                 IdEmpresa = e.IdEmpresa,
-                                 NombreEmpresa = e.NombreEmpresa,
-                                 NombreContacto = e.NombreContacto,
-                                 Email = db.EmailsTB.Where(x => x.IdEmpresa == e.IdEmpresa)
-                                                    .Select(x => x.Email).FirstOrDefault(),
-                                 Telefono = db.TelefonosTB.Where(x => x.IdEmpresa == e.IdEmpresa)
-                                                          .Select(x => x.Telefono).FirstOrDefault(),
-                                 Provincia = pro.Nombre,
-                                 Canton = can.Nombre,
-                                 Distrito = dis.Nombre,
-                                 Direccion = dir.DireccionExacta,
-                                 Areas = e.AreasAfines
-                             }).FirstOrDefaultAsync();
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { ok = false, msg = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
 
-            if (emp == null) return Json(new { ok = false, msg = "No encontrada" }, JsonRequestBehavior.AllowGet);
-            return Json(new { ok = true, data = emp }, JsonRequestBehavior.AllowGet);
+                var emp = await (from e in db.EmpresasTB
+                                 where e.IdEmpresa == id
+                                 join dir in db.DireccionesTB on e.IdDireccion equals dir.IdDireccion into d0
+                                 from dir in d0.DefaultIfEmpty()
+                                 join dis in db.DistritosTB on dir.IdDistrito equals dis.IdDistrito into d1
+                                 from dis in d1.DefaultIfEmpty()
+                                 join can in db.CantonesTB on dis.IdCanton equals can.IdCanton into d2
+                                 from can in d2.DefaultIfEmpty()
+                                 join pro in db.ProvinciasTB on can.IdProvincia equals pro.IdProvincia into d3
+                                 from pro in d3.DefaultIfEmpty()
+                                 select new EmpresaEditVM
+                                 {
+                                     IdEmpresa = e.IdEmpresa,
+                                     NombreEmpresa = e.NombreEmpresa,
+                                     NombreContacto = e.NombreContacto,
+                                     Email = db.EmailsTB.Where(x => x.IdEmpresa == e.IdEmpresa)
+                                                        .Select(x => x.Email).FirstOrDefault(),
+                                     Telefono = db.TelefonosTB.Where(x => x.IdEmpresa == e.IdEmpresa)
+                                                              .Select(x => x.Telefono).FirstOrDefault(),
+                                     Provincia = pro.Nombre,
+                                     Canton = can.Nombre,
+                                     Distrito = dis.Nombre,
+                                     Direccion = dir.DireccionExacta,
+                                     Areas = e.AreasAfines
+                                 }).FirstOrDefaultAsync();
+
+                if (emp == null) return Json(new { ok = false, msg = "No encontrada" }, JsonRequestBehavior.AllowGet);
+                return Json(new { ok = true, data = emp }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ok = false, msg = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         // ===========================
@@ -192,11 +228,16 @@ namespace TuProyecto.Controllers
         [HttpPost]
         public async Task<JsonResult> EditarEmpresa(EmpresaEditVM vm)
         {
-            if (!ModelState.IsValid || vm.IdEmpresa <= 0)
-                return Json(new { ok = false, msg = "Datos inválidos." });
-
             try
             {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { ok = false, msg = "Sesión expirada" });
+                }
+
+                if (!ModelState.IsValid || vm.IdEmpresa <= 0)
+                    return Json(new { ok = false, msg = "Datos inválidos." });
+
                 var emp = await db.EmpresasTB.FindAsync(vm.IdEmpresa);
                 if (emp == null) return Json(new { ok = false, msg = "No existe." });
 
@@ -278,6 +319,11 @@ namespace TuProyecto.Controllers
         {
             try
             {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { ok = false, msg = "Sesión expirada" });
+                }
+
                 var emp = await db.EmpresasTB.FindAsync(id);
                 if (emp == null) return Json(new { ok = false, msg = "No existe." });
 
@@ -305,33 +351,78 @@ namespace TuProyecto.Controllers
         [HttpGet]
         public async Task<JsonResult> GetProvincias()
         {
-            var list = await db.ProvinciasTB
-                               .OrderBy(p => p.Nombre)
-                               .Select(p => new { p.IdProvincia, p.Nombre })
-                               .ToListAsync();
-            return Json(list, JsonRequestBehavior.AllowGet);
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
+
+                var list = await db.ProvinciasTB
+                                   .OrderBy(p => p.Nombre)
+                                   .Select(p => new { p.IdProvincia, p.Nombre })
+                                   .ToListAsync();
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpGet]
         public async Task<JsonResult> GetCantones(int idProvincia)
         {
-            var list = await db.CantonesTB
-                               .Where(c => c.IdProvincia == idProvincia)
-                               .OrderBy(c => c.Nombre)
-                               .Select(c => new { c.IdCanton, c.Nombre })
-                               .ToListAsync();
-            return Json(list, JsonRequestBehavior.AllowGet);
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
+
+                var list = await db.CantonesTB
+                                   .Where(c => c.IdProvincia == idProvincia)
+                                   .OrderBy(c => c.Nombre)
+                                   .Select(c => new { c.IdCanton, c.Nombre })
+                                   .ToListAsync();
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpGet]
         public async Task<JsonResult> GetDistritos(int idCanton)
         {
-            var list = await db.DistritosTB
-                               .Where(d => d.IdCanton == idCanton)
-                               .OrderBy(d => d.Nombre)
-                               .Select(d => new { d.IdDistrito, d.Nombre })
-                               .ToListAsync();
-            return Json(list, JsonRequestBehavior.AllowGet);
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
+
+                var list = await db.DistritosTB
+                                   .Where(d => d.IdCanton == idCanton)
+                                   .OrderBy(d => d.Nombre)
+                                   .Select(d => new { d.IdDistrito, d.Nombre })
+                                   .ToListAsync();
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 
