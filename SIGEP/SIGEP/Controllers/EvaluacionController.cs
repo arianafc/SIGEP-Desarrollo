@@ -1,12 +1,17 @@
 ﻿using SIGEP.EF;
+using SIGEP.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls.WebParts;
 
 namespace SIGEP.Controllers
 {
+    [FiltroSesion]
+    [FiltroUsuarioAdmin]
+
     public class EvaluacionController : Controller
     {
         public ActionResult ListarEstudianteConPractica()
@@ -15,6 +20,7 @@ namespace SIGEP.Controllers
             {
                 return RedirectToAction("Login", "Home");
             }
+
             return View();
         }
 
@@ -92,7 +98,7 @@ namespace SIGEP.Controllers
                             NombreEmpresa = perfil.NombreEmpresa,
                             TelefonoEmpresa = perfil.TelefonoEmpresa,
                             IdVacante = perfil.IdVacante,    
-                            //EstadoPractica = perfil.EstadoPractica,
+                            EstadoPractica = perfil.EstadoPractica,
                             IdUsuario = perfil.IdUsuario,      
                             Comentarios = comentarios
                         }
@@ -444,29 +450,34 @@ namespace SIGEP.Controllers
 
                     string cedulaEstudiante = estudiante.Cedula;
 
-                    // Crear directorio en C:\sigep si no existe
-                    string directorioBase = @"C:\sigep\Evaluaciones";
-                    if (!System.IO.Directory.Exists(directorioBase))
+                    // Crear ruta relativa dentro del proyecto: ~/Documentos/Evaluaciones/{Cedula}/
+                    string rutaRelativa = $"~/Documentos/Evaluaciones/{cedulaEstudiante}";
+                    string rutaFisica = Server.MapPath(rutaRelativa);
+
+                    // Crear directorio si no existe
+                    if (!System.IO.Directory.Exists(rutaFisica))
                     {
-                        System.IO.Directory.CreateDirectory(directorioBase);
+                        System.IO.Directory.CreateDirectory(rutaFisica);
                     }
 
-                    // Generar nombre del archivo con cédula (sin fecha/hora)
+                    // Generar nombre del archivo
                     string nombreOriginal = System.IO.Path.GetFileNameWithoutExtension(archivo.FileName);
                     string nombreArchivo = $"{cedulaEstudiante}_{nombreOriginal}{extension}";
 
                     // Ruta completa del archivo
-                    string rutaCompleta = System.IO.Path.Combine(directorioBase, nombreArchivo);
+                    string rutaCompleta = System.IO.Path.Combine(rutaFisica, nombreArchivo);
 
-                    // Si el archivo ya existe, se sobrescribe
+                    // Guardar el archivo
                     archivo.SaveAs(rutaCompleta);
 
-                    // Guardar registro en BD con la ruta del archivo
+                    // Guardar ruta RELATIVA en la BD (para portabilidad)
+                    string rutaRelativaArchivo = $"{rutaRelativa}/{nombreArchivo}".Replace("~", "");
+
                     var documento = new DocumentosTB
                     {
-                        Documento = archivo.FileName, // Nombre original para mostrar
+                        Documento = archivo.FileName,
                         Tipo = "Evaluación",
-                        RutaArchivo = rutaCompleta,
+                        RutaArchivo = rutaRelativaArchivo, // Guardar ruta relativa
                         FechaSubida = DateTime.Now,
                         IdUsuario = idUsuario
                     };
@@ -524,15 +535,15 @@ namespace SIGEP.Controllers
                         return HttpNotFound("Documento no encontrado");
                     }
 
-                    // Ya tenemos la ruta física completa, no usar Server.MapPath
-                    var filePath = documento.RutaArchivo;
+                    // Convertir ruta relativa a física
+                    string rutaFisica = Server.MapPath("~" + documento.RutaArchivo);
 
-                    if (!System.IO.File.Exists(filePath))
+                    if (!System.IO.File.Exists(rutaFisica))
                     {
                         return HttpNotFound("Archivo no encontrado en el servidor");
                     }
 
-                    var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                    var fileBytes = System.IO.File.ReadAllBytes(rutaFisica);
                     var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
 
                     string contentType = "application/octet-stream";
@@ -566,10 +577,10 @@ namespace SIGEP.Controllers
                         return HttpNotFound("Documento no encontrado");
                     }
 
-                    // Ya tenemos la ruta física completa
-                    var filePath = documento.RutaArchivo;
+                    // Convertir ruta relativa a física
+                    string rutaFisica = Server.MapPath("~" + documento.RutaArchivo);
 
-                    if (!System.IO.File.Exists(filePath))
+                    if (!System.IO.File.Exists(rutaFisica))
                     {
                         return HttpNotFound("Archivo no encontrado");
                     }
@@ -579,7 +590,7 @@ namespace SIGEP.Controllers
                     // Solo permitir visualización de PDFs en el navegador
                     if (extension == ".pdf")
                     {
-                        var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                        var fileBytes = System.IO.File.ReadAllBytes(rutaFisica);
                         return File(fileBytes, "application/pdf");
                     }
                     else
@@ -607,7 +618,6 @@ namespace SIGEP.Controllers
 
                 using (var dbContext = new SIGEPEntities())
                 {
-                    // Buscar el documento en la base de datos
                     var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
 
                     if (documento == null)
@@ -615,19 +625,19 @@ namespace SIGEP.Controllers
                         return Json(new { success = false, message = "Documento no encontrado en la base de datos" });
                     }
 
-                    // Guardar la ruta del archivo antes de eliminar el registro
-                    string rutaArchivo = documento.RutaArchivo;
+                    // Convertir ruta relativa a física
+                    string rutaFisica = Server.MapPath("~" + documento.RutaArchivo);
 
                     // Eliminar el registro de la base de datos
                     dbContext.DocumentosTB.Remove(documento);
                     dbContext.SaveChanges();
 
                     // Eliminar el archivo físico si existe
-                    if (!string.IsNullOrEmpty(rutaArchivo) && System.IO.File.Exists(rutaArchivo))
+                    if (System.IO.File.Exists(rutaFisica))
                     {
                         try
                         {
-                            System.IO.File.Delete(rutaArchivo);
+                            System.IO.File.Delete(rutaFisica);
                         }
                         catch (Exception exFile)
                         {
@@ -650,6 +660,57 @@ namespace SIGEP.Controllers
                     success = false,
                     message = "Error al eliminar el documento: " + ex.Message
                 });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerEspecialidades()
+        {
+            try
+            {
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" }, JsonRequestBehavior.AllowGet);
+                }
+
+                int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
+                int idRol = Convert.ToInt32(Session["IdRol"]);
+
+                using (var db = new SIGEPEntities())
+                {
+                    List<object> especialidades = new List<object>();
+
+                    if (idRol == 3) // Profesor
+                    {
+                        var especialidadProfesor = (from ue in db.UsuarioEspecialidadTB
+                                                    join e in db.EspecialidadesTB on ue.IdEspecialidad equals e.IdEspecialidad
+                                                    where ue.IdUsuario == idUsuario && ue.IdEstado == 1
+                                                    select new { e.Nombre })
+                                                   .FirstOrDefault();
+
+                        if (especialidadProfesor != null)
+                        {
+                            especialidades.Add(new { Value = especialidadProfesor.Nombre, Text = especialidadProfesor.Nombre });
+                        }
+                    }
+                    else // Coordinador o Admin
+                    {
+                        especialidades.Add(new { Value = "", Text = "-- Todas las especialidades --" });
+
+                        var lista = db.EspecialidadesTB
+                            .OrderBy(e => e.Nombre)
+                            .Select(e => new { Value = e.Nombre, Text = e.Nombre })
+                            .ToList();
+
+                        especialidades.AddRange(lista.Cast<object>());
+                    }
+
+                    return Json(new { success = true, especialidades = especialidades }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
     }

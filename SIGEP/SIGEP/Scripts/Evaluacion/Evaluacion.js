@@ -1,4 +1,5 @@
 ﻿$(document).ready(function () {
+    cargarEspecialidades();
     // Inicializar DataTable
     var table = $('#miTabla').DataTable({
         responsive: true,
@@ -87,7 +88,7 @@
         table.column(5).search(this.value).draw();
     });
 
-    $('#filtroEspecialidad').on('keyup', function () {
+    $('#filtroEspecialidad').on('change', function () {
         table.column(2).search(this.value).draw();
     });
 
@@ -130,6 +131,37 @@
         subirDocumento();
     });
 });
+
+function cargarEspecialidades() {
+    $.ajax({
+        url: '/Evaluacion/ObtenerEspecialidades',
+        type: 'GET',
+        success: function (response) {
+            console.log('Respuesta especialidades:', response);
+
+            if (response.success) {
+                var select = $('#filtroEspecialidad');
+                select.empty();
+
+                response.especialidades.forEach(function (item) {
+                    select.append($('<option>', {
+                        value: item.Value,
+                        text: item.Text
+                    }));
+                });
+
+                console.log('Especialidades cargadas:', response.especialidades.length);
+            } else {
+                console.error('Error al cargar especialidades:', response.message);
+                $('#filtroEspecialidad').html('<option value="">Error al cargar</option>');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error AJAX:', error);
+            $('#filtroEspecialidad').html('<option value="">Error de conexión</option>');
+        }
+    });
+}
 
 // Función para cargar perfil del estudiante
 function cargarPerfilEstudiante(idUsuario) {

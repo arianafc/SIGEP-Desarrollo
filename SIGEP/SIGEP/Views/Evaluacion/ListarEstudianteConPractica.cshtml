@@ -18,13 +18,15 @@
                 <label class="Filtros">Estado académico</label>
                 <select id="filtroEstadoAcademico" class="form-control">
                     <option value="">Todos</option>
-                    <option value="Aprobado">Aprobado</option>
+                    <option value="Aprobada">Aprobada</option>
                     <option value="Rezagado">Rezagado</option>
                 </select>
             </div>
             <div>
                 <label>Especialidad</label>
-                <input type="text" id="filtroEspecialidad" class="form-control" placeholder="Filtrar por especialidad" />
+                <select id="filtroEspecialidad" class="form-control">
+                    <option value="">Cargando...</option>
+                </select>
             </div>
         </div>
     </div>
@@ -39,7 +41,7 @@
                 <th>Especialidad</th>
                 <th>Teléfono</th>
                 <th>Práctica asignada</th>
-                <th>Estado Académico</th>
+                <th>Estado Práctica</th>
                 <th>Nota Final</th>
                 <th>Acciones</th>
             </tr>

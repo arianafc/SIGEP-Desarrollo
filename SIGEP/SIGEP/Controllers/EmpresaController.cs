@@ -190,8 +190,6 @@ namespace TuProyecto.Controllers
             if (!ModelState.IsValid || vm.IdEmpresa <= 0)
                 return Json(new { ok = false, msg = "Datos inválidos." });
 
-            try
-            {
                 var emp = await db.EmpresasTB.FindAsync(vm.IdEmpresa);
              
                 if (emp == null) return Json(new { ok = false, msg = "No existe." });

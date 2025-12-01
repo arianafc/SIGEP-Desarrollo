@@ -18,7 +18,7 @@ using System.Web.Mvc;
 namespace SIGEP.Controllers
 {
     [FiltroSesion]
-    //[FiltroUsuarioAdmin]
+    [FiltroUsuarioAdmin]
 
     public class PracticasController : Controller
     {
@@ -681,8 +681,6 @@ namespace SIGEP.Controllers
         }
 
 
-
-
         // ==============================
         // OBTENER ESTUDIANTES ASIGNADOS
         // ==============================
@@ -860,10 +858,6 @@ namespace SIGEP.Controllers
         }
 
 
-
-
-
-
         // ==============================
         // MÉTODOS PRIVADOS PARA DROPDOWNS
         // ==============================
@@ -1004,8 +998,6 @@ namespace SIGEP.Controllers
                 return RedirectToAction("Login", "Home");
             }
         }
-
-
 
         [HttpGet]
         public ActionResult VisualizacionPostulacion(int idVacante, int idUsuario)
@@ -1562,7 +1554,7 @@ namespace SIGEP.Controllers
             if (Session["IdUsuario"] == null)
                 return RedirectToAction("Login", "Home");
 
-            return View(); // la vista que te dejo abajo
+            return View();
         }
 
        
