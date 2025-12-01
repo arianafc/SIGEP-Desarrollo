@@ -187,6 +187,7 @@ namespace TuProyecto.Controllers
         [HttpPost]
         public async Task<JsonResult> EditarEmpresa(EmpresaEditVM vm)
         {
+            try { 
             if (!ModelState.IsValid || vm.IdEmpresa <= 0)
                 return Json(new { ok = false, msg = "Datos inválidos." });
 
@@ -255,6 +256,7 @@ namespace TuProyecto.Controllers
                 return Json(new { ok = false, msg = ex.Message });
             }
         }
+
 
         // ===========================
         // Eliminar (soft delete + cancelar vacantes de esa empresa)
