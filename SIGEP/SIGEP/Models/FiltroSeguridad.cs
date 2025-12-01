@@ -8,27 +8,33 @@ namespace SIGEP.Models
         {
             var contexto = filterContext.HttpContext;
 
-            if (contexto.Session.Count == 0)
+            var idRolObj = contexto.Session["IdRol"];
+            var idRol = idRolObj != null ? idRolObj.ToString() : null;
+
+         
+            if (contexto.Session.Count == 0 || string.IsNullOrEmpty(idRol))
             {
                 filterContext.Controller.TempData["SwalError"] = "Debes iniciar sesión para acceder a esta página.";
                 filterContext.Result = new RedirectResult("~/Home/Login");
             }
+
             base.OnActionExecuting(filterContext);
         }
-
     }
+
     public class FiltroEstudiante : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var contexto = filterContext.HttpContext;
-  
+            var rol = contexto.Session["IdRol"] != null ? contexto.Session["IdRol"].ToString() : null;
 
-            if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "1")
+            if (string.IsNullOrEmpty(rol) || rol != "1")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
                 filterContext.Result = new RedirectResult("~/Home/Index");
             }
+
             base.OnActionExecuting(filterContext);
         }
     }
@@ -38,10 +44,9 @@ namespace SIGEP.Models
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var contexto = filterContext.HttpContext;
-            var rol = contexto.Session["IdRol"].ToString();
+            var rol = contexto.Session["IdRol"] != null ? contexto.Session["IdRol"].ToString() : null;
 
-            
-            if (contexto.Session.Count == 0 || (contexto.Session["IdRol"].ToString() != "2" && contexto.Session["IdRol"].ToString() != "3"))
+            if (string.IsNullOrEmpty(rol) || (rol != "2" && rol != "3"))
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
                 filterContext.Result = new RedirectResult("~/Home/Index");
@@ -50,24 +55,23 @@ namespace SIGEP.Models
             base.OnActionExecuting(filterContext);
         }
     }
-
 
     public class FiltroProfesor : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var contexto = filterContext.HttpContext;
-         
+            var rol = contexto.Session["IdRol"] != null ? contexto.Session["IdRol"].ToString() : null;
 
-            if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "3")
+            if (string.IsNullOrEmpty(rol) || rol != "3")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
                 filterContext.Result = new RedirectResult("~/Home/Index");
             }
+
             base.OnActionExecuting(filterContext);
         }
     }
-
 
 
     public class FiltroCoordinador : ActionFilterAttribute
@@ -75,17 +79,17 @@ namespace SIGEP.Models
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var contexto = filterContext.HttpContext;
-       
+            var rol = contexto.Session["IdRol"] != null ? contexto.Session["IdRol"].ToString() : null;
 
-            if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "2")
+            if (string.IsNullOrEmpty(rol) || rol != "2")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
                 filterContext.Result = new RedirectResult("~/Home/Index");
             }
+
             base.OnActionExecuting(filterContext);
         }
     }
-
 
 
     public class FiltroEgresado : ActionFilterAttribute
@@ -93,14 +97,16 @@ namespace SIGEP.Models
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             var contexto = filterContext.HttpContext;
-            var rol = contexto.Session["IdRol"] as string;
+            var rol = contexto.Session["IdRol"] != null ? contexto.Session["IdRol"].ToString() : null;
 
-            if (contexto.Session.Count == 0 || contexto.Session["IdRol"].ToString() != "4")
+            if (string.IsNullOrEmpty(rol) || rol != "4")
             {
                 filterContext.Controller.TempData["SwalError"] = "No tienes permiso para acceder a esta página.";
                 filterContext.Result = new RedirectResult("~/Home/Index");
             }
+
             base.OnActionExecuting(filterContext);
         }
     }
+
 }
