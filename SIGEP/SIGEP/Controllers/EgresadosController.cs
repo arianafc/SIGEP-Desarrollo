@@ -15,6 +15,9 @@ namespace SIGEP.Controllers
         private SIGEPEntities db = new SIGEPEntities();
         Utilitarios utilitarios = new Utilitarios();
 
+
+        [FiltroSesion]
+        [FiltroCoordinador]
         [HttpGet]
         public ActionResult ListaEgresados()
         {
@@ -48,6 +51,8 @@ namespace SIGEP.Controllers
 
             return View();
         }
+        
+        
         [HttpGet]
         public JsonResult ObtenerEgresados(int idEspecialidad = 0, int anio = 0)
         {
@@ -102,7 +107,7 @@ namespace SIGEP.Controllers
         #region Gestion de bolsa de empleos
 
 
-
+        [FiltroSesion]
         [FiltroCoordinador]
         [HttpGet]
 

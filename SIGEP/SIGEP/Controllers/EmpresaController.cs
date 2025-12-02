@@ -28,22 +28,6 @@ namespace TuProyecto.Controllers
             return estado == 0 ? fallback : estado;
         }
 
-        private async Task<int?> ResolveDistritoIdAsync(string provincia, string canton, string distrito)
-        {
-            if (string.IsNullOrWhiteSpace(provincia) ||
-                string.IsNullOrWhiteSpace(canton) ||
-                string.IsNullOrWhiteSpace(distrito)) return null;
-
-            var q =
-                from p in db.ProvinciasTB
-                join c in db.CantonesTB on p.IdProvincia equals c.IdProvincia
-                join d in db.DistritosTB on c.IdCanton equals d.IdCanton
-                where p.Nombre == provincia && c.Nombre == canton && d.Nombre == distrito
-                select d.IdDistrito;
-
-            return await q.FirstOrDefaultAsync();
-        }
-
         // ===========================
         // Vista principal
         // ===========================

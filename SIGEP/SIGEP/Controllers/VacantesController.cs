@@ -14,6 +14,8 @@ namespace SIGEP.Controllers
         // ============================================================
         // LISTA DE VACANTES (EGRESADOS)
         // ============================================================
+        [FiltroSesion]
+        [FiltroCoordinador] // Acceso restringido a coordinadores
         [HttpGet]
         public ActionResult ListaVacantesEgresado()
         {

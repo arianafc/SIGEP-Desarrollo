@@ -167,19 +167,21 @@
                                 </a>
                             </li>
                         }
+                        @if (rol == 1 || rol == 3 || rol == 2 || rol == 4)
+                        {
 
+                            <li class="nav-small-cap">
+                                <i class="mdi mdi-dots-horizontal"></i>
+                                <span class="hide-menu">COMUNICACIONES</span>
+                            </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("Comunicados", "Comunicados")">
+                                    <i class="ti-announcement"></i>
+                                    <span class="hide-menu">Comunicados</span>
+                                </a>
+                            </li>
+                        }
                         <!-- COMUNICACIONES -->
-                        <li class="nav-small-cap">
-                            <i class="mdi mdi-dots-horizontal"></i>
-                            <span class="hide-menu">COMUNICACIONES</span>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("Comunicados", "Comunicados")">
-                                <i class="ti-announcement"></i>
-                                <span class="hide-menu">Comunicados</span>
-                            </a>
-                        </li>
-
                         <!-- EGRESADOS -->
                         @if (rol == 2 || rol == 4)
                         {
@@ -214,13 +216,14 @@
                             }
                         }
 
-                        <!-- ADMINISTRACIÓN -->
-                        <li class="nav-small-cap">
-                            <i class="mdi mdi-dots-horizontal"></i>
-                            <span class="hide-menu">ADMINISTRACIÓN</span>
-                        </li>
+
                         @if (rol == 2)
                         {
+                            <!-- ADMINISTRACIÓN -->
+                            <li class="nav-small-cap">
+                                <i class="mdi mdi-dots-horizontal"></i>
+                                <span class="hide-menu">ADMINISTRACIÓN</span>
+                            </li>
                             <li class="sidebar-item">
                                 <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("AdministracionGeneral", "AdministracionGeneral")">
                                     <i class="fas fa-cog"></i>
@@ -228,28 +231,30 @@
                                 </a>
                             </li>
                         }
+                        @if (rol == 1 || rol == 3 || rol == 2 || rol == 4)
+                        {
 
-                        <li class="sidebar-item">
-                            <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("MiPerfil", "Perfil")">
-                                <i class="ti-id-badge"></i>
-                                <span class="hide-menu">Mi Perfil</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item">
-                            @if (Session["Nombre"] != null && !string.IsNullOrEmpty(Session["Nombre"].ToString()))
-                            {
-                                using (Html.BeginForm("CerrarSesion", "Home", FormMethod.Post, new { id = "logoutForm", style = "display:none;" }))
-                                {
-                                    @Html.AntiForgeryToken()
-                                }
-                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" aria-expanded="false">
-                                    <i class="ti-power-off"></i>
-                                    <span class="hide-menu">Cerrar Sesión</span>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("MiPerfil", "Perfil")">
+                                    <i class="ti-id-badge"></i>
+                                    <span class="hide-menu">Mi Perfil</span>
                                 </a>
-                            }
-                        </li>
+                            </li>
 
+                            <li class="sidebar-item">
+                                @if (Session["Nombre"] != null && !string.IsNullOrEmpty(Session["Nombre"].ToString()))
+                                {
+                                    using (Html.BeginForm("CerrarSesion", "Home", FormMethod.Post, new { id = "logoutForm", style = "display:none;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                    }
+                                    <a class="sidebar-link waves-effect waves-dark sidebar-link" href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();" aria-expanded="false">
+                                        <i class="ti-power-off"></i>
+                                        <span class="hide-menu">Cerrar Sesión</span>
+                                    </a>
+                                }
+                            </li>
+                        }
                     </ul>
                 </nav>
             </div>
