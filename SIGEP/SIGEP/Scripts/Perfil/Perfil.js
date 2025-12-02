@@ -275,12 +275,12 @@
                     <small>Cargado: ${doc.FechaSubida}</small>
                 </div>
                 <div class="d-flex gap-3">
-                    
-                    <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}&download=true" 
-                       title="Descargar" class="btn btn-link p-0 text-secondary">
-                       <i class="fas fa-download"></i>
-                    </a>
-                    <button class="btn btn-link p-0 text-secondary btnEliminarDoc" data-id="${doc.IdDocumento}" title="Eliminar">
+
+                 <a href="/Perfil/DescargarDocumento?idDocumento=${doc.IdDocumento}" 
+                    title="Descargar" class="btn btn-link p-0 text-secondary">
+                    <i class="fas fa-download"></i>
+            </a>
+                                <button class="btn btn-link p-0 text-secondary btnEliminarDoc" data-id="${doc.IdDocumento}" title="Eliminar">
                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>

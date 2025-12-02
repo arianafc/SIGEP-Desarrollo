@@ -83,198 +83,201 @@
         <div class="row g-4" id="contenedorComunicados">
             @foreach (var c in Model.AllComunicados)
             {
-                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
-                    <div class="comunicado-card ">
-                        <p><strong>@c.Titulo</strong></p>
-                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                        <div class="botones-acciones">
-                            <button class="btn-ver btn-abrir-comunicado"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalComunicadoUnico"
-                                    data-id="@c.Id"
-                                    data-titulo="@c.Titulo"
-                                    data-descripcion="@c.Descripcion"
-                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                    data-publicado="@c.PublicadoPor"
-                                    data-dirigido="@c.DirigidoA">
-                                Abrir
-                            </button>
+                <div class="col-12 col-sm-6 col-lg-3 d-flex justify-content-center" id="comunicado-@c.Id">
+                    <div class="card w-100">
+                        <div class="card-body">
+                            <p><strong>@c.Titulo</strong></p>
+                            <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                            <div class="botones-acciones">
+                                <button class="btn-ver btn-abrir-comunicado"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalComunicadoUnico"
+                                        data-id="@c.Id"
+                                        data-titulo="@c.Titulo"
+                                        data-descripcion="@c.Descripcion"
+                                        data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                        data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                        data-publicado="@c.PublicadoPor"
+                                        data-dirigido="@c.DirigidoA">
+                                    Abrir
+                                </button>
+                            </div>
                         </div>
                     </div>
+                    </div>
+
+                    }
                 </div>
             }
+
+            <!--Comunicados estudiante y general-->
+            @if (rol == 1)
+            {
+                <div class="row g-4" id="contenedorComunicados">
+                    @foreach (var c in Model.ListaComunicadosEstudiantes)
+                    {
+                        <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                            <div class="comunicado-card w-100">
+                                <p><strong>@c.Titulo</strong></p>
+                                <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                                <div class="botones-acciones">
+                                    <button class="btn-ver btn-abrir-comunicado"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalComunicadoUnico"
+                                            data-id="@c.Id"
+                                            data-titulo="@c.Titulo"
+                                            data-descripcion="@c.Descripcion"
+                                            data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                            data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                            data-publicado="@c.PublicadoPor"
+                                            data-dirigido="@c.DirigidoA">
+                                        Abrir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @foreach (var c in Model.ListaComunicadosGeneral)
+                    {
+                        <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                            <div class="comunicado-card w-100">
+                                <p><strong>@c.Titulo</strong></p>
+                                <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                                <div class="botones-acciones">
+                                    <button class="btn-ver btn-abrir-comunicado"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalComunicadoUnico"
+                                            data-id="@c.Id"
+                                            data-titulo="@c.Titulo"
+                                            data-descripcion="@c.Descripcion"
+                                            data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                            data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                            data-publicado="@c.PublicadoPor"
+                                            data-dirigido="@c.DirigidoA">
+                                        Abrir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+
+                </div>
+            }
+            <!--Comunicados profe y general -->
+            @if (rol == 3)
+            {
+                <div class="row g-4" id="contenedorComunicados">
+                    @foreach (var c in Model.ListaComunicadosProfesores)
+                    {
+                        <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                            <div class="comunicado-card w-100">
+                                <p><strong>@c.Titulo</strong></p>
+                                <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                                <div class="botones-acciones">
+                                    <button class="btn-ver btn-abrir-comunicado"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalComunicadoUnico"
+                                            data-id="@c.Id"
+                                            data-titulo="@c.Titulo"
+                                            data-descripcion="@c.Descripcion"
+                                            data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                            data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                            data-publicado="@c.PublicadoPor"
+                                            data-dirigido="@c.DirigidoA">
+                                        Abrir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @foreach (var c in Model.ListaComunicadosGeneral)
+                    {
+                        <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                            <div class="comunicado-card w-100">
+                                <p><strong>@c.Titulo</strong></p>
+                                <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                                <div class="botones-acciones">
+                                    <button class="btn-ver btn-abrir-comunicado"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalComunicadoUnico"
+                                            data-id="@c.Id"
+                                            data-titulo="@c.Titulo"
+                                            data-descripcion="@c.Descripcion"
+                                            data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                            data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                            data-publicado="@c.PublicadoPor"
+                                            data-dirigido="@c.DirigidoA">
+                                        Abrir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+
+                </div>
+            }
+            <!--Comunicados egresado y general-->
+            @if (rol == 4)
+            {
+                <div class="row g-4" id="contenedorComunicados">
+                    @foreach (var c in Model.ListaComunicadosEgresados)
+                    {
+                        <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                            <div class="comunicado-card w-100">
+                                <p><strong>@c.Titulo</strong></p>
+                                <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                                <div class="botones-acciones">
+                                    <button class="btn-ver btn-abrir-comunicado"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalComunicadoUnico"
+                                            data-id="@c.Id"
+                                            data-titulo="@c.Titulo"
+                                            data-descripcion="@c.Descripcion"
+                                            data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                            data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                            data-publicado="@c.PublicadoPor"
+                                            data-dirigido="@c.DirigidoA">
+                                        Abrir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @foreach (var c in Model.ListaComunicadosGeneral)
+                    {
+                        <div class="col-md-2 d-flex" id="comunicado-@c.Id">
+                            <div class="comunicado-card w-100">
+                                <p><strong>@c.Titulo</strong></p>
+                                <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
+                                <div class="botones-acciones">
+                                    <button class="btn-ver btn-abrir-comunicado"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalComunicadoUnico"
+                                            data-id="@c.Id"
+                                            data-titulo="@c.Titulo"
+                                            data-descripcion="@c.Descripcion"
+                                            data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
+                                            data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
+                                            data-publicado="@c.PublicadoPor"
+                                            data-dirigido="@c.DirigidoA">
+                                        Abrir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+
+                </div>
+            }
+
+
         </div>
-    }
-
-    <!--Comunicados estudiante y general-->
-    @if (rol == 1)
-    {
-        <div class="row g-4" id="contenedorComunicados">
-            @foreach (var c in Model.ListaComunicadosEstudiantes)
-            {
-                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
-                    <div class="comunicado-card w-100">
-                        <p><strong>@c.Titulo</strong></p>
-                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                        <div class="botones-acciones">
-                            <button class="btn-ver btn-abrir-comunicado"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalComunicadoUnico"
-                                    data-id="@c.Id"
-                                    data-titulo="@c.Titulo"
-                                    data-descripcion="@c.Descripcion"
-                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                    data-publicado="@c.PublicadoPor"
-                                    data-dirigido="@c.DirigidoA">
-                                Abrir
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @foreach (var c in Model.ListaComunicadosGeneral)
-            {
-                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
-                    <div class="comunicado-card w-100">
-                        <p><strong>@c.Titulo</strong></p>
-                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                        <div class="botones-acciones">
-                            <button class="btn-ver btn-abrir-comunicado"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalComunicadoUnico"
-                                    data-id="@c.Id"
-                                    data-titulo="@c.Titulo"
-                                    data-descripcion="@c.Descripcion"
-                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                    data-publicado="@c.PublicadoPor"
-                                    data-dirigido="@c.DirigidoA">
-                                Abrir
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-
-
-        </div>
-    }
-    <!--Comunicados profe y general -->
-    @if (rol == 3)
-    {
-        <div class="row g-4" id="contenedorComunicados">
-            @foreach (var c in Model.ListaComunicadosProfesores)
-            {
-                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
-                    <div class="comunicado-card w-100">
-                        <p><strong>@c.Titulo</strong></p>
-                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                        <div class="botones-acciones">
-                            <button class="btn-ver btn-abrir-comunicado"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalComunicadoUnico"
-                                    data-id="@c.Id"
-                                    data-titulo="@c.Titulo"
-                                    data-descripcion="@c.Descripcion"
-                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                    data-publicado="@c.PublicadoPor"
-                                    data-dirigido="@c.DirigidoA">
-                                Abrir
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @foreach (var c in Model.ListaComunicadosGeneral)
-            {
-                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
-                    <div class="comunicado-card w-100">
-                        <p><strong>@c.Titulo</strong></p>
-                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                        <div class="botones-acciones">
-                            <button class="btn-ver btn-abrir-comunicado"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalComunicadoUnico"
-                                    data-id="@c.Id"
-                                    data-titulo="@c.Titulo"
-                                    data-descripcion="@c.Descripcion"
-                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                    data-publicado="@c.PublicadoPor"
-                                    data-dirigido="@c.DirigidoA">
-                                Abrir
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-
-
-        </div>
-    }
-    <!--Comunicados egresado y general-->
-    @if (rol == 4)
-    {
-        <div class="row g-4" id="contenedorComunicados">
-            @foreach (var c in Model.ListaComunicadosEgresados)
-            {
-                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
-                    <div class="comunicado-card w-100">
-                        <p><strong>@c.Titulo</strong></p>
-                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                        <div class="botones-acciones">
-                            <button class="btn-ver btn-abrir-comunicado"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalComunicadoUnico"
-                                    data-id="@c.Id"
-                                    data-titulo="@c.Titulo"
-                                    data-descripcion="@c.Descripcion"
-                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                    data-publicado="@c.PublicadoPor"
-                                    data-dirigido="@c.DirigidoA">
-                                Abrir
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @foreach (var c in Model.ListaComunicadosGeneral)
-            {
-                <div class="col-md-2 d-flex" id="comunicado-@c.Id">
-                    <div class="comunicado-card w-100">
-                        <p><strong>@c.Titulo</strong></p>
-                        <p><strong>Publicado:</strong> @c.FechaPublicacion.ToString("dd/MM/yyyy")</p>
-                        <div class="botones-acciones">
-                            <button class="btn-ver btn-abrir-comunicado"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalComunicadoUnico"
-                                    data-id="@c.Id"
-                                    data-titulo="@c.Titulo"
-                                    data-descripcion="@c.Descripcion"
-                                    data-fecha="@c.FechaPublicacion.ToString("dd/MM/yyyy")"
-                                    data-aplicacion="@(c.FechaAplicacion.HasValue ? c.FechaAplicacion.Value.ToString("yyyy-MM-dd") : "N/A")"
-                                    data-publicado="@c.PublicadoPor"
-                                    data-dirigido="@c.DirigidoA">
-                                Abrir
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-
-
-        </div>
-    }
-
-
-</div>
 
 <!-- Modal Enviar Correo -->
 <div class="modal fade" id="modalEnviarCorreo" tabindex="-1" aria-labelledby="modalEnviarCorreoLabel" aria-hidden="true">

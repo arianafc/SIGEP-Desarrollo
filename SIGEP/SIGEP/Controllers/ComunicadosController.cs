@@ -98,8 +98,8 @@ namespace Sigep.UI.Controllers
                 db.ComunicadosTB.Add(nuevo);
                 db.SaveChanges();
 
-            
-                string carpetaDestino = @"C:\SIGEP\Comunicados";
+
+                string carpetaDestino = Server.MapPath("~/Documentos/Comunicados/");
                 if (!Directory.Exists(carpetaDestino))
                     Directory.CreateDirectory(carpetaDestino);
 
@@ -120,7 +120,7 @@ namespace Sigep.UI.Controllers
                             {
                                 Documento = nombreArchivo,
                                 Tipo = ext,
-                                RutaArchivo = rutaCompleta,
+                                RutaArchivo = "/Documentos/Comunicados/" + nombreArchivo,
                                 FechaSubida = DateTime.Now,
                                 IdUsuario = idUsuarioCreador,
                                 IdComunicado = nuevo.IdComunicado
@@ -173,8 +173,8 @@ namespace Sigep.UI.Controllers
                     comunicado.Fecha = DateTime.Now;
                     db.SaveChanges();
 
-                  
-                    string carpetaDestino = @"C:\SIGEP\Comunicados";
+
+                    string carpetaDestino = Server.MapPath("~/Documentos/Comunicados/");
                     if (!Directory.Exists(carpetaDestino))
                         Directory.CreateDirectory(carpetaDestino);
 
@@ -275,14 +275,30 @@ namespace Sigep.UI.Controllers
                     if (doc == null)
                         return Json(new { success = false, message = "Documento no encontrado" });
 
-                   
-                    if (System.IO.File.Exists(doc.RutaArchivo))
-                        System.IO.File.Delete(doc.RutaArchivo);
+                    string rutaFisica = Server.MapPath("~" + doc.RutaArchivo);
 
+                    // Eliminar el registro de la base de datos
                     dbContext.DocumentosTB.Remove(doc);
                     dbContext.SaveChanges();
 
-                    return Json(new { success = true, message = "Documento eliminado correctamente" });
+                    // Eliminar el archivo físico si existe
+                    if (System.IO.File.Exists(rutaFisica))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(rutaFisica);
+                        }
+                        catch (Exception exFile)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error al eliminar archivo físico: {exFile.Message}");
+                        }
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Documento eliminado correctamente"
+                    });
                 }
             }
             catch (Exception ex)

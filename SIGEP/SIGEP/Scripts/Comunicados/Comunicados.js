@@ -333,10 +333,10 @@
                             <small>Cargado: ${doc.FechaSubida}</small>
                         </div>
                         <div id="AccionesDocumentosComunicados" class="d-flex gap-3">
-                            <a href="/Perfil/DescargarDocumento?ruta=${encodeURIComponent(doc.RutaArchivo)}&download=true"
-                               title="Descargar" class="btn btn-link p-0 text-secondary">
-                               <i class="fas fa-download"></i>
-                            </a>
+                           <a href="/Perfil/DescargarDocumento?idDocumento=${doc.IdDocumento}" 
+   title="Descargar" class="btn btn-link p-0 text-secondary">
+   <i class="fas fa-download"></i>
+</a>
                             ${typeof rolUsuario !== 'undefined' && rolUsuario === 2 ? `
                                 <button class="btn btn-link p-0 text-secondary btnEliminarDocComunicado"
                                         data-id="${doc.IdDocumento}" title="Eliminar">

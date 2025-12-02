@@ -3,11 +3,13 @@ using SIGEP.EF;
 using SIGEP.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI;
+using System.Xml.Linq;
 
 namespace SIGEP.Controllers
 {
@@ -914,29 +916,28 @@ namespace SIGEP.Controllers
 
                     string cedulaEstudiante = estudiante.Cedula;
 
-                    // Crear directorio en C:\sigep si no existe
-                    string directorioBase = @"C:\sigep\Perfil\"+estudiante.Cedula;
-                    if (!System.IO.Directory.Exists(directorioBase))
+                    string carpeta = Server.MapPath("~/Documentos/Perfil/" + cedulaEstudiante);
+
+                    // Crear carpeta si no existe
+                    if (!Directory.Exists(carpeta))
                     {
-                        System.IO.Directory.CreateDirectory(directorioBase);
+                        Directory.CreateDirectory(carpeta);
                     }
 
-                    // Generar nombre del archivo con cédula (sin fecha/hora)
-                    string nombreOriginal = System.IO.Path.GetFileNameWithoutExtension(archivo.FileName);
+                    string nombreOriginal = Path.GetFileNameWithoutExtension(archivo.FileName);
                     string nombreArchivo = $"{cedulaEstudiante}_{nombreOriginal}{extension}";
 
-                    // Ruta completa del archivo
-                    string rutaCompleta = System.IO.Path.Combine(directorioBase, nombreArchivo);
+                    // Ruta FINAL del archivo
+                    string ruta = Path.Combine(carpeta, nombreArchivo);
 
-                    // Si el archivo ya existe, se sobrescribe
-                    archivo.SaveAs(rutaCompleta);
-
+                    // Guardar archivo
+                    archivo.SaveAs(ruta);
                     // Guardar registro en BD con la ruta del archivo
                     var documento = new DocumentosTB
                     {
                         Documento = archivo.FileName, // Nombre original para mostrar
                         Tipo = "Perfil",
-                        RutaArchivo = rutaCompleta,
+                        RutaArchivo = "/Documentos/Perfil/" + cedulaEstudiante + "/" + nombreArchivo,
                         FechaSubida = DateTime.Now,
                         IdUsuario = idUsuario
                     };
@@ -1204,14 +1205,30 @@ namespace SIGEP.Controllers
                     if (doc == null)
                         return Json(new { success = false, message = "Documento no encontrado" });
 
-                    // Eliminar archivo físico
-                    if (System.IO.File.Exists(doc.RutaArchivo))
-                        System.IO.File.Delete(doc.RutaArchivo);
+                    string rutaFisica = Server.MapPath("~" + doc.RutaArchivo);
 
+                    // Eliminar el registro de la base de datos
                     dbContext.DocumentosTB.Remove(doc);
                     dbContext.SaveChanges();
 
-                    return Json(new { success = true, message = "Documento eliminado correctamente" });
+                    // Eliminar el archivo físico si existe
+                    if (System.IO.File.Exists(rutaFisica))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(rutaFisica);
+                        }
+                        catch (Exception exFile)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error al eliminar archivo físico: {exFile.Message}");
+                        }
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Documento eliminado correctamente"
+                    });
                 }
             }
             catch (Exception ex)
@@ -1222,19 +1239,48 @@ namespace SIGEP.Controllers
 
 
 
-        public FileResult DescargarDocumento(string ruta, bool download = false)
+        [HttpGet]
+        public ActionResult DescargarDocumento(int idDocumento)
         {
-            if (!System.IO.File.Exists(ruta))
-                return null;
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
 
-            string nombreArchivo = System.IO.Path.GetFileName(ruta);
-            string contentType = "application/octet-stream";
+                    if (documento == null)
+                    {
+                        return HttpNotFound("Documento no encontrado");
+                    }
 
-            if (download)
-                return File(ruta, contentType, nombreArchivo); // descarga
-            else
-                return File(ruta, contentType); // abre en navegador
+                    // Convertir ruta relativa a física
+                    string rutaFisica = Server.MapPath(documento.RutaArchivo);
+
+                    if (!System.IO.File.Exists(rutaFisica))
+                    {
+                        return HttpNotFound("Archivo no encontrado en el servidor");
+                    }
+
+                    var fileBytes = System.IO.File.ReadAllBytes(rutaFisica);
+                    var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
+
+                    string contentType = "application/octet-stream";
+                    if (extension == ".pdf")
+                        contentType = "application/pdf";
+                    else if (extension == ".xlsx")
+                        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    else if (extension == ".xls")
+                        contentType = "application/vnd.ms-excel";
+
+                    return File(fileBytes, contentType, documento.Documento);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error al descargar: " + ex.Message);
+            }
         }
+
 
 
 
