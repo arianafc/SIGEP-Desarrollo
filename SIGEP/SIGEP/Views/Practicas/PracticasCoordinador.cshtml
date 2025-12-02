@@ -42,7 +42,6 @@
                 <th>Cédula</th>
                 <th>Nombre</th>
                 <th>Especialidad</th>
-                <th>Teléfono</th>
                 <th>Estado de Postulación</th>
                 <th>Empresa</th>
                 <th>Tipo</th>
@@ -70,8 +69,6 @@
                     { data: 'Cedula' },
                     { data: 'Nombre' },
                     { data: 'Especialidad' },
-                    { data: 'Telefono',
-                      render: function (d) { return d || '—'; } },
                     { data: 'EstadoPostulacion',
                       render: function (d) {
                           if (!d) return '—';
