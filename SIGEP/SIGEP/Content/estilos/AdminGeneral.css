@@ -42,40 +42,40 @@
 
     /* Usuarios: azul oscuro */
     .vacantes-wrapper .tab-btn.usuarios {
-        border-color: var(--c-azul-oscuro);
-        color: var(--c-azul-oscuro);
+        border-color: #2E594E;
+        color: #2E594E;
     }
 
         .vacantes-wrapper .tab-btn.usuarios:hover,
         .vacantes-wrapper .tab-btn.usuarios.active-tab {
-            background-color: var(--c-azul-oscuro);
-            border-color: var(--c-azul-oscuro);
-            color: #fff; /* asegura blanco */
+            background-color: #2E594E;
+            border-color: #2E594E;
+            color: #fff; /* aseguablanco */
         }
 
     /* Especialidades: terracota */
     .vacantes-wrapper .tab-btn.especialidades {
-        border-color: var(--c-terracota);
-        color: var(--c-terracota);
+        border-color: #2E5659;
+        color: #2E5659;
     }
 
         .vacantes-wrapper .tab-btn.especialidades:hover,
         .vacantes-wrapper .tab-btn.especialidades.active-tab {
-            background-color: var(--c-terracota);
-            border-color: var(--c-terracota);
+            background-color: #2E5659;
+            border-color: #2E5659;
             color: #fff;
         }
 
     /* Secciones: turquesa */
     .vacantes-wrapper .tab-btn.secciones {
-        border-color: var(--c-turquesa);
-        color: var(--c-turquesa);
+        border-color: #598478;
+        color: #598478;
     }
 
         .vacantes-wrapper .tab-btn.secciones:hover,
         .vacantes-wrapper .tab-btn.secciones.active-tab {
-            background-color: var(--c-turquesa);
-            border-color: var(--c-turquesa);
+            background-color: #598478;
+            border-color: #598478;
             color: #fff;
         }
 
@@ -161,7 +161,7 @@ table.dataTable tbody tr:hover {
 
 /* Transición visual entre tabs */
 .d-none {
-    display: none !important;
+    display: none;
 }
 
 .estado-badge-admin {
