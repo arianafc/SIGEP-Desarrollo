@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
+using System.Globalization;
 using SIGEP.EF;
 
 namespace SIGEP.Web.Controllers
@@ -70,7 +71,7 @@ namespace SIGEP.Web.Controllers
                     else return Json(new { ok = false, msg = "Estado no válido." });
 
                     var u = db.UsuariosTB.FirstOrDefault(x => x.IdUsuario == idUsuario);
-                    if (u == null) 
+                    if (u == null)
                         return Json(new { ok = false, msg = "El usuario no existe." });
 
                     u.IdEstado = idEstado;
@@ -108,6 +109,47 @@ namespace SIGEP.Web.Controllers
             }
         }
 
+        // ===== HELPER GENERAL PARA NORMALIZAR CADENAS =====
+        private static string NormalizarCadena(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+                return string.Empty;
+
+            // Quitar espacios extremos
+            texto = texto.Trim();
+
+            // Normalizar a FormD (separar letras y tildes)
+            var normalizedString = texto.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var uc = CharUnicodeInfo.GetUnicodeCategory(c);
+
+                // Ignorar marcas de acento
+                if (uc != UnicodeCategory.NonSpacingMark)
+                {
+                    // Convertir espacios raros en espacio normal
+                    if (char.IsWhiteSpace(c))
+                        sb.Append(' ');
+                    else
+                        sb.Append(c);
+                }
+            }
+
+            // Volver a FormC
+            var sinAcentos = sb.ToString().Normalize(NormalizationForm.FormC);
+
+            // Colapsar espacios múltiples en uno solo
+            var partes = sinAcentos
+                .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var sinEspaciosExtra = string.Join(" ", partes);
+
+            // Mayúsculas para que no importe el case
+            return sinEspaciosExtra.ToUpperInvariant();
+        }
+
         // ===== ESPECIALIDADES =====
         [HttpGet]
         public JsonResult Especialidades()
@@ -129,23 +171,39 @@ namespace SIGEP.Web.Controllers
         {
             try
             {
-                var nom = (nombre ?? "").Trim();
-                if (string.IsNullOrWhiteSpace(nom))
+                var nomOriginal = (nombre ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nomOriginal))
                     return Json(new { ok = false, msg = "El nombre es requerido." });
+
+                var nomNormalizado = NormalizarCadena(nomOriginal);
 
                 using (var db = new SIGEPEntities())
                 {
-                    var existente = db.EspecialidadesTB.FirstOrDefault(x => x.Nombre == nom);
+                    // Traemos todas para comparar en memoria usando NormalizarCadena
+                    var especialidades = db.EspecialidadesTB.ToList();
+
+                    var existente = especialidades
+                        .FirstOrDefault(x => NormalizarCadena(x.Nombre) == nomNormalizado);
+
                     if (existente != null)
                     {
                         if (existente.IdEstado == 2)
-                            return Json(new { ok = false, msg = "Ya existe una especialidad con ese nombre, pero está INACTIVA. Actívela desde Acciones." });
-                        return Json(new { ok = false, msg = "Ya existe una especialidad ACTIVA con ese nombre." });
+                            return Json(new
+                            {
+                                ok = false,
+                                msg = "Ya existe una especialidad con ese nombre, pero está INACTIVA. Actívela desde Acciones."
+                            });
+
+                        return Json(new
+                        {
+                            ok = false,
+                            msg = "Ya existe una especialidad ACTIVA con ese nombre."
+                        });
                     }
 
                     db.EspecialidadesTB.Add(new EF.EspecialidadesTB
                     {
-                        Nombre = nom,
+                        Nombre = nomOriginal, // se guarda tal como lo digitó el usuario
                         IdEstado = 1
                     });
                     db.SaveChanges();
@@ -163,24 +221,42 @@ namespace SIGEP.Web.Controllers
         {
             try
             {
-                var nom = (nombre ?? "").Trim();
-                if (string.IsNullOrWhiteSpace(nom))
+                var nomOriginal = (nombre ?? "").Trim();
+                if (string.IsNullOrWhiteSpace(nomOriginal))
                     return Json(new { ok = false, msg = "El nombre es requerido." });
+
+                var nomNormalizado = NormalizarCadena(nomOriginal);
 
                 using (var db = new SIGEPEntities())
                 {
                     var esp = db.EspecialidadesTB.FirstOrDefault(x => x.IdEspecialidad == id);
                     if (esp == null) return Json(new { ok = false, msg = "La especialidad no existe." });
 
-                    var duplicado = db.EspecialidadesTB.FirstOrDefault(x => x.Nombre == nom && x.IdEspecialidad != id);
+                    // Sacar otras especialidades para validar duplicados normalizados
+                    var otras = db.EspecialidadesTB
+                                  .Where(x => x.IdEspecialidad != id)
+                                  .ToList();
+
+                    var duplicado = otras
+                        .FirstOrDefault(x => NormalizarCadena(x.Nombre) == nomNormalizado);
+
                     if (duplicado != null)
                     {
                         if (duplicado.IdEstado == 2)
-                            return Json(new { ok = false, msg = "No se puede usar ese nombre: existe otro registro INACTIVO con el mismo nombre." });
-                        return Json(new { ok = false, msg = "No se puede usar ese nombre: ya existe un registro ACTIVO igual." });
+                            return Json(new
+                            {
+                                ok = false,
+                                msg = "No se puede usar ese nombre: existe otro registro INACTIVO con el mismo nombre."
+                            });
+
+                        return Json(new
+                        {
+                            ok = false,
+                            msg = "No se puede usar ese nombre: ya existe un registro ACTIVO igual."
+                        });
                     }
 
-                    esp.Nombre = nom;
+                    esp.Nombre = nomOriginal; // se guarda como lo digitó el usuario
                     db.SaveChanges();
                     return Json(new { ok = true, msg = "Cambios guardados." });
                 }
