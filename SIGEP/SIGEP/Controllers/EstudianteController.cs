@@ -36,7 +36,7 @@ namespace SIGEP.Controllers
             {
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-               
+
                 var especialidadesProfesor = (from ue in db.UsuarioEspecialidadTB
                                               join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
                                               where ue.IdUsuario == idUsuario
@@ -105,7 +105,7 @@ namespace SIGEP.Controllers
                          select ep.Descripcion.Trim()).FirstOrDefault()
                 };
 
-           
+
             if (!string.IsNullOrWhiteSpace(estado))
             {
                 var estadoNorm = estado.Trim().ToLowerInvariant();
@@ -128,14 +128,14 @@ namespace SIGEP.Controllers
             {
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-               
+
                 var especialidadesProfesor = db.UsuarioEspecialidadTB
                     .Where(ue => ue.IdUsuario == idUsuario)
                     .Select(ue => ue.IdEspecialidad)
                     .Distinct()
                     .ToList();
 
-              
+
                 if (especialidadesProfesor.Count > 1)
                 {
                     if (idEspecialidad > 0)
@@ -155,7 +155,7 @@ namespace SIGEP.Controllers
             }
             else
             {
-               
+
                 if (idEspecialidad > 0)
                     query = query.Where(x => x.IdEspecialidad == idEspecialidad);
             }
@@ -205,11 +205,11 @@ namespace SIGEP.Controllers
                                 join cant in db.CantonesTB on dist.IdCanton equals cant.IdCanton into jc
                                 from cant in jc.DefaultIfEmpty()
 
-                                  
+
                                 join prov in db.ProvinciasTB on cant.IdProvincia equals prov.IdProvincia into jp
                                 from prov in jp.DefaultIfEmpty()
 
-                                  
+
                                 join s in db.SeccionesTB on u.IdSeccion equals s.IdSeccion into js
                                 from s in js.DefaultIfEmpty()
 
@@ -257,7 +257,7 @@ namespace SIGEP.Controllers
                                       orderby p.IdPractica descending
                                       select es.Descripcion).FirstOrDefault() ?? "No Asignada";
 
-                
+
                 int edad = 0;
                 if (baseInfo.FechaNacimiento != default(DateTime))
                 {
@@ -305,19 +305,6 @@ namespace SIGEP.Controllers
         // ==============================
         // DOCUMENTOS
         // ==============================
-        public ActionResult VisualizarDocumento(int id)
-        {
-            var doc = db.Database.SqlQuery<DocumentoDTO>(
-                "EXEC sp_ObtenerDocumento @IdDocumento",
-                new SqlParameter("@IdDocumento", id)
-            ).FirstOrDefault();
-
-            if (doc == null) return HttpNotFound("Documento no encontrado.");
-            if (!System.IO.File.Exists(doc.RutaArchivo)) return HttpNotFound("El archivo físico no existe en el servidor.");
-
-            string contentType = MimeMapping.GetMimeMapping(doc.RutaArchivo);
-            return File(doc.RutaArchivo, contentType);
-        }
 
         [HttpPost]
         public ActionResult SubirDocumento(int idUsuario, HttpPostedFileBase archivo)
@@ -346,18 +333,90 @@ namespace SIGEP.Controllers
             return RedirectToAction("Detalle", new { id = idUsuario });
         }
 
+        [HttpGet]
         public ActionResult DescargarDocumento(int id)
         {
-            var doc = db.Database.SqlQuery<DocumentoDTO>(
-                "EXEC sp_ObtenerDocumento @IdDocumento",
-                new SqlParameter("@IdDocumento", id)
-            ).FirstOrDefault();
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == id);
 
-            if (doc == null) return HttpNotFound("Documento no encontrado.");
-            if (!System.IO.File.Exists(doc.RutaArchivo)) return HttpNotFound("El archivo físico no existe en el servidor.");
+                    if (documento == null)
+                    {
+                        return HttpNotFound("Documento no encontrado");
+                    }
 
-            string contentType = MimeMapping.GetMimeMapping(doc.RutaArchivo);
-            return File(doc.RutaArchivo, contentType, doc.Documento);
+                    // Convertir ruta relativa a física
+                    string rutaFisica = Server.MapPath("~" + documento.RutaArchivo);
+
+                    if (!System.IO.File.Exists(rutaFisica))
+                    {
+                        return HttpNotFound("Archivo no encontrado en el servidor");
+                    }
+
+                    var fileBytes = System.IO.File.ReadAllBytes(rutaFisica);
+                    var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
+
+                    string contentType = "application/octet-stream";
+                    if (extension == ".pdf")
+                        contentType = "application/pdf";
+                    else if (extension == ".xlsx")
+                        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    else if (extension == ".xls")
+                        contentType = "application/vnd.ms-excel";
+
+                    return File(fileBytes, contentType, documento.Documento);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error al descargar: " + ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        public ActionResult VisualizarDocumento(int id)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == id);
+
+                    if (documento == null)
+                    {
+                        return HttpNotFound("Documento no encontrado");
+                    }
+
+                    // Convertir ruta relativa a física
+                    string rutaFisica = Server.MapPath("~" + documento.RutaArchivo);
+
+                    if (!System.IO.File.Exists(rutaFisica))
+                    {
+                        return HttpNotFound("Archivo no encontrado");
+                    }
+
+                    var extension = System.IO.Path.GetExtension(documento.Documento).ToLower();
+
+                    // Solo permitir visualización de PDFs en el navegador
+                    if (extension == ".pdf")
+                    {
+                        var fileBytes = System.IO.File.ReadAllBytes(rutaFisica);
+                        return File(fileBytes, "application/pdf");
+                    }
+                    else
+                    {
+                        // Para Excel, forzar descarga
+                        return DescargarDocumento(id);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error: " + ex.Message);
+            }
         }
 
         [HttpPost]
@@ -365,24 +424,55 @@ namespace SIGEP.Controllers
         {
             try
             {
-                var doc = db.Database.SqlQuery<DocumentoDTO>(
-                    "EXEC sp_ObtenerDocumento @IdDocumento",
-                    new SqlParameter("@IdDocumento", id)
-                ).FirstOrDefault();
+                if (Session["IdUsuario"] == null)
+                {
+                    return Json(new { success = false, message = "Sesión expirada" });
+                }
 
-                if (doc == null)
-                    return Json(new { success = false, message = "Documento no encontrado en la base de datos." });
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == id);
 
-                db.Database.ExecuteSqlCommand(
-                    "EXEC sp_EliminarDocumento @IdDocumento",
-                    new SqlParameter("@IdDocumento", id)
-                );
+                    if (documento == null)
+                    {
+                        return Json(new { success = false, message = "Documento no encontrado en la base de datos" });
+                    }
 
-                return Json(new { success = true, message = "Documento eliminado correctamente." });
+                    // Convertir ruta relativa a física
+                    string rutaFisica = Server.MapPath("~" + documento.RutaArchivo);
+
+                    // Eliminar el registro de la base de datos
+                    dbContext.DocumentosTB.Remove(documento);
+                    dbContext.SaveChanges();
+
+                    // Eliminar el archivo físico si existe
+                    if (System.IO.File.Exists(rutaFisica))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(rutaFisica);
+                        }
+                        catch (Exception exFile)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error al eliminar archivo físico: {exFile.Message}");
+                        }
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Documento eliminado correctamente"
+                    });
+                }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error al eliminar el documento: " + ex.Message });
+                System.Diagnostics.Debug.WriteLine($"Error en EliminarDocumento: {ex.Message}");
+                return Json(new
+                {
+                    success = false,
+                    message = "Error al eliminar el documento: " + ex.Message
+                });
             }
         }
 

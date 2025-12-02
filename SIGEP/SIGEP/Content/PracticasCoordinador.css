@@ -309,7 +309,7 @@ a.btn-desasignar {
         padding: 6px 2px;
     }
 
-    .btn-verde-personalizado,
+    .btn-verde-personalizado, .btn-rojo-personalizado,
     .btn-verde-claro {
         width: 100%;
         margin-bottom: 0.5rem;

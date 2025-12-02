@@ -333,7 +333,7 @@
                             <small>Cargado: ${doc.FechaSubida}</small>
                         </div>
                         <div id="AccionesDocumentosComunicados" class="d-flex gap-3">
-                           <a href="/Perfil/DescargarDocumento?idDocumento=${doc.IdDocumento}" 
+                           <a href="/Comunicados/DescargarDocumento?idDocumento=${doc.IdDocumento}" 
    title="Descargar" class="btn btn-link p-0 text-secondary">
    <i class="fas fa-download"></i>
 </a>

@@ -307,6 +307,47 @@ namespace Sigep.UI.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult DescargarDocumento(int idDocumento)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var documento = dbContext.DocumentosTB.FirstOrDefault(d => d.IdDocumento == idDocumento);
+
+                    if (documento == null)
+                        return HttpNotFound("Documento no encontrado");
+
+                    string rutaFisica = documento.RutaArchivo;
+
+                    if (rutaFisica.StartsWith("~"))
+                        rutaFisica = Server.MapPath(rutaFisica);
+
+                    if (!System.IO.File.Exists(rutaFisica))
+                        return HttpNotFound("Archivo no encontrado en el servidor");
+
+                    var fileBytes = System.IO.File.ReadAllBytes(rutaFisica);
+                    var extension = Path.GetExtension(documento.Documento).ToLower();
+
+                    string contentType = "application/octet-stream";
+                    if (extension == ".pdf")
+                        contentType = "application/pdf";
+                    else if (extension == ".xlsx")
+                        contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    else if (extension == ".xls")
+                        contentType = "application/vnd.ms-excel";
+
+                    return File(fileBytes, contentType, documento.Documento);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content("Error al descargar: " + ex.Message);
+            }
+        }
+
+
 
         [HttpPost]
         public ActionResult EnviarCorreo(string Poblacion, string Asunto, string Mensaje, List<HttpPostedFileBase> Archivos)

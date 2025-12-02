@@ -19,7 +19,7 @@
 <div class="vacantes-titulo titulo-principal d-flex justify-content-between mb-0 align-items-center">
     @if (idRol == 2)
     {
-        <button type="button" class="btn-cta btn-nuevo mb-0" data-bs-toggle="modal" data-bs-target="#modalCrearEmpleo">
+        <button type="button" class="btn-cta btn-nuevo mb-2" data-bs-toggle="modal" data-bs-target="#modalCrearEmpleo">
             + Registrar
         </button>
     }
@@ -94,7 +94,7 @@
                         @if (vacante.IdEstado == 1)
                         {
                             <!-- Empleo ACTIVO: se puede editar y se puede desactivar -->
-                            <button class="btn-accion btn-editar-empresa"
+                            <button class="btn-accion btn-editar-empleo"
                                     data-iddireccion="@vacante.IdDireccion"
                                     data-id="@vacante.IdEmpleo"
                                     data-nombrepuesto="@vacante.NombrePuesto"
