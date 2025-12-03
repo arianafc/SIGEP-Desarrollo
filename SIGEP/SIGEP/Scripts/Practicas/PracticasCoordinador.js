@@ -238,11 +238,11 @@
                 render: function (row) {
                     let html = '';
 
-                    if (row.IdVacanteUltima && row.IdUsuario) {
+                    // 👁 Ojo: solo si hay práctica asociada a ESA fila
+                    if (row.IdPracticaVacante && row.IdPracticaVacante > 0) {
                         html += `
                 <a href="javascript:void(0);" class="btn-ver"
-                   data-idvacante="${row.IdVacanteUltima}"
-                   data-idusuario="${row.IdUsuario}"
+                   data-idpractica="${row.IdPracticaVacante}"
                    title="Ver detalle"
                    style="color:#2d594d; margin-right:8px;">
                    <i class="fas fa-eye"></i>
@@ -270,6 +270,7 @@
                     return html || '—';
                 }
             }
+
         ],
         language: {
             url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
@@ -314,13 +315,14 @@
         });
     });
 
+    
     // === VER DETALLE ===
     $(document).on('click', '.btn-ver', function () {
-        const idVacante = $(this).data('idvacante');
-        const idUsuario = $(this).data('idusuario');
-        if (!idVacante || !idUsuario) return;
-        window.location.href = `/Practicas/VisualizacionPostulacion?idVacante=${idVacante}&idUsuario=${idUsuario}`;
+        const idPractica = $(this).data('idpractica');
+        if (!idPractica) return;
+        window.location.href = `/Practicas/VisualizacionPorPractica?idPractica=${idPractica}`;
     });
+
 
     // === DESASIGNAR DESDE ICONO EN TABLA PRINCIPAL ===
     $(document).on('click', '.btn-desasignar', function () {

@@ -1076,6 +1076,43 @@ namespace SIGEP.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult VisualizacionPorPractica(int idPractica)
+        {
+            try
+            {
+                using (var dbContext = new SIGEPEntities())
+                {
+                    var practica = dbContext.PracticaEstudianteTB
+                        .Where(p => p.IdPractica == idPractica)
+                        .Select(p => new
+                        {
+                            p.IdVacante,
+                            p.IdUsuario
+                        })
+                        .FirstOrDefault();
+
+                    if (practica == null)
+                    {
+                        TempData["SwalError"] = "No se encontró información de la práctica seleccionada.";
+                        return RedirectToAction("PracticasCoordinador");
+                    }
+
+                    return RedirectToAction("VisualizacionPostulacion", new
+                    {
+                        idVacante = practica.IdVacante,
+                        idUsuario = practica.IdUsuario
+                    });
+                }
+            }
+            catch (Exception)
+            {
+                TempData["SwalError"] = "Ocurrió un error al intentar cargar la práctica.";
+                return RedirectToAction("PracticasCoordinador");
+            }
+        }
+
+
         [HttpPost]
         public ActionResult AgregarComentario(int idVacante, int idUsuario, string comentario)
         {

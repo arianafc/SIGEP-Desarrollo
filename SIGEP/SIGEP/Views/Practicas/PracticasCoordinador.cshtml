@@ -163,15 +163,17 @@
 
     // Configuración global del módulo de prácticas ===
     window.PracticasCfg = {
-        urls: {
-            obtenerEstudiantesPracticas: '@Url.Action("ObtenerEstudiantesPracticas", "Practicas")',
-            obtenerVacantesAsignar: '@Url.Action("ObtenerVacantesAsignar", "Practicas")',
-            asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
-            desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
-            retirarEstudiante: '@Url.Action("RetirarEstudiante", "Practicas")'
-        },
-        rol: @idRol,
-        idUsuarioSesion: @(Session["IdUsuario"] ?? 0)
-    };
+    urls: {
+        obtenerEstudiantesPracticas: '@Url.Action("ObtenerEstudiantesPracticas", "Practicas")',
+        obtenerVacantesAsignar: '@Url.Action("ObtenerVacantesAsignar", "Practicas")',
+        asignarEstudiante: '@Url.Action("AsignarEstudiante", "Practicas")',
+        desasignarPractica: '@Url.Action("DesasignarPractica", "Practicas")',
+        retirarEstudiante: '@Url.Action("RetirarEstudiante", "Practicas")',
+        visualizarPractica: '@Url.Action("VisualizacionPostulacion", "Practicas")'   
+    },
+    rol: @idRol,
+    idUsuarioSesion: @(Session["IdUsuario"] ?? 0)
+};
+
     </script>
 }

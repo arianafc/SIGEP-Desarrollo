@@ -11,6 +11,31 @@ namespace SIGEP.Controllers
 {
     public class HistoricoController : Controller
     {
+        // ============================================
+        // VALIDACIÓN GLOBAL PARA TODAS LAS ACCIONES
+        // ============================================
+        private ActionResult ValidarAcceso()
+        {
+            // No hay sesión activa
+            if (Session["IdRol"] == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            int idRol = Convert.ToInt32(Session["IdRol"]);
+
+            // Solo rol 2 permitido
+            if (idRol != 2)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return null; // acceso permitido
+        }
+
+        // ============================================
+        // MODELOS INTERNOS
+        // ============================================
         public class HistoricoItem
         {
             public int IdPractica { get; set; }
@@ -45,25 +70,67 @@ namespace SIGEP.Controllers
             public string Comentario { get; set; }
         }
 
+        public class DetallePracticaItem
+        {
+            public int IdVacante { get; set; }
+            public string Nombre { get; set; }
+            public string EmpresaNombre { get; set; }
+            public string Requerimientos { get; set; }
+            public DateTime? FechaMaxAplicacion { get; set; }
+            public string ModalidadNombre { get; set; }
+
+            public int IdUsuario { get; set; }
+            public string EstudianteNombre { get; set; }
+            public string EstudianteCedula { get; set; }
+            public int EstudianteEdad { get; set; }
+            public string EstudianteEspecialidad { get; set; }
+            public string EstudianteCorreo { get; set; }
+
+            public string ContactoEmpresaNombre { get; set; }
+            public string ContactoEmpresaEmail { get; set; }
+            public string ContactoEmpresaTelefono { get; set; }
+
+            public int IdPractica { get; set; }
+            public DateTime FechaAplicacion { get; set; }
+            public string EstadoPractica { get; set; }
+
+            public decimal? Nota1 { get; set; }
+            public decimal? Nota2 { get; set; }
+            public decimal? NotaFinal { get; set; }
+        }
+
+        // ============================================
+        // OBTENER HISTÓRICO
+        // ============================================
         private List<HistoricoItem> ObtenerHistorico()
         {
             using (var db = new SIGEPEntities())
             {
-                // Asegurate que en el SP tengas V.Nombre AS NombreVacante
                 return db.Database.SqlQuery<HistoricoItem>("HistoricoPracticasSP").ToList();
             }
         }
 
+        // ============================================
+        // VISTA PRINCIPAL
+        // ============================================
         public ActionResult HistoricoPracticas()
         {
+            var acceso = ValidarAcceso();
+            if (acceso != null) return acceso;
+
             var data = ObtenerHistorico();
             return View("~/Views/Historico/HistoricoPracticas.cshtml", data);
         }
 
+        // ============================================
+        // EXPORTAR EXCEL
+        // ============================================
         public ActionResult ExportarExcel()
         {
-            var data = ObtenerHistorico();
+            var acceso = ValidarAcceso();
+            if (acceso != null) return acceso;
 
+            var data = ObtenerHistorico();
             var sb = new StringBuilder();
 
             sb.Append("<table border='1' style='border-collapse:collapse;'>");
@@ -106,8 +173,14 @@ namespace SIGEP.Controllers
             return File(bytes, "application/vnd.ms-excel", nombre);
         }
 
+        // ============================================
+        // COMENTARIOS
+        // ============================================
         public ActionResult ObtenerComentarios(int idUsuario)
         {
+            var acceso = ValidarAcceso();
+            if (acceso != null) return acceso;
+
             using (var db = new SIGEPEntities())
             {
                 var p = new SqlParameter("@IdUsuario", idUsuario);
@@ -122,6 +195,55 @@ namespace SIGEP.Controllers
                     fecha = c.Fecha.ToString("dd/MM/yyyy HH:mm"),
                     comentario = c.Comentario
                 });
+
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // ============================================
+        // DETALLE DE EMPRESA / VACANTE
+        // ============================================
+        public ActionResult ObtenerDetallePractica(int idVacante, int idUsuario)
+        {
+            var acceso = ValidarAcceso();
+            if (acceso != null) return acceso;
+
+            using (var db = new SIGEPEntities())
+            {
+                var pVac = new SqlParameter("@IdVacante", idVacante);
+                var pUsr = new SqlParameter("@IdUsuario", idUsuario);
+
+                var detalle = db.Database.SqlQuery<DetallePracticaItem>(
+                    "ObtenerVisualizacionPracticaSP @IdVacante, @IdUsuario",
+                    pVac,
+                    pUsr
+                ).FirstOrDefault();
+
+                if (detalle == null)
+                {
+                    return Json(null, JsonRequestBehavior.AllowGet);
+                }
+
+                var result = new
+                {
+                    vacante = detalle.Nombre,
+                    empresa = detalle.EmpresaNombre,
+                    requerimientos = detalle.Requerimientos,
+                    fechaMaxAplicacion = detalle.FechaMaxAplicacion?.ToString("dd/MM/yyyy"),
+                    modalidad = detalle.ModalidadNombre,
+                    estudiante = detalle.EstudianteNombre,
+                    cedulaEstudiante = detalle.EstudianteCedula,
+                    edadEstudiante = detalle.EstudianteEdad,
+                    especialidadEstudiante = detalle.EstudianteEspecialidad,
+                    correoEstudiante = detalle.EstudianteCorreo,
+                    contactoNombre = detalle.ContactoEmpresaNombre,
+                    contactoCorreo = detalle.ContactoEmpresaEmail,
+                    contactoTelefono = detalle.ContactoEmpresaTelefono,
+                    estadoPractica = detalle.EstadoPractica,
+                    nota1 = detalle.Nota1,
+                    nota2 = detalle.Nota2,
+                    notaFinal = detalle.NotaFinal
+                };
 
                 return Json(result, JsonRequestBehavior.AllowGet);
             }
