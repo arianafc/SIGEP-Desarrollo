@@ -280,7 +280,6 @@ namespace SIGEP.Controllers
                     usuarioToUpdate.Nombre = usuario.Nombre;
                     usuarioToUpdate.Apellido1 = usuario.Apellido1;
                     usuarioToUpdate.Apellido2 = usuario.Apellido2;
-                    usuarioToUpdate.FechaNacimiento = usuario.FechaNacimiento;
                     usuarioToUpdate.Nacionalidad = usuario.Nacionalidad;
                     usuarioToUpdate.Sexo = usuario.Sexo;
 
