@@ -12,28 +12,6 @@ namespace SIGEP.Controllers
     public class HistoricoController : Controller
     {
         // ============================================
-        // VALIDACIÓN GLOBAL PARA TODAS LAS ACCIONES
-        // ============================================
-        private ActionResult ValidarAcceso()
-        {
-            // No hay sesión activa
-            if (Session["IdRol"] == null)
-            {
-                return RedirectToAction("Login", "Home");
-            }
-
-            int idRol = Convert.ToInt32(Session["IdRol"]);
-
-            // Solo rol 2 permitido
-            if (idRol != 2)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            return null; // acceso permitido
-        }
-
-        // ============================================
         // MODELOS INTERNOS
         // ============================================
         public class HistoricoItem
@@ -113,11 +91,12 @@ namespace SIGEP.Controllers
         // ============================================
         // VISTA PRINCIPAL
         // ============================================
+        [FiltroSesion]
+        [FiltroCoordinador]
+        [HttpGet]
         public ActionResult HistoricoPracticas()
         {
-            var acceso = ValidarAcceso();
-            if (acceso != null) return acceso;
-
+           
             var data = ObtenerHistorico();
             return View("~/Views/Historico/HistoricoPracticas.cshtml", data);
         }
@@ -127,8 +106,7 @@ namespace SIGEP.Controllers
         // ============================================
         public ActionResult ExportarExcel()
         {
-            var acceso = ValidarAcceso();
-            if (acceso != null) return acceso;
+           
 
             var data = ObtenerHistorico();
             var sb = new StringBuilder();
@@ -178,8 +156,7 @@ namespace SIGEP.Controllers
         // ============================================
         public ActionResult ObtenerComentarios(int idUsuario)
         {
-            var acceso = ValidarAcceso();
-            if (acceso != null) return acceso;
+          
 
             using (var db = new SIGEPEntities())
             {
@@ -205,8 +182,7 @@ namespace SIGEP.Controllers
         // ============================================
         public ActionResult ObtenerDetallePractica(int idVacante, int idUsuario)
         {
-            var acceso = ValidarAcceso();
-            if (acceso != null) return acceso;
+         
 
             using (var db = new SIGEPEntities())
             {
