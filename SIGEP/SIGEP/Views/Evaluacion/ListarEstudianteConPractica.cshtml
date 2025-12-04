@@ -4,6 +4,10 @@
     var rol = Session["IdRol"] != null ? Convert.ToInt32(Session["IdRol"]) : 0;
 }
 
+@section styles {
+    <link href="~/Content/estilos/VacantesEstudiantes.css" rel="stylesheet" />
+}
+
 <!-- Campo oculto para el rol (usado en JavaScript) -->
 <input type="hidden" id="rolUsuario" value="@rol" />
 

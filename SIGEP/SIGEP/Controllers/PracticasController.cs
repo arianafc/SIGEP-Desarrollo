@@ -18,7 +18,6 @@ using System.Web.Mvc;
 namespace SIGEP.Controllers
 {
     [FiltroSesion]
-    [FiltroUsuarioAdmin]
 
     public class PracticasController : Controller
     {
@@ -29,6 +28,7 @@ namespace SIGEP.Controllers
         // ==============================
         // VISTA PRINCIPAL VACANTES
         // ==============================
+        [FiltroCoordinador]
         [HttpGet]
         public ActionResult VacantesEstudiantes()
         {
@@ -956,6 +956,7 @@ namespace SIGEP.Controllers
             }
         }
 
+        [FiltroProfesor]
         [HttpGet]
         public ActionResult VistaVacantesProfesor()
         {
@@ -1355,7 +1356,7 @@ namespace SIGEP.Controllers
             }
         }
 
-
+        [FiltroUsuarioAdmin]
         [HttpGet]
         public ActionResult PracticasCoordinador()
         {
@@ -1367,8 +1368,6 @@ namespace SIGEP.Controllers
 
             return View();
         }
-
-       
 
         [HttpGet]
         public JsonResult GetVacantesProfesor(string estado = "", int idModalidad = 0, int idEspecialidad = 0)
@@ -1497,6 +1496,7 @@ namespace SIGEP.Controllers
             }
         }
 
+        [FiltroEstudiante]
         [HttpGet]
         public ActionResult MiPractica()
         {
@@ -1539,6 +1539,7 @@ namespace SIGEP.Controllers
             }
         }
 
+        [FiltroEstudiante]
         [HttpGet]
         public ActionResult PostulacionesEstudiantes()
         {
@@ -1584,7 +1585,7 @@ namespace SIGEP.Controllers
             }
         }
 
-
+        [FiltroUsuarioAdmin]
         [HttpGet]
         public ActionResult ListadoEstudiantes()
         {
@@ -1594,7 +1595,7 @@ namespace SIGEP.Controllers
             return View();
         }
 
-       
+
 
         [HttpGet]
         public JsonResult ListarEstudiantesJson(int? idVacante = null)
@@ -1607,19 +1608,19 @@ namespace SIGEP.Controllers
 
             using (var db = new SIGEPEntities())
             {
-
-                if (idRol == 2)
+                if (idRol == 2 || idRol == 3)
                 {
-                    // 🔹 Especialidades del coordinador (para limitar a "lo suyo")
-                    var especialidadesCoord = db.UsuarioEspecialidadTB
-                        .Where(ue => ue.IdUsuario == idUsuario && ue.IdEstado == 1)
-                        .Select(ue => ue.IdEspecialidad)
-                        .ToList();
+                    int anioActual = DateTime.Now.Year;
 
-                    // Si por algún motivo no tiene especialidades configuradas, no filtramos por especialidad
-                    bool filtrarPorEspecialidad = especialidadesCoord.Any();
+                    var especialidadesProfesor = new List<int>();
+                    if (idRol == 3)
+                    {
+                        especialidadesProfesor = db.UsuarioEspecialidadTB
+                            .Where(ue => ue.IdUsuario == idUsuario && ue.IdEstado == 1)
+                            .Select(ue => ue.IdEspecialidad)
+                            .ToList();
+                    }
 
-                    // 🔹 Query base: UNA FILA POR CADA POSTULACIÓN (PracticaEstudianteTB)
                     var query =
                         from p in db.PracticaEstudianteTB
                         join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
@@ -1629,118 +1630,52 @@ namespace SIGEP.Controllers
                         join ue in db.UsuarioEspecialidadTB on u.IdUsuario equals ue.IdUsuario
                         join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
                         where ue.IdEstado == 1
-                              && (!filtrarPorEspecialidad || especialidadesCoord.Contains(ue.IdEspecialidad))
-                              && p.FechaAplicacion.Year == DateTime.Now.Year
+        && u.IdRol == 1
+        && p.FechaAplicacion.Year == anioActual
+                        select new { p, u, v, emp, est, ue, esp };
 
-                        select new
-                        {
-                            Practica = p,
-                            Estudiante = u,
-                            Vacante = v,
-                            Empresa = emp,
-                            EstadoPractica = est,
-                            Especialidad = esp
-                        };
+                    if (idRol == 3 && especialidadesProfesor.Any())
+                    {
+                        query = query.Where(x => especialidadesProfesor.Contains(x.ue.IdEspecialidad));
+                    }
+
+                    if (idRol == 3 && idVacante.HasValue && idVacante.Value > 0)
+                    {
+                        int idVac = idVacante.Value;
+                        query = query.Where(x => x.v.IdVacante == idVac);
+                    }
 
                     var datos = query
-                        // Por si un mismo IdPractica aparece repetido por múltiples especialidades,
-                        // nos quedamos con una sola fila por IdPractica.
                         .ToList()
-                        .GroupBy(x => x.Practica.IdPractica)
+                        .GroupBy(x => x.p.IdPractica)
                         .Select(g => g.First())
-                        .ToList();
-
-                    var lista = datos
                         .Select(x => new
                         {
-                            IdUsuario = x.Estudiante.IdUsuario,
-                            Cedula = x.Estudiante.Cedula,
-                            Nombre = (x.Estudiante.Nombre + " " + x.Estudiante.Apellido1 + " " + x.Estudiante.Apellido2).Trim(),
-                            Especialidad = x.Especialidad.Nombre,
-
+                            IdUsuario = x.u.IdUsuario,
+                            Cedula = x.u.Cedula,
+                            Nombre = (x.u.Nombre + " " + x.u.Apellido1 + " " + x.u.Apellido2).Trim(),
+                            Especialidad = x.esp.Nombre,
                             Telefono = db.TelefonosTB
-                                .Where(t => t.IdUsuario == x.Estudiante.IdUsuario)
+                                .Where(t => t.IdUsuario == x.u.IdUsuario)
                                 .Select(t => t.Telefono)
                                 .FirstOrDefault(),
-
-                            // 🔹 Estado de ESA postulación
-                            EstadoPostulacion = x.EstadoPractica.Descripcion,
-
-                            // 🔹 Empresa y tipo de ESA vacante
-                            Empresa = x.Empresa.NombreEmpresa,
-                            Tipo = x.Vacante.Tipo,
-
-                            // 🔹 Identificadores de la relación práctica-vacante
-                            IdPracticaVacante = x.Practica.IdPractica,
-                            EstadoVacante = x.EstadoPractica.Descripcion,
-                            IdVacanteUltima = x.Vacante.IdVacante,
-
-                            // Si tu lógica actual usa esto para semáforos o badges, lo puedes ajustar luego
+                            EstadoPostulacion = x.est.Descripcion,
+                            Empresa = x.emp.NombreEmpresa,
+                            Tipo = x.v.Tipo ?? "—",
+                            IdPracticaVacante = x.p.IdPractica,
+                            EstadoVacante = x.est.Descripcion,
+                            IdVacanteUltima = (int?)x.v.IdVacante,
                             TipoMensaje = ""
                         })
                         .OrderBy(x => x.Nombre)
                         .ToList();
 
-                    return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
+                    return Json(new { data = datos }, JsonRequestBehavior.AllowGet);
                 }
 
-
-
-                else if (idRol == 3)
-                {
-                   
-                    var data = db.Database.SqlQuery<EstudianteProfesorVM>(
-                        "EXEC ObtenerEstudiantesProfesorSP @IdUsuario, @IdVacante",
-                        new SqlParameter("@IdUsuario", idUsuario),
-                        new SqlParameter("@IdVacante", (object)idVacante ?? DBNull.Value)
-                    ).ToList();
-
-                 
-                    var lista = data
-                        .GroupBy(x => x.IdUsuario)
-                        .Select(g =>
-                        {
-                            var primero = g.OrderByDescending(x => x.IdPracticaVacante).First();
-
-
-                            var tipoVacante = db.PracticaEstudianteTB
-                                .Include("VacantesPracticasTB")
-                                .Where(p => p.IdPractica == primero.IdPracticaVacante)
-                                .Select(p => p.VacantesPracticasTB.Tipo)
-                                .FirstOrDefault() ?? "—";
-
-                            return new EstudianteListadoVM
-                            {
-                                IdUsuario = primero.IdUsuario,
-                                Cedula = primero.Cedula,
-                                Nombre = primero.Nombre,
-                                Especialidad = string.Join(", ", g.Select(x => x.Especialidad).Distinct()),
-                                Telefono = db.TelefonosTB
-                                    .Where(t => t.IdUsuario == primero.IdUsuario)
-                                    .Select(t => t.Telefono)
-                                    .FirstOrDefault(),
-                                EstadoPostulacion = primero.EstadoPractica,
-                                Empresa = UltimaEmpresa(primero.IdUsuario),
-                                TieneRelacionEnVacante = g.Any(x => x.TieneRelacionEnVacante == true || x.IdPracticaVacante != null),
-                                Tipo = tipoVacante,
-                                IdPracticaVacante = primero.IdPracticaVacante,
-                                EstadoVacante = primero.EstadoVacante,
-                                IdVacanteUltima = UltimaVacanteId(primero.IdUsuario),
-                                TipoMensaje = primero.TipoMensaje 
-                            };
-                        })
-                        .OrderBy(x => x.Nombre)
-                        .ToList();
-
-                    return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
-                }
-
-                
+                return Json(new { data = new object[0] }, JsonRequestBehavior.AllowGet);
             }
-
-            return Json(new { data = new object[0] }, JsonRequestBehavior.AllowGet);
         }
-
 
         private static readonly string[] EstadosActivos = new[]
         {

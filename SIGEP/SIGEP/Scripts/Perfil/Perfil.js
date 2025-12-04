@@ -1,5 +1,38 @@
 ﻿$(function () {
 
+    $("#btnActualizarAcademica").on("click", function (e) {
+        e.preventDefault(); 
+
+     
+        let carrera = $("#Carrera").val().trim();
+        let anno = $("#AnnoGraduacion").val().trim();
+        let titulo = $("#TituloObtenido").val().trim();
+
+       
+        if (carrera === "" || anno === "" || titulo === "") {
+            Swal.fire({
+                icon: "warning",
+                title: "Campos incompletos",
+                text: "Por favor, completa todos los campos antes de actualizar."
+            });
+            return; 
+        }
+
+        
+        Swal.fire({
+            title: "¿Deseas actualizar tu información académica?",
+            text: "Se guardarán los datos ingresados.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, actualizar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $("#ActualizarInfoAcademicaForm").submit();
+            }
+        });
+    });
+
     $(document).on('click', '.btnEditarEspecialidad', function () {
         const idUsuarioEspecialidad = $(this).data('idusuarioespecialidad');
         const idEspecialidadActual = $(this).data('idespecialidad');

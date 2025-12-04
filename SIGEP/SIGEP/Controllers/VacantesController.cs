@@ -15,7 +15,7 @@ namespace SIGEP.Controllers
         // LISTA DE VACANTES (EGRESADOS)
         // ============================================================
         [FiltroSesion]
-        [FiltroCoordinador] // Acceso restringido a coordinadores
+        [FiltroEgresado] // Acceso restringido a coordinadores
         [HttpGet]
         public ActionResult ListaVacantesEgresado()
         {
@@ -68,6 +68,71 @@ namespace SIGEP.Controllers
             }
         }
 
+        [HttpGet]
+        public JsonResult ObtenerVacantesEgresado(string area = "", int? idModalidad = null)
+        {
+            try
+            {
+                var estadoActivo = db.EstadosTB
+                    .FirstOrDefault(e => e.Descripcion.Trim().ToLower() == "activo");
+                int idEstadoActivo = estadoActivo != null ? estadoActivo.IdEstado : 0;
 
+                var query = from b in db.BolsaEmpleoTB
+                            join m in db.ModalidadesTB on b.IdModalidad equals m.IdModalidad
+                            join est in db.EstadosTB on b.IdEstado equals est.IdEstado
+                            where b.IdEstado == idEstadoActivo
+                                  && (string.IsNullOrEmpty(area) || b.AreaAfin == area)
+                                  && (!idModalidad.HasValue || b.IdModalidad == idModalidad.Value)
+                            orderby b.FechaPublicacion descending
+                            select new
+                            {
+                                b.IdEmpleo,
+                                Empresa = b.Empresa,
+                                b.Descripcion,
+                                b.Requisitos,
+                                Modalidad = m.Descripcion,
+                                b.AreaAfin,
+                                b.FechaPublicacion,
+                                b.FechaLimite,
+                                b.NombrePuesto,
+                                Estado = est.Descripcion
+                            };
+
+                var lista = query.ToList();
+
+                if (!lista.Any())
+                {
+                    return Json(new
+                    {
+                        SinDatos = true,
+                        Mensaje = "No hay vacantes disponibles por el momento."
+                    }, JsonRequestBehavior.AllowGet);
+                }
+
+                var resultado = lista.Select(x => new
+                {
+                    x.IdEmpleo,
+                    x.Empresa,
+                    x.Descripcion,
+                    x.Requisitos,
+                    x.Modalidad,
+                    x.AreaAfin,
+                    x.NombrePuesto,
+                    FechaPublicacion = x.FechaPublicacion.ToString("yyyy-MM-dd"),
+                    FechaLimite = x.FechaLimite.ToString("yyyy-MM-dd"),
+                    x.Estado
+                });
+
+                return Json(resultado, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Error = true,
+                    Mensaje = "Error al obtener las vacantes: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }

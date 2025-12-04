@@ -80,30 +80,38 @@ namespace SIGEP.Controllers
                     IdUsuario = u.IdUsuario,
                     Cedula = u.Cedula,
                     NombreCompleto = u.Nombre + " " + u.Apellido1 + " " + u.Apellido2,
+
                     Telefono = db.TelefonosTB.Where(t => t.IdUsuario == u.IdUsuario)
-                                             .OrderBy(t => t.IdTelefono)
-                                             .Select(t => t.Telefono)
-                                             .FirstOrDefault(),
-                    IdEspecialidad = db.UsuarioEspecialidadTB.Where(ue => ue.IdUsuario == u.IdUsuario)
-                                          .OrderByDescending(ue => ue.IdUsuarioEspecialidad)
-                                          .Select(ue => ue.IdEspecialidad)
-                                          .FirstOrDefault(),
+                              .OrderBy(t => t.IdTelefono)
+                              .Select(t => t.Telefono)
+                              .FirstOrDefault(),
+
+                    IdEspecialidad = db.UsuarioEspecialidadTB
+                        .Where(ue => ue.IdUsuario == u.IdUsuario && ue.IdEstado == 1)
+                        .OrderByDescending(ue => ue.IdUsuarioEspecialidad)
+                        .Select(ue => ue.IdEspecialidad)
+                        .FirstOrDefault(),
+
                     EspecialidadNombre =
-                        (from ue in db.UsuarioEspecialidadTB
-                         join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
-                         where ue.IdUsuario == u.IdUsuario
-                         orderby ue.IdUsuarioEspecialidad descending
-                         select esp.Nombre).FirstOrDefault(),
+         (from ue in db.UsuarioEspecialidadTB
+          join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
+          where ue.IdUsuario == u.IdUsuario
+                && ue.IdEstado == 1      
+          orderby ue.IdUsuarioEspecialidad descending
+          select esp.Nombre).FirstOrDefault(),
+
                     IdEstado = u.IdEstado,
                     EstadoAcademico = (bool)u.EstadoAcademico,
                     EstadoNombre = e != null ? e.Descripcion : "",
+
                     EstadoPractica =
-                        (from p in db.PracticaEstudianteTB
-                         join ep in db.EstadosTB on p.IdEstado equals ep.IdEstado
-                         where p.IdUsuario == u.IdUsuario
-                         orderby p.IdPractica descending
-                         select ep.Descripcion.Trim()).FirstOrDefault()
+         (from p in db.PracticaEstudianteTB
+          join ep in db.EstadosTB on p.IdEstado equals ep.IdEstado
+          where p.IdUsuario == u.IdUsuario
+          orderby p.IdPractica descending
+          select ep.Descripcion.Trim()).FirstOrDefault()
                 };
+
 
 
             if (!string.IsNullOrWhiteSpace(estado))
@@ -130,7 +138,7 @@ namespace SIGEP.Controllers
 
 
                 var especialidadesProfesor = db.UsuarioEspecialidadTB
-                    .Where(ue => ue.IdUsuario == idUsuario)
+                    .Where(ue => ue.IdUsuario == idUsuario && ue.IdEstado == 1)
                     .Select(ue => ue.IdEspecialidad)
                     .Distinct()
                     .ToList();

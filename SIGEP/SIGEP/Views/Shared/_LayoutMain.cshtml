@@ -216,14 +216,14 @@
                             }
                         }
 
-
+                        <li class="nav-small-cap">
+                            <i class="mdi mdi-dots-horizontal"></i>
+                            <span class="hide-menu">ADMINISTRACIÓN</span>
+                        </li>
                         @if (rol == 2)
                         {
                             <!-- ADMINISTRACIÓN -->
-                            <li class="nav-small-cap">
-                                <i class="mdi mdi-dots-horizontal"></i>
-                                <span class="hide-menu">ADMINISTRACIÓN</span>
-                            </li>
+
                             <li class="sidebar-item">
                                 <a class="sidebar-link waves-effect waves-dark sidebar-link" href="@Url.Action("AdministracionGeneral", "AdministracionGeneral")">
                                     <i class="fas fa-cog"></i>
