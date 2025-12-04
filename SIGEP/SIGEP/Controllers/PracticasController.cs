@@ -1607,39 +1607,85 @@ namespace SIGEP.Controllers
 
             using (var db = new SIGEPEntities())
             {
-                
+
                 if (idRol == 2)
                 {
-                  
-                    var data = db.Database.SqlQuery<EstudiantePracticaVM>(
-                        "EXEC ObtenerEstudiantesPracticasSP @IdUsuarioSesion",
-                        new SqlParameter("@IdUsuarioSesion", idUsuario)
-                    ).ToList();
+                    // 🔹 Especialidades del coordinador (para limitar a "lo suyo")
+                    var especialidadesCoord = db.UsuarioEspecialidadTB
+                        .Where(ue => ue.IdUsuario == idUsuario && ue.IdEstado == 1)
+                        .Select(ue => ue.IdEspecialidad)
+                        .ToList();
 
-                    var lista = data.Select(x => new
-                    {
-                        x.IdUsuario,
-                        x.Cedula,
-                        Nombre = x.NombreCompleto ?? (x.NombreCompleto ?? "—"),
-                        x.Especialidad,
-                        
-                        Telefono = db.TelefonosTB
-                            .Where(t => t.IdUsuario == x.IdUsuario)
-                            .Select(t => t.Telefono)
-                            .FirstOrDefault(),
-                        x.EstadoPostulacion,
-                        x.Empresa,
-                        x.Tipo,
-                        x.IdPracticaVacante,
-                        x.EstadoVacante,
-                        x.IdVacanteUltima,
-                        x.TipoMensaje
-                    }).ToList();
+                    // Si por algún motivo no tiene especialidades configuradas, no filtramos por especialidad
+                    bool filtrarPorEspecialidad = especialidadesCoord.Any();
+
+                    // 🔹 Query base: UNA FILA POR CADA POSTULACIÓN (PracticaEstudianteTB)
+                    var query =
+                        from p in db.PracticaEstudianteTB
+                        join u in db.UsuariosTB on p.IdUsuario equals u.IdUsuario
+                        join v in db.VacantesPracticasTB on p.IdVacante equals v.IdVacante
+                        join emp in db.EmpresasTB on v.IdEmpresa equals emp.IdEmpresa
+                        join est in db.EstadosTB on p.IdEstado equals est.IdEstado
+                        join ue in db.UsuarioEspecialidadTB on u.IdUsuario equals ue.IdUsuario
+                        join esp in db.EspecialidadesTB on ue.IdEspecialidad equals esp.IdEspecialidad
+                        where ue.IdEstado == 1
+                              && (!filtrarPorEspecialidad || especialidadesCoord.Contains(ue.IdEspecialidad))
+                              && p.FechaAplicacion.Year == DateTime.Now.Year
+
+                        select new
+                        {
+                            Practica = p,
+                            Estudiante = u,
+                            Vacante = v,
+                            Empresa = emp,
+                            EstadoPractica = est,
+                            Especialidad = esp
+                        };
+
+                    var datos = query
+                        // Por si un mismo IdPractica aparece repetido por múltiples especialidades,
+                        // nos quedamos con una sola fila por IdPractica.
+                        .ToList()
+                        .GroupBy(x => x.Practica.IdPractica)
+                        .Select(g => g.First())
+                        .ToList();
+
+                    var lista = datos
+                        .Select(x => new
+                        {
+                            IdUsuario = x.Estudiante.IdUsuario,
+                            Cedula = x.Estudiante.Cedula,
+                            Nombre = (x.Estudiante.Nombre + " " + x.Estudiante.Apellido1 + " " + x.Estudiante.Apellido2).Trim(),
+                            Especialidad = x.Especialidad.Nombre,
+
+                            Telefono = db.TelefonosTB
+                                .Where(t => t.IdUsuario == x.Estudiante.IdUsuario)
+                                .Select(t => t.Telefono)
+                                .FirstOrDefault(),
+
+                            // 🔹 Estado de ESA postulación
+                            EstadoPostulacion = x.EstadoPractica.Descripcion,
+
+                            // 🔹 Empresa y tipo de ESA vacante
+                            Empresa = x.Empresa.NombreEmpresa,
+                            Tipo = x.Vacante.Tipo,
+
+                            // 🔹 Identificadores de la relación práctica-vacante
+                            IdPracticaVacante = x.Practica.IdPractica,
+                            EstadoVacante = x.EstadoPractica.Descripcion,
+                            IdVacanteUltima = x.Vacante.IdVacante,
+
+                            // Si tu lógica actual usa esto para semáforos o badges, lo puedes ajustar luego
+                            TipoMensaje = ""
+                        })
+                        .OrderBy(x => x.Nombre)
+                        .ToList();
 
                     return Json(new { data = lista }, JsonRequestBehavior.AllowGet);
                 }
 
-                
+
+
                 else if (idRol == 3)
                 {
                    
