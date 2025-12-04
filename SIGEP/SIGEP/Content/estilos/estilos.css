@@ -8,14 +8,14 @@ body {
 }
 
 
-/* Color del texto e íconos dentro de la sección expandida */
+
 .expanded-section .sidebar-link,
 .expanded-section .sidebar-link .hide-menu,
 .expanded-section .sidebar-link i {
     color: #61733a !important;
 }
 
-    /* Hover con un tono un poco más oscuro para mantener coherencia */
+
     .expanded-section .sidebar-link:hover,
     .expanded-section .sidebar-link:hover .hide-menu,
     .expanded-section .sidebar-link:hover i {
