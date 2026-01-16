@@ -65,6 +65,10 @@ namespace SIGEP.Web.Controllers
         {
             try
             {
+
+                var usuarioLogueado = Session["IdUsuario"];
+
+
                 using (var db = new SIGEPEntities())
                 {
                     int idEstado;
@@ -72,10 +76,13 @@ namespace SIGEP.Web.Controllers
                     else if (string.Equals(nuevoEstado, "Inactivo", StringComparison.OrdinalIgnoreCase)) idEstado = 2;
                     else return Json(new { ok = false, msg = "Estado no válido." });
 
+
+
                     var u = db.UsuariosTB.FirstOrDefault(x => x.IdUsuario == idUsuario);
                     if (u == null) 
                         return Json(new { ok = false, msg = "El usuario no existe." });
-
+                    if (u.IdUsuario == (int)usuarioLogueado)
+                        return Json(new { ok = false, msg = "No puede desactivar su propio usuario." });
                     u.IdEstado = idEstado;
                     db.SaveChanges();
                     return Json(new { ok = true, msg = "Estado actualizado correctamente." });
