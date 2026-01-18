@@ -19,6 +19,7 @@ namespace SIGEP.Web.Controllers
 
         // ===== VISTA =====
         [FiltroSesion]
+        [ValidarUsuarioActivo]
         [FiltroCoordinador]
         [HttpGet]
         public ActionResult AdministracionGeneral(string tab = "usuarios")
@@ -65,9 +66,10 @@ namespace SIGEP.Web.Controllers
         {
             try
             {
+                if (Session["IdUsuario"] == null)
+                    return Json(new { ok = false, msg = "Sesión expirada." });
 
-                var usuarioLogueado = Session["IdUsuario"];
-
+                int usuarioLogueadoId = Convert.ToInt32(Session["IdUsuario"]);
 
                 using (var db = new SIGEPEntities())
                 {
@@ -81,7 +83,7 @@ namespace SIGEP.Web.Controllers
                     var u = db.UsuariosTB.FirstOrDefault(x => x.IdUsuario == idUsuario);
                     if (u == null) 
                         return Json(new { ok = false, msg = "El usuario no existe." });
-                    if (u.IdUsuario == (int)usuarioLogueado)
+                    if (u.IdUsuario == usuarioLogueadoId)
                         return Json(new { ok = false, msg = "No puede desactivar su propio usuario." });
                     u.IdEstado = idEstado;
                     db.SaveChanges();

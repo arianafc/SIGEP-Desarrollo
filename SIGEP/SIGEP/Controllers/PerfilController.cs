@@ -13,10 +13,12 @@ using System.Xml.Linq;
 
 namespace SIGEP.Controllers
 {
+    [ValidarUsuarioActivo]
     public class PerfilController : Controller
     {
 
         [FiltroSesion]
+     
         [HttpGet]
      
         public ActionResult MiPerfil()

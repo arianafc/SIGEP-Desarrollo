@@ -7,6 +7,7 @@ using System.Web.Mvc;
 namespace SIGEP.Controllers
 {
     [FiltroSesion] // Acceso restringido a usuarios con sesión activa
+    [ValidarUsuarioActivo]
     public class VacantesController : Controller
     {
         private SIGEPEntities db = new SIGEPEntities();

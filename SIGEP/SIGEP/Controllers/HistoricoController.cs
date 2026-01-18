@@ -92,6 +92,7 @@ namespace SIGEP.Controllers
         // VISTA PRINCIPAL
         // ============================================
         [FiltroSesion]
+        [ValidarUsuarioActivo]
         [FiltroCoordinador]
         [HttpGet]
         public ActionResult HistoricoPracticas()
@@ -154,6 +155,7 @@ namespace SIGEP.Controllers
         // ============================================
         // COMENTARIOS
         // ============================================
+        [ValidarUsuarioActivo]
         public ActionResult ObtenerComentarios(int idUsuario)
         {
           
@@ -180,6 +182,7 @@ namespace SIGEP.Controllers
         // ============================================
         // DETALLE DE EMPRESA / VACANTE
         // ============================================
+        [ValidarUsuarioActivo]
         public ActionResult ObtenerDetallePractica(int idVacante, int idUsuario)
         {
          

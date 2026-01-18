@@ -1,4 +1,8 @@
-﻿using System.Web.Mvc;
+﻿using SIGEP.EF;
+using System.Data.Entity;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
 
 namespace SIGEP.Models
 {
@@ -22,7 +26,51 @@ namespace SIGEP.Models
         }
     }
 
-    public class FiltroEstudiante : ActionFilterAttribute
+    public class ValidarUsuarioActivoAttribute : ActionFilterAttribute
+    {
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            var session = HttpContext.Current.Session;
+
+            if (session == null || session["IdUsuario"] == null)
+            {
+                RedirigirLogin(filterContext);
+                return;
+            }
+
+            int idUsuario = (int)session["IdUsuario"];
+
+            using (var db = new SIGEPEntities())
+            {
+                var usuario = db.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idUsuario);
+
+                if (usuario == null || usuario.IdEstado == 2)
+                {
+                    session.Clear();
+                    session.Abandon();
+
+                    RedirigirLogin(filterContext);
+                }
+            }
+
+            base.OnActionExecuting(filterContext);
+        }
+
+        private void RedirigirLogin(ActionExecutingContext context)
+        {
+
+
+
+            context.Result = new RedirectToRouteResult(
+                new System.Web.Routing.RouteValueDictionary
+                {
+                { "controller", "Home" },
+                { "action", "Login" }
+                });
+        }
+
+    }
+        public class FiltroEstudiante : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {

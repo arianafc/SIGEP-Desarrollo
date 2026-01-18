@@ -15,7 +15,9 @@ namespace SIGEP.Controllers
     {
 
         Utilitarios utilitarios = new Utilitarios();
+        
         [FiltroSesion]
+        [ValidarUsuarioActivo]
         [HttpGet]
         public ActionResult Index()
         {

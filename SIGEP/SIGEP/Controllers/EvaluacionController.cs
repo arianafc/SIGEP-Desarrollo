@@ -10,6 +10,7 @@ using System.Web.UI.WebControls.WebParts;
 namespace SIGEP.Controllers
 {
     [FiltroSesion]
+    [ValidarUsuarioActivo]
     [FiltroUsuarioAdmin]
 
     public class EvaluacionController : Controller

@@ -11,6 +11,7 @@ using System.Web.Mvc;
 namespace TuProyecto.Controllers
 {
     [FiltroSesion]
+    
     public class EmpresaController : Controller
     {
         private SIGEPEntities db = new SIGEPEntities();
@@ -32,6 +33,7 @@ namespace TuProyecto.Controllers
         // Vista principal
         // ===========================
         [FiltroSesion]
+        [ValidarUsuarioActivo]
         [FiltroCoordinador]
         [HttpGet]
         public ActionResult ListaEmpresas()

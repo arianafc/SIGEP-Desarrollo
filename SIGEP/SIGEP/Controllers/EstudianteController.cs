@@ -13,6 +13,7 @@ using System.Web.Mvc;
 namespace SIGEP.Controllers
 {
     [FiltroSesion]
+    [ValidarUsuarioActivo]
     [FiltroUsuarioAdmin]
     public class EstudianteController : Controller
     {

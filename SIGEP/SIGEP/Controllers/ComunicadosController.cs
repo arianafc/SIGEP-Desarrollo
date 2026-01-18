@@ -19,6 +19,7 @@ namespace Sigep.UI.Controllers
         private readonly SIGEPEntities db = new SIGEPEntities();
 
         [FiltroSesion]
+        [ValidarUsuarioActivo]
         [HttpGet]
         public ActionResult Comunicados()
         {

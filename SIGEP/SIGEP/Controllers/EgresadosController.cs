@@ -17,6 +17,7 @@ namespace SIGEP.Controllers
 
 
         [FiltroSesion]
+        [ValidarUsuarioActivo]
         [FiltroCoordinador]
         [HttpGet]
         public ActionResult ListaEgresados()
@@ -108,6 +109,7 @@ namespace SIGEP.Controllers
 
 
         [FiltroSesion]
+        [ValidarUsuarioActivo]
         [FiltroCoordinador]
         [HttpGet]
 

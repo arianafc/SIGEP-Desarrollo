@@ -18,7 +18,7 @@ using System.Web.Mvc;
 namespace SIGEP.Controllers
 {
     [FiltroSesion]
-
+    [ValidarUsuarioActivo]
     public class PracticasController : Controller
     {
 
