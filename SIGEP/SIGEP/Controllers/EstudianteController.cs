@@ -592,7 +592,7 @@ namespace SIGEP.Controllers
                     return Json(new { success = false, message = "Solo se permite cambiar a Rezagado o Aprobado." });
 
               
-                usuario.IdEstado = nuevoEstadoId;
+               
                 usuario.EstadoAcademico = (desc == "aprobada");
                 db.SaveChanges();
 
