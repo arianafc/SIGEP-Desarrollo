@@ -86,6 +86,16 @@ namespace TuProyecto.Controllers
             if (!ModelState.IsValid)
                 return Json(new { ok = false, msg = "Datos incompletos." });
 
+            // Validar nombre duplicado
+            var nombreNormalizado = vm.NombreEmpresa.Trim().ToLower();
+            var nombres = await db.EmpresasTB
+                .Select(e => e.NombreEmpresa)
+                .ToListAsync();
+            var existe = nombres.Any(n => n != null && n.Trim().ToLower() == nombreNormalizado);
+
+            if (existe)
+                return Json(new { ok = false, msg = $"Ya existe una empresa registrada con el nombre '{vm.NombreEmpresa.Trim()}'." });
+
             try
             {
                 var activoId = await GetEstadoIdAsync("Activo", 1);
@@ -167,46 +177,54 @@ namespace TuProyecto.Controllers
             return Json(new { ok = true, data = emp }, JsonRequestBehavior.AllowGet);
         }
 
-        // ===========================
-        // Editar
-        // ===========================
         [HttpPost]
         public async Task<JsonResult> EditarEmpresa(EmpresaEditVM vm)
         {
-            try { 
-            if (!ModelState.IsValid || vm.IdEmpresa <= 0)
-                return Json(new { ok = false, msg = "Datos inválidos." });
+            try
+            {
+                if (!ModelState.IsValid || vm.IdEmpresa <= 0)
+                    return Json(new { ok = false, msg = "Datos inválidos." });
 
                 var emp = await db.EmpresasTB.FindAsync(vm.IdEmpresa);
-             
+
                 if (emp == null) return Json(new { ok = false, msg = "No existe." });
+
+                // Validar nombre duplicado excluyendo la empresa actual
+                var nombreNormalizado = vm.NombreEmpresa.Trim().ToLower();
+                var nombres = await db.EmpresasTB
+                    .Where(e => e.IdEmpresa != vm.IdEmpresa)
+                    .Select(e => e.NombreEmpresa)
+                    .ToListAsync();
+                var existe = nombres.Any(n => n != null && n.Trim().ToLower() == nombreNormalizado);
+
+                if (existe)
+                    return Json(new { ok = false, msg = $"Ya existe otra empresa registrada con el nombre '{vm.NombreEmpresa.Trim()}'." });
 
                 var IdDireccion = 0;
 
                 if (emp.IdDireccion != null)
                 {
-                     IdDireccion = (int)emp.IdDireccion;
-                } else
+                    IdDireccion = (int)emp.IdDireccion;
+                }
+                else
                 {
                     IdDireccion = 0;
                 }
 
-                    int idDireccion = utilitarios.ObtenerOCrearDireccion(
-                           db,
-                          vm.Provincia,
-                          vm.Canton,
-                         vm.Distrito,
-                         vm.Direccion,
-                         IdDireccion
-                       );
+                int idDireccion = utilitarios.ObtenerOCrearDireccion(
+                       db,
+                       vm.Provincia,
+                       vm.Canton,
+                       vm.Distrito,
+                       vm.Direccion,
+                       IdDireccion
+                   );
 
-                // Empresa
                 emp.NombreEmpresa = vm.NombreEmpresa;
                 emp.NombreContacto = vm.NombreContacto;
                 emp.AreasAfines = vm.Areas;
                 emp.IdDireccion = idDireccion;
 
-                // Email (uno principal)
                 var email = await db.EmailsTB.FirstOrDefaultAsync(x => x.IdEmpresa == emp.IdEmpresa);
                 if (string.IsNullOrWhiteSpace(vm.Email))
                 {
@@ -220,7 +238,6 @@ namespace TuProyecto.Controllers
                         email.Email = vm.Email;
                 }
 
-                // Teléfono (uno principal)
                 var tel = await db.TelefonosTB.FirstOrDefaultAsync(x => x.IdEmpresa == emp.IdEmpresa);
                 if (string.IsNullOrWhiteSpace(vm.Telefono))
                 {
@@ -247,6 +264,33 @@ namespace TuProyecto.Controllers
         // ===========================
         // Eliminar (soft delete + cancelar vacantes de esa empresa)
         // ===========================
+        //[HttpPost]
+        //public async Task<JsonResult> EliminarEmpresa(int id)
+        //{
+        //    try
+        //    {
+        //        var emp = await db.EmpresasTB.FindAsync(id);
+        //        if (emp == null) return Json(new { ok = false, msg = "No existe." });
+
+        //        var inactivoId = await GetEstadoIdAsync("Inactivo", 2);
+        //        var canceladoId = await GetEstadoIdAsync("Cancelado", 3);
+
+        //        emp.IdEstado = inactivoId;
+
+        //        // Cancelar vacantes asociadas (si aplica)
+        //        var vacs = await db.VacantesPracticasTB.Where(v => v.IdEmpresa == id).ToListAsync();
+        //        foreach (var v in vacs) v.IdEstado = canceladoId;
+
+        //        await db.SaveChangesAsync();
+        //        return Json(new { ok = true, msg = "Empresa eliminada (inactiva) y vacantes canceladas." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { ok = false, msg = ex.Message });
+        //    }
+        //}
+
+        //se elimina empresa solo si no tiene vacantes en estado Activo (1) o Archivado (10), de lo contrario no se elimina, y no deberia afectar la vista de practicas
         [HttpPost]
         public async Task<JsonResult> EliminarEmpresa(int id)
         {
@@ -255,17 +299,18 @@ namespace TuProyecto.Controllers
                 var emp = await db.EmpresasTB.FindAsync(id);
                 if (emp == null) return Json(new { ok = false, msg = "No existe." });
 
-                var inactivoId = await GetEstadoIdAsync("Inactivo", 2);
-                var canceladoId = await GetEstadoIdAsync("Cancelado", 3);
+                // Bloquear si tiene vacantes en estado Activo (1) o Archivado (10)
+                var tieneVacantes = await db.VacantesPracticasTB
+                    .AnyAsync(v => v.IdEmpresa == id && (v.IdEstado == 1 || v.IdEstado == 10));
 
+                if (tieneVacantes)
+                    return Json(new { ok = false, msg = "No se puede eliminar la empresa porque tiene vacantes asociadas. Debe eliminar primero las vacantes vinculadas." });
+
+                var inactivoId = await GetEstadoIdAsync("Inactivo", 2);
                 emp.IdEstado = inactivoId;
 
-                // Cancelar vacantes asociadas (si aplica)
-                var vacs = await db.VacantesPracticasTB.Where(v => v.IdEmpresa == id).ToListAsync();
-                foreach (var v in vacs) v.IdEstado = canceladoId;
-
                 await db.SaveChangesAsync();
-                return Json(new { ok = true, msg = "Empresa eliminada (inactiva) y vacantes canceladas." });
+                return Json(new { ok = true, msg = "Empresa eliminada correctamente." });
             }
             catch (Exception ex)
             {

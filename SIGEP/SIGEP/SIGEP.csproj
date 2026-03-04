@@ -468,6 +468,7 @@
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff" />
     <Content Include="Content\icons\weather-icons\fonts\weathericons-regular-webfont.woff2" />
     <Content Include="Content\Direcciones\provincias_cantones_distritos_costa_rica.json" />
+    <Content Include="Documentos\Comunicados\Comunicado25.pdf" />
     <EntityDeploy Include="EF\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
@@ -481,6 +482,8 @@
     <Content Include="Scripts\Direcciones\Direcciones.js" />
     <Content Include="Scripts\Egresados\BolsaEmpleo.js" />
     <Content Include="Scripts\Egresados\ListaEgresados.js" />
+    <Content Include="Scripts\Empresas\Empresas.js" />
+    <Content Include="Scripts\Empresa\ListaEmpresas.js" />
     <Content Include="Scripts\Estudiantes\ListaEstudiantes.js" />
     <Content Include="Scripts\Evaluacion\Evaluacion.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />

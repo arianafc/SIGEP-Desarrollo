@@ -56,7 +56,14 @@
 
         if (!payload.NombreEmpresa) errores.push("Debe ingresar el nombre de la empresa.");
         if (!payload.NombreContacto) errores.push("Debe ingresar el nombre del contacto.");
-        if (!payload.Email) errores.push("Debe ingresar el correo electrónico.");
+        if (!payload.Email) {
+            errores.push("Debe ingresar el correo electrónico.");
+        } else {
+            const regexEmail = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+            if (!regexEmail.test(payload.Email)) {
+                errores.push("El correo electrónico no es válido (ej: correo@empresa.com).");
+            }
+        }
         if (!payload.Telefono) {
             errores.push("Debe ingresar el teléfono.");
         } else {
@@ -201,7 +208,14 @@
 
         if (!payload.NombreEmpresa) errores.push("Debe ingresar el nombre de la empresa.");
         if (!payload.NombreContacto) errores.push("Debe ingresar el nombre del contacto.");
-        if (!payload.Email) errores.push("Debe ingresar el correo electrónico.");
+        if (!payload.Email) {
+            errores.push("Debe ingresar el correo electrónico.");
+        } else {
+            const regexEmail = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+            if (!regexEmail.test(payload.Email)) {
+                errores.push("El correo electrónico no es válido (ej: correo@empresa.com).");
+            }
+        }
 
         if (!payload.Telefono) {
             errores.push("Debe ingresar el teléfono.");
