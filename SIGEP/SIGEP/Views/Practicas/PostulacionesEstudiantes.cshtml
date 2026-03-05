@@ -75,7 +75,15 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Teléfono <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" name="telefono" required />
+                            <input type="tel"
+                                   class="form-control"
+                                   name="telefono"
+                                   id="inputTelefono"
+                                   placeholder="Ej: 88001234"
+                                   maxlength="8"
+                                   pattern="[0-9]{8}"
+                                   title="Debe contener exactamente 8 dígitos numéricos"
+                                   required />
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Provincia <span class="text-danger">*</span></label>

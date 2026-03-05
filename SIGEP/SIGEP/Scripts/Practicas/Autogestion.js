@@ -32,6 +32,30 @@
         }
     }
 
+
+    // Bloquear letras en campo teléfono
+    const inputTel = document.querySelector('[name="telefono"]');
+    if (inputTel) {
+        inputTel.setAttribute('maxlength', '8');
+
+        inputTel.addEventListener('keydown', function (e) {
+            const teclaPermitida = /^[0-9]$/.test(e.key) ||
+                ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key);
+            if (!teclaPermitida) e.preventDefault();
+        });
+
+        inputTel.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
+        });
+
+        inputTel.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const texto = (e.clipboardData || window.clipboardData).getData('text');
+            const soloNumeros = texto.replace(/[^0-9]/g, '').slice(0, 8);
+            this.value = soloNumeros;
+        });
+    }
+
     // Función para registrar práctica autogestionada
     window.registrarPostulacion = function () {
         const form = document.getElementById("formAutogestion");
@@ -83,6 +107,30 @@
                 icon: 'warning',
                 title: 'Distrito requerido',
                 text: 'Debe seleccionar un distrito',
+                confirmButtonColor: '#2D594D'
+            });
+            return;
+        }
+
+        // Validar teléfono exactamente 8 dígitos numéricos
+        const telefonoValor = form.querySelector('[name="telefono"]').value.trim();
+        if (!/^[0-9]{8}$/.test(telefonoValor)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Teléfono inválido',
+                text: 'El teléfono debe contener exactamente 8 dígitos numéricos.',
+                confirmButtonColor: '#2D594D'
+            });
+            return;
+        }
+
+        //Validar formato de correo electrónico
+        const correoValor = form.querySelector('[name="correo"]').value.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoValor)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Correo inválido',
+                text: 'Ingresá un correo electrónico válido (Ej: nombre@empresa.com).',
                 confirmButtonColor: '#2D594D'
             });
             return;

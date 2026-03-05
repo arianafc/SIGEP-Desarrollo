@@ -1848,6 +1848,7 @@ namespace SIGEP.Controllers
             }
         }
 
+
         // Visualización de la postulación
 
 
@@ -1944,6 +1945,28 @@ namespace SIGEP.Controllers
                     if (especialidadEstudiante == 0)
                     {
                         return Json(new { success = false, message = "El estudiante no tiene una especialidad asignada" });
+                    }
+
+                    //validar empresa duplicada SOLO para este estudiante
+                    var nombreEmpresaNorm = model.NombreEmpresa.Trim().ToLower();
+
+                    bool empresaDuplicada = (
+                        from p in dbContext.PracticaEstudianteTB
+                        join v in dbContext.VacantesPracticasTB on p.IdVacante equals v.IdVacante
+                        join e in dbContext.EmpresasTB on v.IdEmpresa equals e.IdEmpresa
+                        where p.IdUsuario == idUsuario
+                           && v.Tipo == "Autogestionada"
+                        select e.NombreEmpresa
+                    ).ToList()
+                     .Any(nombre => nombre != null && nombre.Trim().ToLower() == nombreEmpresaNorm);
+
+                    if (empresaDuplicada)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"Ya tenés una práctica autogestionada registrada con la empresa '{model.NombreEmpresa.Trim()}'. No podés registrar la misma empresa dos veces."
+                        });
                     }
 
                     var modalidad = dbContext.ModalidadesTB.FirstOrDefault(m => m.IdModalidad == model.IdModalidad);

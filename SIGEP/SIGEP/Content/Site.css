@@ -356,8 +356,9 @@
 
 /* Retirada */
 .badge-retirada {
-    background-color: #f5c6cb; /* rosado más fuerte */
-    color: #721c24;
+    background-color: #f5c6cb /* rosado más fuerte */
+    !important;
+    color: #721c24 !important;
     font-size: 14px;
     font-weight: bold;
 }
