@@ -277,6 +277,7 @@
 
     <!-- JQUERY -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="~/Scripts/Utilitarios/common-helpers.js"></script>
 
     <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -306,7 +307,7 @@
 
     @RenderSection("Scripts", required: false)
 
-<script>
+    <script>
   @if (TempData["SwalError"] != null)
   {
       <text>
@@ -319,7 +320,7 @@
           });
       </text>
   }
-    
+
   @if (TempData["SwalSuccess"] != null)
   {
       <text>
@@ -340,7 +341,7 @@
         }
     });
 
-</script>
-  
+    </script>
+
 </body>
 </html>

@@ -214,12 +214,12 @@ function llenarModalPerfil(perfil) {
         var estadoNormalizado = normalizarEstado(estadoActual);
         var claseBadge = obtenerClaseBadge(estadoNormalizado);
 
-        var urlVisualizacion = '/Practicas/VisualizacionPostulacion?idVacante=' + perfil.IdVacante + '&idUsuario=' + perfil.IdUsuario;
 
         practicaContainer.html(`
             <div class="col-md-12">
-                <a href="${urlVisualizacion}" 
-                   class="d-flex justify-content-between align-items-center p-3 text-decoration-none"
+                <a href="#"
+                           onclick="irAVisualizacion(${perfil.IdVacante}, ${perfil.IdUsuario}); return false;"
+                           class="d-flex justify-content-between align-items-center p-3 text-decoration-none"
                    style="background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #2D594D; color: #2D594D;">
                     <span style="font-weight: 600;">${perfil.NombreEmpresa}</span>
                     <span class="badge ${claseBadge}">${estadoActual}</span>

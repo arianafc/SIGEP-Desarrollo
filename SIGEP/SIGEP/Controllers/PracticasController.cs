@@ -1001,13 +1001,59 @@ namespace SIGEP.Controllers
         }
 
         [HttpGet]
-        public ActionResult VisualizacionPostulacion(int idVacante, int idUsuario)
+        public ActionResult VisualizacionPostulacion(int? idVacante = null, int? idUsuario = null)
         {
+            // Si no vienen parámetros, intentar obtenerlos de sessionStorage vía JavaScript
+            // El JavaScript los enviará automáticamente
+
+            if (Session["IdUsuario"] == null || Session["IdRol"] == null)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            if (!idVacante.HasValue || !idUsuario.HasValue)
+            {
+                // En lugar de redirigir, mostrar la vista vacía
+                // El JavaScript se encargará de enviar los parámetros
+                return View(new VacantePracticaVM());
+            }
+
+            int usuarioActualId = Convert.ToInt32(Session["IdUsuario"]);
+            int rol = Convert.ToInt32(Session["IdRol"]);
+
+            if (rol == 4 && idUsuario.Value != usuarioActualId)
+            {
+                TempData["Error"] = "No tienes permiso para ver esta información.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (rol == 3)
+            {
+                using (var db = new SIGEPEntities())
+                {
+                    var especialidadesProfesor = db.UsuarioEspecialidadTB
+                        .Where(ue => ue.IdUsuario == usuarioActualId && ue.IdEstado == 1)
+                        .Select(ue => ue.IdEspecialidad)
+                        .ToList();
+
+                    var especialidadEstudiante = db.UsuarioEspecialidadTB
+                        .Where(ue => ue.IdUsuario == idUsuario.Value && ue.IdEstado == 1)
+                        .Select(ue => ue.IdEspecialidad)
+                        .FirstOrDefault();
+
+                    if (especialidadesProfesor.Any() && !especialidadesProfesor.Contains(especialidadEstudiante))
+                    {
+                        TempData["Error"] = "No tienes permiso para ver este estudiante.";
+                        return RedirectToAction("VistaVacantesProfesor");
+                    }
+                }
+            }
+
             try
             {
                 using (var dbContext = new SIGEPEntities())
                 {
-                    var datosPractica = dbContext.ObtenerVisualizacionPracticaSP(idVacante, idUsuario).FirstOrDefault();
+                    var datosPractica = dbContext.ObtenerVisualizacionPracticaSP(idVacante.Value, idUsuario.Value).FirstOrDefault();
 
                     if (datosPractica == null)
                     {
@@ -1056,7 +1102,7 @@ namespace SIGEP.Controllers
                             }).ToList()
                     };
 
-                    var comentarios = dbContext.ObtenerComentariosPracticaSP(idVacante, idUsuario)
+                    var comentarios = dbContext.ObtenerComentariosPracticaSP(idVacante.Value, idUsuario.Value)
                         .Select(c => new ComentarioVM
                         {
                             Id = c.Id,
