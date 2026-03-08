@@ -349,4 +349,34 @@ else
 
 @section scripts {
     <script src="~/Scripts/Practicas/ScriptPracticas.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Solo limpiar la URL después de cargar
+            if (window.location.search) {
+                // Guardar en sessionStorage por si hace refresh
+                var urlParams = new URLSearchParams(window.location.search);
+                var idVacante = urlParams.get('idVacante');
+                var idUsuario = urlParams.get('idUsuario');
+
+                if (idVacante && idUsuario) {
+                    sessionStorage.setItem('visuPostulacion_idVacante', idVacante);
+                    sessionStorage.setItem('visuPostulacion_idUsuario', idUsuario);
+                }
+
+                history.replaceState(null, '', window.location.pathname);
+            }
+
+            // Si hace refresh y no hay parámetros, recargar con ellos
+            if (!window.location.search) {
+                var datos = obtenerDatosVisualizacion();
+                if (datos && !@(Model.IdVacante > 0 ? "true" : "false")) {
+                    // Si el modelo está vacío pero hay datos en sessionStorage, recargar
+                    window.location.href = window.location.pathname +
+                        '?idVacante=' + datos.idVacante +
+                        '&idUsuario=' + datos.idUsuario;
+                }
+            }
+        });
+    </script>
 }
