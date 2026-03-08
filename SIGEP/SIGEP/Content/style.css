@@ -7486,10 +7486,10 @@ html[dir="ltr"] body .p-l-0 {
       left: 0; }
     #main-wrapper[data-layout="vertical"][data-sidebar-position="fixed"] .topbar .top-navbar .navbar-collapse {
       position: relative;
-      top: 64px; }
+      top: 34px; }
     #main-wrapper[data-layout="vertical"][data-header-position="fixed"][data-sidebar-position="fixed"] .topbar .top-navbar .navbar-collapse {
       position: relative;
-      top: 64px; }
+      top: 34px; }
   .left-part {
     left: -260px;
     background: #f2f4f5;

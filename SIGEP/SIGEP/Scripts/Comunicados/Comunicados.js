@@ -89,7 +89,23 @@
         formData.append("DirigidoA", $("#DirigidoAComunicado").val());
 
         let files = $("#ArchivoDoc")[0].files;
+        let extensionesPermitidas = ["pdf", "xls", "xlsx"];
+
         for (let i = 0; i < files.length; i++) {
+
+            let nombreArchivo = files[i].name;
+            let extension = nombreArchivo.split('.').pop().toLowerCase();
+
+            if (!extensionesPermitidas.includes(extension)) {
+                Swal.fire({
+                    title: 'Archivo no permitido',
+                    text: "Solo se permiten archivos PDF, XLS o XLSX.",
+                    icon: 'error',
+                    confirmButtonColor: '#2D594D'
+                });
+                return;
+            }
+
             formData.append("archivos", files[i]);
         }
 
@@ -176,7 +192,10 @@
         const publicadoPor = $(this).data("publicado");
         const dirigido = $(this).data("dirigido");
 
-        $(document).on("click", ".btnActualizarComunicado", function () {
+    });
+        
+
+    $(document).on("click", ".btnActualizarComunicado", function () {
             const id = $("#IdComunicadoEditar").val(); // asegúrate de tener este input hidden en el modal
             const tituloEditado = $("#TituloComunicadoEditar").val().trim();
             const descripcionEditada = $("#DescripcionComunicadoEditar").val().trim();
@@ -192,9 +211,25 @@
 
 
             let files = $("#ArchivoDocEditar")[0].files;
+            let extensionesPermitidas = ["pdf", "xls", "xlsx"];
+
             for (let i = 0; i < files.length; i++) {
+
+                let nombreArchivo = files[i].name;
+                let extension = nombreArchivo.split('.').pop().toLowerCase();
+
+                if (!extensionesPermitidas.includes(extension)) {
+                    Swal.fire({
+                        title: "Archivo no permitido",
+                        text: "Solo se permiten archivos PDF, XLS o XLSX.",
+                        icon: "error",
+                        confirmButtonColor: "#2D594D"
+                    });
+                    return;
+                }
+
                 formData.append("archivos", files[i]);
-            }
+            } 
 
 
             Swal.fire({
@@ -280,8 +315,6 @@
                 }
             });
         });
-
-
 
         // Llenar los datos del modal principal
         $("#modalComunicadoUnicoLabel").text(titulo);

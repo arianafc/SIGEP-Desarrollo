@@ -111,12 +111,19 @@ namespace Sigep.UI.Controllers
                     {
                         if (archivo != null && archivo.ContentLength > 0)
                         {
-                            string ext = Path.GetExtension(archivo.FileName);
+                            string ext = Path.GetExtension(archivo.FileName).ToLower();
+
+                            string[] extensionesPermitidas = { ".pdf", ".xls", ".xlsx" };
+
+                            if (!extensionesPermitidas.Contains(ext))
+                            {
+                                return Json(new { ok = false, msg = "Solo se permiten archivos PDF, XLS o XLSX." });
+                            }
+
                             string nombreArchivo = $"Comunicado{nuevo.IdComunicado}{ext}";
                             string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivo);
 
                             archivo.SaveAs(rutaCompleta);
-
                             var doc = new DocumentosTB
                             {
                                 Documento = nombreArchivo,
@@ -186,7 +193,15 @@ namespace Sigep.UI.Controllers
                         {
                             if (archivo != null && archivo.ContentLength > 0)
                             {
-                                string ext = Path.GetExtension(archivo.FileName);
+                                string ext = Path.GetExtension(archivo.FileName).ToLower();
+
+                                string[] extensionesPermitidas = { ".pdf", ".xls", ".xlsx" };
+
+                                if (!extensionesPermitidas.Contains(ext))
+                                {
+                                    return Json(new { ok = false, msg = "Solo se permiten archivos PDF, XLS o XLSX." });
+                                }
+
                                 string nombreArchivoBase = $"Comunicado{comunicado.IdComunicado}{ext}";
                                 string rutaCompleta = Path.Combine(carpetaDestino, nombreArchivoBase);
 

@@ -1,12 +1,12 @@
 ﻿$(function () {
 
-    $("#btnActualizarAcademica").on("click", function (e) {
+    $("#btnActualizarInfoAcademica").on("click", function (e) {
         e.preventDefault(); 
 
      
-        let carrera = $("#Carrera").val().trim();
-        let anno = $("#AnnoGraduacion").val().trim();
-        let titulo = $("#TituloObtenido").val().trim();
+        let carrera = ($("#Carrera").val() || "").trim();
+        let anno = ($("#AnnoGraduacion").val() || "").trim();
+        let titulo = ($("#TituloObtenido").val() || "").trim();
 
        
         if (carrera === "" || anno === "" || titulo === "") {
@@ -751,6 +751,8 @@ $('#ActualizarPerfil').on('submit', function (e) {
     let correo = $('#CorreoPersonalPerfil').val().trim();
     let direccion = $('#DireccionPerfil').val().trim();
 
+    
+
     // Validar campos vacíos
     if (!nombre || !apellido1 || !apellido2 || !cedula || !telefono ||
         !correo || !direccion) {
@@ -781,6 +783,50 @@ $('#ActualizarPerfil').on('submit', function (e) {
         Swal.fire('Error', 'Ingrese un número de teléfono válido (8 dígitos).', 'error');
         return;
     }
+
+
+    const regexCedula = /^[0-9]+$/;
+
+    if (!regexCedula.test(cedula)) {
+        Swal.fire({
+            icon: "error",
+            title: "Cédula inválida",
+            text: "La cédula solo puede contener números."
+        });
+        return;
+    }
+
+    const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+    if (!regexNombre.test(nombre)) {
+        Swal.fire({
+            icon: "error",
+            title: "Nombre inválido",
+            text: "El nombre solo puede contener letras."
+        });
+        return;
+    }
+
+    if (!regexNombre.test(apellido1)) {
+        Swal.fire({
+            icon: "error",
+            title: "Apellido inválido",
+            text: "El primer apellido solo puede contener letras."
+        });
+        return;
+    }
+
+    if (!regexNombre.test(apellido2)) {
+        Swal.fire({
+            icon: "error",
+            title: "Apellido inválido",
+            text: "El segundo apellido solo puede contener letras."
+        });
+        return;
+    }
+
+
+
     // Confirmación antes de enviar
     Swal.fire({
         title: '¿Desea actualizar su información?',

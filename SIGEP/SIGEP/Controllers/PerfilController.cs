@@ -14,10 +14,11 @@ using System.Xml.Linq;
 namespace SIGEP.Controllers
 {
     [ValidarUsuarioActivo]
+    [FiltroSesion]
     public class PerfilController : Controller
     {
 
-        [FiltroSesion]
+        
      
         [HttpGet]
      
@@ -269,8 +270,11 @@ namespace SIGEP.Controllers
                         else if (IdRol == 1)
                         {
                             var EsEncargado = dbContext.EncargadosTB.FirstOrDefault(u => u.Cedula == usuario.Cedula);
-                            TempData["SwalError"] = "Error: La cédula indicada se encuentra asociada a un encargado";
-                            return Redirect("MiPerfil");
+                            if(EsEncargado!= null)
+                            {
+                                TempData["SwalError"] = "Error: La cédula indicada se encuentra asociada a un encargado";
+                                return Redirect("MiPerfil");
+                            }
                         }
                         usuarioToUpdate.Cedula = usuario.Cedula;
                         Session["cedula"] = usuario.Cedula;
