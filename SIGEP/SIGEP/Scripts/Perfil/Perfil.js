@@ -750,11 +750,14 @@ $('#ActualizarPerfil').on('submit', function (e) {
     let telefono = $('#TelefonoPerfil').val().trim();
     let correo = $('#CorreoPersonalPerfil').val().trim();
     let direccion = $('#DireccionPerfil').val().trim();
+    let nacionalidad = $('#NacionalidadPerfil').val().trim();
+    let sexo = $('#SexoPerfil').val().trim();
+   
 
     
 
     // Validar campos vacíos
-    if (!nombre || !apellido1 || !apellido2 || !cedula || !telefono ||
+    if (!nombre || !apellido1 || !apellido2 || !cedula || !telefono || !nacionalidad || !sexo || 
         !correo || !direccion) {
         Swal.fire({
             icon: 'warning',

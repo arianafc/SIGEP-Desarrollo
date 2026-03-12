@@ -243,106 +243,180 @@ namespace SIGEP.Controllers
             }
         }
 
-
         [HttpPost]
         public ActionResult ActualizarPerfil(UsuarioModel usuario)
         {
             var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
             var IdRol = Convert.ToInt32(Session["IdRol"]);
+
             using (var dbContext = new SIGEPEntities())
             {
                 var usuarioToUpdate = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == IdUsuario);
-                if (usuarioToUpdate != null)
-                {
-                    // ===============================
-                    // Validar cédula
-                    // ===============================
-                    if (usuarioToUpdate.Cedula != usuario.Cedula)
-                    {
-                        var cedulaExistente = dbContext.UsuariosTB
-                            .FirstOrDefault(u => u.Cedula == usuario.Cedula && u.IdUsuario != IdUsuario);
 
-                        if (cedulaExistente != null)
+                if (usuarioToUpdate == null)
+                {
+                    TempData["SwalError"] = "Usuario no encontrado.";
+                    return Redirect("MiPerfil");
+                }
+
+                // ===============================
+                // Validar cédula
+                // ===============================
+                if (usuarioToUpdate.Cedula != usuario.Cedula)
+                {
+                    var cedulaExistente = dbContext.UsuariosTB
+                        .FirstOrDefault(u => u.Cedula == usuario.Cedula && u.IdUsuario != IdUsuario);
+
+                    if (cedulaExistente != null)
+                    {
+                        TempData["SwalError"] = "La cédula ya está en uso por otro usuario.";
+                        return Redirect("MiPerfil");
+                    }
+
+                    if (IdRol == 1)
+                    {
+                        var esEncargado = dbContext.EncargadosTB
+                            .FirstOrDefault(u => u.Cedula == usuario.Cedula);
+
+                        if (esEncargado != null)
                         {
-                            TempData["SwalError"] = "La cédula ya está en uso por otro usuario.";
+                            TempData["SwalError"] = "Error: La cédula indicada se encuentra asociada a un encargado";
                             return Redirect("MiPerfil");
                         }
-                        else if (IdRol == 1)
-                        {
-                            var EsEncargado = dbContext.EncargadosTB.FirstOrDefault(u => u.Cedula == usuario.Cedula);
-                            if(EsEncargado!= null)
-                            {
-                                TempData["SwalError"] = "Error: La cédula indicada se encuentra asociada a un encargado";
-                                return Redirect("MiPerfil");
-                            }
-                        }
-                        usuarioToUpdate.Cedula = usuario.Cedula;
-                        Session["cedula"] = usuario.Cedula;
                     }
 
-                    // ===============================
-                    // Actualizaciones básicas
-                    // ===============================
-                    usuarioToUpdate.Nombre = usuario.Nombre;
-                    usuarioToUpdate.Apellido1 = usuario.Apellido1;
-                    usuarioToUpdate.Apellido2 = usuario.Apellido2;
-                    usuarioToUpdate.Nacionalidad = usuario.Nacionalidad;
-                    usuarioToUpdate.Sexo = usuario.Sexo;
+                    usuarioToUpdate.Cedula = usuario.Cedula;
+                    Session["cedula"] = usuario.Cedula;
+                }
 
-                    // ===============================
-                    // Correos
-                    // ===============================
+                // ===============================
+                // Datos básicos
+                // ===============================
+                usuarioToUpdate.Nombre = usuario.Nombre;
+                usuarioToUpdate.Apellido1 = usuario.Apellido1;
+                usuarioToUpdate.Apellido2 = usuario.Apellido2;
+                usuarioToUpdate.Nacionalidad = usuario.Nacionalidad;
+                usuarioToUpdate.Sexo = usuario.Sexo;
+
+                // ===============================
+                // Correos
+                // ===============================
+                if (!string.IsNullOrWhiteSpace(usuario.CorreoPersonal))
+                {
                     var correoPersonal = dbContext.EmailsTB
-                        .FirstOrDefault(e => e.IdUsuario == IdUsuario && !e.Email.ToLower().Contains("@mep.go.cr"));
+                        .FirstOrDefault(e => e.IdUsuario == IdUsuario && !e.Email.Contains("@mep.go.cr"));
+
                     if (correoPersonal != null)
                         correoPersonal.Email = usuario.CorreoPersonal;
-                    else if (!string.IsNullOrEmpty(usuario.CorreoPersonal))
+                    else
                         dbContext.EmailsTB.Add(new EmailsTB { IdUsuario = IdUsuario, Email = usuario.CorreoPersonal });
-                    if (IdRol != 4)
+                }
+
+                if (IdRol != 4)
+                {
+                    var correoMEP = dbContext.EmailsTB
+                        .FirstOrDefault(e => e.IdUsuario == IdUsuario && e.Email.ToLower().Contains("@mep.go.cr"));
+
+                    if (string.IsNullOrWhiteSpace(usuario.CorreoMEP))
                     {
-                        var correoMEP = dbContext.EmailsTB
-                       .FirstOrDefault(e => e.IdUsuario == IdUsuario && e.Email.ToLower().Contains("@mep.go.cr"));
+                    
+                        if (correoMEP != null)
+                            dbContext.EmailsTB.Remove(correoMEP);
+                    }
+                    else
+                    {
+                        
                         if (correoMEP != null)
                             correoMEP.Email = usuario.CorreoMEP;
-                        else if (!string.IsNullOrEmpty(usuario.CorreoMEP))
+                        else
                             dbContext.EmailsTB.Add(new EmailsTB { IdUsuario = IdUsuario, Email = usuario.CorreoMEP });
                     }
+                }
 
-
-                    // ===============================
-                    // Teléfono
-                    // ===============================
+                // ===============================
+                // Teléfono
+                // ===============================
+                if (!string.IsNullOrWhiteSpace(usuario.Telefono))
+                {
                     var telefono = dbContext.TelefonosTB.FirstOrDefault(t => t.IdUsuario == IdUsuario);
+
                     if (telefono != null)
                         telefono.Telefono = usuario.Telefono;
-                    else if (!string.IsNullOrEmpty(usuario.Telefono))
+                    else
                         dbContext.TelefonosTB.Add(new TelefonosTB { IdUsuario = IdUsuario, Telefono = usuario.Telefono });
+                }
 
-                    // ===============================
-                    // Provincias / Cantones / Distritos
-                    // ===============================
-                    var provincia = dbContext.ProvinciasTB.FirstOrDefault(p => p.Nombre == usuario.provincia)
-                                    ?? dbContext.ProvinciasTB.Add(new ProvinciasTB { Nombre = usuario.provincia });
-                    dbContext.SaveChanges();
+                // ===============================
+                // Provincia
+                // ===============================
+                ProvinciasTB provincia = null;
 
-                    var canton = dbContext.CantonesTB
-                        .FirstOrDefault(c => c.Nombre == usuario.canton && c.IdProvincia == provincia.IdProvincia)
-                        ?? dbContext.CantonesTB.Add(new CantonesTB { Nombre = usuario.canton, IdProvincia = provincia.IdProvincia });
-                    dbContext.SaveChanges();
+                if (!string.IsNullOrWhiteSpace(usuario.provincia))
+                {
+                    provincia = dbContext.ProvinciasTB
+                        .FirstOrDefault(p => p.Nombre == usuario.provincia);
 
-                    var distrito = dbContext.DistritosTB
-                        .FirstOrDefault(d => d.Nombre == usuario.distrito && d.IdCanton == canton.IdCanton)
-                        ?? dbContext.DistritosTB.Add(new DistritosTB { Nombre = usuario.distrito, IdCanton = canton.IdCanton });
-                    dbContext.SaveChanges();
+                    if (provincia == null)
+                    {
+                        provincia = new ProvinciasTB { Nombre = usuario.provincia };
+                        dbContext.ProvinciasTB.Add(provincia);
+                    }
+                }
 
-                    // ===============================
-                    // Dirección del usuario
-                    // ===============================
+                // ===============================
+                // Cantón
+                // ===============================
+                CantonesTB canton = null;
+
+                if (provincia != null && !string.IsNullOrWhiteSpace(usuario.canton))
+                {
+                    canton = dbContext.CantonesTB
+                        .FirstOrDefault(c => c.Nombre == usuario.canton && c.IdProvincia == provincia.IdProvincia);
+
+                    if (canton == null)
+                    {
+                        canton = new CantonesTB
+                        {
+                            Nombre = usuario.canton,
+                            IdProvincia = provincia.IdProvincia
+                        };
+                        dbContext.CantonesTB.Add(canton);
+                    }
+                }
+
+                // ===============================
+                // Distrito
+                // ===============================
+                DistritosTB distrito = null;
+
+                if (canton != null && !string.IsNullOrWhiteSpace(usuario.distrito))
+                {
+                    distrito = dbContext.DistritosTB
+                        .FirstOrDefault(d => d.Nombre == usuario.distrito && d.IdCanton == canton.IdCanton);
+
+                    if (distrito == null)
+                    {
+                        distrito = new DistritosTB
+                        {
+                            Nombre = usuario.distrito,
+                            IdCanton = canton.IdCanton
+                        };
+                        dbContext.DistritosTB.Add(distrito);
+                    }
+                }
+
+                // ===============================
+                // Dirección
+                // ===============================
+                if (distrito != null)
+                {
                     DireccionesTB direccion;
+
                     if (usuarioToUpdate.IdDireccion != null)
                     {
-                        // Actualizar dirección existente
-                        direccion = dbContext.DireccionesTB.FirstOrDefault(d => d.IdDireccion == usuarioToUpdate.IdDireccion);
+                        direccion = dbContext.DireccionesTB
+                            .FirstOrDefault(d => d.IdDireccion == usuarioToUpdate.IdDireccion);
+
                         if (direccion != null)
                         {
                             direccion.IdDistrito = distrito.IdDistrito;
@@ -351,28 +425,21 @@ namespace SIGEP.Controllers
                     }
                     else
                     {
-                        // Insertar nueva dirección
                         direccion = new DireccionesTB
                         {
                             IdDistrito = distrito.IdDistrito,
                             DireccionExacta = usuario.DireccionExacta,
                             IdEstado = 1
                         };
-                        dbContext.DireccionesTB.Add(direccion);
-                        dbContext.SaveChanges();
 
-                        // Asignar IdDireccion al usuario
+                        dbContext.DireccionesTB.Add(direccion);
                         usuarioToUpdate.IdDireccion = direccion.IdDireccion;
                     }
-
-                    dbContext.SaveChanges();
-                    TempData["SwalSuccess"] = "Perfil actualizado exitosamente.";
-                }
-                else
-                {
-                    TempData["SwalError"] = "Usuario no encontrado.";
                 }
 
+                dbContext.SaveChanges();
+
+                TempData["SwalSuccess"] = "Perfil actualizado exitosamente.";
                 return Redirect("MiPerfil");
             }
         }
