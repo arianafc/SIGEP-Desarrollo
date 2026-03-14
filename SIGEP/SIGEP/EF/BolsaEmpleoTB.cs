@@ -24,6 +24,7 @@ namespace SIGEP.EF
         public string AreaAfin { get; set; }
         public Nullable<int> IdDireccion { get; set; }
         public Nullable<int> IdModalidad { get; set; }
+        public string NombrePuesto { get; set; }
     
         public virtual DireccionesTB DireccionesTB { get; set; }
         public virtual EstadosTB EstadosTB { get; set; }

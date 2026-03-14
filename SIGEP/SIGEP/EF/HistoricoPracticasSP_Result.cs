@@ -11,22 +11,25 @@ namespace SIGEP.EF
 {
     using System;
     
-    public partial class ObtenerVacantesAsignarSP_Result
+    public partial class HistoricoPracticasSP_Result
     {
+        public int IdPractica { get; set; }
         public int IdVacante { get; set; }
+        public int IdUsuario { get; set; }
+        public string Nombre { get; set; }
+        public string Apellido1 { get; set; }
+        public string Apellido2 { get; set; }
+        public System.DateTime FechaAplicacion { get; set; }
+        public int IdEstado { get; set; }
         public string NombreVacante { get; set; }
-        public string NombreEmpresa { get; set; }
-        public string Especialidad { get; set; }
-        public Nullable<int> NumCupos { get; set; }
-        public Nullable<int> CuposOcupados { get; set; }
-        public Nullable<System.DateTime> FechaCierre { get; set; }
         public string Requerimientos { get; set; }
+        public Nullable<System.DateTime> FechaMaxAplicacion { get; set; }
+        public Nullable<int> NumCupos { get; set; }
+        public Nullable<System.DateTime> FechaCierre { get; set; }
+        public string Descripcion { get; set; }
         public string Tipo { get; set; }
-        public string TipoMensaje { get; set; }
-        public string EstadoPractica { get; set; }
-        public int IdPracticaVacante { get; set; }
-        public int PuedeAsignar { get; set; }
-        public string NombreCompleto { get; set; }
-        public string EstadoAcademicoDescripcion { get; set; }
+        public string Modalidad { get; set; }
+        public Nullable<int> IdEspecialidad { get; set; }
+        public string Especialidad { get; set; }
     }
 }

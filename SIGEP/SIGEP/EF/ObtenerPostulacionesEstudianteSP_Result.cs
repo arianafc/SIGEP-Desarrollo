@@ -21,5 +21,9 @@ namespace SIGEP.EF
         public string EstadoPractica { get; set; }
         public System.DateTime FechaAplicacion { get; set; }
         public Nullable<bool> EsAutogestionada { get; set; }
+        public Nullable<bool> MostrarNotas { get; set; }
+        public Nullable<decimal> Nota1 { get; set; }
+        public Nullable<decimal> Nota2 { get; set; }
+        public Nullable<decimal> NotaFinal { get; set; }
     }
 }

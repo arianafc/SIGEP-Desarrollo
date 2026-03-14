@@ -25,5 +25,6 @@ namespace SIGEP.EF
         public string TelefonoEmpresa { get; set; }
         public Nullable<int> IdVacante { get; set; }
         public Nullable<int> IdUsuario { get; set; }
+        public string EstadoPractica { get; set; }
     }
 }

@@ -36,7 +36,6 @@ namespace SIGEP.EF
         public virtual DbSet<DistritosTB> DistritosTB { get; set; }
         public virtual DbSet<DocumentosTB> DocumentosTB { get; set; }
         public virtual DbSet<EmailsTB> EmailsTB { get; set; }
-        public virtual DbSet<EmpleosTB> EmpleosTB { get; set; }
         public virtual DbSet<EmpresasTB> EmpresasTB { get; set; }
         public virtual DbSet<EncargadosTB> EncargadosTB { get; set; }
         public virtual DbSet<EspecialidadesTB> EspecialidadesTB { get; set; }
@@ -47,6 +46,7 @@ namespace SIGEP.EF
         public virtual DbSet<InformacionLaboralTB> InformacionLaboralTB { get; set; }
         public virtual DbSet<InformacionMedicaTB> InformacionMedicaTB { get; set; }
         public virtual DbSet<ModalidadesTB> ModalidadesTB { get; set; }
+        public virtual DbSet<NotasEstudiantesTB> NotasEstudiantesTB { get; set; }
         public virtual DbSet<PracticaEstudianteTB> PracticaEstudianteTB { get; set; }
         public virtual DbSet<ProvinciasTB> ProvinciasTB { get; set; }
         public virtual DbSet<RolesTB> RolesTB { get; set; }
@@ -55,8 +55,59 @@ namespace SIGEP.EF
         public virtual DbSet<UsuarioEspecialidadTB> UsuarioEspecialidadTB { get; set; }
         public virtual DbSet<UsuariosTB> UsuariosTB { get; set; }
         public virtual DbSet<VacantesPracticasTB> VacantesPracticasTB { get; set; }
-        public virtual DbSet<EstadoTB_Backup> EstadoTB_Backup { get; set; }
-        public virtual DbSet<RolesTB_Backup> RolesTB_Backup { get; set; }
+    
+        public virtual ObjectResult<Nullable<int>> AccionesEncargadoSP(Nullable<int> accion, Nullable<int> idEncargado, string nombre, string telefono, string parentesco, string lugarTrabajo, string ocupacion, string correo, string cedula, string apellido1, string apellido2, Nullable<int> idUsuario)
+        {
+            var accionParameter = accion.HasValue ?
+                new ObjectParameter("Accion", accion) :
+                new ObjectParameter("Accion", typeof(int));
+    
+            var idEncargadoParameter = idEncargado.HasValue ?
+                new ObjectParameter("IdEncargado", idEncargado) :
+                new ObjectParameter("IdEncargado", typeof(int));
+    
+            var nombreParameter = nombre != null ?
+                new ObjectParameter("Nombre", nombre) :
+                new ObjectParameter("Nombre", typeof(string));
+    
+            var telefonoParameter = telefono != null ?
+                new ObjectParameter("Telefono", telefono) :
+                new ObjectParameter("Telefono", typeof(string));
+    
+            var parentescoParameter = parentesco != null ?
+                new ObjectParameter("Parentesco", parentesco) :
+                new ObjectParameter("Parentesco", typeof(string));
+    
+            var lugarTrabajoParameter = lugarTrabajo != null ?
+                new ObjectParameter("LugarTrabajo", lugarTrabajo) :
+                new ObjectParameter("LugarTrabajo", typeof(string));
+    
+            var ocupacionParameter = ocupacion != null ?
+                new ObjectParameter("Ocupacion", ocupacion) :
+                new ObjectParameter("Ocupacion", typeof(string));
+    
+            var correoParameter = correo != null ?
+                new ObjectParameter("Correo", correo) :
+                new ObjectParameter("Correo", typeof(string));
+    
+            var cedulaParameter = cedula != null ?
+                new ObjectParameter("Cedula", cedula) :
+                new ObjectParameter("Cedula", typeof(string));
+    
+            var apellido1Parameter = apellido1 != null ?
+                new ObjectParameter("Apellido1", apellido1) :
+                new ObjectParameter("Apellido1", typeof(string));
+    
+            var apellido2Parameter = apellido2 != null ?
+                new ObjectParameter("Apellido2", apellido2) :
+                new ObjectParameter("Apellido2", typeof(string));
+    
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Nullable<int>>("AccionesEncargadoSP", accionParameter, idEncargadoParameter, nombreParameter, telefonoParameter, parentescoParameter, lugarTrabajoParameter, ocupacionParameter, correoParameter, cedulaParameter, apellido1Parameter, apellido2Parameter, idUsuarioParameter);
+        }
     
         public virtual ObjectResult<ActualizarEstadoPracticaSP_Result> ActualizarEstadoPracticaSP(Nullable<int> idPractica, Nullable<int> idEstado, string comentario, Nullable<int> idUsuarioSesion)
         {
@@ -79,6 +130,19 @@ namespace SIGEP.EF
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ActualizarEstadoPracticaSP_Result>("ActualizarEstadoPracticaSP", idPracticaParameter, idEstadoParameter, comentarioParameter, idUsuarioSesionParameter);
         }
     
+        public virtual ObjectResult<AsignarEstudianteSP_Result> AsignarEstudianteSP(Nullable<int> idVacante, Nullable<int> idUsuario)
+        {
+            var idVacanteParameter = idVacante.HasValue ?
+                new ObjectParameter("IdVacante", idVacante) :
+                new ObjectParameter("IdVacante", typeof(int));
+    
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<AsignarEstudianteSP_Result>("AsignarEstudianteSP", idVacanteParameter, idUsuarioParameter);
+        }
+    
         public virtual int CambiarContrasennaSP(string cEDULA, string nUEVA_CONTRASENNA)
         {
             var cEDULAParameter = cEDULA != null ?
@@ -90,6 +154,54 @@ namespace SIGEP.EF
                 new ObjectParameter("NUEVA_CONTRASENNA", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("CambiarContrasennaSP", cEDULAParameter, nUEVA_CONTRASENNAParameter);
+        }
+    
+        public virtual int FinalizarPracticasSP(Nullable<int> idUsuarioCoordinador)
+        {
+            var idUsuarioCoordinadorParameter = idUsuarioCoordinador.HasValue ?
+                new ObjectParameter("IdUsuarioCoordinador", idUsuarioCoordinador) :
+                new ObjectParameter("IdUsuarioCoordinador", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("FinalizarPracticasSP", idUsuarioCoordinadorParameter);
+        }
+    
+        public virtual ObjectResult<GuardarNotaEstudianteSP_Result> GuardarNotaEstudianteSP(Nullable<int> idUsuario, Nullable<decimal> nota1, Nullable<decimal> nota2, Nullable<decimal> notaFinal, Nullable<int> idProfesor)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            var nota1Parameter = nota1.HasValue ?
+                new ObjectParameter("Nota1", nota1) :
+                new ObjectParameter("Nota1", typeof(decimal));
+    
+            var nota2Parameter = nota2.HasValue ?
+                new ObjectParameter("Nota2", nota2) :
+                new ObjectParameter("Nota2", typeof(decimal));
+    
+            var notaFinalParameter = notaFinal.HasValue ?
+                new ObjectParameter("NotaFinal", notaFinal) :
+                new ObjectParameter("NotaFinal", typeof(decimal));
+    
+            var idProfesorParameter = idProfesor.HasValue ?
+                new ObjectParameter("IdProfesor", idProfesor) :
+                new ObjectParameter("IdProfesor", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GuardarNotaEstudianteSP_Result>("GuardarNotaEstudianteSP", idUsuarioParameter, nota1Parameter, nota2Parameter, notaFinalParameter, idProfesorParameter);
+        }
+    
+        public virtual ObjectResult<HistoricoPracticasSP_Result> HistoricoPracticasSP()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<HistoricoPracticasSP_Result>("HistoricoPracticasSP");
+        }
+    
+        public virtual int IniciarPracticasSP(Nullable<int> idUsuarioCoordinador)
+        {
+            var idUsuarioCoordinadorParameter = idUsuarioCoordinador.HasValue ?
+                new ObjectParameter("IdUsuarioCoordinador", idUsuarioCoordinador) :
+                new ObjectParameter("IdUsuarioCoordinador", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("IniciarPracticasSP", idUsuarioCoordinadorParameter);
         }
     
         public virtual ObjectResult<Nullable<int>> InsertarComentarioPracticaSP(Nullable<int> idVacante, Nullable<int> idUsuario, string comentario, Nullable<int> idUsuarioComentario)
@@ -126,6 +238,20 @@ namespace SIGEP.EF
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<LoginSP_Result>("LoginSP", cEDULAParameter, cONTRASENNAParameter);
         }
     
+        public virtual ObjectResult<ObtenerBolsaEmpleoSP_Result> ObtenerBolsaEmpleoSP()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerBolsaEmpleoSP_Result>("ObtenerBolsaEmpleoSP");
+        }
+    
+        public virtual ObjectResult<ObtenerComentariosEstudianteSP_Result> ObtenerComentariosEstudianteSP(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerComentariosEstudianteSP_Result>("ObtenerComentariosEstudianteSP", idUsuarioParameter);
+        }
+    
         public virtual ObjectResult<ObtenerComentariosPracticaSP_Result> ObtenerComentariosPracticaSP(Nullable<int> idVacante, Nullable<int> idUsuario)
         {
             var idVacanteParameter = idVacante.HasValue ?
@@ -139,6 +265,100 @@ namespace SIGEP.EF
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerComentariosPracticaSP_Result>("ObtenerComentariosPracticaSP", idVacanteParameter, idUsuarioParameter);
         }
     
+        public virtual ObjectResult<ObtenerDocumentosEvaluacionSP_Result> ObtenerDocumentosEvaluacionSP(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerDocumentosEvaluacionSP_Result>("ObtenerDocumentosEvaluacionSP", idUsuarioParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerDocumentosPerfilSP_Result> ObtenerDocumentosPerfilSP(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerDocumentosPerfilSP_Result>("ObtenerDocumentosPerfilSP", idUsuarioParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerEmpresasActivasSP_Result> ObtenerEmpresasActivasSP()
+        {
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerEmpresasActivasSP_Result>("ObtenerEmpresasActivasSP");
+        }
+    
+        public virtual ObjectResult<ObtenerEncargadosUsuarioSP_Result> ObtenerEncargadosUsuarioSP(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerEncargadosUsuarioSP_Result>("ObtenerEncargadosUsuarioSP", idUsuarioParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerEstudiantesAsignarSP_Result> ObtenerEstudiantesAsignarSP(Nullable<int> idVacante, Nullable<int> idUsuarioSesion)
+        {
+            var idVacanteParameter = idVacante.HasValue ?
+                new ObjectParameter("IdVacante", idVacante) :
+                new ObjectParameter("IdVacante", typeof(int));
+    
+            var idUsuarioSesionParameter = idUsuarioSesion.HasValue ?
+                new ObjectParameter("IdUsuarioSesion", idUsuarioSesion) :
+                new ObjectParameter("IdUsuarioSesion", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerEstudiantesAsignarSP_Result>("ObtenerEstudiantesAsignarSP", idVacanteParameter, idUsuarioSesionParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerEstudiantesParaEvaluacionSP_Result> ObtenerEstudiantesParaEvaluacionSP(Nullable<int> idProfesor)
+        {
+            var idProfesorParameter = idProfesor.HasValue ?
+                new ObjectParameter("IdProfesor", idProfesor) :
+                new ObjectParameter("IdProfesor", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerEstudiantesParaEvaluacionSP_Result>("ObtenerEstudiantesParaEvaluacionSP", idProfesorParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerEstudiantesPracticasSP_Result> ObtenerEstudiantesPracticasSP(Nullable<int> idUsuarioSesion)
+        {
+            var idUsuarioSesionParameter = idUsuarioSesion.HasValue ?
+                new ObjectParameter("IdUsuarioSesion", idUsuarioSesion) :
+                new ObjectParameter("IdUsuarioSesion", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerEstudiantesPracticasSP_Result>("ObtenerEstudiantesPracticasSP", idUsuarioSesionParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerEstudiantesProfesorSP_Result> ObtenerEstudiantesProfesorSP(Nullable<int> idUsuario, Nullable<int> idVacante)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            var idVacanteParameter = idVacante.HasValue ?
+                new ObjectParameter("IdVacante", idVacante) :
+                new ObjectParameter("IdVacante", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerEstudiantesProfesorSP_Result>("ObtenerEstudiantesProfesorSP", idUsuarioParameter, idVacanteParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerNotasEstudianteSP_Result> ObtenerNotasEstudianteSP(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerNotasEstudianteSP_Result>("ObtenerNotasEstudianteSP", idUsuarioParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerPerfilEstudianteSP_Result> ObtenerPerfilEstudianteSP(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerPerfilEstudianteSP_Result>("ObtenerPerfilEstudianteSP", idUsuarioParameter);
+        }
+    
         public virtual ObjectResult<ObtenerPostulacionesEstudianteSP_Result> ObtenerPostulacionesEstudianteSP(Nullable<int> idUsuario)
         {
             var idUsuarioParameter = idUsuario.HasValue ?
@@ -146,6 +366,15 @@ namespace SIGEP.EF
                 new ObjectParameter("IdUsuario", typeof(int));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerPostulacionesEstudianteSP_Result>("ObtenerPostulacionesEstudianteSP", idUsuarioParameter);
+        }
+    
+        public virtual ObjectResult<ObtenerVacantesAsignarSP_Result> ObtenerVacantesAsignarSP(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<ObtenerVacantesAsignarSP_Result>("ObtenerVacantesAsignarSP", idUsuarioParameter);
         }
     
         public virtual ObjectResult<ObtenerVisualizacionPracticaSP_Result> ObtenerVisualizacionPracticaSP(Nullable<int> idVacante, Nullable<int> idUsuario)
@@ -249,6 +478,54 @@ namespace SIGEP.EF
                 new ObjectParameter("Cedula", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Nullable<int>>("RegistroSP", nombreParameter, apellido1Parameter, apellido2Parameter, correoParameter, idEspecialidadParameter, fechaNacimientoParameter, idSeccionParameter, contrasennaParameter, cedulaParameter);
+        }
+    
+        public virtual int sp_EliminarDocumento(Nullable<int> idDocumento)
+        {
+            var idDocumentoParameter = idDocumento.HasValue ?
+                new ObjectParameter("IdDocumento", idDocumento) :
+                new ObjectParameter("IdDocumento", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_EliminarDocumento", idDocumentoParameter);
+        }
+    
+        public virtual int sp_InsertarDocumento(Nullable<int> idUsuario, string documento, string tipo, string rutaArchivo)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            var documentoParameter = documento != null ?
+                new ObjectParameter("Documento", documento) :
+                new ObjectParameter("Documento", typeof(string));
+    
+            var tipoParameter = tipo != null ?
+                new ObjectParameter("Tipo", tipo) :
+                new ObjectParameter("Tipo", typeof(string));
+    
+            var rutaArchivoParameter = rutaArchivo != null ?
+                new ObjectParameter("RutaArchivo", rutaArchivo) :
+                new ObjectParameter("RutaArchivo", typeof(string));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("sp_InsertarDocumento", idUsuarioParameter, documentoParameter, tipoParameter, rutaArchivoParameter);
+        }
+    
+        public virtual ObjectResult<sp_ObtenerDocumento_Result> sp_ObtenerDocumento(Nullable<int> idDocumento)
+        {
+            var idDocumentoParameter = idDocumento.HasValue ?
+                new ObjectParameter("IdDocumento", idDocumento) :
+                new ObjectParameter("IdDocumento", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<sp_ObtenerDocumento_Result>("sp_ObtenerDocumento", idDocumentoParameter);
+        }
+    
+        public virtual ObjectResult<sp_ObtenerDocumentosPorUsuario_Result> sp_ObtenerDocumentosPorUsuario(Nullable<int> idUsuario)
+        {
+            var idUsuarioParameter = idUsuario.HasValue ?
+                new ObjectParameter("IdUsuario", idUsuario) :
+                new ObjectParameter("IdUsuario", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<sp_ObtenerDocumentosPorUsuario_Result>("sp_ObtenerDocumentosPorUsuario", idUsuarioParameter);
         }
     }
 }

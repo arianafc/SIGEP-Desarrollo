@@ -46,32 +46,32 @@
         {
             <div class="row" id="info-personal">
                 <div class="col-md-6 form-group">
-                    <label>Nombre</label>
+                    <label>Nombre <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", @id = "NombrePerfil" })
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Primer Apellido</label>
+                    <label>Primer Apellido <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.Apellido1, new { @class = "form-control", @id = "Apellido1Perfil" })
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Segundo Apellido</label>
+                    <label>Segundo Apellido <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.Apellido2, new { @class = "form-control", @id = "Apellido2Perfil" })
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Cédula</label>
+                    <label>Cédula <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", @id = "CedulaPerfil" })
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Teléfono</label>
+                    <label>Teléfono <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.Telefono, new { @class = "form-control", @id = "TelefonoPerfil" })
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Correo Electrónico</label>
+                    <label>Correo Electrónico <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.CorreoPersonal, new { @class = "form-control", @id = "CorreoPersonalPerfil" })
                 </div>
 
@@ -85,7 +85,7 @@
                 }
 
                 <div class="col-md-6 form-group">
-                    <label>Sexo / Género</label>
+                    <label>Sexo / Género <span class="text-danger">*</span></label>
                     @Html.DropDownListFor(m => m.Sexo,
                         new SelectList(
                             new[]
@@ -105,7 +105,7 @@
                 </div>
 
                 <div class="col-md-6 form-group">
-                    <label>Nacionalidad</label>
+                    <label>Nacionalidad <span class="text-danger">*</span></label>
                     @Html.TextBoxFor(m => m.Nacionalidad, new { @class = "form-control", @id = "NacionalidadPerfil" })
                 </div>
                 <div class="col-md-6 form-group mb-3">

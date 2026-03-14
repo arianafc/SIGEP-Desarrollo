@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using SIGEP.Models;
+using System.Web;
 using System.Web.Mvc;
 
 namespace SIGEP
@@ -7,6 +8,7 @@ namespace SIGEP
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
+         
             filters.Add(new HandleErrorAttribute());
         }
     }

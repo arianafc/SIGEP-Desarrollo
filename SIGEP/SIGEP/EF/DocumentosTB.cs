@@ -20,7 +20,9 @@ namespace SIGEP.EF
         public string RutaArchivo { get; set; }
         public System.DateTime FechaSubida { get; set; }
         public int IdUsuario { get; set; }
+        public Nullable<int> IdComunicado { get; set; }
     
+        public virtual ComunicadosTB ComunicadosTB { get; set; }
         public virtual UsuariosTB UsuariosTB { get; set; }
     }
 }
