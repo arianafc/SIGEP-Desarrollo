@@ -367,7 +367,9 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Fecha Límite (si aplica)</label>
-                            <input type="date" class="form-control" id="FechaAplicacionComunicado">
+                            <input type="date" id="FechaAplicacionComunicado"
+       value="@DateTime.Now.ToString("yyyy-MM-dd")"
+       class="form-control">
                         </div>
                     </div>
 
