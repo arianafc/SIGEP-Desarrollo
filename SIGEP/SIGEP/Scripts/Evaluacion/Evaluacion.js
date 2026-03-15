@@ -17,7 +17,7 @@
             {
                 data: 'EstadoAcademico',
                 render: function (data) {
-                    var badgeClass = data === 'Aprobado' ? 'badge-aprobada' :
+                    var badgeClass = data === 'Aprobada' ? 'badge-aprobada' :
                         data === 'Rezagado' ? 'badge-rezagado' :
                             'badge-secondary';
                     return `<span class="badge ${badgeClass}">${data}</span>`;
