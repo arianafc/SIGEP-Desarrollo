@@ -182,7 +182,7 @@
                             : '';
 
                         const btnToggle = `
-                        <a href="#" class="btn btn-sm btn-accion toggle btn-toggle-seccion"
+                        <a href="#" class="btn btn-sm btn-accion toggle btn-toggle-especialidad"
                            data-id="${row.IdSeccion}" data-actual="${row.IdEstado}"
                            title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
                            <i class="bi ${icon}"></i></a>
