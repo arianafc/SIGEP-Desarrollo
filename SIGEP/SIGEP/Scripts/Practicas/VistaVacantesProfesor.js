@@ -437,11 +437,15 @@
         function cargarEstudiantesAsignar(idVacante) {
             $.getJSON(CFG.urls.obtenerEstudiantesAsignar, { idVacante })
                 .done(res => {
-                    const $tbody = $('#tablaAsignar tbody');
-                    $tbody.empty();
+                    tablaAsignar.clear(); // 🔥 IMPORTANTE
 
                     if (!res || !res.ok || !res.data || res.data.length === 0) {
-                        $tbody.html('<tr><td colspan="5" class="text-center text-muted">No hay estudiantes disponibles</td></tr>');
+                        tablaAsignar.row.add([
+                            '—', '—', '—',
+                            '—',
+                            '<span class="text-muted">No hay estudiantes disponibles</span>'
+                        ]);
+                        tablaAsignar.draw();
                         return;
                     }
 
@@ -454,81 +458,57 @@
 
                         let btnHtml = '';
 
-                        // 🔹 1️⃣ Tiene práctica activa en otra vacante → bloquear
                         if (tieneActiva && !tieneRelacion) {
-                            btnHtml = `
-                        <button class="btn bg-transparent btn-accion"
-                                title="Ya tiene práctica activa en otra vacante"
-                                style="color:#6c757d;" disabled>
-                            <i class="fas fa-ban fa-lg"></i>
-                        </button>`;
+                            btnHtml = `<i class="fas fa-ban text-secondary"></i>`;
                         }
-                        // 🔹 2️⃣ Relación con esta vacante
                         else if (tieneRelacion) {
                             if (estado === 'asignada') {
-                                // Puede retirar de ESTA vacante
                                 btnHtml = `
-    <button class="btn bg-transparent btn-accion btn-retirar-estudiante"
-            data-idusuario="${e.IdUsuario}"
-            data-idpractica="${e.IdPracticaVacante || 0}"
-            data-nombre="${(e.NombreCompleto || '—').replace(/"/g, '&quot;')}"
-            data-estadoacademico="${e.EstadoAcademicoDescripcion || 'Activo'}"
-            title="Retirar estudiante"
-            style="color:#b02a37;">
-        <i class="fas fa-trash-alt fa-lg"></i>
-    </button>`;
-                            } else if (['en proceso de aplicacion', 'retirada', 'sin proceso activo'].includes(estado)) {
-                                // Usamos mismo botón Asignar (el backend decide: nuevo, pasar a asignada, reactivar, etc.)
-                                btnHtml = `
-                            <button class="btn bg-transparent btn-accion btn-asignar-estudiante"
-                                    data-idusuario="${e.IdUsuario}"
-                                    title="Asignar estudiante"
-                                    style="color:#198754;">
-                                <i class="fas fa-user-plus fa-lg"></i>
+                            <button class="btn bg-transparent btn-retirar-estudiante"
+                                data-idusuario="${e.IdUsuario}"
+                                data-idpractica="${e.IdPracticaVacante || 0}"
+                                data-nombre="${(e.NombreCompleto || '').replace(/"/g, '&quot;')}"
+                                title="Retirar"
+                                style="color:#b02a37;">
+                                <i class="fas fa-trash-alt"></i>
                             </button>`;
                             } else {
-                                // Estados finales o bloqueantes en esta vacante
                                 btnHtml = `
-                            <button class="btn bg-transparent btn-accion"
-                                    title="No disponible"
-                                    style="color:#6c757d;" disabled>
-                                <i class="fas fa-ban fa-lg"></i>
+                            <button class="btn bg-transparent btn-asignar-estudiante"
+                                data-idusuario="${e.IdUsuario}"
+                                title="Asignar"
+                                style="color:#198754;">
+                                <i class="fas fa-user-plus"></i>
                             </button>`;
                             }
                         }
-                        // 🔹 3️⃣ No relación aún + sin práctica activa bloqueante → puede asignarse
                         else {
-                            if (['rechazada', 'aprobada', 'finalizada', 'en curso', 'archivado', 'rezagado'].includes(estado)) {
-                                btnHtml = `
-                            <button class="btn bg-transparent btn-accion"
-                                    title="No disponible"
-                                    style="color:#6c757d;" disabled>
-                                <i class="fas fa-ban fa-lg"></i>
-                            </button>`;
-                            } else {
-                                btnHtml = `
-                            <button class="btn bg-transparent btn-accion btn-asignar-estudiante"
-                                    data-idusuario="${e.IdUsuario}"
-                                    title="Asignar estudiante"
-                                    style="color:#198754;">
-                                <i class="fas fa-user-plus fa-lg"></i>
-                            </button>`;
-                            }
+                            btnHtml = `
+                        <button class="btn bg-transparent btn-asignar-estudiante"
+                            data-idusuario="${e.IdUsuario}"
+                            title="Asignar"
+                            style="color:#198754;">
+                            <i class="fas fa-user-plus"></i>
+                        </button>`;
                         }
 
-                        $tbody.append(`
-                    <tr class="align-middle text-center">
-                        <td>${escapeHtml(e.NombreCompleto || '')}</td>
-                        <td>${escapeHtml(e.Cedula || '')}</td>
-                        <td>${escapeHtml(e.Especialidad || '')}</td>
-                        <td>${badge}</td>
-                        <td>${btnHtml}</td>
-                    </tr>`);
+                        tablaAsignar.row.add([
+                            escapeHtml(e.NombreCompleto || ''),
+                            escapeHtml(e.Cedula || ''),
+                            escapeHtml(e.Especialidad || ''),
+                            badge,
+                            btnHtml
+                        ]);
                     });
+
+                    tablaAsignar.draw(); // 🔥 CLAVE
                 })
-                .fail(xhr => {
-                    console.error('Error obtenerEstudiantesAsignar:', xhr.responseText || xhr.statusText);
-                    $('#tablaAsignar tbody').html('<tr><td colspan="5" class="text-center text-danger">Error al cargar estudiantes</td></tr>');
+                .fail(() => {
+                    tablaAsignar.clear().row.add([
+                        '—', '—', '—',
+                        '—',
+                        '<span class="text-danger">Error al cargar</span>'
+                    ]).draw();
                 });
         }
     
