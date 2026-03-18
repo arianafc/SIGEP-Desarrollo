@@ -5,6 +5,27 @@
         // =====================================================
         // 🔹 Helpers
         // =====================================================
+
+        // =====================================================
+        // 🔹 BLOQUEAR FECHAS PASADAS
+        // =====================================================
+        function setMinFechaHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+
+            $('[name="FechaMaxAplicacion"]').attr('min', hoy);
+            $('[name="FechaCierre"]').attr('min', hoy);
+
+            $('#edit-FechaMaxAplicacion').attr('min', hoy);
+            $('#edit-FechaCierre').attr('min', hoy);
+        }
+
+        // Ejecutar al cargar
+        setMinFechaHoy();
+
+        // Ejecutar al abrir modales
+        $('#modalCrearVacante, #modalEditarVacante').on('shown.bs.modal', function () {
+            setMinFechaHoy();
+        });
         function redirSiLogin(res, xhr) {
             try {
                 const ct = (xhr && xhr.getResponseHeader && xhr.getResponseHeader('content-type')) || '';
@@ -105,7 +126,16 @@
                 });
                 return false;
             }
+            const hoy = new Date().toISOString().split('T')[0];
 
+            if (fechaAplic < hoy || fechaCierre < hoy) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha inválida',
+                    text: 'No puedes seleccionar fechas anteriores a hoy.'
+                });
+                return false;
+            }
             if (validarFechas(fechaAplic, fechaCierre)) {
                 Swal.fire({
                     icon: 'warning',

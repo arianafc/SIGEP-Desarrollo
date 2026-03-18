@@ -22,6 +22,5 @@ namespace SIGEP.EF
         public Nullable<bool> TieneRelacionEnVacante { get; set; }
         public string EstadoVacante { get; set; }
         public Nullable<int> IdPracticaVacante { get; set; }
-        public string TipoMensaje { get; set; }
     }
 }

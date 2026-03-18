@@ -10,11 +10,13 @@
 namespace SIGEP.EF
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class EstadoTB_Backup
+    public partial class sp_ObtenerDocumentosPorUsuario_Result
     {
-        public int IdEstado { get; set; }
-        public string Descripcion { get; set; }
+        public int IdDocumento { get; set; }
+        public string Documento { get; set; }
+        public string Tipo { get; set; }
+        public string RutaArchivo { get; set; }
+        public System.DateTime FechaSubida { get; set; }
     }
 }

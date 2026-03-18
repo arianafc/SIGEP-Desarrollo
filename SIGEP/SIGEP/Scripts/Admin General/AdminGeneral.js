@@ -175,18 +175,19 @@
                         const activo = Number(row.IdEstado) === 1;
                         const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
                         const icon = row.IdEstado === 1 ? 'bi-slash-circle' : 'bi-check-circle';
+
                         const btnEditar = activo
-                            ? `<a href="#" class="btn btn-sm btn-accion editar btn-editar-seccion"
-                               data-id="${row.IdSeccion}" data-nombre="${row.Seccion}"
-                               title="Editar"><i class="bi bi-pencil-square"></i></a>`
+                            ? `<a href="#" class="btn btn-sm btn-accion editar btn-editar-especialidad"
+           data-id="${row.IdEspecialidad}" data-nombre="${row.Nombre}"
+           title="Editar"><i class="bi bi-pencil-square"></i></a>`
                             : '';
 
                         const btnToggle = `
-                        <a href="#" class="btn btn-sm btn-accion toggle btn-toggle-seccion"
-                           data-id="${row.IdSeccion}" data-actual="${row.IdEstado}"
-                           title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
-                           <i class="bi ${icon}"></i></a>
-                    `;
+        <a href="#" class="btn btn-sm btn-accion toggle btn-toggle-especialidad"
+           data-id="${row.IdEspecialidad}" data-actual="${row.IdEstado}"
+           title="${siguiente === 'Inactivo' ? 'Desactivar' : 'Activar'}">
+           <i class="bi ${icon}"></i></a>
+    `;
 
                         return `${btnEditar} ${btnToggle}`;
                     }

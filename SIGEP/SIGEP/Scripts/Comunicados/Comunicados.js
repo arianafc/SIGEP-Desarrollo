@@ -81,16 +81,72 @@
     });
 
     $("#btnGuardarComunicado").click(function () {
+
         let formData = new FormData();
         formData.append("__RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
-        formData.append("Titulo", $("#TituloComunicado").val());
-        formData.append("Descripcion", $("#DescripcionComunicado").val());
-        formData.append("FechaAplicacion", $("#FechaAplicacionComunicado").val());
-        formData.append("DirigidoA", $("#DirigidoAComunicado").val());
+
+        const Titulo = $("#TituloComunicado").val().trim();
+        const Descripcion = $("#DescripcionComunicado").val().trim();
+        const dirigidoA = $("#DirigidoAComunicado").val();
+
+        let fechaInput = $("#FechaAplicacionComunicado").val();
 
         let files = $("#ArchivoDoc")[0].files;
         let extensionesPermitidas = ["pdf", "xls", "xlsx"];
 
+        // Validación de título y descripción
+        if (!Titulo || !Descripcion) {
+            Swal.fire({
+                title: 'Error',
+                text: "Debes completar el título y la descripción.",
+                icon: 'info',
+                confirmButtonColor: '#2D594D'
+            });
+            return;
+        }
+
+        // Si no selecciona fecha se asigna la de hoy
+        if (!fechaInput) {
+
+            const hoy = new Date();
+            const hoyFormato = hoy.toISOString().split('T')[0];
+
+            fechaInput = hoyFormato;
+
+            $("#FechaAplicacionComunicado").val(hoyFormato);
+
+            Swal.fire({
+                title: 'Fecha límite no seleccionada',
+                text: "Se asignará automáticamente la fecha del día de hoy.",
+                icon: 'info',
+                confirmButtonColor: '#2D594D'
+            });
+        }
+
+        // Validar que la fecha no sea menor a hoy
+        const hoy = new Date();
+        const hoyFormato =
+            hoy.getFullYear() + "-" +
+            String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
+            String(hoy.getDate()).padStart(2, "0");
+
+        if (fechaInput < hoyFormato) {
+            Swal.fire({
+                title: 'Error',
+                text: "La fecha límite no puede ser anterior al día de hoy.",
+                icon: 'info',
+                confirmButtonColor: '#2D594D'
+            });
+            return;
+        }
+
+        // Agregar datos al FormData
+        formData.append("Titulo", Titulo);
+        formData.append("Descripcion", Descripcion);
+        formData.append("FechaAplicacion", fechaInput);
+        formData.append("DirigidoA", dirigidoA);
+
+        // Validación de archivos
         for (let i = 0; i < files.length; i++) {
 
             let nombreArchivo = files[i].name;
@@ -109,78 +165,56 @@
             formData.append("archivos", files[i]);
         }
 
-        const fechaInput = $("#FechaAplicacionComunicado").val();
-        const Titulo = $("#TituloComunicado").val();
-        const Descripcion = $("#DescripcionComunicado").val();
-
-        if (!Titulo || !Descripcion) {
-            Swal.fire({
-                title: 'Error',
-                text: "Debes completar el título y la descripción.",
-                icon: 'info',
-                confirmButtonColor: '#2D594D'
-            });
-            return;
-        }
-
-        if (!fechaInput) {
-            Swal.fire({
-                title: 'Error',
-                text: "Debe seleccionar una fecha.",
-                icon: 'info',
-                confirmButtonColor: '#2D594D'
-            });
-            return;
-        }
-
-        const fechaSeleccionada = new Date(fechaInput);
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        fechaSeleccionada.setHours(0, 0, 0, 0);
-
-        if (fechaSeleccionada < hoy) {
-            Swal.fire({
-                title: 'Error',
-                text: "La fecha límite no puede ser anterior al día de hoy.",
-                icon: 'info',
-                confirmButtonColor: '#2D594D'
-            });
-            return;
-        }
-
-      
+        // Envío AJAX
         $.ajax({
             url: '/Comunicados/CrearComunicado',
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
+
             success: function (res) {
+
                 if (res.ok) {
+
                     Swal.fire({
                         title: 'Éxito',
                         text: res.msg,
                         icon: 'success',
                         confirmButtonColor: '#2D594D'
                     }).then(() => {
+
                         $("#modalAgregarComunicado").modal('hide');
                         location.reload();
+
                     });
+
                 } else {
+
                     Swal.fire({
                         title: 'Error',
                         text: res.msg,
                         icon: 'error',
                         confirmButtonColor: '#d33'
                     });
-                }
-            },
-            error: function () {
-                alert("Error al guardar el comunicado.");
-            }
-        });
-    });
 
+                }
+
+            },
+
+            error: function () {
+
+                Swal.fire({
+                    title: 'Error',
+                    text: "Ocurrió un error al guardar el comunicado.",
+                    icon: 'error'
+                });
+
+            }
+
+        });
+
+    });
     
 
     $(document).on("click", ".btn-abrir-comunicado", function () {
@@ -192,7 +226,79 @@
         const publicadoPor = $(this).data("publicado");
         const dirigido = $(this).data("dirigido");
 
+        // Llenar los datos del modal principal
+        $("#modalComunicadoUnicoLabel").text(titulo);
+        $("#comunicadoDescripcion").text(descripcion);
+        $("#comunicadoFecha").text(fecha);
+        $("#comunicadoAplicacion").text(aplicacion);
+        $("#comunicadoPublicadoPor").text(publicadoPor);
+        $("#comunicadoDirigido").text(dirigido);
+
+        // Llenar el modal de edición (si se abre luego)
+        $("#IdComunicadoEditar").val(id);
+        $("#TituloComunicadoEditar").val(titulo);
+        $("#DescripcionComunicadoEditar").val(descripcion);
+        $("#FechaPublicacionComunicadoEditar").val(fecha);
+        $("#FechaAplicacionComunicadoEditar").val(aplicacion !== "N/A" ? aplicacion : "");
+        $("#DirigidoAComunicadoEditar").val(dirigido);
+
+        // Mostrar mensajes de carga
+        const contenedorDocs = $("#comunicadoDocumentos");
+
+        // Obtener documentos por AJAX
+        $.ajax({
+            url: '/Comunicados/ObtenerDocumentos',
+            type: 'GET',
+            data: { IdComunicado: id },
+            success: function (response) {
+                contenedorDocs.empty();
+
+                if (!response.success) {
+                    Swal.fire('Error', response.message || 'No se pudieron cargar los documentos.', 'error');
+                    return;
+                }
+
+                const documentos = response.documentos;
+
+                if (!documentos || documentos.length === 0) {
+                    contenedorDocs.html('<div class="text-center text-muted">No hay documentos subidos.</div>');
+
+                    return;
+                }
+
+                documentos.forEach(doc => {
+                    // Plantilla del documento
+                    const itemHtml = `
+                    <div class="list-group-item d-flex justify-content-between align-items-center mb-2"
+                         style="background-color: white; border: 1px solid #8CA653; border-radius: 8px;">
+                        <div>
+                            <strong>${doc.Nombre}</strong><br />
+                            <small>Cargado: ${doc.FechaSubida}</small>
+                        </div>
+                        <div id="AccionesDocumentosComunicados" class="d-flex gap-3">
+                           <a href="/Comunicados/DescargarDocumento?idDocumento=${doc.IdDocumento}" 
+   title="Descargar" class="btn btn-link p-0 text-secondary">
+   <i class="fas fa-download"></i>
+</a>
+                            ${typeof rolUsuario !== 'undefined' && rolUsuario === 2 ? `
+                                <button class="btn btn-link p-0 text-secondary btnEliminarDocComunicado"
+                                        data-id="${doc.IdDocumento}" title="Eliminar">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>` : ""}
+                        </div>
+                    </div>`;
+
+                    // Agregar documento en ambos modales
+                    contenedorDocs.append(itemHtml);
+                });
+            },
+            error: function () {
+                Swal.fire('Error', 'No se pudieron cargar los documentos.', 'error');
+            }
+        });
     });
+
+  
         
 
     $(document).on("click", ".btnActualizarComunicado", function () {
@@ -200,7 +306,17 @@
             const tituloEditado = $("#TituloComunicadoEditar").val().trim();
             const descripcionEditada = $("#DescripcionComunicadoEditar").val().trim();
             const fechaAplicacionEditada = $("#FechaAplicacionComunicadoEditar").val().trim();
-            const dirigidoAEditado = $("#DirigidoAComunicadoEditar").val().trim();
+        const dirigidoAEditado = $("#DirigidoAComunicadoEditar").val().trim();
+
+        if (!tituloEditado || !descripcionEditada) {
+            Swal.fire({
+                title: "Campos incompletos",
+                text: "Debe ingresar el título y la descripción del comunicado.",
+                icon: "warning",
+                confirmButtonColor: "#2D594D"
+            });
+            return;
+        }
 
             let formData = new FormData();
             formData.append("IdComunicado", id);
@@ -314,82 +430,12 @@
                     });
                 }
             });
+      
         });
-
-        // Llenar los datos del modal principal
-        $("#modalComunicadoUnicoLabel").text(titulo);
-        $("#comunicadoDescripcion").text(descripcion);
-        $("#comunicadoFecha").text(fecha);
-        $("#comunicadoAplicacion").text(aplicacion);
-        $("#comunicadoPublicadoPor").text(publicadoPor);
-        $("#comunicadoDirigido").text(dirigido);
-
-        // Llenar el modal de edición (si se abre luego)
-        $("#IdComunicadoEditar").val(id);
-        $("#TituloComunicadoEditar").val(titulo);
-        $("#DescripcionComunicadoEditar").val(descripcion);
-        $("#FechaPublicacionComunicadoEditar").val(fecha);
-        $("#FechaAplicacionComunicadoEditar").val(aplicacion !== "N/A" ? aplicacion : "");
-        $("#DirigidoAComunicadoEditar").val(dirigido);
-
-        // Mostrar mensajes de carga
-        const contenedorDocs = $("#comunicadoDocumentos");
-
-        // Obtener documentos por AJAX
-        $.ajax({
-            url: '/Comunicados/ObtenerDocumentos',
-            type: 'GET',
-            data: { IdComunicado: id },
-            success: function (response) {
-                contenedorDocs.empty();
-
-                if (!response.success) {
-                    Swal.fire('Error', response.message || 'No se pudieron cargar los documentos.', 'error');
-                    return;
-                }
-
-                const documentos = response.documentos;
-
-                if (!documentos || documentos.length === 0) {
-                    contenedorDocs.html('<div class="text-center text-muted">No hay documentos subidos.</div>');
-                 
-                    return;
-                }
-
-                documentos.forEach(doc => {
-                    // Plantilla del documento
-                    const itemHtml = `
-                    <div class="list-group-item d-flex justify-content-between align-items-center mb-2"
-                         style="background-color: white; border: 1px solid #8CA653; border-radius: 8px;">
-                        <div>
-                            <strong>${doc.Nombre}</strong><br />
-                            <small>Cargado: ${doc.FechaSubida}</small>
-                        </div>
-                        <div id="AccionesDocumentosComunicados" class="d-flex gap-3">
-                           <a href="/Comunicados/DescargarDocumento?idDocumento=${doc.IdDocumento}" 
-   title="Descargar" class="btn btn-link p-0 text-secondary">
-   <i class="fas fa-download"></i>
-</a>
-                            ${typeof rolUsuario !== 'undefined' && rolUsuario === 2 ? `
-                                <button class="btn btn-link p-0 text-secondary btnEliminarDocComunicado"
-                                        data-id="${doc.IdDocumento}" title="Eliminar">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>` : ""}
-                        </div>
-                    </div>`;
-
-                    // Agregar documento en ambos modales
-                    contenedorDocs.append(itemHtml);
-                });
-            },
-            error: function () {
-                Swal.fire('Error', 'No se pudieron cargar los documentos.', 'error');
-            }
-        });
-
+      
 
         $(document).on('click', '.btnEliminarDocComunicado', function () {
-            var idDocumento = $(this).data('id');
+            const idDocumento = $(this).data('id');
 
             Swal.fire({
                 title: '¿Desea eliminar este documento?',
@@ -408,7 +454,9 @@
                         success: function (response) {
                             if (response.success) {
                                 Swal.fire('Eliminado', response.message, 'success');
-                                location.reload();
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 2000);
                             } else {
                                 Swal.fire('Error', response.message, 'error');
                             }
@@ -422,9 +470,4 @@
         });
 
     });
-
-});
-
-
-
 

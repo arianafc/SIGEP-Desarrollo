@@ -15,6 +15,7 @@ namespace SIGEP.EF
     {
         public int IdEmpleo { get; set; }
         public string Empresa { get; set; }
+        public string NombrePuesto { get; set; }
         public int IdEstado { get; set; }
         public string Descripcion { get; set; }
         public string Requisitos { get; set; }

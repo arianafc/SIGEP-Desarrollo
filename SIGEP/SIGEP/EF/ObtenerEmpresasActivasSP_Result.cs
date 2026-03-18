@@ -10,15 +10,10 @@
 namespace SIGEP.EF
 {
     using System;
-    using System.Collections.Generic;
     
-    public partial class EmpleosTB
+    public partial class ObtenerEmpresasActivasSP_Result
     {
-        public int IdEmpleo { get; set; }
-        public string NombrePuesto { get; set; }
-        public string Mensaje { get; set; }
-        public int IdEstado { get; set; }
-    
-        public virtual EstadosTB EstadosTB { get; set; }
+        public int IdEmpresa { get; set; }
+        public string NombreEmpresa { get; set; }
     }
 }

@@ -26,6 +26,8 @@ namespace SIGEP.EF
             this.FormacionAcademicaTB = new HashSet<FormacionAcademicaTB>();
             this.InformacionLaboralTB = new HashSet<InformacionLaboralTB>();
             this.InformacionMedicaTB = new HashSet<InformacionMedicaTB>();
+            this.NotasEstudiantesTB = new HashSet<NotasEstudiantesTB>();
+            this.NotasEstudiantesTB1 = new HashSet<NotasEstudiantesTB>();
             this.PracticaEstudianteTB = new HashSet<PracticaEstudianteTB>();
             this.TelefonosTB = new HashSet<TelefonosTB>();
             this.UsuarioEspecialidadTB = new HashSet<UsuarioEspecialidadTB>();
@@ -38,12 +40,15 @@ namespace SIGEP.EF
         public string Apellido2 { get; set; }
         public string Contrasenna { get; set; }
         public System.DateTime FechaNacimiento { get; set; }
+        public string Nacionalidad { get; set; }
+        public string Sexo { get; set; }
         public System.DateTime FechaRegistro { get; set; }
         public Nullable<System.DateTime> FechaEgreso { get; set; }
         public Nullable<int> IdSeccion { get; set; }
         public Nullable<int> IdDireccion { get; set; }
         public int IdRol { get; set; }
         public int IdEstado { get; set; }
+        public bool EstadoAcademico { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<AuditoriaGlobalTB> AuditoriaGlobalTB { get; set; }
@@ -65,6 +70,10 @@ namespace SIGEP.EF
         public virtual ICollection<InformacionLaboralTB> InformacionLaboralTB { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<InformacionMedicaTB> InformacionMedicaTB { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<NotasEstudiantesTB> NotasEstudiantesTB { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<NotasEstudiantesTB> NotasEstudiantesTB1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PracticaEstudianteTB> PracticaEstudianteTB { get; set; }
         public virtual RolesTB RolesTB { get; set; }

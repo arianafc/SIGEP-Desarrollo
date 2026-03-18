@@ -23,6 +23,7 @@ namespace SIGEP.EF
         public string Vacante { get; set; }
         public string Empresa { get; set; }
         public string Tipo { get; set; }
+        public string TipoMensaje { get; set; }
         public int IdVacanteUltima { get; set; }
         public int IdPracticaVacante { get; set; }
     }

@@ -8,9 +8,12 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml.Linq;
 
 namespace Sigep.UI.Controllers
 {
+
+    [FiltroSesion]
     public class ComunicadosController : Controller
     {
         private readonly Utilitarios utilitarios = new Utilitarios();
@@ -18,7 +21,7 @@ namespace Sigep.UI.Controllers
         
         private readonly SIGEPEntities db = new SIGEPEntities();
 
-        [FiltroSesion]
+        
         [ValidarUsuarioActivo]
         [HttpGet]
         public ActionResult Comunicados()
@@ -178,7 +181,7 @@ namespace Sigep.UI.Controllers
                     comunicado.Informacion = Descripcion;
                     comunicado.Poblacion = DirigidoA;
                     comunicado.FechaLimite = FechaAplicacion;
-                    comunicado.Fecha = DateTime.Now;
+                
                     db.SaveChanges();
 
 
@@ -291,7 +294,10 @@ namespace Sigep.UI.Controllers
                     if (doc == null)
                         return Json(new { success = false, message = "Documento no encontrado" });
 
-                    string rutaFisica = Server.MapPath("~" + doc.RutaArchivo);
+                    string rutaFisica = doc.RutaArchivo;
+
+                    if (rutaFisica.StartsWith("~"))
+                        rutaFisica = Server.MapPath(rutaFisica);
 
                     // Eliminar el registro de la base de datos
                     dbContext.DocumentosTB.Remove(doc);

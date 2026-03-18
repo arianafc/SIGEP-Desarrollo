@@ -31,5 +31,8 @@ namespace SIGEP.EF
         public int IdPractica { get; set; }
         public System.DateTime FechaAplicacion { get; set; }
         public string EstadoPractica { get; set; }
+        public Nullable<decimal> Nota1 { get; set; }
+        public Nullable<decimal> Nota2 { get; set; }
+        public Nullable<decimal> NotaFinal { get; set; }
     }
 }

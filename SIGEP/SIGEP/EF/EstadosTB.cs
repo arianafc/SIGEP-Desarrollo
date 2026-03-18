@@ -20,7 +20,6 @@ namespace SIGEP.EF
             this.BolsaEmpleoTB = new HashSet<BolsaEmpleoTB>();
             this.ComunicadosTB = new HashSet<ComunicadosTB>();
             this.DireccionesTB = new HashSet<DireccionesTB>();
-            this.EmpleosTB = new HashSet<EmpleosTB>();
             this.EmpresasTB = new HashSet<EmpresasTB>();
             this.EncargadosTB = new HashSet<EncargadosTB>();
             this.EspecialidadesTB = new HashSet<EspecialidadesTB>();
@@ -42,8 +41,6 @@ namespace SIGEP.EF
         public virtual ICollection<ComunicadosTB> ComunicadosTB { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DireccionesTB> DireccionesTB { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<EmpleosTB> EmpleosTB { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmpresasTB> EmpresasTB { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

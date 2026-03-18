@@ -31,17 +31,17 @@
         <div class="dropdown-menu p-3" style="min-width: 300px;">
             <div class="mb-2">
                     <label>Estado de vacante</label>
-                    <select id="filtroPractica" class="form-control" data-col="6">
+                    <select id="filtroPractica" class="form-control" data-col="7">
                         <option value="">Todos</option>
                         @foreach (var s in ViewBag.Estados as List<SelectListItem>)
                         {
-                            <option value="@s.Value">@s.Text</option>
+                            <option value="@s.Text">@s.Text</option>
                         }
                     </select>
                 </div>
             <div class="mb-2">
                 <label>Modalidad</label>
-                <select id="filtroModalidad" class="form-control" data-col="4">
+                <select id="filtroModalidad" class="form-control" data-col="5">
                     <option value="">Todas</option>
                     @foreach (var m in ViewBag.Modalidades as List<SelectListItem>)
                     {
@@ -168,15 +168,15 @@
                             </div>
 
                             <div class="col-md-6 form-group mb-3">
-                                <label>Descripción</label>
+                                <label>Descripción <span class="text-danger">*</span></label>
                                 <textarea name="Descripcion" class="form-control" id="DescripcionEmpleo"></textarea>
                             </div>
                             <div class="col-md-6 form-group mb-3">
-                                <label>Requisitos</label>
+                                <label>Requisitos <span class="text-danger">*</span></label>
                                 <textarea name="Requisitos" class="form-control" id="RequisitosEmpleo"></textarea>
                             </div>
                             <div class="col-md-6 form-group mb-3">
-                                <label>Nombre Puesto</label>
+                                <label>Nombre Puesto <span class="text-danger">*</span></label>
                                 <input name="NombrePuesto" class="form-control" id="NombrePuestoEmpleo"></input>
                             </div>
                             <div class="col-md-6 form-group mb-3">
@@ -268,15 +268,15 @@
                                 </select>
                             </div>
                             <div class="col-md-6 form-group mb-3">
-                                <label>Descripción</label>
+                                <label>Descripción <span class="text-danger">*</span></label>
                                 <textarea name="Descripcion" class="form-control" id="DescripcionEmpleoEditar"></textarea>
                             </div>
                             <div class="col-md-6 form-group mb-3">
-                                <label>Requisitos</label>
+                                <label>Requisitos <span class="text-danger">*</span></label>
                                 <textarea name="Requisitos" class="form-control" id="RequisitosEmpleoEditar"></textarea>
                             </div>
                             <div class="col-md-6 form-group mb-3">
-                                <label>Nombre Puesto</label>
+                                <label>Nombre Puesto <span class="text-danger">*</span></label>
                                 <input name="NombrePuesto" class="form-control" id="NombrePuestoEmpleoEditar"></input>
                             </div>
                             <div class="col-md-6 form-group mb-3">
