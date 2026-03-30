@@ -348,7 +348,7 @@
         
 
     $(document).on("click", ".btnActualizarComunicado", function () {
-            const id = $("#IdComunicadoEditar").val(); // asegúrate de tener este input hidden en el modal
+            const id = $("#IdComunicadoEditar").val(); 
             const tituloEditado = $("#TituloComunicadoEditar").val().trim();
             const descripcionEditada = $("#DescripcionComunicadoEditar").val().trim();
             const fechaAplicacionEditada = $("#FechaAplicacionComunicadoEditar").val().trim();
