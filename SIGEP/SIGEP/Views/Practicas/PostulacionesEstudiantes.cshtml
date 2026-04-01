@@ -10,7 +10,7 @@
     <h4 class="section-title">Mis Postulaciones</h4>
 
 
-    @if (Model.EstadoAcademico)
+    @if (Model.EstadoAcademico && !Model.TienePracticaActiva)
     {
         <button class="btn btn-verde-oscuro mb-3" data-bs-toggle="modal" data-bs-target="#modalAutogestion">
             <i class="fas fa-plus me-2"></i>Autogestionar Práctica

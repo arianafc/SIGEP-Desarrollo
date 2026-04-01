@@ -1598,9 +1598,12 @@ namespace SIGEP.Controllers
                 int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
                 using (var dbContext = new SIGEPEntities())
                 {
-                    // Obtener el estado académico del estudiante
                     var usuario = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idUsuario);
-                    var estadoAcademico = usuario?.EstadoAcademico ?? true; // true por defecto (Aprobado)
+                    var estadoAcademico = usuario?.EstadoAcademico ?? true;
+
+                    var estadosQueBloquean = new[] { 5, 11 }; // Asignada, En Curso
+                    var tienePracticaActiva = dbContext.PracticaEstudianteTB
+                        .Any(p => p.IdUsuario == idUsuario && estadosQueBloquean.Contains(p.IdEstado));
 
                     var postulaciones = dbContext.ObtenerPostulacionesEstudianteSP(idUsuario)
                         .Select(p => new PostulacionEstudianteVM
@@ -1618,7 +1621,8 @@ namespace SIGEP.Controllers
                     var viewModel = new MisPostulacionesVM
                     {
                         Postulaciones = postulaciones,
-                        EstadoAcademico = estadoAcademico
+                        EstadoAcademico = estadoAcademico,
+                        TienePracticaActiva = tienePracticaActiva
                     };
 
                     return View(viewModel);

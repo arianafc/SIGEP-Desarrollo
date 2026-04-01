@@ -195,9 +195,14 @@
             url: '/Practicas/ListarEstudiantesJson',
             type: 'GET',
             data: function (d) {
-                d._ts = new Date().getTime(); // evita caché
+                d._ts = new Date().getTime();
             },
-            dataSrc: 'data'
+            dataSrc: function (json) {
+                if (!json || !json.data) return [];
+                return json.data.filter(function (row) {
+                    return row.EstadoAcademico === true;
+                });
+            }
         },
         columns: [
             { data: 'Cedula' },

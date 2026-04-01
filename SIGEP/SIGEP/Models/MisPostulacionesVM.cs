@@ -9,6 +9,7 @@ namespace SIGEP.Models
     {
         public List<PostulacionEstudianteVM> Postulaciones { get; set; } = new List<PostulacionEstudianteVM>();
         public bool EstadoAcademico { get; set; } = true;
+        public bool TienePracticaActiva { get; set; }
     }
 
     public class PostulacionEstudianteVM
@@ -21,6 +22,8 @@ namespace SIGEP.Models
         public string EstadoPractica { get; set; }
         public DateTime FechaAplicacion { get; set; }
         public bool EsAutogestionada { get; set; }
+
+        public bool TienePracticaActiva { get; set; }
     }
 
     public class AutogestionPracticaVM
