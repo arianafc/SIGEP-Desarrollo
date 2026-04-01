@@ -1711,6 +1711,7 @@ namespace SIGEP.Controllers
                             IdPracticaVacante = x.p.IdPractica,
                             EstadoVacante = x.est.Descripcion,
                             IdVacanteUltima = (int?)x.v.IdVacante,
+                            EstadoAcademico = x.u.EstadoAcademico,
                             TipoMensaje = ""
                         })
                         .OrderBy(x => x.Nombre)
