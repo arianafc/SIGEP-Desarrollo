@@ -52,8 +52,21 @@ namespace SIGEP.Controllers
 
             return View();
         }
-        
-        
+
+        // Agrega estas clases dentro del controlador
+        public class FormacionDTO
+        {
+            public string Carrera { get; set; }
+            public string Titulo { get; set; }
+            public int? AnnoGraduacion { get; set; }
+        }
+
+        public class LaboralDTO
+        {
+            public string EmpresaActual { get; set; }
+            public string PuestoActual { get; set; }
+        }
+
         [HttpGet]
         public JsonResult ObtenerEgresados(int idEspecialidad = 0, int anio = 0)
         {
@@ -72,34 +85,82 @@ namespace SIGEP.Controllers
                             u.FechaEgreso,
                             Especialidad = esp != null ? esp.Nombre : "Sin especialidad",
                             IdEspecialidad = ue != null ? ue.IdEspecialidad : 0,
-                            Correo = db.EmailsTB.Where(e => e.IdUsuario == u.IdUsuario).Select(e => e.Email).FirstOrDefault(),
-                            Telefono = db.TelefonosTB.Where(t => t.IdUsuario == u.IdUsuario).Select(t => t.Telefono).FirstOrDefault()
+                            Correo = db.EmailsTB
+                                .Where(e => e.IdUsuario == u.IdUsuario)
+                                .Select(e => e.Email)
+                                .FirstOrDefault(),
+                            Telefono = db.TelefonosTB
+                                .Where(t => t.IdUsuario == u.IdUsuario)
+                                .Select(t => t.Telefono)
+                                .FirstOrDefault()
                         };
 
-            // 🔹 Filtrar por especialidad
             if (idEspecialidad > 0)
-            {
                 query = query.Where(x => x.IdEspecialidad == idEspecialidad);
-            }
 
-            // 🔹 Filtrar por año de egreso
             if (anio > 0)
-            {
                 query = query.Where(x => x.FechaEgreso.HasValue && x.FechaEgreso.Value.Year == anio);
-            }
 
-            // 🔹 Proyectar resultado final
-            var lista = query
-                .AsEnumerable() // ejecutar antes de manipular datos calculados
+            var usuarios = query.AsEnumerable()
                 .Select(x => new
                 {
-                    NombreCompleto = $"{x.Nombre} {x.Apellido1} {x.Apellido2}",
+                    x.IdUsuario,
+                    NombreCompleto = $"{x.Nombre} {x.Apellido1} {x.Apellido2}".Trim(),
                     Generacion = x.FechaEgreso.HasValue ? x.FechaEgreso.Value.Year.ToString() : "N/A",
                     x.Especialidad,
-                    x.Correo,
-                    x.Telefono
-                })
-                .ToList();
+                    Correo = x.Correo ?? "—",
+                    Telefono = x.Telefono ?? "—"
+                }).ToList();
+
+            var ids = usuarios.Select(u => u.IdUsuario).ToList();
+
+            // ✅ Usar clases DTO concretas para que Json() serialice correctamente
+            var formacionMap = db.FormacionAcademicaTB
+                .Where(f => ids.Contains(f.IdUsuario))
+                .ToList() // materializar primero
+                .GroupBy(f => f.IdUsuario)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(f => new FormacionDTO
+                    {
+                        Carrera = f.Carrera,
+                        Titulo = f.Titulo,
+                        AnnoGraduacion = f.AnnoGraduacion
+                    }).ToList()
+                );
+
+            var laboralMap = db.InformacionLaboralTB
+                .Where(l => ids.Contains(l.IdUsuario))
+                .ToList() // materializar primero
+                .GroupBy(l => l.IdUsuario)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(l => new LaboralDTO
+                    {
+                        EmpresaActual = l.EmpresaActual,
+                        PuestoActual = l.PuestoActual
+                    }).ToList()
+                );
+
+            // Debug temporal — quítalo después de confirmar que funciona
+            System.Diagnostics.Debug.WriteLine($"IDs buscados: {string.Join(",", ids)}");
+            System.Diagnostics.Debug.WriteLine($"Formaciones encontradas: {formacionMap.Count}");
+            System.Diagnostics.Debug.WriteLine($"Laborales encontradas: {laboralMap.Count}");
+
+            var lista = usuarios.Select(u => new
+            {
+                u.NombreCompleto,
+                u.Generacion,
+                u.Especialidad,
+                u.Correo,
+                u.Telefono,
+                Formacion = formacionMap.ContainsKey(u.IdUsuario)
+                    ? formacionMap[u.IdUsuario]
+                    : new List<FormacionDTO>(),
+                Laboral = laboralMap.ContainsKey(u.IdUsuario)
+                    ? laboralMap[u.IdUsuario]
+                    : new List<LaboralDTO>()
+            }).ToList();
 
             return Json(lista, JsonRequestBehavior.AllowGet);
         }
