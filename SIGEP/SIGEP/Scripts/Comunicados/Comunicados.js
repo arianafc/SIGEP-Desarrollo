@@ -226,6 +226,8 @@
         const publicadoPor = $(this).data("publicado");
         const dirigido = $(this).data("dirigido");
 
+
+
         // Llenar los datos del modal principal
         $("#modalComunicadoUnicoLabel").text(titulo);
         $("#comunicadoDescripcion").text(descripcion);
@@ -296,13 +298,57 @@
                 Swal.fire('Error', 'No se pudieron cargar los documentos.', 'error');
             }
         });
+
+        $(document).on("click", ".btnEliminarComunicado", function () {
+
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "El comunicado será desactivado y no estará disponible para los usuarios.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Sí, desactivar",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Comunicados/EliminarComunicado',
+                        type: 'POST',
+                        data: { IdComunicado: id },
+                        success: function (response) {
+                            if (response.ok) {
+                                Swal.fire({
+                                    title: "Desactivado",
+                                    text: response.msg,
+                                    icon: "success",
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+
+
+                                $("#modalComunicadoUnico").modal("hide");
+                                location.reload();
+                            } else {
+                                Swal.fire('Error', response.msg || 'No se pudo desactivar el comunicado.', 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Error', 'Ocurrió un error al intentar desactivar el comunicado.', 'error');
+                        }
+                    });
+                }
+            });
+
+        });
+
     });
 
   
         
 
     $(document).on("click", ".btnActualizarComunicado", function () {
-            const id = $("#IdComunicadoEditar").val(); // asegúrate de tener este input hidden en el modal
+            const id = $("#IdComunicadoEditar").val(); 
             const tituloEditado = $("#TituloComunicadoEditar").val().trim();
             const descripcionEditada = $("#DescripcionComunicadoEditar").val().trim();
             const fechaAplicacionEditada = $("#FechaAplicacionComunicadoEditar").val().trim();
@@ -390,49 +436,7 @@
         });
 
 
-        $(document).on("click", ".btnEliminarComunicado", function () {
-       
-            Swal.fire({
-                title: "¿Estás seguro?",
-                text: "El comunicado será desactivado y no estará disponible para los usuarios.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Sí, desactivar",
-                cancelButtonText: "Cancelar"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '/Comunicados/EliminarComunicado',
-                        type: 'POST', 
-                        data: { IdComunicado: id },
-                        success: function (response) {
-                            if (response.ok) {
-                                Swal.fire({
-                                    title: "Desactivado",
-                                    text: response.msg,
-                                    icon: "success",
-                                    timer: 2000,
-                                    showConfirmButton: false
-                                });
-
-                              
-                                $("#modalComunicadoUnico").modal("hide");
-                                location.reload();
-                            } else {
-                                Swal.fire('Error', response.msg || 'No se pudo desactivar el comunicado.', 'error');
-                            }
-                        },
-                        error: function () {
-                            Swal.fire('Error', 'Ocurrió un error al intentar desactivar el comunicado.', 'error');
-                        }
-                    });
-                }
-            });
-      
-        });
-      
+     
 
         $(document).on('click', '.btnEliminarDocComunicado', function () {
             const idDocumento = $(this).data('id');

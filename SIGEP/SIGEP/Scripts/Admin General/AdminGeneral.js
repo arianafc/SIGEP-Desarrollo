@@ -173,7 +173,10 @@
                     orderable: false,
                     render: (row) => {
                         const activo = Number(row.IdEstado) === 1;
-                        const siguiente = row.IdEstado === 1 ? 'Inactivo' : 'Activo';
+                        const siguiente = row.IdEstado === 1
+
+
+                            ? 'Inactivo' : 'Activo';
                         const icon = row.IdEstado === 1 ? 'bi-slash-circle' : 'bi-check-circle';
 
                         const btnEditar = activo
