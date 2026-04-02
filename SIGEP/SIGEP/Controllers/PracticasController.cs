@@ -1601,7 +1601,7 @@ namespace SIGEP.Controllers
                     var usuario = dbContext.UsuariosTB.FirstOrDefault(u => u.IdUsuario == idUsuario);
                     var estadoAcademico = usuario?.EstadoAcademico ?? true;
 
-                    var estadosQueBloquean = new[] { 5, 11 }; // Asignada, En Curso
+                    var estadosQueBloquean = new[] { 6, 8, 11 }; // Aprobada, Finalizada, En Curso
                     var tienePracticaActiva = dbContext.PracticaEstudianteTB
                         .Any(p => p.IdUsuario == idUsuario && estadosQueBloquean.Contains(p.IdEstado));
 

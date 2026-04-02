@@ -11,13 +11,14 @@ using System.Web.Services.Description;
 
 namespace SIGEP.Controllers
 {
+
     public class HomeController : Controller
     {
 
         Utilitarios utilitarios = new Utilitarios();
-        
         [FiltroSesion]
         [ValidarUsuarioActivo]
+
         [HttpGet]
         public ActionResult Index()
         {
@@ -37,6 +38,7 @@ namespace SIGEP.Controllers
                         .Count(p => p.IdEstado == 5);
                     Datos.EstudiantesActivos = dbContext.UsuariosTB.Count(u => u.IdRol == 1 && u.IdEstado == 1);
                     Datos.EmpresasRegistradas = dbContext.EmpresasTB.Count(e => e.IdEstado == 1);
+                    Datos.EstudiantesConPracticasAsignadas = estudiantesConPracticaAsignada;
                     if (totalEstudiantesEstado1 > 0)
                     {
                         Datos.PorcentajeEstudiantesConPractica =

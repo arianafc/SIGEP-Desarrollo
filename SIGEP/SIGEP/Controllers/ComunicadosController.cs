@@ -47,9 +47,6 @@ namespace Sigep.UI.Controllers
                 model.ListaComunicadosEgresados = model.AllComunicados.Where(c => c.DirigidoA.ToLower() == "egresados").ToList();
             }
 
-
-
-
             return View(model);
         }
 

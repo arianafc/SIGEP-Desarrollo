@@ -17,8 +17,6 @@ namespace SIGEP.Controllers
     [FiltroSesion]
     public class PerfilController : Controller
     {
-
-        
      
         [HttpGet]
      
@@ -32,15 +30,15 @@ namespace SIGEP.Controllers
                 using (var dbContext = new SIGEPEntities())
                 {
 
-                  
-
-
+                 
                     // ===============================
                     // VALIDAR SESIÓN
                     // ===============================
                     var cedula = Session["Cedula"]?.ToString();
                     var IdUsuario = Convert.ToInt32(Session["IdUsuario"]);
-                   
+                    var IdRol = Convert.ToInt32(Session["IdRol"]);
+                    var usuarioCorreoMEP = "";
+
 
                     if (string.IsNullOrEmpty(cedula))
                     {
@@ -74,9 +72,29 @@ namespace SIGEP.Controllers
                     var InfoLaboral = dbContext.InformacionLaboralTB.FirstOrDefault(u => u.IdUsuario == usuarioData.IdUsuario);
                     // ===============================
                     // CORREOS
-                    // ===============================
-                    var usuarioCorreoMEP = usuarioCorreos.FirstOrDefault(e => e.Email.ToLower().Contains("@mep.go.cr"));
-                    var usuarioCorreoPersonal = usuarioCorreos.FirstOrDefault(e => !e.Email.ToLower().Contains("@mep.go.cr"));
+            
+
+                    // Correo MEP según rol
+                    if (IdRol == 1)
+                    {
+                        usuarioCorreoMEP = usuarioCorreos
+                            .FirstOrDefault(e => e.Email.EndsWith("@est.mep.go.cr", StringComparison.OrdinalIgnoreCase))
+                            ?.Email ?? $"{cedula}@est.mep.go.cr";
+                    }
+                    else
+                    {
+                        usuarioCorreoMEP = usuarioCorreos
+                            .FirstOrDefault(e => e.Email.EndsWith("@mep.go.cr", StringComparison.OrdinalIgnoreCase))
+                            ?.Email;
+                    }
+
+                    // Correo personal (excluye dominios MEP)
+                    var usuarioCorreoPersonal = usuarioCorreos
+                        .FirstOrDefault(e =>
+                            !e.Email.EndsWith("@mep.go.cr", StringComparison.OrdinalIgnoreCase) &&
+                            !e.Email.EndsWith("@est.mep.go.cr", StringComparison.OrdinalIgnoreCase)
+                        )?.Email;
+
 
                     // ===============================
                     // ENCARGADOS
@@ -127,8 +145,8 @@ namespace SIGEP.Controllers
                     // ===============================
                     // CORREOS
                     // ===============================
-                    Usuario.CorreoMEP = usuarioCorreoMEP?.Email ?? "";
-                    Usuario.CorreoPersonal = usuarioCorreoPersonal?.Email ?? "";
+                    Usuario.CorreoMEP = usuarioCorreoMEP ?? "";
+                    Usuario.CorreoPersonal = usuarioCorreoPersonal ?? "";
 
                     // ===============================
                     // SECCIÓN
